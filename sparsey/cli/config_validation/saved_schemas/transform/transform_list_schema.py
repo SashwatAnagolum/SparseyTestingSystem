@@ -7,7 +7,7 @@ Transform List Schema: the schema for transform list configs.
 
 from typing import Optional
 
-from schema import Schema
+from schema import Schema, SchemaError
 
 from ..abs_schema import AbstractSchema
 from ..transform import individual_transforms
@@ -43,7 +43,6 @@ class TransformListSchema(AbstractSchema):
             passed in.
         """
         transform_module_name = f'{transform_name}_transform_schema'
-        transform_class_name = f'{transform_name.capitalize()}TransformSchema'
 
         if transform_module_name not in dir(individual_transforms):
             raise ValueError(
@@ -54,7 +53,13 @@ class TransformListSchema(AbstractSchema):
             individual_transforms, transform_module_name
         )
 
-        transform_class = getattr(transform_module, transform_class_name)
+        transform_pretty_name = ''.join(
+            [i.capitalize() for i in transform_module_name.split('_')]
+        )
+
+        transform_class = getattr(
+            transform_module, transform_pretty_name
+        )
 
         return transform_class()
 
@@ -77,7 +82,7 @@ class TransformListSchema(AbstractSchema):
         if 'transform_list' not in config_info:
             return None
 
-        schema_params['transform_schemas'] = []
+        schema_params['transforms'] = []
 
         for transform in config_info['transform_list']:
             transform_name = transform['transform_name']
@@ -86,10 +91,8 @@ class TransformListSchema(AbstractSchema):
             if module_name not in self.allowed_transforms:
                 return None
 
-            transform_schema = self.get_transform_schema(transform_name)
-
-            schema_params['transform_schemas'].append(
-                transform_schema
+            schema_params['transforms'].append(
+                transform_name
             )
 
         return schema_params
@@ -107,12 +110,47 @@ class TransformListSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
-        config_schema = Schema(
-            {
-                'transform_list': [
-                    schema for schema in schema_params['transform_schemas']
-                ]
-            }
-        )
+        schema_list = []
 
-        return config_schema
+        for transform_name in schema_params['transforms']:
+            schema_list.append(self.get_transform_schema(transform_name))
+
+        return schema_list
+
+
+    def validate(self, config_info: dict) -> Optional[dict]:
+        """
+        Validates a given configuration against the 
+        schema defined by the class.
+
+        Args:
+            config_info: a dict containing all of the configuration
+                information passed in by the user.
+            schema: a Schema to be used for validation
+
+        Returns:
+            a dict (might be None) holding the validated
+                (and possibly transformed) user config info.
+        """
+        schema_params = self.extract_schema_params(config_info)
+
+        if schema_params is None:
+            raise ValueError('The passed in configuration file is invalid!')
+
+        schema = self.build_schema(schema_params)
+
+        valid_config_info = {'transform_list': []}
+
+        try:
+            for index, transform in enumerate(config_info['transform_list']):
+                valid_transform_config = schema[index].validate(
+                    transform
+                )
+
+                valid_config_info['transform_list'].append(valid_transform_config)
+        except SchemaError as e:
+            print(e, '\n')
+
+            return None
+
+        return valid_config_info
