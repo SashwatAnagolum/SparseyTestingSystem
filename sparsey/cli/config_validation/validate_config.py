@@ -8,12 +8,12 @@ Validate Config: functions to validate a config file
 
 import os
 import argparse
-import yaml
 import sys
+import yaml
 
-from schema import Schema
+from .schemas import get_schema_by_name
+from .saved_schemas.abs_schema import AbstractSchema
 
-import schemas
 
 def get_config_info(config_filepath: str) -> dict:
     """
@@ -40,7 +40,7 @@ def get_config_info(config_filepath: str) -> dict:
     return config_info
 
 
-def get_schema(schema_type, schema_name) -> Schema:
+def get_schema(schema_type, schema_name) -> AbstractSchema:
     """
     Gets and returns the schema corresponding to the passed
     in schema type and name.
@@ -52,15 +52,15 @@ def get_schema(schema_type, schema_name) -> Schema:
             the config file against.
 
     Returns:
-        the corresponding schema
+        the corresponding AbstractSchema
     """
-    config_schema = schemas.get_schema(schema_type, schema_name)
+    config_schema = get_schema_by_name(schema_type, schema_name)
 
     return config_schema
 
 
 def validate_config(config_filepath: str, schema_type: str,
-    schema_name: str) -> bool:
+    schema_name: str) -> dict:
     """
     Validates the given config file against the given schema. If
     the config is valid, then the valid config is returned, otherwise
@@ -77,9 +77,17 @@ def validate_config(config_filepath: str, schema_type: str,
         A bool indicating whether the config file is valid or not.
     """
     config_info = get_config_info(config_filepath)
-    config_schema = get_schema(schema_type, schema_name)
+    config_schema_class = get_schema(schema_type, schema_name)
 
-    return config_schema.validate(config_info)
+    schema_obj = config_schema_class()
+    valid_config = schema_obj.validate(config_info)
+
+    if valid_config is None:
+        raise ValueError(
+            'The provided config file does not match the required schema!\n'
+        )
+
+    return valid_config
 
 
 def main() -> None:
