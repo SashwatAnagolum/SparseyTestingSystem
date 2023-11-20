@@ -4,4 +4,4 @@
 Init: initialization for the Model sub-package.
 """
 
-from . import sparsey
+from . import sparsey_model_schema

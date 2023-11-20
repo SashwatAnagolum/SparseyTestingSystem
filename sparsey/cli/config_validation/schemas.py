@@ -7,7 +7,6 @@ Schemas: functions to get schemas
 
 from . import saved_schemas
 from .saved_schemas.abs_schema import AbstractSchema
-from .validation_constants import allowed_schema_types, allowed_schema_names
 
 
 def get_schema_by_name(schema_type: str, schema_name: str) -> AbstractSchema:
@@ -23,13 +22,20 @@ def get_schema_by_name(schema_type: str, schema_name: str) -> AbstractSchema:
         an AbstractSchema corresponding to the name and type
             passed in.
     """
-    if schema_type not in allowed_schema_types:
+    if schema_type not in dir(saved_schemas):
         raise ValueError(f'Invalid schema type: {schema_type}!')
 
-    if schema_name not in allowed_schema_names[schema_type]:
+    schema_type_module = getattr(saved_schemas, schema_type)
+    schema_name_module = schema_name + '_schema'
+
+    if schema_name_module not in dir(schema_type_module):
         raise ValueError(f'Invalid schema name: {schema_name}!')
 
-    schema_type_module = getattr(saved_schemas, schema_type)
-    schema_module = getattr(schema_type_module, schema_name)
+    schema_module = getattr(schema_type_module, schema_name_module)
 
-    return getattr(schema_module, f'{schema_name.capitalize()}Schema')
+    schema_name_parts = schema_name.split('_')
+    schema_class_name = ''.join(
+        [i.capitalize() for i in schema_name_parts] + ['Schema']
+    )
+
+    return getattr(schema_module, schema_class_name)

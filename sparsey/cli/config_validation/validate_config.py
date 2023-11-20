@@ -80,6 +80,7 @@ def validate_config(config_filepath: str, schema_type: str,
     config_schema_class = get_schema(schema_type, schema_name)
 
     schema_obj = config_schema_class()
+
     valid_config = schema_obj.validate(config_info)
 
     if valid_config is None:
@@ -103,7 +104,7 @@ def main() -> None:
     args = parser.parse_args()
 
     valid_config = validate_config(args.config_filepath, args.schema_type, args.schema_name)
-    
+
     print(valid_config)
 
 if __name__ == "__main__":

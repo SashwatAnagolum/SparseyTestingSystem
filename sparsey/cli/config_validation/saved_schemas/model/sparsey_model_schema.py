@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Sparsey Schema: the schema for Sparsey model config files.
+Sparsey Model Schema: the schema for Sparsey model config files.
 """
 
 
@@ -12,9 +12,10 @@ from schema import Schema, And
 from ..abs_schema import AbstractSchema
 from ...saved_schemas import schema_utils
 
-class SparseySchema(AbstractSchema):
+
+class SparseyModelSchema(AbstractSchema):
     """
-    SparseySchema: schema for Sparsey networks.
+    SparseyModelSchema: schema for Sparsey networks.
     """
     def extract_schema_params(self, config_info: dict) -> Optional[dict]:
         """
@@ -36,7 +37,7 @@ class SparseySchema(AbstractSchema):
             (not isinstance(config_info['num_layers'], int))
         ):
             return None
-        
+
         schema_params['num_layers'] = config_info['num_layers']
 
 
