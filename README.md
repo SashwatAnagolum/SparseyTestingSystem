@@ -15,7 +15,7 @@ Models:
 	* ConvNeXT
 
 Trainers:
-	* ASParsey trianer
+	* ASParsey trainer
 	* Any deep learning model trainer (most options are the same)
 
 HPO runs:
