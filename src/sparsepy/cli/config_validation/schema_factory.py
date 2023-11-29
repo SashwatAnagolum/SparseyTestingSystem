@@ -8,7 +8,7 @@ Schema Factory: functions to get schemas
 from .saved_schemas.abs_schema import AbstractSchema
 
 
-def get_schema_by_name(schema_module: str,
+def get_schema_by_name(schema_module,
                        schema_type: str, schema_name: str) -> AbstractSchema:
     """
     Gets and returns the schema corresponding the the passed in schema type
@@ -22,8 +22,6 @@ def get_schema_by_name(schema_module: str,
         an AbstractSchema corresponding to the name and type
             passed in.
     """
-    print(type(schema_module))
-
     if schema_name not in dir(schema_module):
         raise ValueError(f'Invalid schema name: {schema_name}!')
 
@@ -36,4 +34,4 @@ def get_schema_by_name(schema_module: str,
         ]
     )
 
-    return getattr(schema_module, schema_class_name)
+    return getattr(schema_module, schema_class_name)()

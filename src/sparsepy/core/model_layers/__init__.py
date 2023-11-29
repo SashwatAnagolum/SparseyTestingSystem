@@ -4,4 +4,4 @@
 Init: initialization for the model_layers subpackage.
 """
 
-from . import sparsey_layer
+from .sparsey_layer import SparseyLayer

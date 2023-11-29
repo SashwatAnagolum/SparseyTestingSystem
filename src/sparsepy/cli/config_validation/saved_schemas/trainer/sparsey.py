@@ -10,7 +10,7 @@ import typing
 from schema import Schema, Optional, And
 
 from ..abs_schema import AbstractSchema
-from .....core.training import optimizers
+from sparsepy.core import optimizers
 
 
 class SparseyTrainerSchema(AbstractSchema):
@@ -36,12 +36,25 @@ class SparseyTrainerSchema(AbstractSchema):
         schema_params['optimizer_schema'] = []
 
         try:
-            if config_info['optimizer']['name'] not in dir(optimizers):
+            optimizer_name = ''.join(
+                [
+                    i.capitalize()
+                    for i in config_info['optimizer']['name'].split('_')
+                ]
+            )
+
+            if optimizer_name not in dir(optimizers):
                 return None
         except KeyError:
             return None
 
         return schema_params
+
+
+    def transform_schema(self, config_info: dict) -> dict:
+        config_info['optimizer']['params'] = dict()
+        
+        return config_info
 
 
     def build_schema(self, schema_params: dict) -> Schema:

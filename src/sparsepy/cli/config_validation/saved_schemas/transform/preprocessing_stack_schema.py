@@ -5,13 +5,14 @@ Transform List Schema: the schema for transform list configs.
 """
 
 
-from typing import Optional
+from typing import Optional, Tuple
 
-from schema import Schema, SchemaError
+from schema import SchemaError
 
 from ..abs_schema import AbstractSchema
 from .. import transform
 from ... import schema_factory
+
 
 class TransformListSchema(AbstractSchema):
     """
@@ -50,7 +51,7 @@ class TransformListSchema(AbstractSchema):
         return schema_params
 
 
-    def build_schema(self, schema_params: dict) -> Schema:
+    def build_schema(self, schema_params: dict) -> list[AbstractSchema]:
         """
         Builds a schema that can be used to validate the passed in
         config info.
@@ -62,7 +63,7 @@ class TransformListSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
-        schema_list = []
+        schema_list: list[AbstractSchema] = []
 
         for transform_name in schema_params['transforms']:
             schema_list.append(
@@ -74,7 +75,7 @@ class TransformListSchema(AbstractSchema):
         return schema_list
 
 
-    def validate(self, config_info: dict) -> Optional[dict]:
+    def validate(self, config_info: dict) -> Tuple[Optional[dict], bool]:
         """
         Validates a given configuration against the 
         schema defined by the class.
@@ -91,7 +92,7 @@ class TransformListSchema(AbstractSchema):
         schema_params = self.extract_schema_params(config_info)
 
         if schema_params is None:
-           return None, False
+            return None, False
 
         schema = self.build_schema(schema_params)
 

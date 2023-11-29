@@ -44,13 +44,23 @@ class MAC(torch.nn.Module):
         num_inputs *= num_cms_per_mac_in_input
         num_inputs *= num_neurons_per_cm_in_input
 
+        if len(input_filter) == 0:
+            raise ValueError(
+                'MAC input connection list cannot be empty! ' + 
+                'This is most likely due to a bad set of layer ' + 
+                'configurations, especially the mac_grid_num_rows and ' + 
+                'mac_grid_num_cols properties.'
+            )
+
         self.input_num_cms = num_cms_per_mac_in_input
         self.input_num_neurons = num_neurons_per_cm_in_input
         self.input_min_macs = torch.max(input_filter).item()
 
-        self.weights = torch.randint(
-            0, 2, (num_cms, num_inputs, num_neurons),
-            dtype=torch.float32
+        self.weights = torch.nn.Parameter(
+            torch.randint(
+                0, 2, (num_cms, num_inputs, num_neurons),
+                dtype=torch.float32
+            ), requires_grad=False
         )
 
         self.input_filter = input_filter
@@ -76,11 +86,11 @@ class MAC(torch.nn.Module):
             ) with dtype torch.float32
         """
         if (
-            (len(x.shape) != 4) or 
+            (len(x.shape) != 4) or
             (tuple(x.shape[2:4]) != (
                 self.input_num_cms, self.input_num_neurons
                 )
-            ) or 
+            ) or
             (x.shape[1] <= self.input_min_macs)
         ):
             raise ValueError(f'Incorrect input size: {x.shape}!')
@@ -148,11 +158,13 @@ class SparseyLayer(torch.nn.Module):
         mac_list: list[MAC] containing all the MACs in this layer.
     """
     def __init__(self, num_macs: int, num_cms_per_mac: int,
-        num_neurons_per_mac: int, mac_grid_num_rows: int,
+        num_neurons_per_cm: int, mac_grid_num_rows: int,
         mac_grid_num_cols: int, mac_receptive_field_radius: float,
-        prev_layer_cms_per_mac: int,
-        prev_layer_neurons_per_cm: int,
-        prev_layer_mac_positions: list[Tuple[float, float]]):
+        prev_layer_num_cms_per_mac: int,
+        prev_layer_num_neurons_per_cm: int,
+        prev_layer_mac_grid_num_rows: int,
+        prev_layer_mac_grid_num_cols: int,
+        prev_layer_num_macs: int):
         """
         Initializes the SparseyLayer object.
 
@@ -168,6 +180,11 @@ class SparseyLayer(torch.nn.Module):
             num_macs, mac_grid_num_rows, mac_grid_num_cols
         )
 
+        prev_layer_mac_positions = self.compute_mac_positions(
+            prev_layer_num_macs, prev_layer_mac_grid_num_rows,
+            prev_layer_mac_grid_num_cols
+        )
+
         self.input_connections = self.find_connected_macs_in_prev_layer(
             self.mac_positions, prev_layer_mac_positions
         )
@@ -179,11 +196,13 @@ class SparseyLayer(torch.nn.Module):
 
         self.mac_list = [
             MAC(
-                num_cms_per_mac, num_neurons_per_mac,
-                self.input_connections[i], prev_layer_cms_per_mac,
-                prev_layer_neurons_per_cm
+                num_cms_per_mac, num_neurons_per_cm,
+                self.input_connections[i], prev_layer_num_cms_per_mac,
+                prev_layer_num_neurons_per_cm
             ) for i in range(num_macs)
         ]
+
+        self.mac_list = torch.nn.ModuleList(self.mac_list)
 
 
     def compute_mac_positions(
@@ -310,20 +329,3 @@ class SparseyLayer(torch.nn.Module):
         ]
 
         return torch.stack(mac_outputs, dim=1)
-
-
-if __name__ == "__main__":
-    layer = SparseyLayer(
-        5, 10, 10, 2, 3, 0.5, 5, 5,
-        [
-            (0.0, 0.0), (0.0, 0.5), (0.0, 1.0),
-            (0.5, 0.0), (0.5, 0.5), (0.5, 1.0),
-            (1.0, 0.0), (1.0, 0.5), (1.0, 1.0),
-        ]
-    )
-
-    out = layer(
-        torch.randint(0, 2, (16, 9, 5, 5), dtype=torch.float32)
-    )
-
-    print(out.shape)

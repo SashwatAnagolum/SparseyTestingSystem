@@ -28,7 +28,7 @@ class TestSparseyModelConfigs:
             'input_dimensions': {
                 'width': 28,
                 'height': 28
-            }, 
+            },
             'num_layers': 5,
             'layerwise_configs': {
                 'num_macs': [50, 40, 30, 20, 10],
