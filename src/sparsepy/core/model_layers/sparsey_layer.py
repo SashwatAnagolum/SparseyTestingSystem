@@ -57,11 +57,13 @@ class MAC(torch.nn.Module):
         self.input_min_macs = torch.max(input_filter).item()
 
         self.weights = torch.nn.Parameter(
-            torch.randint(
-                0, 2, (num_cms, num_inputs, num_neurons),
+            torch.zeros(
+                (num_cms, num_inputs, num_neurons),
                 dtype=torch.float32
             ), requires_grad=False
         )
+
+        self.stored_codes = set()
 
         self.input_filter = input_filter
 
@@ -138,6 +140,9 @@ class MAC(torch.nn.Module):
                 2, active_neurons,
                 torch.ones(x.shape, dtype=torch.float32)
             )
+
+            if tuple([i for i in active_neurons.flatten().numpy()]) not in self.stored_codes:
+                self.stored_codes.add(tuple([i for i in active_neurons.flatten().numpy()]))
 
             return output
 

@@ -7,6 +7,7 @@ Model Builder: code for the Model Builder class.
 
 from sparsepy.core.model_layers.layer_factory import LayerFactory
 from sparsepy.access_objects.models.model import Model
+from sparsepy.core.hooks.hook_factory import HookFactory
 
 
 class ModelBuilder:
@@ -33,5 +34,8 @@ class ModelBuilder:
             )
 
             model.add_layer(new_layer)
+
+        for hook_config in model_config['hooks']:
+            hook = HookFactory.create_hook(hook_config['name'], model)
 
         return model

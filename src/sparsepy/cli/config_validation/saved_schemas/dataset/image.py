@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 
 """
-Sparsey Trainer Schema: the schema for Sparsey trainer config files.
+Image dataset schema: the schema for Image dataset config files.
 """
 
 
 import typing
+import os
 
 from schema import Schema, Optional, And
 
-from ..abs_schema import AbstractSchema
+from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.core import optimizers
 
 
-class SparseyTrainerSchema(AbstractSchema):
+class ImageDatasetSchema(AbstractSchema):
     """
     SparseyTrainerSchema: schema for Sparsey trainers.
     """
@@ -33,27 +34,10 @@ class SparseyTrainerSchema(AbstractSchema):
         """
         schema_params = dict()
 
-        schema_params['optimizer_schema'] = []
-
-        try:
-            optimizer_name = ''.join(
-                [
-                    i.capitalize()
-                    for i in config_info['optimizer']['name'].split('_')
-                ]
-            )
-
-            if optimizer_name not in dir(optimizers):
-                return None
-        except KeyError:
-            return None
-
         return schema_params
 
 
     def transform_schema(self, config_info: dict) -> dict:
-        config_info['optimizer']['params'] = dict()
-        
         return config_info
 
 
@@ -71,18 +55,11 @@ class SparseyTrainerSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'optimizer': {
-                    'name': str
-                },
-                'metrics': And(
-                    list, lambda x: len(x) > 0,
-                    [
-                        {
-                            'name': str,
-                            Optional('save', default=False): bool
-                        }
-                    ]
-                )
+                'dataset_type': 'image',
+                'params': {
+                    'data_dir': And(str, os.path.exists),
+                    'image_format': And(str, lambda x: x[0] == '.')
+                }
             }
         )
 

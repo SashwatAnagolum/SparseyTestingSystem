@@ -28,8 +28,18 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        '--trainer_config', type=str,
+        '--training_recipe_config', type=str,
         help='The location of the trainer config file.'
+    )
+
+    parser.add_argument(
+        '--preprocessing_config', type=str,
+        help='The location of the preprocessing config file.'
+    )
+
+    parser.add_argument(
+        '--dataset_config', type=str,
+        help='The location of the dataset config file.'
     )
 
     args = parser.parse_args()
@@ -40,17 +50,39 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
 
-    config_info = get_config_info(args.model_config)
+    model_config_info = get_config_info(args.model_config)
     validated_config, is_valid = validate_config(
-        config_info, 'model', 'sparsey'
+        model_config_info, 'model', 'sparsey'
     )
 
-    trainer_config_info = get_config_info(args.trainer_config)
+    training_recipe_config_info = get_config_info(
+        args.training_recipe_config
+    )
+
     validated_trainer_config, is_valid = validate_config(
-        trainer_config_info, 'trainer', 'sparsey'
+        training_recipe_config_info, 'training_recipe', 'sparsey'
     )
 
-    train_model(validated_config, validated_trainer_config, None, None)
+    preprocessing_config_info = get_config_info(
+        args.preprocessing_config
+    )
+
+    # validated_preprocessing_config
+    
+    dataset_config_info = get_config_info(
+        args.dataset_config
+    )
+
+    validated_dataset_config, is_valid = validate_config(
+        dataset_config_info, 'dataset', 'image'
+    )
+
+    train_model(
+        validated_config,
+        validated_trainer_config,
+        preprocessing_config_info,
+        validated_dataset_config
+    )
 
 if __name__ == "__main__":
     main()

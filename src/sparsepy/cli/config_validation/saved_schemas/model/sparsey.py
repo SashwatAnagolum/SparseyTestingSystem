@@ -11,6 +11,7 @@ from schema import Schema, And
 
 from ..abs_schema import AbstractSchema
 from ...saved_schemas import schema_utils
+from sparsepy.core import hooks
 
 
 class SparseyModelSchema(AbstractSchema):
@@ -33,6 +34,23 @@ class SparseyModelSchema(AbstractSchema):
         schema_params = dict()
 
         return schema_params
+
+
+    def check_if_hook_exists(self, hook_name):
+        """
+        Checks if a hook exists.
+
+        Args: 
+            hook_name (str): name of the hook
+
+        Returns:
+            (bool): whether the hook exists in the system or not.
+        """
+        hook_name = ''.join(
+            [i.capitalize() for i in hook_name.split('_')] + ['Hook']
+        )
+
+        return hook_name in dir(hooks)
 
 
     def transform_schema(self, config_info: dict) -> dict:
@@ -119,6 +137,11 @@ class SparseyModelSchema(AbstractSchema):
                                 lambda x: schema_utils.is_between(x, 0.0, 1.0)
                             )
                         }
+                    }
+                ],
+                'hooks': [
+                    {
+                        'name': And(str, self.check_if_hook_exists)
                     }
                 ]
             }

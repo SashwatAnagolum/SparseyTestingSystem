@@ -6,6 +6,7 @@ Abs Schema: file containing the base class for all Schemas.
 
 
 import abc
+import sys
 
 from typing import Optional
 
@@ -90,4 +91,4 @@ class AbstractSchema():
             return self.transform_schema(validated_config)
         except SchemaError as e:
             print(e)
-            return None
+            sys.exit(-1)

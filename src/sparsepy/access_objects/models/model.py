@@ -21,14 +21,16 @@ class Model(torch.nn.Module):
         """
         super().__init__()
 
-        self.layers = torch.nn.ModuleList()
+        self.num_layers = 0
 
 
     def add_layer(self, layer: torch.nn.Module) -> None:
         """
         Adds a layer to the layers list of the model.
         """
-        self.layers.append(layer)
+        self.add_module(f'Layer_{self.num_layers}', layer)
+
+        self.num_layers += 1
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -41,7 +43,7 @@ class Model(torch.nn.Module):
         Returns:
             (torch.Tensor): the output of the model.
         """
-        for layer in self.layers:
-            x = layer(x)
+        for layer_num in range(self.num_layers):
+            x = self.get_submodule(f'Layer_{layer_num}')(x)
 
         return x

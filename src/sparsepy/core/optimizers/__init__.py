@@ -4,4 +4,4 @@
 Init: initialization for te Optimizers module.
 """
 
-from .hebbian import Hebbian
+from .hebbian import HebbianOptimizer

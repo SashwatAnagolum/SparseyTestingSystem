@@ -20,7 +20,7 @@ class OptimizerFactory:
         Throws an error if the name is not valid.
         """
         class_name = ''.join(
-            [l.capitalize() for l in opt_name.split('_')]
+            [l.capitalize() for l in opt_name.split('_')] + ['Optimizer']
         )
 
         if class_name in OptimizerFactory.allowed_modules:

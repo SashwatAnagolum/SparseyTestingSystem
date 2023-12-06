@@ -27,11 +27,10 @@ def get_schema_by_name(schema_module,
 
     schema_module = getattr(schema_module, schema_name)
 
-    schema_name_parts = schema_name.split('_')
     schema_class_name = ''.join(
-        [i.capitalize() for i in schema_name_parts] + [
-            schema_type.capitalize(), 'Schema'
-        ]
+        [i.capitalize() for i in schema_name.split('_')] +
+        [i.capitalize() for i in schema_type.split('_')] +
+        ['Schema']
     )
 
     return getattr(schema_module, schema_class_name)()
