@@ -38,21 +38,6 @@ class Hook:
         the required hooks.
         """
 
-
-    @abc.abstractmethod
-    def __call__(self, module: torch.nn.Module,
-                 input: torch.Tensor, output: torch.Tensor) -> None:
-        """
-        Call the hook.
-
-        Args:
-            module (torch.nn.Module): the module that the hook was
-                registered to.
-            input (torch.Tensor): module input
-            output (torch.Tensor): module output
-        """
-
-
     def remove(self) -> None:
         """
         Remove the hooks set by the class.

@@ -5,9 +5,9 @@ Sparsey Model Schema: the schema for Sparsey model config files.
 """
 
 
-from typing import Optional
+import typing
 
-from schema import Schema, And
+from schema import Schema, And, Optional
 
 from ..abs_schema import AbstractSchema
 from ...saved_schemas import schema_utils
@@ -18,7 +18,9 @@ class SparseyModelSchema(AbstractSchema):
     """
     SparseyModelSchema: schema for Sparsey networks.
     """
-    def extract_schema_params(self, config_info: dict) -> Optional[dict]:
+    def extract_schema_params(self, config_info: dict) -> typing.Optional[
+        dict
+    ]:
         """
         Extracts the required schema parameters from the config info dict
         in order to build the schema to validate against.
@@ -133,13 +135,12 @@ class SparseyModelSchema(AbstractSchema):
                             'num_neurons_per_cm': And(int, schema_utils.is_positive),
                             'mac_receptive_field_radius': And(
                                 float,
-                                schema_utils.is_positive,
-                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
+                                schema_utils.is_positive
                             )
                         }
                     }
                 ],
-                'hooks': [
+                Optional('hooks'): [
                     {
                         'name': And(str, self.check_if_hook_exists)
                     }

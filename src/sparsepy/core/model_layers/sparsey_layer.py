@@ -30,6 +30,8 @@ class MAC(torch.nn.Module):
         Initializes the MAC object.
 
         Args:
+            layer_index (int): the layer number
+            mac_index (int): the max number within the layer 
             num_cms: int repesenting the number of CMs the MAC should contain.
             num_neurons: int representing the number of neurons per CM.
             input_filter: 1d torch.Tensor of dtype torch.long
@@ -54,7 +56,7 @@ class MAC(torch.nn.Module):
 
         self.input_num_cms = num_cms_per_mac_in_input
         self.input_num_neurons = num_neurons_per_cm_in_input
-        self.input_min_macs = torch.max(input_filter).item()
+        self.input_min_macs = input_filter.shape[0]
 
         self.weights = torch.nn.Parameter(
             torch.zeros(
@@ -87,22 +89,7 @@ class MAC(torch.nn.Module):
                 num_neurons_per_cm
             ) with dtype torch.float32
         """
-        if (
-            (len(x.shape) != 4) or
-            (tuple(x.shape[2:4]) != (
-                self.input_num_cms, self.input_num_neurons
-                )
-            ) or
-            (x.shape[1] <= self.input_min_macs)
-        ):
-            raise ValueError(f'Incorrect input size: {x.shape}!')
-
         with torch.no_grad():
-            # apply input filter to select only the
-            # input signals (neurons) that this MAC
-            # cares about.
-            x = torch.index_select(x, 1, self.input_filter)
-
             # flatten x, maintaining only the batch dim.
             x = x.view(x.shape[0], -1)
 
@@ -194,11 +181,6 @@ class SparseyLayer(torch.nn.Module):
             self.mac_positions, prev_layer_mac_positions
         )
 
-        self.input_connections = [
-            torch.Tensor(connections).long()
-            for connections in self.input_connections
-        ]
-
         self.mac_list = [
             MAC(
                 num_cms_per_mac, num_neurons_per_cm,
@@ -274,7 +256,7 @@ class SparseyLayer(torch.nn.Module):
     def find_connected_macs_in_prev_layer(
         self, mac_positions: list[Tuple[float, float]],
         prev_layer_mac_positions: list[Tuple[float, float]]
-    ) -> list[list[int]]:
+    ) -> list[torch.Tensor]:
         """
         Finds the list of connected MACs in the previous layer
         for each MAC in the current layer.
@@ -286,7 +268,7 @@ class SparseyLayer(torch.nn.Module):
                 list of positions of MACs in the previous layer.
 
         Returns:
-            (list[list[int]]): list of lists containing the indices
+            (list[torch.Tesnor]): list of tensors containing the indices
                 of connected MACs from the previous layer for each
                 MAC in the current layer.
         """
@@ -306,7 +288,7 @@ class SparseyLayer(torch.nn.Module):
 
             connections.append(mac_connections)
 
-        return connections
+        return [torch.Tensor(conn).long() for conn in connections]
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -329,8 +311,15 @@ class SparseyLayer(torch.nn.Module):
                 num_neurons_per_cm
             ) of dtype torch.float32
         """
+        # apply input filter to select only the
+        # input signals (neurons) that this MAC
+        # cares about.
         mac_outputs = [
-            mac(x) for mac in self.mac_list
+            mac(
+                torch.index_select(x, 1, input_filter)
+            ) for mac, input_filter in zip(
+                self.mac_list, self.input_connections
+            )
         ]
 
         return torch.stack(mac_outputs, dim=1)

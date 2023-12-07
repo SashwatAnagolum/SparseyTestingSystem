@@ -23,7 +23,7 @@ class TrainingRecipeBuilder:
         optimizer = OptimizerFactory.create_optimizer(
             train_config['optimizer']['name'],
             **train_config['optimizer']['params'],
-            params=model.parameters()
+            model=model
         )
 
         preprocessing_stack = PreprocessingStack(preprocessing_config)

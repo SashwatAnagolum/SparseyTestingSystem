@@ -35,7 +35,8 @@ class ModelBuilder:
 
             model.add_layer(new_layer)
 
-        for hook_config in model_config['hooks']:
-            hook = HookFactory.create_hook(hook_config['name'], model)
+        if 'hooks' in model_config:
+            for hook_config in model_config['hooks']:
+                hook = HookFactory.create_hook(hook_config['name'], model)
 
         return model

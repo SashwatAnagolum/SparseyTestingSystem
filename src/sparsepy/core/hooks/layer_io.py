@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Layer Activations: file hlding the LayerActivationsHook class.
+Layer IO: file hlding the LayerIOHook class.
 """
 
 
@@ -10,10 +10,10 @@ import torch
 from sparsepy.core.hooks.hook import Hook
 
 
-class LayerActivationsHook(Hook):
+class LayerIOHook(Hook):
     """
-    Layer Activations Hook: simple hook to get the output
-        of a layer.
+    Layer IO Hook: simple hook to get the output
+        and input of a layer.
     """
     def __init__(self, module: torch.nn.Module) -> None:
         """
@@ -24,8 +24,9 @@ class LayerActivationsHook(Hook):
         """
         super().__init__(module)
 
-        self.layer_output = []
-
+        self.input_list = []
+        self.output_list = []
+        self.layer_list = []
 
     def hook(self) -> None:
         """
@@ -35,13 +36,17 @@ class LayerActivationsHook(Hook):
         the required hooks.
         """
         for module in self.module.modules():
-            handle = module.register_forward_hook(self.forward_hook)
-            self.hook_handles.append(handle)
+            if next(module.children(), None) is None:
+                handle = module.register_forward_hook(self.forward_hook)
+                self.hook_handles.append(handle)
 
-        module.register_forward_pre_hook(self.pre_hook)
+        self.module.register_forward_pre_hook(self.pre_hook)
+
 
     def pre_hook(self, module: torch.nn.Module, input: torch.Tensor) -> None:
-        self.layer_output = []
+        self.layer_list = []
+        self.input_list = []
+        self.output_list = []
 
 
     def forward_hook(self, module: torch.nn.Module,
@@ -55,6 +60,10 @@ class LayerActivationsHook(Hook):
             input (torch.Tensor): module input
             output (torch.Tensor): module output
         """
-        self.layer_output.append(output.clone().detach())
+        self.layer_list.append(module)
+        self.output_list.append(output)
+        self.input_list.append(input[0])
 
-        print(self.layer_output[-1].shape)
+
+    def get_layer_io(self):
+        return self.layer_list, self.input_list, self.output_list

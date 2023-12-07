@@ -60,7 +60,7 @@ class TrainingRecipe:
                 loss = self.loss_func(model_output, labels)
                 loss.backward()
 
-            self.optimizer.step(lambda: self.model)
+            self.optimizer.step()
 
         self.batch_index += num_batches_in_step
 

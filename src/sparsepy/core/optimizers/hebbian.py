@@ -5,37 +5,56 @@ Hebbian: file holding the Hebbian optimizer class.
 """
 
 
+import sys
+
 from typing import Iterator, Callable, Optional
 
 import torch
 
+from sparsepy.core.hooks import LayerIOHook
+
 
 class HebbianOptimizer(torch.optim.Optimizer):
-    def __init__(self, params: Iterator[torch.nn.Parameter]):
-        super().__init__(params, dict())
+    def __init__(self, model: torch.nn.Module):
+        super().__init__(model.parameters(), dict())
+        self.model = model
+        self.model_layer_inputs = []
+        self.model_layer_outputs = []
+        self.model_layers = []
+        
+        self.hook = LayerIOHook(self.model)
 
-    def step(self, closure: Callable[[], torch.nn.Module]) -> None:
+
+    def step(self, closure=None) -> None:
         """
         Performs a weight update.
 
         Args:
-            closure: callable returning the model activations,
-                which are used to compute pre-post correlations
-                to decide which weights to increase.
+            closure: callable returning the model output.
         """
-        activations = closure()
+        layers, inputs, outputs = self.hook.get_layer_io()
 
-        for param in self.param_groups[0]['params']:
-            param += torch.clamp(torch.randint(-10, 2, param.shape), min=0)
-            torch.clamp(param, min=0, max=1, out=param)
+        for layer, layer_input, layer_output in zip(
+            layers, inputs, outputs
+        ):
+            for params in layer.parameters():
+                weight_updates = torch.matmul(
+                    torch.transpose(
+                        layer_input.view(layer_input.shape[0], -1), 0, 1
+                    ),
+                    layer_output.view(layer_output.shape[0], -1)
+                )
 
-        # print('Generated codes:\n-----------------------')
+                weight_updates = torch.permute(
+                    weight_updates.view(
+                        weight_updates.shape[0],
+                        params.shape[0],
+                        params.shape[2]
+                    ),
+                    (1, 0, 2)
+                )
 
-        # for layer in range(1, len(activations)):
-        #     for mac_index in range(activations[layer].shape[1]):
-        #         for wta_index in range(activations[layer].shape[2]):
-        #             print(f'WTA module {wta_index} | MAC {mac_index} | Layer {layer}:')
-        #             print(activations[layer][0][mac_index][wta_index].numpy())
-        #             print()
+                params += torch.ge(weight_updates, 1)
+                torch.clamp(params, 0, 1, out=params)
 
         return
