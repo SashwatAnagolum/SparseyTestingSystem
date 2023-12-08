@@ -6,6 +6,7 @@ Abs Schema: file containing the base class for all Schemas.
 
 
 import abc
+import sys
 
 from typing import Optional
 
@@ -33,6 +34,20 @@ class AbstractSchema():
             a dict (might be None) containing all the required parameters 
                 to build the schema.
         """
+
+
+    def transform_schema(self, config_info: dict) -> dict:
+        """
+        Transforms the config info passed in by the user to 
+        construct the config information required by the model builder.
+
+        Args:
+            config_info: dict containing the config information
+
+        Returns:
+            dict containing the transformed config info
+        """
+        return config_info
 
 
     @abc.abstractmethod
@@ -72,6 +87,8 @@ class AbstractSchema():
         schema = self.build_schema(schema_params)
 
         try:
-            return schema.validate(config_info)
-        except SchemaError:
-            return None
+            validated_config = schema.validate(config_info)
+            return self.transform_schema(validated_config)
+        except SchemaError as e:
+            print(e)
+            sys.exit(-1)

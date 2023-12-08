@@ -10,10 +10,12 @@ import typing
 from schema import Schema, Optional, And
 
 from ..abs_schema import AbstractSchema
-from .....core.training import optimizers
+from sparsepy.cli.config_validation.saved_schemas import optimizer
+from sparsepy.cli.config_validation.saved_schemas import schema_utils
+from ... import schema_factory
 
 
-class SparseyTrainerSchema(AbstractSchema):
+class SparseyTrainingRecipeSchema(AbstractSchema):
     """
     SparseyTrainerSchema: schema for Sparsey trainers.
     """
@@ -36,12 +38,26 @@ class SparseyTrainerSchema(AbstractSchema):
         schema_params['optimizer_schema'] = []
 
         try:
-            if config_info['optimizer']['name'] not in dir(optimizers):
-                return None
-        except KeyError:
+            optimizer_name = ''.join(
+                [
+                    i for i in config_info['optimizer']['name'].split('_')
+                ]
+            )
+
+            schema_params['optimizer_schema'] = schema_factory.get_schema_by_name(
+                optimizer, 'optimizer', optimizer_name
+            )
+        except KeyError as e:
+            print(e)
             return None
 
         return schema_params
+
+
+    def transform_schema(self, config_info: dict) -> dict:
+        config_info['optimizer']['params'] = dict()
+        
+        return config_info
 
 
     def build_schema(self, schema_params: dict) -> Schema:
@@ -58,9 +74,7 @@ class SparseyTrainerSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'optimizer': {
-                    'name': str
-                },
+                'optimizer': schema_params['optimizer_schema'],
                 'metrics': And(
                     list, lambda x: len(x) > 0,
                     [
@@ -69,7 +83,17 @@ class SparseyTrainerSchema(AbstractSchema):
                             Optional('save', default=False): bool
                         }
                     ]
-                )
+                ),
+                'dataloader': {
+                    'batch_size': And(int, schema_utils.is_positive),
+                    'shuffle': bool
+                },
+                'training': {
+                    'num_epochs': And(int, schema_utils.is_positive),
+                    Optional('step_resolution', default=None): And(
+                        int, schema_utils.is_positive
+                    )
+                }
             }
         )
 

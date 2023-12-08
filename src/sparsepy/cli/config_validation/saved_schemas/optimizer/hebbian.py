@@ -1,24 +1,23 @@
 # -*- coding: utf-8 -*-
 
 """
-Vertical Flip Transform Schema: the schema for vertical flip
-    transform configs.
+Hebbian Optimizer Schema: the schema for Sparsey trainer config files.
 """
 
 
-from typing import Optional
+import typing
 
-from schema import Schema, And
+from schema import Schema, Optional, And
 
 from ..abs_schema import AbstractSchema
-from ...saved_schemas import schema_utils
 
 
-class VerticalFlipTransformSchema(AbstractSchema):
+class HebbianOptimizerSchema(AbstractSchema):
     """
-    VerticalFlipTransformSchema: schema for vertical flip transforms.
+    HebbianOptimizerSchema: schema for hebbian optimizers.
     """
-    def extract_schema_params(self, config_info: dict) -> Optional[dict]:
+    def extract_schema_params(
+            self, config_info: dict) -> typing.Optional[dict]:
         """
         Extracts the required schema parameters from the config info dict
         in order to build the schema to validate against.
@@ -36,6 +35,10 @@ class VerticalFlipTransformSchema(AbstractSchema):
         return schema_params
 
 
+    def transform_schema(self, config_info: dict) -> dict:
+        return config_info
+
+
     def build_schema(self, schema_params: dict) -> Schema:
         """
         Builds a schema that can be used to validate the passed in
@@ -50,14 +53,8 @@ class VerticalFlipTransformSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'transform_name': And(
-                    str, lambda x: x == 'vertical_flip'
-                ),
-                'flip_probability': And(
-                    float,
-                    lambda x: schema_utils.is_between(x, 0.0, 1.0)
-                )
-            }
+                'name':'hebbian',
+            }, ignore_extra_keys=True
         )
 
         return config_schema

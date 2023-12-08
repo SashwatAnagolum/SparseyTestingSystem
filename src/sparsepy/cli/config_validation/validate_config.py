@@ -85,11 +85,9 @@ def validate_config(config_info: dict, schema_type: str,
         A bool indicating whether the config file is valid or not.
     """
     is_valid = True
-    config_schema_class = get_schema(schema_type, schema_name)
+    config_schema = get_schema(schema_type, schema_name)
 
-    schema_obj = config_schema_class()
-
-    valid_config = schema_obj.validate(config_info)
+    valid_config = config_schema.validate(config_info)
 
     if valid_config is None:
         is_valid = False
@@ -109,12 +107,10 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    config_info = get_config_info(args.onfig_filepath)
+    config_info = get_config_info(args.config_filepath)
     valid_config = validate_config(
         config_info, args.schema_type, args.schema_name
     )
-
-    print(valid_config)
 
 if __name__ == "__main__":
     main()

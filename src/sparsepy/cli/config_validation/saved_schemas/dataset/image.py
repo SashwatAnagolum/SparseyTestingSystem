@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 
 """
-Binarize Transform Schema: the schema for Bianrize transform configs.
+Image dataset schema: the schema for Image dataset config files.
 """
 
 
-from typing import Optional
+import typing
+import os
 
-from schema import Schema, And
+from schema import Schema, Optional, And
 
-from ..abs_schema import AbstractSchema
-from ...saved_schemas import schema_utils
+from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
+from sparsepy.core import optimizers
 
 
-class BinarizeTransformSchema(AbstractSchema):
+class ImageDatasetSchema(AbstractSchema):
     """
-    BinarizeTransformSchema: schema for Binarize transforms.
+    SparseyTrainerSchema: schema for Sparsey trainers.
     """
-    def extract_schema_params(self, config_info: dict) -> Optional[dict]:
+    def extract_schema_params(
+            self, config_info: dict) -> typing.Optional[dict]:
         """
         Extracts the required schema parameters from the config info dict
         in order to build the schema to validate against.
@@ -35,6 +37,10 @@ class BinarizeTransformSchema(AbstractSchema):
         return schema_params
 
 
+    def transform_schema(self, config_info: dict) -> dict:
+        return config_info
+
+
     def build_schema(self, schema_params: dict) -> Schema:
         """
         Builds a schema that can be used to validate the passed in
@@ -49,11 +55,11 @@ class BinarizeTransformSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'transform_name': And(str, lambda x: x == 'binarize'),
-                'binarize_threshold': And(
-                    float,
-                    lambda x: schema_utils.is_between(x, 0.0, 1.0)
-                )
+                'dataset_type': 'image',
+                'params': {
+                    'data_dir': And(str, os.path.exists),
+                    'image_format': And(str, lambda x: x[0] == '.')
+                }
             }
         )
 

@@ -1,1 +1,1 @@
-from . import sparsey
+from . import hebbian
