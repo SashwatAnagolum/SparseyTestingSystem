@@ -1,0 +1,12 @@
+---
+# the name by which to refer to the dataset
+dataset_type: image
+
+# information about the dataset
+params:
+  # the folder which the directory is stored in
+  data_dir: 'C:\Users\JD Padrnos\OneDrive - The Pennsylvania State University\Courses\CMPSC 445\Project\ImageModel\datasets\smaller-split\train'
+
+  # what file format the images are in
+  image_format: '.jpg'
+	  
