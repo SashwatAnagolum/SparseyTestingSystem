@@ -61,7 +61,11 @@ class TrainingRecipe:
             result = {}
 
             for metric in self.metrics_list:
-                output = metric.compute(self.model, transformed_data, model_output, training)
+                output = metric.compute(
+                    self.model, transformed_data,
+                    model_output, training
+                )
+
                 result[metric.__class__.__name__] = output
 
             if training:

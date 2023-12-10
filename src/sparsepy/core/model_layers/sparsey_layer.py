@@ -25,7 +25,8 @@ class MAC(torch.nn.Module):
     def __init__(self, num_cms: int,
                  num_neurons: int, input_filter: torch.Tensor,
                  num_cms_per_mac_in_input: int,
-                 num_neurons_per_cm_in_input: int) -> None:
+                 num_neurons_per_cm_in_input: int,
+                 sigmoid_lambda=28.0, sigmoid_phi=5.0) -> None:
         """
         Initializes the MAC object.
 
@@ -40,6 +41,8 @@ class MAC(torch.nn.Module):
             num_cms_per_mac_in_input: the number of CMs per mac in the input
             num_neurons_per_cm_in_input: the number of neurons per CM in
                 the input.
+            sigmoid_lambda (float): parameter for the familiarity computation.
+            sigmoid_phi (float): parameter for the familiarity computation.
         """
         super().__init__()
         num_inputs = input_filter.shape[0]
@@ -58,6 +61,9 @@ class MAC(torch.nn.Module):
         self.input_num_neurons = num_neurons_per_cm_in_input
         self.input_min_macs = input_filter.shape[0]
 
+        self.sigmoid_lambda = sigmoid_lambda
+        self.sigmoid_phi = sigmoid_phi
+
         self.weights = torch.nn.Parameter(
             torch.zeros(
                 (num_cms, num_inputs, num_neurons),
@@ -68,6 +74,11 @@ class MAC(torch.nn.Module):
         self.stored_codes = set()
 
         self.input_filter = input_filter
+        self.training = True
+
+
+    def train(self, mode: bool = True) -> None:
+        self.training = mode
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -108,19 +119,29 @@ class MAC(torch.nn.Module):
             # get the max value from each CM
             familiarities = torch.max(x, -1)[0]
 
-            # compute the average familiarity across the MAC
-            average_familiarity = torch.mean(familiarities)
+            if self.training:
+                # compute the average familiarity across the MAC
+                average_familiarity = torch.mean(familiarities)
 
-            # compute temperature for softmax
-            softmax_temp = torch.div(1.0, average_familiarity + 1e-4) - 1
+                # compute the logits for sampling the active neuron
+                # in each CM
+                cm_logits = torch.log(
+                    torch.div(
+                        1.0,
+                        1.0 + torch.exp(
+                            -1.0 * self.sigmoid_lambda * x + self.sigmoid_phi
+                        )
+                    )
+                )
 
-            # scale the logits for the softmax using the
-            # average familiarity (higher familiarity => lower temperature,
-            # and lower familiarity => higher temperature)
-            x = torch.div(x, softmax_temp)
+                # sample from categorial dist using processed inputs as logits
+                active_neurons = Categorical(
+                    logits=cm_logits
+                ).sample().unsqueeze(-1)
+            else:
+                active_neurons = torch.argmax(x, 2, keepdim=True)
 
-            # sample from categorial dist using processed inputs as logits
-            active_neurons = Categorical(logits=x).sample().unsqueeze(-1)
+            print(active_neurons.shape)
 
             output = torch.zeros(x.shape, dtype=torch.float32)
             output.scatter_(
@@ -128,8 +149,15 @@ class MAC(torch.nn.Module):
                 torch.ones(x.shape, dtype=torch.float32)
             )
 
-            if tuple([i for i in active_neurons.flatten().numpy()]) not in self.stored_codes:
-                self.stored_codes.add(tuple([i for i in active_neurons.flatten().numpy()]))
+            if self.training:
+                if tuple(
+                    [i for i in active_neurons.flatten().numpy()]
+                ) not in self.stored_codes:
+                    self.stored_codes.add(
+                        tuple(
+                            [i for i in active_neurons.flatten().numpy()]
+                        )
+                    )
 
             return output
 
@@ -148,6 +176,8 @@ class SparseyLayer(torch.nn.Module):
             MACs in the previous layer within the receptive field of
             each MAC in this layer.
         mac_list: list[MAC] containing all the MACs in this layer.
+        sigmoid_lambda (float): parameter for the familiarity computation.
+        sigmoid_phi (float): parameter for the familiarity computation.
     """
     def __init__(self, num_macs: int, num_cms_per_mac: int,
         num_neurons_per_cm: int, mac_grid_num_rows: int,
@@ -156,7 +186,8 @@ class SparseyLayer(torch.nn.Module):
         prev_layer_num_neurons_per_cm: int,
         prev_layer_mac_grid_num_rows: int,
         prev_layer_mac_grid_num_cols: int,
-        prev_layer_num_macs: int):
+        prev_layer_num_macs: int,
+        sigmoid_phi: float, sigmoid_lambda: float):
         """
         Initializes the SparseyLayer object.
 
@@ -185,12 +216,12 @@ class SparseyLayer(torch.nn.Module):
             MAC(
                 num_cms_per_mac, num_neurons_per_cm,
                 self.input_connections[i], prev_layer_num_cms_per_mac,
-                prev_layer_num_neurons_per_cm
+                prev_layer_num_neurons_per_cm, sigmoid_lambda,
+                sigmoid_phi
             ) for i in range(num_macs)
         ]
 
         self.mac_list = torch.nn.ModuleList(self.mac_list)
-
 
     def compute_mac_positions(
         self, num_macs: int, mac_grid_num_rows: int,
