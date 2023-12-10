@@ -33,6 +33,11 @@ class Model(torch.nn.Module):
         self.num_layers += 1
 
 
+    def train(self, mode: bool = True) -> None:
+        for module in self.children():
+            module.train(mode)
+
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Performs a forward pass with data x.

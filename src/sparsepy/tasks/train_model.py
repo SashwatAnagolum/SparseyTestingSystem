@@ -5,8 +5,9 @@ Train Model: script to train models.
 """
 
 
-import torch
 import pprint
+
+import torch
 
 
 from sparsepy.access_objects.models.model_builder import ModelBuilder
@@ -30,21 +31,17 @@ def train_model(model_config: dict, trainer_config: dict,
 
     for epoch in range(trainer_config['training']['num_epochs']):
         is_epoch_done = False
+        model.train()
 
         while not is_epoch_done:
             output, is_epoch_done = trainer.step(training=True)
-            print("training results")
+            print("\n\nTraining results\n--------------------")
             pprint.pprint(output)
 
+        model.eval()
         is_epoch_done = False
 
         while not is_epoch_done:
             output, is_epoch_done = trainer.step(training=False)
-            print("evaluation results")
+            print("\n\nEvaluation results\n--------------------")
             pprint.pprint(output)
-
-        # for layer in range(len(model.layers)):
-        #     for mac in range(len(model.layers[layer].mac_list)):
-        #         max_codes = model.layers[layer].mac_list[mac].weights.shape[2] ** model.layers[layer].mac_list[mac].weights.shape[0]
-
-        #         print(f'Layer {layer} | MAC {mac} | Stored codes: {len(output[layer][mac])} | Max codes possible: {max_codes}')

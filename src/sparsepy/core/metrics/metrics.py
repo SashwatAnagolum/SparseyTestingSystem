@@ -14,6 +14,7 @@ class Metric:
     def __init__(self, model: torch.nn.Module):
         self.model = model
 
+
     @abc.abstractmethod
     def compute(self, m: Model, last_batch: torch.Tensor, labels: torch.Tensor, training: bool = True):
         """

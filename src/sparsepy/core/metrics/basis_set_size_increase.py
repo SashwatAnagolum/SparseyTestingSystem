@@ -12,9 +12,6 @@ class BasisSetSizeIncreaseMetric(Metric):
     def __init__(self, model: torch.nn.Module):
         super().__init__(model)
         self.old_sizes = self._get_set_sizes(model)
-        #old_sizes = [
-        #    [len(mac.stored_codes) for mac in layer.children() if isinstance(mac, MAC)] for layer in model.children()
-        #]
 
     def compute(self, m: Model, last_batch: torch.Tensor, labels: torch.Tensor, training: bool = True):
 

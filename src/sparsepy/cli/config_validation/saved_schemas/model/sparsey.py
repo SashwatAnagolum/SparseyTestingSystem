@@ -136,7 +136,9 @@ class SparseyModelSchema(AbstractSchema):
                             'mac_receptive_field_radius': And(
                                 float,
                                 schema_utils.is_positive
-                            )
+                            ),
+                            'sigmoid_lambda': And(float, schema_utils.is_positive),
+                            'sigmoid_phi': float
                         }
                     }
                 ],
