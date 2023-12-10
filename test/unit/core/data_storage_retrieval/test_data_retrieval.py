@@ -52,3 +52,23 @@ class TestDataFetcher:
         data_fetcher.get_training_result = Mock(return_value=mock_training_result)
         training_result = data_fetcher.get_training_result("experiment_id_123")
         assert training_result == mock_training_result, "The returned TrainingResult does not match the expected mock TrainingResult"
+    
+    def test_get_model_weights_invalid_id(self, data_fetcher: DataFetcher) -> None:
+        """
+        Test the get_model_weights method to ensure it raises an error with an invalid ID.
+        """
+        invalid_id = "invalid_model_id"
+        with pytest.raises(ValueError) as exc_info:
+            data_fetcher.get_model_weights(invalid_id)
+        
+        assert "invalid ID" in str(exc_info.value), "ValueError not raised for an invalid ID"
+
+    def test_get_training_result_invalid_id(self, data_fetcher: DataFetcher) -> None:
+        """
+        Test the get_training_result method to ensure it raises an error with an invalid ID.
+        """
+        invalid_id = "invalid_experiment_id"
+        with pytest.raises(ValueError) as exc_info:
+            data_fetcher.get_training_result(invalid_id)
+        
+        assert "invalid ID" in str(exc_info.value), "ValueError not raised for an invalid ID"

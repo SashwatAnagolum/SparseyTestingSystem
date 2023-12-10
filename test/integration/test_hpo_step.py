@@ -9,6 +9,7 @@ the last experiment result.
 import pytest
 from sparsepy.core.hpo_stratagies.hpo_stratagy import HPOStrategy
 from sparsepy.core.hpo_stratagies.experiment_result import ExperimentResult
+from sparsepy.core.hpo_strategies.exceptions import UntrackableParameterException
 
 class TestHPOStrategy:
     """
@@ -59,3 +60,22 @@ class TestHPOStrategy:
 
         for param in next_params:
             assert param in setup_experiment_result.parameters, f"Parameter '{param}' not found in experiment result"
+
+    def test_untrackable_parameter(self, hpo_strategy: HPOStrategy, setup_experiment_result: ExperimentResult) -> None:
+        """
+        Tests that the get_next_parameters method raises an exception when asked to track
+        a parameter not present in the last experiment result.
+
+        Args:
+            hpo_strategy: An instance of HPOStrategy for testing.
+            setup_experiment_result: A mock instance of ExperimentResult with predefined values.
+        """
+        # Here we manually add an untrackable parameter to the HPOStrategy instance
+        # which simulates the scenario where HPOStrategy is asked to get a next parameter
+        # that wasn't part of the last experiment results.
+        hpo_strategy.untrackable_param = 'untrackable_param_not_in_result'
+        
+        with pytest.raises(UntrackableParameterException) as exc_info:
+            hpo_strategy.get_next_parameters(setup_experiment_result)
+        
+        assert "untrackable parameter" in str(exc_info.value), "UntrackableParameterException not raised for untrackable parameter"

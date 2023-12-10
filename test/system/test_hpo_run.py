@@ -29,3 +29,14 @@ class TestHPORunTask:
 
         except Exception as e:
             pytest.fail(f"Execution of hpo_run_task.py failed: {e}")
+    
+    def test_run_hpo_task_invalid_filepath():
+        """
+        This test calls the main function of hpo_run_task.py and checks
+        for a no such file error if an incorrect path is given
+        """
+        with pytest.raises(FileNotFoundError) as exc_info:
+            invalid_path = 'non_existent_config.yaml'
+            main(invalid_path)  # Call with an invalid file path
+        
+        assert "No such file or directory" in str(exc_info.value)
