@@ -12,6 +12,7 @@ from sparsepy.access_objects.training_recipes.training_recipe import TrainingRec
 from sparsepy.core.optimizers.optimizer_factory import OptimizerFactory
 from sparsepy.access_objects.datasets.dataset_factory import DatasetFactory
 from sparsepy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
+from sparsepy.core.metrics.metric_factory import MetricFactory
 
 
 class TrainingRecipeBuilder:
@@ -39,21 +40,22 @@ class TrainingRecipeBuilder:
 
         metrics_list = []
 
-        # for metric_config in trainer_config['metrics']:
-        #     metric = MetricFactory.create_metric(
-        #         metric_config['names']
-        #         **metric_config['params']
-        #     )
+        for metric_config in train_config['metrics']:
+            metric = MetricFactory.create_metric(
+                metric_config['names']
+                **metric_config['params'],
+                model=model
+            )
 
-        # if 'loss' in trainer_config:
-        #     loss_func = MetricFactory.create_metric(
-        #         train_config['loss']['name'],
-        #         train_config['loss']['params']
-        #     )
-        # else:
-        #     loss_func = None
+        if 'loss' in train_config:
+            loss_func = MetricFactory.create_metric(
+                train_config['loss']['name'],
+                train_config['loss']['params']
+            )
+        else:
+             loss_func = None
 
-        loss_func = None
+        #loss_func = None
 
         return TrainingRecipe(
             model, optimizer, dataloader,
@@ -61,5 +63,4 @@ class TrainingRecipeBuilder:
             loss_func,
             train_config['training']['step_resolution']
         )
-
 

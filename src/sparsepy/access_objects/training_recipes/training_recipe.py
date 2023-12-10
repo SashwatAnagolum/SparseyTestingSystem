@@ -56,6 +56,9 @@ class TrainingRecipe:
 
             model_output = self.model(transformed_data)
 
+            for metric in self.metrics_list:
+                output = metric.compute(self.model, transformed_data, model_output)
+
             if self.loss_func is not None:
                 loss = self.loss_func(model_output, labels)
                 loss.backward()
