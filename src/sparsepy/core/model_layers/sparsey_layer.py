@@ -141,8 +141,6 @@ class MAC(torch.nn.Module):
             else:
                 active_neurons = torch.argmax(x, 2, keepdim=True)
 
-            print(active_neurons.shape)
-
             output = torch.zeros(x.shape, dtype=torch.float32)
             output.scatter_(
                 2, active_neurons,
