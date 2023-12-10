@@ -42,10 +42,12 @@ class TrainingRecipeBuilder:
 
         for metric_config in train_config['metrics']:
             metric = MetricFactory.create_metric(
-                metric_config['names']
-                **metric_config['params'],
+                metric_config['name'],
+                #**metric_config['params'],
                 model=model
             )
+
+            metrics_list.append(metric)
 
         if 'loss' in train_config:
             loss_func = MetricFactory.create_metric(

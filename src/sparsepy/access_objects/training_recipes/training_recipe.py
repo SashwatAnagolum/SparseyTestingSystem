@@ -38,11 +38,13 @@ class TrainingRecipe:
         self.num_batches = len(self.dataloader)
 
 
-    def step(self):
+    def step(self, training: bool = True):
         if self.batch_index + self.step_resolution >= self.num_batches:
             num_batches_in_step = self.num_batches - self.batch_index
         else:
             num_batches_in_step = self.step_resolution
+
+        results = []
 
         for _ in range(num_batches_in_step):
             data, labels = next(iter(self.dataloader))
@@ -56,14 +58,21 @@ class TrainingRecipe:
 
             model_output = self.model(transformed_data)
 
+            result = {}
+
             for metric in self.metrics_list:
-                output = metric.compute(self.model, transformed_data, model_output)
+                output = metric.compute(self.model, transformed_data, model_output, training)
+                result[metric.__class__.__name__] = output
 
-            if self.loss_func is not None:
-                loss = self.loss_func(model_output, labels)
-                loss.backward()
+            if training:
+                if self.loss_func is not None:
+                    loss = self.loss_func(model_output, labels)
+                    loss.backward()
 
-            self.optimizer.step()
+                self.optimizer.step()
+
+            results.append(result)
+            
 
         self.batch_index += num_batches_in_step
 
@@ -78,4 +87,4 @@ class TrainingRecipe:
         #    for layer in self.model.layers
         # ]
 
-        return None, epoch_ended
+        return results, epoch_ended
