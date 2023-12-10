@@ -9,7 +9,7 @@ import typing
 
 from schema import Schema, Optional, And
 
-from ..abs_schema import AbstractSchema
+from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 
 
 class HebbianOptimizerSchema(AbstractSchema):

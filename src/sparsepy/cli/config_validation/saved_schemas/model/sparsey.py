@@ -9,8 +9,8 @@ import typing
 
 from schema import Schema, And, Optional
 
-from ..abs_schema import AbstractSchema
-from ...saved_schemas import schema_utils
+from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
+from sparsepy.cli.config_validation.saved_schemas import schema_utils
 from sparsepy.core import hooks
 
 

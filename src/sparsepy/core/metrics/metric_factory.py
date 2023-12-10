@@ -1,6 +1,6 @@
 from sparsepy.core import metrics
 
-from .metrics import Metric
+from sparsepy.core.metrics.metrics import Metric
 
 
 class MetricFactory:
