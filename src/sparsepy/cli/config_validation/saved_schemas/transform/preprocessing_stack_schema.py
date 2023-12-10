@@ -9,9 +9,9 @@ from typing import Optional, Tuple
 
 from schema import SchemaError
 
-from ..abs_schema import AbstractSchema
-from .. import transform
-from ... import schema_factory
+from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
+from sparsepy.cli.config_validation.saved_schemas import transform
+from sparsepy.cli.config_validation import schema_factory
 
 
 class TransformListSchema(AbstractSchema):

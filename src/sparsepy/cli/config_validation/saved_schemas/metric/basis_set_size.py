@@ -1,43 +1,34 @@
-# -*- coding: utf-8 -*-
-
-"""
-Hebbian Optimizer Schema: the schema for Sparsey trainer config files.
-"""
-
-
 import typing
 
-from schema import Schema, Optional, And
+from schema import Schema, And, Optional
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
+from sparsepy.cli.config_validation.saved_schemas import schema_utils
 
 
-class HebbianOptimizerSchema(AbstractSchema):
-    """
-    HebbianOptimizerSchema: schema for hebbian optimizers.
-    """
-    def extract_schema_params(
-            self, config_info: dict) -> typing.Optional[dict]:
+class BasisSetSizeSchema(AbstractSchema):
+    def extract_schema_params(self, config_info: dict) -> typing.Optional[dict]:
         """
         Extracts the required schema parameters from the config info dict
         in order to build the schema to validate against.
 
+        In this instance, there are no parameters.
+
         Args:
-            config_info: a dict containing the config info from the 
+            config_info: a dict containing the config info from the
                 user.
 
         Returns:
-            a dict (might be None) containing all the required parameters 
+            a dict (might be None) containing all the required parameters
                 to build the schema.
         """
+
         schema_params = dict()
 
         return schema_params
 
-
     def transform_schema(self, config_info: dict) -> dict:
         return config_info
-
 
     def build_schema(self, schema_params: dict) -> Schema:
         """
@@ -53,7 +44,8 @@ class HebbianOptimizerSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'name':'hebbian',
+                'name':'basis_set_size',
+                Optional('save', default=False): bool
             }, ignore_extra_keys=True
         )
 

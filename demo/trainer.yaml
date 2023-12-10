@@ -1,0 +1,17 @@
+---
+optimizer:
+  name: hebbian
+
+metrics:
+  #- name: accuracy
+  #  save: True
+  - name: exact_match_accuracy
+    save: True
+
+dataloader:
+  batch_size: 1
+  shuffle: True
+
+training:
+  num_epochs: 1
+	  

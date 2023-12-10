@@ -9,10 +9,10 @@ import typing
 
 from schema import Schema, Optional, And
 
-from ..abs_schema import AbstractSchema
+from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation.saved_schemas import optimizer
 from sparsepy.cli.config_validation.saved_schemas import schema_utils
-from ... import schema_factory
+from sparsepy.cli.config_validation import schema_factory
 
 
 class SparseyTrainingRecipeSchema(AbstractSchema):

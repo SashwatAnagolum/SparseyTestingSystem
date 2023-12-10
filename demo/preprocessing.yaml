@@ -1,0 +1,10 @@
+transform_list:
+  - name: random_equalize
+    params:
+      p: 0.8
+  - name: random_horizontal_flip
+    params:
+      p: 0.5
+  - name: random_vertical_flip
+    params:
+      p: 0.5

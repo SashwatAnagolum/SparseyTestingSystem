@@ -27,4 +27,5 @@ schema==0.7.5
 six==1.16.0
 sympy==1.12
 torch==2.1.1
+torchvision
 typing_extensions==4.8.0

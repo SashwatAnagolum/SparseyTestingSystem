@@ -6,11 +6,11 @@ IMage Dataset: file holding the image dataset class.
 
 
 import os
+import torch
+
+import numpy as np
 
 from typing import Any
-
-import torch
-import numpy as np
 
 from torchvision.io import read_image
 

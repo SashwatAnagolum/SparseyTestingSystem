@@ -7,7 +7,7 @@ Layer Factory: file holding the Layer Factory class.
 
 import torch
 
-from .. import model_layers
+from sparsepy.core import model_layers
 
 
 class LayerFactory:

@@ -6,6 +6,7 @@ Train Model: script to train models.
 
 
 import torch
+import pprint
 
 
 from sparsepy.access_objects.models.model_builder import ModelBuilder
@@ -31,7 +32,16 @@ def train_model(model_config: dict, trainer_config: dict,
         is_epoch_done = False
 
         while not is_epoch_done:
-            output, is_epoch_done = trainer.step()
+            output, is_epoch_done = trainer.step(training=True)
+            print("training results")
+            pprint.pprint(output)
+
+        is_epoch_done = False
+
+        while not is_epoch_done:
+            output, is_epoch_done = trainer.step(training=False)
+            print("evaluation results")
+            pprint.pprint(output)
 
         # for layer in range(len(model.layers)):
         #     for mac in range(len(model.layers[layer].mac_list)):

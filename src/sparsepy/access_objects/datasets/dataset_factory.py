@@ -9,7 +9,7 @@ import torch
 
 from torch.utils.data import Dataset
 
-from .. import datasets
+from sparsepy.access_objects import datasets
 
 
 class DatasetFactory:
