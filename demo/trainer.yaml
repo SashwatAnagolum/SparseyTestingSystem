@@ -1,11 +1,16 @@
 ---
+
 optimizer:
   name: hebbian
 
 metrics:
-  #- name: accuracy
-  #  save: True
+  - name: basis_set_size
+    save: True
+  - name: basis_set_size_increase
+    save: False
   - name: exact_match_accuracy
+    save: True
+  - name: approximate_match_accuracy
     save: True
 
 dataloader:
@@ -14,4 +19,4 @@ dataloader:
 
 training:
   num_epochs: 1
-	  
+...

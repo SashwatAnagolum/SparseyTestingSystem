@@ -1,10 +1,27 @@
 transform_list:
-  - name: random_equalize
+# other transforms
+  - name: resize
     params:
-      p: 0.8
-  - name: random_horizontal_flip
+      size: [8, 8]
+      antialias: True
+  #- name: random_vertical_flip
+  #  params:
+  #    p: 0.5
+
+# convert images to float from uint8, and scale them to [0, 1]
+  - name: to_dtype
     params:
-      p: 0.5
-  - name: random_vertical_flip
+      dtype: float32
+      scale: True
+
+# binarize
+  - name: grayscale
     params:
-      p: 0.5
+      num_output_channels: 1
+  - name: random_posterize
+    params:
+      p: 1.0
+      bits: 1
+  - name: random_autocontrast
+    params:
+      p: 1.0
