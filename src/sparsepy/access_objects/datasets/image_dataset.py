@@ -51,13 +51,11 @@ class ImageDataset(Dataset):
 
 
     def __getitem__(self, index) -> Any:
-        image_index = np.random.randint(0, self.total_images)
-
         image_subfolder = np.argwhere(
-            self.subfolder_image_counts <= image_index
+            self.subfolder_image_counts <= index
         )[-1].item()
 
-        image_subfolder_index = image_index - self.subfolder_image_counts[
+        image_subfolder_index = index - self.subfolder_image_counts[
             image_subfolder
         ]
 
