@@ -36,6 +36,7 @@ class TrainingRecipe:
 
         self.batch_index = 0
         self.num_batches = len(self.dataloader)
+        self.iterator = iter(self.dataloader)
 
 
     def step(self, training: bool = True):
@@ -47,14 +48,11 @@ class TrainingRecipe:
         results = []
 
         for _ in range(num_batches_in_step):
-            data, labels = next(iter(self.dataloader))
+            data, labels = next(self.iterator)
 
             self.optimizer.zero_grad()
 
             transformed_data = self.preprocessing_stack(data)
-            transformed_data = transformed_data.view(
-                (transformed_data.shape[0], -1, 1, 1)
-            )
 
             model_output = self.model(transformed_data)
 
@@ -83,6 +81,7 @@ class TrainingRecipe:
         if self.batch_index == self.num_batches:
             epoch_ended = True
             self.batch_index = 0
+            self.iterator = iter(self.dataloader)
         else:
             epoch_ended = False
 
