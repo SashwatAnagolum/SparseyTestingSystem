@@ -10,9 +10,6 @@ from sparsepy.cli.config_validation.validate_config import (
     validate_config, get_config_info
 )
 
-from sparsepy.tasks.train_model import train_model
-
-
 def parse_args() -> argparse.Namespace:
     """
     Parses the command line arguments passed in during execution.
@@ -21,16 +18,6 @@ def parse_args() -> argparse.Namespace:
         Namespace containing the parsed arguments.
     """
     parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        '--model_config', type=str,
-        help='The location of the model config file.'
-    )
-
-    parser.add_argument(
-        '--training_recipe_config', type=str,
-        help='The location of the training recipe config file.'
-    )
 
     parser.add_argument(
         '--preprocessing_config', type=str,
@@ -51,21 +38,8 @@ def parse_args() -> argparse.Namespace:
 
     return args
 
-
 def main():
     args = parse_args()
-
-    model_config_info = get_config_info(args.model_config)
-    validated_model_config, _ = validate_config(
-        model_config_info, 'model', 'sparsey'
-    )
-
-    training_recipe_config_info = get_config_info(
-        args.training_recipe_config
-    )
-    validated_trainer_config, _ = validate_config(
-        training_recipe_config_info, 'training_recipe', 'sparsey'
-    )
 
     preprocessing_config_info = get_config_info(
         args.preprocessing_config
