@@ -54,6 +54,10 @@ class TrainingRecipe:
 
             transformed_data = self.preprocessing_stack(data)
 
+            transformed_data = transformed_data.view(
+                (transformed_data.shape[0], -1, 1, 1)
+            )
+
             model_output = self.model(transformed_data)
 
             result = {}
