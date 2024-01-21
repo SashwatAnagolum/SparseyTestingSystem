@@ -10,7 +10,7 @@ import sys
 
 from typing import Optional
 
-from schema import Schema, SchemaError
+from schema import Schema
 
 
 class AbstractSchema():
@@ -82,13 +82,9 @@ class AbstractSchema():
         schema_params = self.extract_schema_params(config_info)
 
         if schema_params is None:
-            return None
+            raise ValueError('Invalaid schema!')
 
         schema = self.build_schema(schema_params)
+        validated_config = schema.validate(config_info)
 
-        try:
-            validated_config = schema.validate(config_info)
-            return self.transform_schema(validated_config)
-        except SchemaError as e:
-            print(e)
-            sys.exit(-1)
+        return self.transform_schema(validated_config)
