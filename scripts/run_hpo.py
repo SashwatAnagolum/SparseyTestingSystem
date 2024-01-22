@@ -4,11 +4,13 @@
 Run HPO: script to run HPO
 """
 
+
 import argparse
 
 from sparsepy.cli.config_validation.validate_config import (
     validate_config, get_config_info
 )
+
 
 def parse_args() -> argparse.Namespace:
     """
@@ -45,6 +47,8 @@ def main():
         args.preprocessing_config
     )
 
+    # preprocessing config validation
+
     dataset_config_info = get_config_info(
         args.dataset_config
     )
@@ -57,7 +61,9 @@ def main():
     )
 
     # TODO update to validate the config
-    validated_hpo_config = hpo_config_info
+    validated_hpo_config = validate_config(
+        hpo_config_info, 'hpo', 'default'
+    )
 
     # TODO start the HPO run
 

@@ -6,6 +6,7 @@ Sparsey Model Schema: the schema for Sparsey model config files.
 
 
 import typing
+import math
 
 from schema import Schema, And, Optional
 
@@ -55,6 +56,39 @@ class SparseyModelSchema(AbstractSchema):
         return hook_name in dir(hooks)
 
 
+    def compute_factor_pair(self, num: int) -> typing.Tuple[int, int]:
+        """
+        Returns the pair of factors whose product is num
+        whose elements are closest to sqrt(num)
+
+        Args:
+            num (int): the number to find the factors of.
+
+        Returns:
+            (Tuple[int, int]): the chosen factors
+        """
+        factor = 1
+
+        for i in range(2, math.floor(num ** 0.5) + 1):
+            if not num % i:
+                factor = i
+
+        return factor, num // factor
+
+
+    def compute_grid_size(self, num_macs: int) -> typing.Tuple[int, int]:
+        """
+        Finds the smallest grid with at least 2 rows 
+        that can accomodate num_macs.
+        """
+        factor_1, factor_2 = self.compute_factor_pair(num_macs)
+
+        if factor_1 == 1:
+            factor_1, factor_2 = self.compute_factor_pair(num_macs + 1)
+
+        return factor_1, factor_2
+
+
     def transform_schema(self, config_info: dict) -> dict:
         """
         Transforms the config info passed in by the user to 
@@ -75,29 +109,30 @@ class SparseyModelSchema(AbstractSchema):
         )
 
         for index in range(len(config_info['layers'])):
-            config_info['layers'][index]['params'][
-                'prev_layer_mac_grid_num_rows'
-            ] = prev_layer_dims[0]
+            for key_index, key in enumerate(
+                [
+                    'prev_layer_mac_grid_num_rows',
+                    'prev_layer_mac_grid_num_cols',
+                    'prev_layer_num_macs',
+                    'prev_layer_num_cms_per_mac',
+                    'prev_layer_num_neurons_per_cm'
+                ]
+            ):
+                config_info['layers'][index][
+                    'params'
+                ][key] = prev_layer_dims[key_index]
 
-            config_info['layers'][index]['params'][
-                'prev_layer_mac_grid_num_cols'
-            ] = prev_layer_dims[1]
-
-            config_info['layers'][index]['params'][
-                'prev_layer_num_macs'
-            ] = prev_layer_dims[2]
-
-            config_info['layers'][index]['params'][
-                'prev_layer_num_cms_per_mac'
-            ] = prev_layer_dims[3]
-
-            config_info['layers'][index]['params'][
-                'prev_layer_num_neurons_per_cm'
-            ] = prev_layer_dims[4]
+            if config_info['layers'][index]['params']['autosize_grid']:
+                (
+                    config_info['layers'][index]['params']['mac_grid_num_rows'],
+                    config_info['layers'][index]['params']['mac_grid_num_cols']
+                ) = self.compute_grid_size(
+                    config_info['layers'][index]['params']['num_macs']
+                )
 
             prev_layer_dims = (
                 config_info['layers'][index]['params']['mac_grid_num_rows'],
-                config_info['layers'][index]['params']['mac_grid_num_rows'],
+                config_info['layers'][index]['params']['mac_grid_num_cols'],
                 config_info['layers'][index]['params']['num_macs'],
                 config_info['layers'][index]['params']['num_cms_per_mac'],
                 config_info['layers'][index]['params']['num_neurons_per_cm']
@@ -128,9 +163,10 @@ class SparseyModelSchema(AbstractSchema):
                     {
                         'name': And(str, 'sparsey'),
                         'params': {
+                            Optional('autosize_grid', default=False): bool,
                             'num_macs': And(int, schema_utils.is_positive),
-                            'mac_grid_num_rows': And(int, schema_utils.is_positive),
-                            'mac_grid_num_cols': And(int, schema_utils.is_positive),
+                            Optional('mac_grid_num_rows', default=1): And(int, schema_utils.is_positive),
+                            Optional('mac_grid_num_cols', default=1): And(int, schema_utils.is_positive),
                             'num_cms_per_mac': And(int, schema_utils.is_positive),
                             'num_neurons_per_cm': And(int, schema_utils.is_positive),
                             'mac_receptive_field_radius': And(
