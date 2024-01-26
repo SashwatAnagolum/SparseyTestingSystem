@@ -49,6 +49,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
             layers, inputs, outputs
         ):
             for params in layer.parameters():
+                # compute the weight updates
                 weight_updates = torch.matmul(
                     torch.transpose(
                         layer_input.view(layer_input.shape[0], -1), 0, 1
@@ -69,7 +70,13 @@ class HebbianOptimizer(torch.optim.Optimizer):
 
                 updateable_mask = self.calculate_freezing_mask(params.data, layer_index)
                 weight_updates *= updateable_mask
+                
+                # apply persistence/weight decay to all weights 
+                # (newly changed weights will be reset to 1 in the next step)
+                # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
+                params = torch.mul(params, layer.persistence)
 
+                # add the new weights to the old ones then clamp to [0,1]
                 params += torch.ge(weight_updates, 1)
                 torch.clamp(params, 0, 1, out=params)
 

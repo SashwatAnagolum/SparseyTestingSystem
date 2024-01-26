@@ -35,8 +35,11 @@ class LayerIOHook(Hook):
         Concrete hooks need to implement this method to register
         the required hooks.
         """
+        # get all the submodules in the network
         for module in self.module.modules():
+            # if that module has no children (= it is a MAC)
             if next(module.children(), None) is None:
+                # then add it to the hook handles
                 handle = module.register_forward_hook(self.forward_hook)
                 self.hook_handles.append(handle)
 
