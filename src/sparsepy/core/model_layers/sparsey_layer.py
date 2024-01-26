@@ -25,7 +25,7 @@ class MAC(torch.nn.Module):
     def __init__(self, num_cms: int,
                  num_neurons: int, input_filter: torch.Tensor,
                  num_cms_per_mac_in_input: int,
-                 num_neurons_per_cm_in_input: int,
+                 num_neurons_per_cm_in_input: int, layer_index: int,
                  sigmoid_lambda=28.0, sigmoid_phi=5.0) -> None:
         """
         Initializes the MAC object.
@@ -48,6 +48,8 @@ class MAC(torch.nn.Module):
         num_inputs = input_filter.shape[0]
         num_inputs *= num_cms_per_mac_in_input
         num_inputs *= num_neurons_per_cm_in_input
+
+        self.layer_index = layer_index
 
         if len(input_filter) == 0:
             raise ValueError(
@@ -185,7 +187,7 @@ class SparseyLayer(torch.nn.Module):
         prev_layer_mac_grid_num_rows: int,
         prev_layer_mac_grid_num_cols: int,
         prev_layer_num_macs: int,
-        sigmoid_phi: float, sigmoid_lambda: float):
+        sigmoid_phi: float, sigmoid_lambda: float, saturation_threshold: float, layer_index: int):
         """
         Initializes the SparseyLayer object.
 
@@ -214,12 +216,18 @@ class SparseyLayer(torch.nn.Module):
             MAC(
                 num_cms_per_mac, num_neurons_per_cm,
                 self.input_connections[i], prev_layer_num_cms_per_mac,
-                prev_layer_num_neurons_per_cm, sigmoid_lambda,
+                prev_layer_num_neurons_per_cm, layer_index, sigmoid_lambda,
                 sigmoid_phi
             ) for i in range(num_macs)
         ]
 
         self.mac_list = torch.nn.ModuleList(self.mac_list)
+
+        self.saturation_threshold = saturation_threshold
+
+
+        ####Edit out when we have a better mechanism for tracking layers
+        self.layer_index = layer_index
 
     def compute_mac_positions(
         self, num_macs: int, mac_grid_num_rows: int,

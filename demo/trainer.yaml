@@ -2,9 +2,7 @@
 
 optimizer:
   name: hebbian
-  params:
-    thresh: 0.5
-
+  params: {}
 metrics:
   - name: basis_set_size
     save: True
@@ -21,4 +19,6 @@ dataloader:
 
 training:
   num_epochs: 1
+
+#verbosity: 
 ...

@@ -17,7 +17,7 @@ layers:
       mac_receptive_field_radius: 1.5
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
-      #persistence: 1.0
+      saturation_threshold: 0.5
 
   - name: sparsey
     params:
@@ -29,7 +29,7 @@ layers:
       mac_receptive_field_radius: 1.0
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
-      #persistence: 0.95
+      saturation_threshold: 0.5
 
   # persistence -> talk to Dr. Rinkus
   # weight freezing thresholds -> talk to Dr. Rinkus

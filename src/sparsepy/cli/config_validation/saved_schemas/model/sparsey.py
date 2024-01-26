@@ -7,7 +7,7 @@ Sparsey Model Schema: the schema for Sparsey model config files.
 
 import typing
 
-from schema import Schema, And, Optional
+from schema import Schema, And, Optional, Use
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation.saved_schemas import schema_utils
@@ -138,7 +138,8 @@ class SparseyModelSchema(AbstractSchema):
                                 schema_utils.is_positive
                             ),
                             'sigmoid_lambda': And(float, schema_utils.is_positive),
-                            'sigmoid_phi': float
+                            'sigmoid_phi': float,
+                            'saturation_threshold': And(float, Use(float), lambda n: 0 <= n <= 1)
                         }
                     }
                 ],

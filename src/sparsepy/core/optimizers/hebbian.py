@@ -15,19 +15,23 @@ from sparsepy.core.hooks import LayerIOHook
 
 
 class HebbianOptimizer(torch.optim.Optimizer):
-    def __init__(self, model: torch.nn.Module, thresh):
+    def __init__(self, model: torch.nn.Module):
         super().__init__(model.parameters(), dict())
         self.model = model
-        self.thresh = thresh
+        self.saturation_thresholds = []
+        for layer in model.children():
+            if hasattr(layer, 'saturation_threshold'):
+                self.saturation_thresholds.append(layer.saturation_threshold)
         self.model_layer_inputs = []
         self.model_layer_outputs = []
         self.model_layers = []
-        
+
         self.hook = LayerIOHook(self.model)
 
-    def calculate_freezing_mask(self, weights):
+    def calculate_freezing_mask(self, weights, layer_index):
+        layer_threshold = self.saturation_thresholds[layer_index]
         mean_inputs = torch.mean(weights, dim=1)
-        freezing_mask = (mean_inputs > self.thresh).float()
+        freezing_mask = (mean_inputs > layer_threshold).float()
         freezing_mask_expanded = freezing_mask.unsqueeze(1).expand_as(weights)
         updateable_mask = 1 - freezing_mask_expanded
         return updateable_mask
@@ -41,7 +45,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
         """
         layers, inputs, outputs = self.hook.get_layer_io()
 
-        for layer, layer_input, layer_output in zip(
+        for (layer, layer_input, layer_output) in zip(
             layers, inputs, outputs
         ):
             for params in layer.parameters():
@@ -61,7 +65,9 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     (1, 0, 2)
                 )
 
-                updateable_mask = self.calculate_freezing_mask(params.data)
+                layer_index = layer.layer_index
+
+                updateable_mask = self.calculate_freezing_mask(params.data, layer_index)
                 weight_updates *= updateable_mask
 
                 params += torch.ge(weight_updates, 1)
