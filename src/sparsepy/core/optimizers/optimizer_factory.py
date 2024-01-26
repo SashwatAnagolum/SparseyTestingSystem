@@ -36,7 +36,13 @@ class OptimizerFactory:
         """
         Creates a layer passed in based on the layer name and kwargs.
         """
+        print(f"Creating optimizer with arguments: {kwargs}")
+
         opt_class = OptimizerFactory.get_optimizer_class(opt_name)
+
+        # Before instantiation, check if 'thresh' is required and present
+        if opt_name.lower() == 'hebbian' and 'thresh' not in kwargs:
+            raise ValueError("Missing required 'thresh' parameter for HebbianOptimizer")
 
         opt_obj = opt_class(**kwargs)
 

@@ -2,6 +2,8 @@
 
 optimizer:
   name: hebbian
+  params:
+    thresh: 0.5
 
 metrics:
   - name: basis_set_size

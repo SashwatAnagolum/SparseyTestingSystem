@@ -15,15 +15,22 @@ from sparsepy.core.hooks import LayerIOHook
 
 
 class HebbianOptimizer(torch.optim.Optimizer):
-    def __init__(self, model: torch.nn.Module):
+    def __init__(self, model: torch.nn.Module, thresh):
         super().__init__(model.parameters(), dict())
         self.model = model
+        self.thresh = thresh
         self.model_layer_inputs = []
         self.model_layer_outputs = []
         self.model_layers = []
         
         self.hook = LayerIOHook(self.model)
 
+    def calculate_freezing_mask(self, weights):
+        mean_inputs = torch.mean(weights, dim=1)
+        freezing_mask = (mean_inputs > self.thresh).float()
+        freezing_mask_expanded = freezing_mask.unsqueeze(1).expand_as(weights)
+        updateable_mask = 1 - freezing_mask_expanded
+        return updateable_mask
 
     def step(self, closure=None) -> None:
         """
@@ -53,6 +60,9 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     ),
                     (1, 0, 2)
                 )
+
+                updateable_mask = self.calculate_freezing_mask(params.data)
+                weight_updates *= updateable_mask
 
                 params += torch.ge(weight_updates, 1)
                 torch.clamp(params, 0, 1, out=params)
