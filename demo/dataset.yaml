@@ -13,4 +13,12 @@ params:
 
 preprocessed: False
 preprocessed_dir: 'C:\Users\toddk\SparseyTestingSystem\demo\MNIST_Preprocessed'
+
+preprocessed_stack:
+  transform_list:
+  # other transforms
+    - name: resize
+      params:
+        size: [8, 8]
+        antialias: True
 ...

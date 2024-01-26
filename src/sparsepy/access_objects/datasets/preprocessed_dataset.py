@@ -35,12 +35,12 @@ class PreprocessedDataset(Dataset):
         Returns:
             The preprocessed data.
         """
-        data = self.dataset[idx]
+        data, label = self.dataset[idx]
         preprocessed_data = self.preprocessing_stack(data)
 
         preprocessed_path = os.path.join(self.preprocessed_dir, f'{idx}.pkl')
         with open(preprocessed_path, 'wb') as f:
-            pickle.dump(preprocessed_data, f)
+            pickle.dump(preprocessed_data, label, f)
 
         return preprocessed_data
 
@@ -49,10 +49,10 @@ class PreprocessedDataset(Dataset):
         # If preprocessed data exists, load and return it
         if os.path.exists(preprocessed_path):
             with open(preprocessed_path, 'rb') as f:
-                data = pickle.load(f)
+                data, label = pickle.load(f)
         # If not, preprocess and save the data
         else:
-            data = self._preprocess_and_save(idx)
+            data, label = self._preprocess_and_save(idx)
 
         return data
 
