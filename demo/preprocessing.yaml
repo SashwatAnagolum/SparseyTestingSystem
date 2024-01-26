@@ -13,6 +13,7 @@ transform_list:
     params:
       dtype: float32
       scale: True
+      #probability: 0.5
 
 # binarize
   - name: grayscale
