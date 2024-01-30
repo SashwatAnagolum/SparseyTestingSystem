@@ -11,14 +11,16 @@ params:
   # what file format the images are in
   image_format: '.png'
 
-preprocessed: False
+preprocessed: True
 preprocessed_dir: 'C:\Users\toddk\SparseyTestingSystem\demo\MNIST_Preprocessed'
 
 preprocessed_stack:
   transform_list:
   # other transforms
-    - name: resize
+    - name: binarize_transform
       params:
-        size: [8, 8]
-        antialias: True
+        binarize_threshold: 0.5
+    - name: skeletonization_transform
+      params:
+        sigma: 3
 ...
