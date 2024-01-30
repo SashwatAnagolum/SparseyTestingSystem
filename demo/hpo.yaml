@@ -1,0 +1,78 @@
+---
+model_family: sparsey
+
+fixed_hyperparameters:
+  input_dimensions: 
+    width: 4
+    height: 4
+
+  layers:
+    - name: sparsey
+      params:
+        autosize_grid: True
+        num_cms_per_mac: 2
+
+    - name: sparsey
+      params:
+        autosize_grid: True
+        num_neurons_per_cm: 2
+
+    - name: sparsey
+      params:
+        autosize_grid: True
+        num_cms_per_mac: 2
+        num_neurons_per_cm: 2
+
+    - name: sparsey
+      params:
+        autosize_grid: True
+        num_cms_per_mac: 2
+        num_neurons_per_cm: 2
+
+optimized_hyperparameters:
+  num_layers:
+    bounds: [2, 5]
+    data_type: int
+
+  shared:
+    mac_receptive_field_radius:
+      value_set: [0.25, 0.5, 0.75, 1.0, 1.5]
+
+    sigmoid_lambda:
+      value_set: [1.0, 5.0, 10.0, 25.0]
+
+    sigmoid_phi:
+      value_set: [1.0, 1.5, 2.0, 2.5, 3.0]
+
+  layers:
+    - num_macs:
+        value_set: [2, 4, 8, 12]
+      num_neurons_per_cm:
+        bounds: [2, 10]
+        data_type: int
+
+    - num_macs:
+        bounds: [2, 8]
+        data_type: int
+      num_cms_per_mac:
+        value_set: [5, 10, 15, 20, 25]
+
+    - num_macs:
+        value_set: [4, 16, 32]
+
+    - num_macs:
+        bounds: [5, 10]
+        data_type: int
+
+hpo_strategy: random
+
+optimization_objective:
+  - name: match_accuracy
+    weight: 1.0  
+
+  - name: feature_coverage
+    weight: 0.5
+
+termination_condition:
+  num_candidates: 1000
+...
