@@ -20,7 +20,11 @@ def parse_args() -> argparse.Namespace:
         Namespace containing the parsed arguments.
     """
     parser = argparse.ArgumentParser()
-
+    
+    parser.add_argument(
+        '--training_recipe_config', type=str,
+        help='The location of the trainer config file.'
+    )
     parser.add_argument(
         '--preprocessing_config', type=str,
         help='The location of the preprocessing config file.'
@@ -42,7 +46,15 @@ def parse_args() -> argparse.Namespace:
 
 def main():
     args = parse_args()
+    
+    training_recipe_config_info = get_config_info(
+        args.training_recipe_config
+    )
 
+    validated_trainer_config, is_valid = validate_config(
+        training_recipe_config_info, 'training_recipe', 'sparsey'
+    )
+    
     preprocessing_config_info = get_config_info(
         args.preprocessing_config
     )

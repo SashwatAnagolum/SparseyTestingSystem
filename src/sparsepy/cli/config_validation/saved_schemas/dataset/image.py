@@ -59,7 +59,10 @@ class ImageDatasetSchema(AbstractSchema):
                 'params': {
                     'data_dir': And(str, os.path.exists),
                     'image_format': And(str, lambda x: x[0] == '.')
-                }
+                },
+                'preprocessed': bool,
+                'preprocessed_dir': str,
+                'preprocessed_stack': dict
             }
         )
 
