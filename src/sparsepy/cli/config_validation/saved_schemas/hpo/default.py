@@ -36,30 +36,7 @@ class DefaultHpoSchema(AbstractSchema):
             a dict (might be None) containing all the required parameters 
                 to build the schema.
         """
-        schema_params = dict()
-
-        try:
-            hpo_strategy_name = config_info['hpo_strategy']['name']
-        except KeyError as e:
-            raise ValueError('Missing HPO Strategy name!') from e
-        try:
-            hpo_strategy_schema = schema_factory.get_schema_by_name(
-                hpo_strategy, 'hpo_strategy', hpo_strategy_name
-            )
-
-            schema_params['hpo_strategy_schema'] = hpo_strategy_schema
-        except ValueError as e:
-            raise ValueError(
-                f'Invalid HPO Strategy name {hpo_strategy_name}!'
-            ) from e
-    
-        if 'optimization_objective' not in config_info:
-            raise ValueError('`optimization_objective` config missing!')
-        elif not isinstance(config_info['optimization_objective'], list):
-            raise ValueError(
-                'invalid `optimization_objective` config' + 
-                f'{config_info["optimization_objective"]}: must be a list!'
-            )      
+        schema_params = dict()    
 
         return schema_params
 
@@ -92,29 +69,34 @@ class DefaultHpoSchema(AbstractSchema):
         hyperparam_schema = Schema(
             Or(
                 {
-                    'bounds': And(
-                        list,
-                        lambda x: schema_utils.is_expected_len(x, 2)
-                    ),
-                    'data_type': lambda x: x in ['int', 'float']
-                },
-                {
-                    'value_set': And(
-                        list,
-                        lambda x: sum(
-                            [
-                                True if isinstance(i, int)
-                                or isinstance(i, float)
-                                else False for i in x
-                            ]
-                        ) == len(x)
+                    'min': Or(int, float),
+                    'max': Or(int, float),
+                    'distribution': Or(
+                        'int_uniform', 'uniform', 'categorical',
+                        'q_uniform', 'log_uniform', 'log_uniform_values',
+                        'q_log_uniform', 'q_log_uniform_values',
+                        'inv_log_uniform', 'normal', 'q_normal',
+                        'log_normal', 'q_log_normal'
                     )
                 },
+                {
+                    'values': And(
+                        list,
+                        schema_utils.all_elements_are_same_type
+                    )
+                },
+                {
+                    'value': Or(str, int, float, bool)
+                }
             )
         )
 
         if isinstance(config_info, dict):
-            if 'bounds' in config_info.keys() or 'value_set' in config_info.keys():
+            if (
+                'min' in config_info.keys() or
+                'values' in config_info.keys() or
+                'value' in config_info.keys()
+            ):
                 try:
                     hyperparam_schema.validate(config_info)
                 except SchemaError as e:
@@ -164,24 +146,20 @@ class DefaultHpoSchema(AbstractSchema):
         config_schema = Schema(
             {
                 'model_family': And(str, self.check_if_model_family_exists),
-                Optional('fixed_hyperparameters'): dict,
-                'optimized_hyperparameters': And(
+                'hpo_run_name': str,
+                'project_name': str,
+                'hyperparameters': And(
                     dict, self.check_optimizer_hyperparams_validity
                 ),
-                'hpo_strategy': {
-                    'name': str,
-                    Optional(
-                        'params',
-                        default=None
-                    ): schema_params['hpo_strategy_schema']
-                },
+                'hpo_strategy': Or('random', 'grid', 'bayes'),
                 'optimization_objective': [
                     {
                         'name': str,
                         Optional('params', default=None): dict,
                         'weight': float
                     }
-                ]
+                ],
+                'num_candidates': And(int, schema_utils.is_positive)
             }
         )
 
