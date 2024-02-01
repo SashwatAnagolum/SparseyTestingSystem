@@ -14,7 +14,7 @@ from sparsepy.access_objects.hpo_runs.hpo_run  import HPORun
 
 def run_hpo(hpo_config: dict, trainer_config: dict,
             dataset_config: dict, preprocessing_config: dict,
-            wandb_api_key: Optional[str] = None):
+            wandb_api_key: Optional[str] = ''):
     """
     Runs hyperparameter optimization
     over the specified network hyperparameters

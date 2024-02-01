@@ -13,7 +13,7 @@ from schema import Schema, And, Optional, Or, SchemaError
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation import schema_factory
 from sparsepy.cli.config_validation.saved_schemas import (
-    model, hpo_strategy, schema_utils
+    model, schema_utils
 )
 
 
