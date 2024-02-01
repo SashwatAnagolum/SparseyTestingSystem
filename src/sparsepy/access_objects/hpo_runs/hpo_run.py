@@ -8,10 +8,6 @@ HPO Run: file holding the HPORun class.
 import random
 import wandb
 
-from sparsepy.core.hpo_strategies.hpo_strategy_factory import (
-    HPOStrategyFactory
-)
-
 
 class HPORun():
     """
@@ -142,8 +138,9 @@ class HPORun():
         using the trained model.
         """
         wandb.init()
+        # print(wandb.config)
         wandb.log({'hpo_objective': random.random()})
-  
+
 
     def run_sweep(self) -> dict:
         """
