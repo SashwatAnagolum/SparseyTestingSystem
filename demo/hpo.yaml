@@ -1,0 +1,107 @@
+---
+model_family: sparsey
+hpo_run_name: sample_hpo_run
+project_name: sparsey_hpo_test
+
+hyperparameters:
+  input_dimensions: 
+    width: 
+      value: 4
+    height:
+      value: 4
+
+  num_layers:
+    min: 2
+    max: 5
+    distribution: int_uniform
+
+  layers:
+    - name: 
+        value: sparsey
+      params:
+        autosize_grid:
+          value: True
+        num_cms_per_mac:
+          value: 2
+        num_macs:
+          values: [2, 4, 8, 12]
+        num_neurons_per_cm:
+          min: 2
+          max: 10
+          distribution: int_uniform
+        mac_receptive_field_radius:
+          values: [0.25, 0.5, 0.75, 1.0, 1.5]
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+
+    - name: 
+        value: sparsey
+      params:
+        autosize_grid:
+          value: True
+        num_neurons_per_cm:
+          value: 2
+        num_macs:
+          min: 2
+          max: 8
+          distribution: int_uniform
+        num_cms_per_mac:
+          values: [5, 10, 15, 20, 25]
+        mac_receptive_field_radius:
+          values: [0.25, 0.5, 0.75, 1.0, 1.5]
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+
+    - name: 
+        value: sparsey
+      params:
+        autosize_grid:
+          value: True
+        num_neurons_per_cm:
+          value: 2
+        num_macs:
+          values: [4, 16, 32]
+        num_cms_per_mac:
+          value: 2
+        mac_receptive_field_radius:
+          values: [0.25, 0.5, 0.75, 1.0, 1.5]
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+
+    - name: 
+        value: sparsey
+      params:
+        autosize_grid:
+          value: True
+        num_cms_per_mac:
+          value: 2
+        num_neurons_per_cm:
+          value: 2
+        num_macs:
+          min: 5
+          max: 10
+          distribution: int_uniform
+        mac_receptive_field_radius:
+          values: [0.25, 0.5, 0.75, 1.0, 1.5]
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+
+hpo_strategy: random
+
+optimization_objective:
+  - name: match_accuracy
+    weight: 1.0  
+
+  - name: feature_coverage
+    weight: 0.5
+
+num_candidates: 25
+...
