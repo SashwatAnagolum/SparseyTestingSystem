@@ -12,7 +12,6 @@ params:
   image_format: '.png'
 
 preprocessed: True
-preprocessed_dir: 'C:\Users\toddk\SparseyTestingSystem\demo\MNIST_Preprocessed'
 
 preprocessed_stack:
   transform_list:
