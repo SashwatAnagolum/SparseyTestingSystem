@@ -4,13 +4,15 @@
 HPO Run: file holding the HPORun class.
 """
 
-
+import torch
 import random
 import wandb
 
 from sparsepy.core.metrics.metric_factory import MetricFactory
 from sparsepy.access_objects.models.model_builder import ModelBuilder
 from sparsepy.cli.config_validation.validate_config import validate_config
+from sparsepy.core.hpo_objectives.hpo_objective import HPOObjective
+
 
 class HPORun():
     """
