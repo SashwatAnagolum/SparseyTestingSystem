@@ -8,6 +8,9 @@ HPO Run: file holding the HPORun class.
 import random
 import wandb
 
+from sparsepy.core.metrics.metric_factory import MetricFactory
+from sparsepy.access_objects.models.model_builder import ModelBuilder
+from sparsepy.cli.config_validation.validate_config import validate_config
 
 class HPORun():
     """
@@ -38,6 +41,7 @@ class HPORun():
         self.sweep_config = self.construct_sweep_config(hpo_config)
         self.sweep_id = wandb.sweep(sweep=self.sweep_config)
         self.num_trials = hpo_config['num_candidates']
+        self.config_info = hpo_config
 
 
     def check_is_value_constraint(self, config):
@@ -130,7 +134,26 @@ class HPORun():
         return sweep_config
 
 
-    def step(self, *args) -> None:
+    def generate_model_config(self, wandb_config: dict) -> dict:
+        model_config = dict()
+        layer_keys = dict()
+        layers = []
+
+        for key, value in wandb_config.items():
+            if ('layers_' in key):
+                layer_keys[key] = value
+            elif (key != 'num_layers'):
+                model_config[key] = value
+
+        for i in range(len(layer_keys)):
+            layers.append(layer_keys[f'layers_{i}'])
+
+        model_config['layers'] = layers
+
+        return model_config
+
+
+    def step(self) -> None:
         """
         Perform one HPO step, which includes sampling 
         a set of model hyperparameters, training the created
@@ -138,7 +161,18 @@ class HPORun():
         using the trained model.
         """
         wandb.init()
-        # print(wandb.config)
+        
+        model_config = self.generate_model_config(
+            dict(wandb.config)
+        )
+
+        validated_config, _ = validate_config(
+            model_config, 'model', self.config_info['model_family']
+        )
+
+        if validated_config is not None:
+            model = ModelBuilder.build_model(validated_config)
+
         wandb.log({'hpo_objective': random.random()})
 
 

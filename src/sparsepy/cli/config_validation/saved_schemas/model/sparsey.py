@@ -8,7 +8,7 @@ Sparsey Model Schema: the schema for Sparsey model config files.
 import typing
 import math
 
-from schema import Schema, And, Optional
+from schema import Schema, And, Optional, Or
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation.saved_schemas import schema_utils
@@ -170,11 +170,11 @@ class SparseyModelSchema(AbstractSchema):
                             'num_cms_per_mac': And(int, schema_utils.is_positive),
                             'num_neurons_per_cm': And(int, schema_utils.is_positive),
                             'mac_receptive_field_radius': And(
-                                float,
+                                Or(int, float),
                                 schema_utils.is_positive
                             ),
-                            'sigmoid_lambda': And(float, schema_utils.is_positive),
-                            'sigmoid_phi': float
+                            'sigmoid_lambda': And(Or(int, float), schema_utils.is_positive),
+                            'sigmoid_phi': Or(int, float)
                         }
                     }
                 ],
