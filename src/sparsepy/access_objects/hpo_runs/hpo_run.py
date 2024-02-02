@@ -4,10 +4,10 @@
 HPO Run: file holding the HPORun class.
 """
 
-
+import torch
 import random
 import wandb
-
+from sparsepy.core.hpo_objectives.hpo_objective import HPOObjective
 
 class HPORun():
     """
@@ -38,6 +38,8 @@ class HPORun():
         self.sweep_config = self.construct_sweep_config(hpo_config)
         self.sweep_id = wandb.sweep(sweep=self.sweep_config)
         self.num_trials = hpo_config['num_candidates']
+        # TODO replace with actual model etc
+        self.objectives = HPOObjective(hpo_config, torch.nn.Module())
 
 
     def check_is_value_constraint(self, config):
