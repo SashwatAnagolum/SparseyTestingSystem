@@ -10,7 +10,6 @@ import wandb
 
 from sparsepy.core.hpo_objectives.hpo_objective import HPOObjective
 
-
 class HPORun():
     """
     HPORun: class for performing HPO Runs.
