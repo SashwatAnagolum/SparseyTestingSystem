@@ -77,7 +77,10 @@ class TrainingRecipe:
 
                 self.optimizer.step()
 
+            print("\n" + "\n" + "\n")
+
             results.append(result)
+
             
 
         self.batch_index += num_batches_in_step
