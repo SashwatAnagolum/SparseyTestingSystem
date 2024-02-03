@@ -117,9 +117,13 @@ class HebbianOptimizer(torch.optim.Optimizer):
                 # Apply the updateable mask to the weight updates, effectively zeroing
                 # updates for weights that are not updateable (frozen).
                 weight_updates *= updateable_mask
+                
+                # apply persistence/weight decay to all weights 
+                # (newly changed weights will be reset to 1 in the next step)
+                # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
+                params = torch.mul(params, layer.persistence)
 
-                # Increment parameters by weight updates if updates are greater or equal to 1,
-                # and then clamp the values of parameters to be within [0, 1].
+                # add the new weights to the old ones then clamp to [0,1]
                 params += torch.ge(weight_updates, 1)
                 torch.clamp(params, 0, 1, out=params)
 

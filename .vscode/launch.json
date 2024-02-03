@@ -10,10 +10,7 @@
             "request": "launch",
             "program": "${file}",
             //"args": [
-                //"--dataset_config", "C:\\Users\\JD Padrnos\\Documents\\Sparsey\\SparseyTestingSystem\\demo\\dataset.yaml",
-                //"--preprocessing_config", "C:\\Users\\JD Padrnos\\Documents\\Sparsey\\SparseyTestingSystem\\demo\\preprocessing.yaml",
-                //"--model_config", "C:\\Users\\JD Padrnos\\Documents\\Sparsey\\SparseyTestingSystem\\demo\\network.yaml",
-                //"--training_recipe_config", "C:\\Users\\JD Padrnos\\Documents\\Sparsey\\SparseyTestingSystem\\demo\\trainer.yaml",
+                //...
             //],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
