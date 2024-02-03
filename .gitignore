@@ -1,4 +1,5 @@
 venv/
 .vscode/**
 !.vscode/launch.json
+wandb/
 __pycache__/
