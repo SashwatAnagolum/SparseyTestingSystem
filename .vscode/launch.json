@@ -31,5 +31,16 @@
             "cwd": "${workspaceFolder}",
             "justMyCode": true
         },
+        {
+            "name": "PyTest - test_weight_freezing",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${workspaceFolder}\\test\\system\\weight_freezing\\test_weight_freezing.py"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
     ]
 }
