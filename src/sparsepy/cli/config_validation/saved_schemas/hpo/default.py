@@ -159,6 +159,7 @@ class DefaultHpoSchema(AbstractSchema):
                         'weight': float
                     }
                 ],
+                'combination_method':  Or('sum', 'product', 'mean'),
                 'num_candidates': And(int, schema_utils.is_positive)
             }
         )

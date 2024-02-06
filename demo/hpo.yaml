@@ -102,6 +102,6 @@ optimization_objective:
 
   - name: basis_set_size
     weight: 0.5
-
+combination_method: "sum"
 num_candidates: 25
 ...
