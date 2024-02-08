@@ -26,7 +26,7 @@ class MAC(torch.nn.Module):
                  num_neurons: int, input_filter: torch.Tensor,
                  num_cms_per_mac_in_input: int,
                  num_neurons_per_cm_in_input: int,
-                 layer_index: int,
+                 layer_index: int, mac_index: int,
                  sigmoid_lambda=28.0, sigmoid_phi=5.0,
                  persistence=1.0,
                  ) -> None:
@@ -53,6 +53,7 @@ class MAC(torch.nn.Module):
         num_inputs *= num_neurons_per_cm_in_input
 
         self.layer_index = layer_index
+        self.mac_index = mac_index
 
         if len(input_filter) == 0:
             raise ValueError(
@@ -231,8 +232,8 @@ class SparseyLayer(torch.nn.Module):
             MAC(
                 num_cms_per_mac, num_neurons_per_cm,
                 self.input_connections[i], prev_layer_num_cms_per_mac,
-                prev_layer_num_neurons_per_cm, 
-                layer_index, # ORDER MATTERS and this section needs to match the constructor signature exactly
+                prev_layer_num_neurons_per_cm, # ORDER MATTERS and this section needs to match the constructor signature exactly
+                layer_index, i, # push mac_index down into MAC
                 sigmoid_lambda, sigmoid_phi,
                 persistence # pass layer persistence value to individual MACs--this might need adjusting so it can be set on a per-MAC basis
             ) for i in range(num_macs)
