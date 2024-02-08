@@ -156,10 +156,10 @@ class DefaultHpoSchema(AbstractSchema):
                     {
                         'name': str,
                         Optional('params', default=None): dict,
-                        'weight': float
+                        'weight': float,
+                        'combination_method':  Or('sum', 'product', 'mean'),
                     }
                 ],
-                'combination_method':  Or('sum', 'product', 'mean'),
                 'num_candidates': And(int, schema_utils.is_positive)
             }
         )

@@ -97,11 +97,11 @@ hyperparameters:
 hpo_strategy: random
 
 optimization_objective:
+  combination_method: "sum"
   - name: exact_match_accuracy
     weight: 1.0  
 
   - name: basis_set_size
     weight: 0.5
-combination_method: "sum"
 num_candidates: 25
 ...
