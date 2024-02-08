@@ -116,6 +116,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
 
                 # Apply the updateable mask to the weight updates, effectively zeroing
                 # updates for weights that are not updateable (frozen).
+                # BUG: probably does not update weights that are both active on this step *and* frozen
                 weight_updates *= updateable_mask
                 
                 # apply persistence/weight decay to all weights 
