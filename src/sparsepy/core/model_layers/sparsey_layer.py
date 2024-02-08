@@ -82,6 +82,8 @@ class MAC(torch.nn.Module):
 
         self.input_filter = input_filter
         self.training = True
+        
+        self.is_active = True
 
 
     def train(self, mode: bool = True) -> None:
@@ -153,6 +155,8 @@ class MAC(torch.nn.Module):
                 2, active_neurons,
                 torch.ones(x.shape, dtype=torch.float32)
             )
+
+            self.is_active = (output.count_nonzero().item() > 0)
 
             if self.training:
                 if tuple(
