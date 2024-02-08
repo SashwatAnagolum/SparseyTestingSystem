@@ -13,8 +13,7 @@ class FeatureCoverageMetric(Metric):
         super().__init__(model)
         # attaches the hook anew for this Metric to gain access to the hook data
         # to check "every code at every level" we require access to the inner model data to determine which MACs have been activated
-        self.hook = LayerIOHook(self.model)
-
+        self.hook = LayerIOHook(self.model, flatten=False)
 
 
     def compute(self, m: Model, last_batch: torch.Tensor, labels: torch.Tensor, training: bool = True):
@@ -50,14 +49,10 @@ class FeatureCoverageMetric(Metric):
 
             image_results = []
 
-            # count MACs to track position in hook
-            # (because it is a flat structure we need to know how many MACs we have seen across layers so far to know where the next MAC in this layer is)
-            macs_counted = 0
-
             # for each layer
-            for layer_index, layer in enumerate(m.named_children()):
+            for layer_index, layer in enumerate(layers):
 
-                print(f"Layer {layer_index}")
+                #print(f"Layer {layer_index}")
 
                 rf_cache.append([])
 
@@ -65,7 +60,7 @@ class FeatureCoverageMetric(Metric):
                 layer_mask = torch.zeros_like(image, dtype=torch.bool)
 
                 # for each MAC in that layer
-                for mac_index, mac in enumerate(layer[1].mac_list):
+                for mac in layer:
                     
                     # create a new input mask in the shape of the input
                     mac_mask = torch.zeros_like(image, dtype=torch.bool)
@@ -76,7 +71,7 @@ class FeatureCoverageMetric(Metric):
                     #print(f"MAC {mac_index} Sources: {[x for x, y in enumerate(source_macs) if y != 0]}")
 
                     # if this MAC is active (=any nonzero neuron outputs = any nonzero values in the 2D tensor for this MAC's output)
-                    if layer_outputs[macs_counted][image_index].count_nonzero(dim=[0,1]) > 0:
+                    if mac.is_active:
 
                         # then update the MAC input mask with this MAC's input
 
@@ -97,9 +92,7 @@ class FeatureCoverageMetric(Metric):
 
                     # regardless, save to the cache as the input mask for this MAC
                     # (this way, MACs that are not active get an all-zero mask)
-                    rf_cache[layer_index].append(mac_mask)
-                    # and increment the MAC counter
-                    macs_counted += 1
+                    rf_cache[mac.layer_index].append(mac_mask)
 
                 # when MAC processing has finished
 
@@ -126,7 +119,7 @@ class FeatureCoverageMetric(Metric):
                     feature_coverage = 1.0
                 else:
                     # calculate feature coverage in results as covered pixels / input size
-                    feature_coverage = (covered_count / total_count) if total_count > 0 else 1
+                    feature_coverage = (covered_count / total_count)
                 
                 # append to results for this image
                 image_results.append(feature_coverage)
