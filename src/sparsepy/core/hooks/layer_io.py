@@ -24,23 +24,20 @@ class LayerIOHook(Hook):
 
         Args:
             module (torch.nn.MOdule): model to be hooked into.
+            flatten (boolean): whether to flatten the model structure into a 1d list for return. Default true.
         """
         super().__init__(module)
 
-        # runs before forward is invoked (only on top-level Model)
-        # on pre hook, reinitialize the lists
-        self.input_list = []
-        self.output_list = []
-        self.layer_list = []
+        # WARNING creates some potentially undesirable assumptions about network structure
+        # also this approach requires .modules() to return all MACs in order by index within layer and in order by layer
+        # save number of layers at creation so we don't have to recompute it
+        self.num_layers = sum([1 for m in module.modules() if isinstance(m, SparseyLayer)])
+        # create empty 2D list with one inner list for each layer
+        self.input_list = [[] for i in range(self.num_layers)]
+        self.output_list = [[] for i in range(self.num_layers)]
+        self.layer_list = [[] for i in range(self.num_layers)]
 
         self.flatten = flatten
-
-        for m in module.modules():
-            if isinstance(m, SparseyLayer):
-                # WARNING this approach will not work correctly with nested SparseyLayers
-                self.input_list.append([])
-                self.output_list.append([])
-                self.layer_list.append([])
 
     def hook(self) -> None:
         """
@@ -56,22 +53,14 @@ class LayerIOHook(Hook):
                 # then add it to the hook handles
                 handle = module.register_forward_hook(self.forward_hook)
                 self.hook_handles.append(handle)
-
+        # pre hook is attached only to the top-level module
         self.module.register_forward_pre_hook(self.pre_hook)
 
 
     def pre_hook(self, module: torch.nn.Module, input: torch.Tensor) -> None:
-        self.input_list = []
-        self.output_list = []
-        self.layer_list = []
-
-        # creates implicit requirement that the module passed to the pre hook is the top-level module
-        for m in module.modules():
-            if isinstance(m, SparseyLayer):
-                # WARNING this approach will not work correctly with nested SparseyLayers
-                self.input_list.append([])
-                self.output_list.append([])
-                self.layer_list.append([])
+        self.input_list = [[] for i in range(self.num_layers)]
+        self.output_list = [[] for i in range(self.num_layers)]
+        self.layer_list = [[] for i in range(self.num_layers)]
 
 
     def forward_hook(self, module: torch.nn.Module,
@@ -85,6 +74,7 @@ class LayerIOHook(Hook):
             input (torch.Tensor): module input
             output (torch.Tensor): module output
         """
+        # creates dependency on layer_index inside the MAC this is attached to; needs reevaluating if we support nested blocks
         self.layer_list[module.layer_index].append(module)
         self.output_list[module.layer_index].append(output)
         self.input_list[module.layer_index].append(input[0])
