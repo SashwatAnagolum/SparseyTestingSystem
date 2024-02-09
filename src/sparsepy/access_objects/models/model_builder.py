@@ -28,7 +28,9 @@ class ModelBuilder:
         """
         model = Model()
 
-        for layer_config in model_config['layers']:
+        for (layer_index, layer_config) in enumerate(model_config['layers']):
+            layer_config['params']['layer_index'] = layer_index
+            
             new_layer = LayerFactory.create_layer(
                 layer_config['name'], **layer_config['params']
             )

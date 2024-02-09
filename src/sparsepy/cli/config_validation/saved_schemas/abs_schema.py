@@ -82,7 +82,7 @@ class AbstractSchema():
         schema_params = self.extract_schema_params(config_info)
 
         if schema_params is None:
-            raise ValueError('Invalaid schema!')
+            raise ValueError('Invalid schema!')
 
         schema = self.build_schema(schema_params)
         validated_config = schema.validate(config_info)
