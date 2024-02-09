@@ -20,7 +20,7 @@ class BasisSetSizeMetric(Metric):
             for layer in m.children() if isinstance(layer, SparseyLayer)
         ]
 
-        if self.reduction is None:
+        if self.reduction is None or self.reduction == "none":
             return basis_set_sizes
         elif self.reduction == 'mean':
             return [

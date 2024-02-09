@@ -124,7 +124,7 @@ class FeatureCoverageMetric(Metric):
 
             # if lesser granularity has been requested, average the layerwise results to achieve a single number 
             # (n.b. this probably needs to be weighted by # of macs per layer)
-        if self.reduction is None:
+        if self.reduction is None or self.reduction == "none":
             return [fc for image in results for fc in image]
         elif self.reduction == "sum":
             return [

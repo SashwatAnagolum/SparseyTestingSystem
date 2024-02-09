@@ -47,7 +47,7 @@ class BasisSetSizeIncreaseMetric(Metric):
         self.old_sizes = new_sizes
 
         # return the differences
-        if self.reduction is None:
+        if self.reduction is None or self.reduction == "none":
             return deltas
         elif self.reduction == 'mean':
             return [
