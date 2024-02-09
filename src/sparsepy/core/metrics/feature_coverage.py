@@ -43,7 +43,7 @@ class FeatureCoverageMetric(Metric):
         for image_index, image_3d in enumerate(last_batch):
 
             # initialize the cache
-            rf_cache = []
+            rf_cache = [[] for i in range(len(layers))]
 
             image = image_3d.flatten()
 
@@ -51,10 +51,6 @@ class FeatureCoverageMetric(Metric):
 
             # for each layer
             for layer_index, layer in enumerate(layers):
-
-                #print(f"Layer {layer_index}")
-
-                rf_cache.append([])
 
                 # create the empty layerwise input mask
                 layer_mask = torch.zeros_like(image, dtype=torch.bool)
@@ -64,24 +60,17 @@ class FeatureCoverageMetric(Metric):
                     
                     # create a new input mask in the shape of the input
                     mac_mask = torch.zeros_like(image, dtype=torch.bool)
-
-                    # get all of the MACs in the previous layer from which this MAC receives input
-                    source_macs = mac.input_filter
-
-                    #print(f"MAC {mac_index} Sources: {[x for x, y in enumerate(source_macs) if y != 0]}")
+                    #print(f"MAC {mac_index} Sources: {[x for x, y in enumerate(mac.input_filter) if y != 0]}")
 
                     # if this MAC is active (=any nonzero neuron outputs = any nonzero values in the 2D tensor for this MAC's output)
                     if mac.is_active:
-
                         # then update the MAC input mask with this MAC's input
-
-                        # IF we are in layer 1 then the source "MACs" represent pixels in the input that we need to scatter onto the mask
                         if layer_index == 0:
-                            mac_mask.scatter_(0, source_macs, 1)
-                        # ELSE loop over all the source MACs
+                            # IF we are in layer 1 then the source "MACs" represent pixels in the input that we need to scatter onto the mask
+                            mac_mask.scatter_(0, mac.input_filter, 1)
                         else:
-                            # for each of those source MACs
-                            for source_index in source_macs:
+                            # otherwise, for each input MAC to this one
+                            for source_index in mac.input_filter:
                                 # get its input filter from the cache and OR it into the mac_mask
                                 # this is slightly inefficient because it does (# of MACs) fetch/OR steps rather than (# of active MACs)
                                 # WARNING double check index numbering!
@@ -91,7 +80,7 @@ class FeatureCoverageMetric(Metric):
                         layer_mask = torch.bitwise_or(layer_mask, mac_mask)
 
                     # regardless, save to the cache as the input mask for this MAC
-                    # (this way, MACs that are not active get an all-zero mask)
+                    # (this way, MACs that are not active just get an all-zero mask)
                     rf_cache[mac.layer_index].append(mac_mask)
 
                 # when MAC processing has finished
@@ -108,10 +97,11 @@ class FeatureCoverageMetric(Metric):
                 # count the number of 1s in the uncovered pixels
                 uncovered_count = torch.count_nonzero(uncovered_pixels).item()
         
+                # total
                 total_count = image.count_nonzero().item()
 
                 # at Level 3 verbosity print the uncovered pixel mask
-                print(f"Layer {layer_index}: covered {covered_count} uncovered {uncovered_count}")
+                #print(f"Layer {layer_index}: covered {covered_count} uncovered {uncovered_count}")
 
                 # handle the case of an empty input
                 if total_count == 0:
@@ -121,9 +111,10 @@ class FeatureCoverageMetric(Metric):
                     # calculate feature coverage in results as covered pixels / input size
                     feature_coverage = (covered_count / total_count)
                 
-                # append to results for this image
+                # append to results for this item
                 image_results.append(feature_coverage)
 
+            # append this item's results
             results.append(image_results) # confirm dimensions are consistent with other metrics
 
             # if lesser granularity has been requested, average the layerwise results to achieve a single number 
