@@ -16,6 +16,10 @@ preprocessed: True
 preprocessed_stack:
   transform_list:
   # other transforms
+    - name: resize
+      params:
+        size: [8, 8]
+        antialias: True
     - name: binarize_transform
       params:
         binarize_threshold: 0.5

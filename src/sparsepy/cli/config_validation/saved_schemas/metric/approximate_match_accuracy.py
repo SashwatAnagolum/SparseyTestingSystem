@@ -45,7 +45,8 @@ class ApproximateMatchAccuracySchema(AbstractSchema):
         config_schema = Schema(
             {
                 'name':'approximate_match_accuracy',
-                Optional('save', default=False): bool
+                Optional('save', default=False): bool,
+                Optional('reduction', default=None): str
             }, ignore_extra_keys=True
         )
 

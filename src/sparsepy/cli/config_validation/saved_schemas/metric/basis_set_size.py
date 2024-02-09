@@ -45,7 +45,8 @@ class BasisSetSizeSchema(AbstractSchema):
         config_schema = Schema(
             {
                 'name':'basis_set_size',
-                Optional('save', default=False): bool
+                Optional('save', default=False): bool,
+                Optional('reduction', default=None): str
             }, ignore_extra_keys=True
         )
 

@@ -94,8 +94,7 @@ class ExactMatchAccuracyMetric(Metric):
 
             print(image_str)
 
-        # non-None reductions need updating for the extra added dimension
-        if self.reduction is None:
+        if self.reduction is None or self.reduction == "none":
             return fidelities
         elif self.reduction == 'mean':
             return [

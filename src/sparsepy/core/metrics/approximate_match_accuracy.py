@@ -1,6 +1,9 @@
 import abc
 
 import torch
+
+from typing import Optional
+
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.model_layers.sparsey_layer import MAC
 from sparsepy.core.hooks import LayerIOHook
@@ -8,13 +11,15 @@ from sparsepy.core.metrics.metrics import Metric
 
 class ApproximateMatchAccuracyMetric(Metric):
 
-    def __init__(self, model: torch.nn.Module):
+    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
         super().__init__(model)
         # attaches the hook anew for this Metric to gain access to the hook data
         # consider hook managerlater if we need to use many metrics with hooks
         self.hook = LayerIOHook(self.model)
         # initialize input map
         self.stored_inputs = {}
+
+        self.reduction = reduction
 
 
     def compute(self, m: Model, last_batch: torch.Tensor, labels: torch.Tensor, training: bool = True):
@@ -84,6 +89,6 @@ class ApproximateMatchAccuracyMetric(Metric):
                                 if approximate_match:
                                     hits += 1
         
-        
+        # BUG reduction is already mean across all MACs by default
         # return final approximate match accuracy as a fraction
         return 0 if total == 0 else hits / total
