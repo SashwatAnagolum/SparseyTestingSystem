@@ -77,7 +77,7 @@ def main():
     )
 
     validated_training_recipe_config, _ = validate_config(
-        hpo_config_info, 'hpo', 'default'
+        training_recipe_config_info, 'training_recipe', 'sparsey'
     )
 
     run_hpo(

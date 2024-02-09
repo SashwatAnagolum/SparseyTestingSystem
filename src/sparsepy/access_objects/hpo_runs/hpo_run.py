@@ -8,10 +8,15 @@ import torch
 import random
 import wandb
 
+from copy import deepcopy
+
 from sparsepy.core.metrics.metric_factory import MetricFactory
 from sparsepy.access_objects.models.model_builder import ModelBuilder
 from sparsepy.cli.config_validation.validate_config import validate_config
 from sparsepy.core.hpo_objectives.hpo_objective import HPOObjective
+from sparsepy.access_objects.training_recipes.training_recipe_builder import (
+    TrainingRecipeBuilder
+)
 
 
 class HPORun():
@@ -44,6 +49,10 @@ class HPORun():
         self.sweep_id = wandb.sweep(sweep=self.sweep_config)
         self.num_trials = hpo_config['num_candidates']
         self.config_info = hpo_config
+
+        self.preprocessing_config = preprocessing_config
+        self.dataset_config = dataset_config
+        self.training_recipe_config = trainer_config
 
 
     def check_is_value_constraint(self, config):
@@ -163,7 +172,7 @@ class HPORun():
         using the trained model.
         """
         wandb.init()
-        
+
         model_config = self.generate_model_config(
             dict(wandb.config)
         )
@@ -174,6 +183,20 @@ class HPORun():
 
         if validated_config is not None:
             model = ModelBuilder.build_model(validated_config)
+
+            training_recipe = TrainingRecipeBuilder.build_training_recipe(
+                model, deepcopy(self.dataset_config),
+                deepcopy(self.preprocessing_config),
+                deepcopy(self.training_recipe_config)
+            )
+
+            done = False
+            results = None
+
+            while not done:
+                results, done = training_recipe.step()
+
+            print(results)
 
         wandb.log({'hpo_objective': random.random()})
 
