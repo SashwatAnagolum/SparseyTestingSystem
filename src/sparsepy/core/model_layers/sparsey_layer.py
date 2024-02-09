@@ -26,7 +26,10 @@ class MAC(torch.nn.Module):
                  num_neurons: int, input_filter: torch.Tensor,
                  num_cms_per_mac_in_input: int,
                  num_neurons_per_cm_in_input: int,
-                 sigmoid_lambda=28.0, sigmoid_phi=5.0) -> None:
+                 layer_index: int, mac_index: int,
+                 sigmoid_lambda=28.0, sigmoid_phi=5.0,
+                 persistence=1.0,
+                 ) -> None:
         """
         Initializes the MAC object.
 
@@ -49,6 +52,9 @@ class MAC(torch.nn.Module):
         num_inputs *= num_cms_per_mac_in_input
         num_inputs *= num_neurons_per_cm_in_input
 
+        self.layer_index = layer_index
+        self.mac_index = mac_index
+
         if len(input_filter) == 0:
             raise ValueError(
                 'MAC input connection list cannot be empty! ' + 
@@ -64,6 +70,8 @@ class MAC(torch.nn.Module):
         self.sigmoid_lambda = sigmoid_lambda
         self.sigmoid_phi = sigmoid_phi
 
+        self.persistence = persistence
+
         self.weights = torch.nn.Parameter(
             torch.zeros(
                 (num_cms, num_inputs, num_neurons),
@@ -75,6 +83,8 @@ class MAC(torch.nn.Module):
 
         self.input_filter = input_filter
         self.training = True
+        
+        self.is_active = True
 
 
     def train(self, mode: bool = True) -> None:
@@ -147,6 +157,8 @@ class MAC(torch.nn.Module):
                 torch.ones(x.shape, dtype=torch.float32)
             )
 
+            self.is_active = (output.count_nonzero().item() > 0)
+
             if self.training:
                 if tuple(
                     [i for i in active_neurons.flatten().numpy()]
@@ -186,7 +198,10 @@ class SparseyLayer(torch.nn.Module):
         prev_layer_mac_grid_num_rows: int,
         prev_layer_mac_grid_num_cols: int,
         prev_layer_num_macs: int,
-        sigmoid_phi: float, sigmoid_lambda: float):
+        layer_index: int,
+        sigmoid_phi: float, sigmoid_lambda: float,
+        saturation_threshold: float,
+        persistence: float):
         """
         Initializes the SparseyLayer object.
 
@@ -198,6 +213,9 @@ class SparseyLayer(torch.nn.Module):
         self.is_grid_autosized = autosize_grid
         self.num_macs = num_macs
         self.receptive_field_radius = mac_receptive_field_radius
+
+        # save layer-level persistence value; check if we actually need to do this
+        self.persistence = persistence
 
         self.mac_positions = self.compute_mac_positions(
             num_macs, mac_grid_num_rows, mac_grid_num_cols
@@ -216,13 +234,20 @@ class SparseyLayer(torch.nn.Module):
             MAC(
                 num_cms_per_mac, num_neurons_per_cm,
                 self.input_connections[i], prev_layer_num_cms_per_mac,
-                prev_layer_num_neurons_per_cm, sigmoid_lambda,
-                sigmoid_phi
+                prev_layer_num_neurons_per_cm, # ORDER MATTERS and this section needs to match the constructor signature exactly
+                layer_index, i, # push mac_index down into MAC
+                sigmoid_lambda, sigmoid_phi,
+                persistence # pass layer persistence value to individual MACs--this might need adjusting so it can be set on a per-MAC basis
             ) for i in range(num_macs)
         ]
 
         self.mac_list = torch.nn.ModuleList(self.mac_list)
 
+        self.saturation_threshold = saturation_threshold
+
+
+        ####Edit out when we have a better mechanism for tracking layers
+        self.layer_index = layer_index
 
     def compute_mac_positions(
         self, num_macs: int, mac_grid_num_rows: int,

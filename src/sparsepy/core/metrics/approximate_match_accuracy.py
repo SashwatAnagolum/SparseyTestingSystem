@@ -55,7 +55,7 @@ class ApproximateMatchAccuracyMetric(Metric):
                     # for every layer in the output
                     for layer_index in range(len(layer_outputs)):
                         # and for every MAC in that layer
-                        for mac_index in range(layer_outputs[layer_index].shape[0]):
+                        for mac_index in range(len(layer_outputs[layer_index])):
 
 
                             # increment number of MACs evaluated

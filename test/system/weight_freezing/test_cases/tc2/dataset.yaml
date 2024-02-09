@@ -1,0 +1,13 @@
+---
+
+# the name by which to refer to the dataset
+dataset_type: image
+
+# information about the dataset
+params:
+  # the folder which the directory is stored in
+  data_dir: 'C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\dataset_1'
+
+  # what file format the images are in
+  image_format: '.png'
+...
