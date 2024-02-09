@@ -152,14 +152,16 @@ class DefaultHpoSchema(AbstractSchema):
                     dict, self.check_optimizer_hyperparams_validity
                 ),
                 'hpo_strategy': Or('random', 'grid', 'bayes'),
-                'optimization_objective': [
-                    {
-                        'name': str,
-                        Optional('params', default=None): dict,
-                        'weight': float,
-                        'combination_method':  Or('sum', 'product', 'mean'),
-                    }
-                ],
+                'optimization_objective': {
+                    'objective_terms': [
+                        {
+                            'name': str,
+                            Optional('params', default=None): dict,
+                            'weight': float,
+                        }
+                    ],
+                    'combination_method': 'sum'
+                },
                 'num_candidates': And(int, schema_utils.is_positive)
             }
         )
