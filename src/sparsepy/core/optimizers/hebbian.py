@@ -29,7 +29,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
 
         self.verbosity = 0
 
-        self.hook = LayerIOHook(self.model, flatten=False)
+        self.hook = LayerIOHook(self.model)
 
     def calculate_freezing_mask(self, weights, layer_index):
         #Retrieve the threshold for freezing weights for the current layer from a list of thresholds.

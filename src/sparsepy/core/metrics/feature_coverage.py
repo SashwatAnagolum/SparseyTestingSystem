@@ -13,7 +13,7 @@ class FeatureCoverageMetric(Metric):
         super().__init__(model)
         # attaches the hook anew for this Metric to gain access to the hook data
         # to check "every code at every level" we require access to the inner model data to determine which MACs have been activated
-        self.hook = LayerIOHook(self.model, flatten=False)
+        self.hook = LayerIOHook(self.model)
 
 
     def compute(self, m: Model, last_batch: torch.Tensor, labels: torch.Tensor, training: bool = True):

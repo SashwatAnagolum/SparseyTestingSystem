@@ -18,13 +18,13 @@ class LayerIOHook(Hook):
     Layer IO Hook: simple hook to get the output
         and input of a layer.
     """
-    def __init__(self, module: torch.nn.Module, flatten = True) -> None:
+    def __init__(self, module: torch.nn.Module, flatten = False) -> None:
         """
         Initializes the hook, and registers it with the model.
 
         Args:
             module (torch.nn.MOdule): model to be hooked into.
-            flatten (boolean): whether to flatten the model structure into a 1d list for return. Default true.
+            flatten (boolean): whether to flatten the model structure into a 1d list for return. Default false.
         """
         super().__init__(module)
 
