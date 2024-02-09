@@ -2,6 +2,8 @@ import abc
 import numpy as np
 import torch
 
+from typing import Optional
+
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.model_layers.sparsey_layer import MAC
 from sparsepy.core.hooks import LayerIOHook
@@ -9,8 +11,11 @@ from sparsepy.core.metrics.metrics import Metric
 
 class FeatureCoverageMetric(Metric):
 
-    def __init__(self, model: torch.nn.Module):
+    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
         super().__init__(model)
+
+        self.reduction = reduction
+
         # attaches the hook anew for this Metric to gain access to the hook data
         # to check "every code at every level" we require access to the inner model data to determine which MACs have been activated
         self.hook = LayerIOHook(self.model)
@@ -119,6 +124,26 @@ class FeatureCoverageMetric(Metric):
 
             # if lesser granularity has been requested, average the layerwise results to achieve a single number 
             # (n.b. this probably needs to be weighted by # of macs per layer)
+        if self.reduction is None:
+            return [fc for image in results for fc in image]
+        elif self.reduction == "sum":
+            return [
+                sum(image) for image in zip(*results)
+            ]
+        elif self.reduction == "mean":
+            return [
+                sum(image)/len(image) if len(image) > 0 else 1.0 for image in zip(*results)
+            ]
+        else:
+            return None
 
-        # return the results
         return results
+        #return [5 * sum(x) for x in zip(*results)]
+        #flattened_results = [fc for image in results for fc in image]
+        # return the results
+        #if self.reduction is None:
+        #    return results
+        #elif self.reduction == "sum":
+        #    return [
+
+            #]
