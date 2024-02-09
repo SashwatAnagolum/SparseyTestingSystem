@@ -50,7 +50,8 @@ class TrainingRecipeBuilder:
             metric = MetricFactory.create_metric(
                 metric_config['name'],
                 #**metric_config['params'],
-                model=model
+                model=model,
+                reduction=metric_config['reduction'] # WARNING this formulation assumes all Metrics support a reduction constructor parameter
             )
 
             metrics_list.append(metric)
