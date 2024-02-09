@@ -189,9 +189,10 @@ class SparseyLayer(torch.nn.Module):
         sigmoid_lambda (float): parameter for the familiarity computation.
         sigmoid_phi (float): parameter for the familiarity computation.
     """
-    def __init__(self, num_macs: int, num_cms_per_mac: int,
-        num_neurons_per_cm: int, mac_grid_num_rows: int,
-        mac_grid_num_cols: int, mac_receptive_field_radius: float,
+    def __init__(self, autosize_grid: bool, num_macs: int,
+        num_cms_per_mac: int, num_neurons_per_cm: int,
+        mac_grid_num_rows: int, mac_grid_num_cols: int,
+        mac_receptive_field_radius: float,
         prev_layer_num_cms_per_mac: int,
         prev_layer_num_neurons_per_cm: int,
         prev_layer_mac_grid_num_rows: int,
@@ -209,6 +210,7 @@ class SparseyLayer(torch.nn.Module):
         """
         super().__init__()
 
+        self.is_grid_autosized = autosize_grid
         self.num_macs = num_macs
         self.receptive_field_radius = mac_receptive_field_radius
 
