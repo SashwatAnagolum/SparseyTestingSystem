@@ -67,7 +67,9 @@ def main():
         args.preprocessing_config
     )
 
-    # validated_preprocessing_config
+    validated_preprocessing_config, is_valid = validate_config(
+        preprocessing_config_info, 'transform', 'preprocessing_stack_schema'
+    )
     
     dataset_config_info = get_config_info(
         args.dataset_config

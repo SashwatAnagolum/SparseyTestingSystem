@@ -54,3 +54,22 @@ def is_between(x: Union[int, float],
         a bool indicating whether x is in the given range or not.
     """
     return (x >= range_start) and (x <= range_end)
+
+
+def all_elements_are_same_type(x: list):
+    """
+    Returns whether all elements in a list are the same type or not.
+
+    Args:
+        x (list): the list to be checked.
+
+    Returns:
+        (bool): whether all elements are the same type or not.
+    """
+    list_type = type(x[0])
+
+    for element in x:
+        if not isinstance(element, list_type):
+            return False
+
+    return True

@@ -13,7 +13,6 @@ class ExactMatchAccuracyMetric(Metric):
         super().__init__(model)
         # attaches the hook anew for this Metric to gain access to the hook data
         # consider hook manager later if we need to use many metrics with hooks
-        #self.hook = LayerIOHook(self.model, 'highest')
         self.hook = LayerIOHook(self.model)
         # initialize input map
         self.stored_inputs = {}

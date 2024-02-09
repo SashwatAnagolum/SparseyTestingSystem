@@ -9,9 +9,10 @@ import pprint
 
 import torch
 
-
 from sparsepy.access_objects.models.model_builder import ModelBuilder
-from sparsepy.access_objects.training_recipes.training_recipe_builder import TrainingRecipeBuilder
+from sparsepy.access_objects.training_recipes.training_recipe_builder import (
+    TrainingRecipeBuilder
+) 
 
 
 def train_model(model_config: dict, trainer_config: dict,
@@ -21,6 +22,14 @@ def train_model(model_config: dict, trainer_config: dict,
     it using the trainer built using trainer_config on 
     the dataset built using dataset_config, with preprocessing
     defined in preprocessing_config.
+
+    Args:
+        model_config (dict): config info to build the model.
+        trainer_config (dict): config info to build the trainer.
+        preprocessing_config (dict): config info to build the
+            preprocessing stack.
+        dataset_config (dict): config info to build the dataset
+            to train on.
     """
     model = ModelBuilder.build_model(model_config)
 
