@@ -14,7 +14,7 @@ class ExactMatchAccuracyMetric(Metric):
         # attaches the hook anew for this Metric to gain access to the hook data
         # consider hook manager later if we need to use many metrics with hooks
         #self.hook = LayerIOHook(self.model, 'highest')
-        self.hook = LayerIOHook(self.model)
+        self.hook = LayerIOHook(self.model, flatten=False)
         # initialize input map
         self.stored_inputs = {}
         self.reduction = reduction
@@ -85,20 +85,22 @@ class ExactMatchAccuracyMetric(Metric):
                     # the codes are the same
                     # for every layer in the output
                     for layer_index in range(len(layer_outputs)):
-                        fidelities[layer_index].append(
-                            self.get_normalized_hamming_distance(
-                                self.stored_inputs[image_str][layer_index],
-                                layer_outputs[layer_index][image_index]
+                        for mac_index in range(len(layer_outputs[layer_index])):
+                            fidelities[layer_index].append(
+                                self.get_normalized_hamming_distance(
+                                    self.stored_inputs[image_str][layer_index][mac_index],
+                                    layer_outputs[layer_index][mac_index][image_index]
+                                )
                             )
-                        )
 
             print(image_str)
 
+        # non-None reductions need updating for the extra added dimension
         if self.reduction is None:
             return fidelities
         elif self.reduction == 'mean':
             return [
-                sum(fid_list) / len(fid_list) for fid_list in fidelities
+                sum(fid_list) / len(fid_list) if len(fid_list) > 0 else None for fid_list in fidelities
             ]
         elif self.reduction == 'sum':
             return [
