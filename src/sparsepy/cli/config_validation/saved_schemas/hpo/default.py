@@ -5,6 +5,7 @@ Default HPO Schema: the schema for HPO runs.
 """
 
 
+from logging import config
 import typing
 import sys
 
@@ -13,7 +14,7 @@ from schema import Schema, And, Optional, Or, SchemaError
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation import schema_factory
 from sparsepy.cli.config_validation.saved_schemas import (
-    model, schema_utils
+    model, schema_utils, metric
 )
 
 
@@ -53,6 +54,33 @@ class DefaultHpoSchema(AbstractSchema):
                 model, 'model', model_family
             )
         except ValueError:
+            return False
+
+        return True
+
+
+    def check_if_metric_exists(self, metric_config) -> bool:
+        """
+        Checks if a metric exists or not.
+
+        Returns:
+            (bool): whether the metric exists or not.
+        """
+        if 'name' not in metric_config:
+            return False
+
+        try:
+            metric_schema = schema_factory.get_schema_by_name(
+                metric, 'metric', metric_config['name']
+            )
+        except ValueError:
+            return False
+
+        try:
+            metric_schema.validate(metric_config)
+        except SchemaError as e:
+            print(e)
+
             return False
 
         return True
@@ -113,7 +141,7 @@ class DefaultHpoSchema(AbstractSchema):
                 f'{config_info} is not a valid configuration' +
                 'for hyperparameters to optimize!'
             )
-                
+
         return True
 
 
@@ -128,6 +156,21 @@ class DefaultHpoSchema(AbstractSchema):
         Returns:
             dict containing the transformed config info
         """
+        for i in range(
+            len(config_info['optimization_objective']['objective_terms'])
+        ):
+            config_info['optimization_objective'][
+                'objective_terms'
+            ][i]['metric'] = schema_factory.get_schema_by_name(
+                metric, 'metric',
+                config_info['optimization_objective']
+                ['objective_terms'][i]['metric']['name']
+            ).validate(
+                config_info['optimization_objective'][
+                    'objective_terms'
+                ][i]['metric']
+            )
+
         return config_info
 
 
@@ -155,8 +198,7 @@ class DefaultHpoSchema(AbstractSchema):
                 'optimization_objective': {
                     'objective_terms': [
                         {
-                            'name': str,
-                            Optional('params', default=None): dict,
+                            'metric': self.check_if_metric_exists,
                             'weight': float,
                         }
                     ],

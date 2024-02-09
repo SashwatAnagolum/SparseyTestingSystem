@@ -5,7 +5,7 @@ from schema import Schema, And, Optional
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation.saved_schemas import schema_utils
 
-class ApproximateMatchAccuracySchema(AbstractSchema):
+class ApproximateMatchAccuracyMetricSchema(AbstractSchema):
 
     def extract_schema_params(
             self, config_info: dict) -> typing.Optional[dict]:

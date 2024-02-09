@@ -81,8 +81,6 @@ class TrainingRecipe:
 
             results.append(result)
 
-            
-
         self.batch_index += num_batches_in_step
 
         if self.batch_index == self.num_batches:

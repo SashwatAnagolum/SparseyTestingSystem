@@ -36,8 +36,6 @@ class OptimizerFactory:
         """
         Creates a layer passed in based on the layer name and kwargs.
         """
-        print(f"Creating optimizer with arguments: {kwargs}")
-
         opt_class = OptimizerFactory.get_optimizer_class(opt_name)
 
         # Before instantiation, check if 'thresh' is required and present

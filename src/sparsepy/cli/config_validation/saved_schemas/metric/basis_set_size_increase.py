@@ -6,7 +6,7 @@ from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSche
 from sparsepy.cli.config_validation.saved_schemas import schema_utils
 
 
-class BasisSetSizeIncreaseSchema(AbstractSchema):
+class BasisSetSizeIncreaseMetricSchema(AbstractSchema):
     def extract_schema_params(self, config_info: dict) -> typing.Optional[dict]:
         """
         Extracts the required schema parameters from the config info dict

@@ -1,0 +1,11 @@
+---
+optimizer:
+  name: hebbian
+
+dataloader:
+  batch_size: 1
+  shuffle: True
+
+training:
+  num_epochs: 1
+...

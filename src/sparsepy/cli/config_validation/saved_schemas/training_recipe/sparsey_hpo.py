@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Sparsey Trainer Schema: the schema for Sparsey trainer config files.
+Sparsey HPO Trainer Schema: the schema for Sparsey trainer config files
+    used with HPO.
 """
 
 
@@ -15,9 +16,9 @@ from sparsepy.cli.config_validation.saved_schemas import schema_utils
 from sparsepy.cli.config_validation import schema_factory
 
 
-class SparseyTrainingRecipeSchema(AbstractSchema):
+class SparseyHpoTrainingRecipeSchema(AbstractSchema):
     """
-    SparseyTrainerSchema: schema for Sparsey trainers.
+    SparseyHPOTrainerSchema: schema for Sparsey HPO trainers.
     """
     def extract_schema_params(
             self, config_info: dict) -> typing.Optional[dict]:
@@ -75,16 +76,6 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
         config_schema = Schema(
             {
                 'optimizer': schema_params['optimizer_schema'],
-                'metrics': And(
-                    list, lambda x: len(x) > 0,
-                    [
-                        {
-                            'name': str,
-                            Optional('save', default=False): bool,
-                            Optional('reduction', default=None): str
-                        }
-                    ]
-                ),
                 'dataloader': {
                     'batch_size': And(int, schema_utils.is_positive),
                     'shuffle': bool

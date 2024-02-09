@@ -4,4 +4,4 @@
 Init: initialization for the Trainer sub-package.
 """
 
-from . import sparsey
+from . import sparsey, sparsey_hpo
