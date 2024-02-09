@@ -16,10 +16,8 @@ preprocessed: True
 preprocessed_stack:
   transform_list:
   # other transforms
-    - name: binarize_transform
+    - name: resize
       params:
-        binarize_threshold: 0.5
-    - name: skeletonization_transform
-      params:
-        sigma: 3
-...
+        size: [8, 8]
+        antialias: True
+... 
