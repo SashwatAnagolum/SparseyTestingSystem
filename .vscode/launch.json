@@ -19,7 +19,7 @@
                 "--dataset_config", ".\\demo\\dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
                 "--hpo_config", ".\\demo\\hpo.yaml",
-                "--training_recipe_config", ".\\demo\\trainer.yaml",
+                "--training_recipe_config", ".\\demo\\trainer_hpo.yaml",
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
