@@ -1,70 +1,97 @@
-import torch
-from sparsepy.core.metrics.metric_factory import MetricFactory
+import numpy as np
 
 class HPOObjective:
-    def __init__(self, hpo_config: dict, model: torch.nn.Module):
-        self.metrics = []  # Stores metric instances
-        self.metric_names = []  # Stores metric names
-        self.weights = []
-        self.model = model
-        if hpo_config:
-            self.process_hpo_config(hpo_config)
+    def __init__(self, hpo_config: dict):
+        self.hpo_config = hpo_config
 
-    def add_objective(self, metric, weight):
-        self.metrics.append(metric)
-        self.weights.append(weight)
-
-    def process_hpo_config(self, hpo_config: dict):
+    def combine_metrics(self, metric_data: list) -> float:
         """
-        Processes the HPO configuration and populates the objectives.
-
-        :param hpo_config: A dictionary representing the parsed HPO configuration.
-        """
-        for objective in hpo_config.get("optimization_objective", []):
-            name = objective.get("name")
-            weight = objective.get("weight")
-            params = objective.get("params")
-            if name and weight is not None:  # Ensures both name and weight are present
-                if isinstance(params, dict):
-                    metric = MetricFactory.create_metric(metric_name=name, model=self.model, params=params)
-                else:
-                    metric = MetricFactory.create_metric(metric_name=name, model=self.model)
-                self.add_objective(metric, weight)
-                self.metric_names.append(name)  # Store metric names
-
-    @staticmethod
-    def combine_metrics(metric_data: list, operation: str) -> float:
-        """
-        Combines multiple metric results into a single scalar value using a specified operation.
+        Combines multiple metric results into a single scalar value using a specified operation and weights,
+        averaging values at different levels within each metric. Only metrics specified in the HPO configuration are used.
 
         :param metric_data: A list of dictionaries containing metric results.
-        :param operation: The operation to perform on the metrics ('sum', 'mean', or 'product').
         :return: A single scalar value representing the combined result.
         """
+        operation = self.hpo_config['optimization_objective']['combination_method']
+        objective_terms = self.hpo_config['optimization_objective']['objective_terms']
 
-        def to_scalar(value):
-            if isinstance(value, list):
-                # Convert list to sum of elements
-                return sum(to_scalar(item) for item in value)
-            elif hasattr(value, 'tolist'):  # Check for numpy array
-                # Convert numpy array to list first
-                return to_scalar(value.tolist())
+        def average_nested_data(data):
+            if isinstance(data, list):
+                return np.mean([average_nested_data(item) for item in data])
+            elif hasattr(data, 'tolist'):  # numpy array
+                return np.mean(data)
             else:
-                # Assume it is already a scalar
-                return value
+                # Scalar value
+                return data
 
-        # Flattening and converting all metrics to scalar values
-        all_scalars = [to_scalar(metric[key]) for metric in metric_data for key in metric]
+        # Calculate weighted averages for each metric specified in HPO config
+        metric_averages = []
+        for term in objective_terms:
+            term_name = term['metric']['name']
+            weight = term['weight']
 
-        # Perform the specified operation
+            term_averages = []
+            for metric in metric_data:
+                term_name = ''.join(
+                [l.capitalize() for l in term_name.split('_')] + ['Metric']
+                )
+                if term_name in metric:
+                    # Calculate average for this metric
+                    term_avg = average_nested_data(metric[term_name])
+                    term_averages.append(term_avg)
+            # Apply weight and add to the list of metric averages
+            if term_averages:
+                weighted_average = np.mean(term_averages) * weight
+                metric_averages.append(weighted_average)
+
+        # Perform the specified operation on the metric averages
         if operation == 'sum':
-            return sum(all_scalars)
+            return sum(metric_averages)
         elif operation == 'mean':
-            return sum(all_scalars) / len(all_scalars) if all_scalars else 0
+            return sum(metric_averages) / len(metric_averages) if metric_averages else 0
         elif operation == 'product':
             result = 1
-            for scalar in all_scalars:
-                result *= scalar
+            for average in metric_averages:
+                result *= average
             return result
         else:
             raise ValueError("Invalid operation. Choose 'sum', 'mean', or 'product'.")
+# Test data in lowercase with underscores
+test_metric_data = [
+    {
+        'BasisSetSizeMetric': [[1,1,1,1], [1,1,1,1]],
+        'ExactMatchAccuracyMetric': [[1,1,1,1], [1,1,1,1]],
+        'FeatureCoverageMetric': [[1.0, 1.0]],
+        'ApproximateMatchAccuracyMetric': 1,
+        'BasisSetSizeIncreaseMetric': [np.array([1,1,1,1]), np.array([1,1,1,1])]
+    },
+    {
+        'BasisSetSizeMetric': [[1,1,1,1], [1,1,1,1]],
+        'ExactMatchAccuracyMetric': [[1,1,1,1], [1,1,1,1]],
+        'FeatureCoverageMetric': [1.0, 1.0],
+        'ApproximateMatchAccuracyMetric': 1,
+        'BasisSetSizeIncreaseMetric': [np.array([1,1,1,1]), np.array([1,1,1,1])]
+    },
+    # Add more entries as needed
+]
+
+# HPO configuration with lowercase metric names
+hpo_config = {
+    "optimization_objective": {
+        "combination_method": "mean",
+        "objective_terms": [
+            {'metric': {"name": "basis_set_size"}, "weight": 1.0},
+            {'metric': {"name": "exact_match_accuracy"}, "weight": 1},
+            {'metric': {"name": "feature_coverage"}, "weight": 1.0},
+            {'metric': {"name": "approximate_match_accuracy"}, "weight": 1.0},
+            {'metric': {"name": "basis_set_size_increase"}, "weight": 1}
+        ]
+    }
+}
+
+# Initialize HPOObjective with the configuration
+hpo_objective = HPOObjective(hpo_config)
+
+# Calculate combined metric
+combined_metric = hpo_objective.combine_metrics(test_metric_data)
+print("Combined Metric:", combined_metric)
