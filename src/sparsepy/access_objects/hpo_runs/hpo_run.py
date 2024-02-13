@@ -204,16 +204,13 @@ class HPORun():
 
             while not done:
                 results, done = training_recipe.step()
-
+            objective = HPOObjective(hpo_config=self.config_info)
+            hpo_objective = objective.combine_metrics(results)
             if results is not None:
                 print(results[-1])
                 wandb.log(
                     {
-                        'hpo_objective': sum(
-                            results[-1]['FeatureCoverageMetric']
-                        ) / len(
-                            results[-1]['FeatureCoverageMetric']
-                        )
+                        'hpo_objective': hpo_objective
                     }
                 )
 
