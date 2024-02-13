@@ -43,7 +43,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
         #If verbosity is set to a level above 0, print the mean values of the inputs.
         # Converting the tensor to a numpy array for easier reading.
         #if (self.verbosity > 0):
-        print("Mean Inputs: " + str(mean_inputs.numpy()))
+        # print("Mean Inputs: " + str(mean_inputs.numpy()))
         
         #Create a mask where 1 represents weights that are not frozen (updateable)
         # and 0 represents weights that are frozen based on the layer's threshold.
@@ -109,10 +109,10 @@ class HebbianOptimizer(torch.optim.Optimizer):
                         print("Params.data " + str(params.data.numpy()))
 
                     # Calculate the updateable mask based on the current parameters and layer's threshold.
-                    print("Layer: " + str(layer_index))
-                    print("MAC: " + str(mac_index))
+                    # print("Layer: " + str(layer_index))
+                    # print("MAC: " + str(mac_index))
                     updateable_mask = self.calculate_freezing_mask(params.data, layer_index)
-                    print("\n")
+                    # print("\n")
 
                     # Apply the updateable mask to the weight updates, effectively zeroing
                     # updates for weights that are not updateable (frozen).

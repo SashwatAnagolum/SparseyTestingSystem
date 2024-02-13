@@ -50,6 +50,15 @@ class HPORun():
         self.num_trials = hpo_config['num_candidates']
         self.config_info = hpo_config
 
+        trainer_config['metrics'] = []
+
+        for metric in hpo_config['optimization_objective'][
+            'objective_terms'
+        ]:
+            trainer_config['metrics'].append(
+                metric['metric']
+            )
+
         self.preprocessing_config = preprocessing_config
         self.dataset_config = dataset_config
         self.training_recipe_config = trainer_config
@@ -196,9 +205,17 @@ class HPORun():
             while not done:
                 results, done = training_recipe.step()
 
-            print(results)
-
-        wandb.log({'hpo_objective': random.random()})
+            if results is not None:
+                print(results[-1])
+                wandb.log(
+                    {
+                        'hpo_objective': sum(
+                            results[-1]['FeatureCoverageMetric']
+                        ) / len(
+                            results[-1]['FeatureCoverageMetric']
+                        )
+                    }
+                )
 
 
     def run_sweep(self) -> dict:

@@ -92,8 +92,6 @@ class ExactMatchAccuracyMetric(Metric):
                                 )
                             )
 
-            print(image_str)
-
         if self.reduction is None or self.reduction == "none":
             return fidelities
         elif self.reduction == 'mean':
