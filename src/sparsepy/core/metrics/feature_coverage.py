@@ -61,7 +61,7 @@ class FeatureCoverageMetric(Metric):
                 layer_mask = torch.zeros_like(image, dtype=torch.bool)
 
                 # for each MAC in that layer
-                for mac in layer:
+                for mac_index, mac in enumerate(layer):
                     
                     # create a new input mask in the shape of the input
                     mac_mask = torch.zeros_like(image, dtype=torch.bool)
@@ -69,6 +69,7 @@ class FeatureCoverageMetric(Metric):
 
                     # if this MAC is active (=any nonzero neuron outputs = any nonzero values in the 2D tensor for this MAC's output)
                     if mac.is_active:
+                    #if layer_outputs[layer_index][mac_index][image_index].count_nonzero(dim=[0,1]) > 0:
                         # then update the MAC input mask with this MAC's input
                         if layer_index == 0:
                             # IF we are in layer 1 then the source "MACs" represent pixels in the input that we need to scatter onto the mask
@@ -124,6 +125,8 @@ class FeatureCoverageMetric(Metric):
 
             # if lesser granularity has been requested, average the layerwise results to achieve a single number 
             # (n.b. this probably needs to be weighted by # of macs per layer)
+        
+        # then reduce the metrics, if requested
         if self.reduction is None or self.reduction == "none":
             return [fc for image in results for fc in image]
         elif self.reduction == "sum":

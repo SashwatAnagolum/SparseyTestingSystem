@@ -157,7 +157,9 @@ class MAC(torch.nn.Module):
                 torch.ones(x.shape, dtype=torch.float32)
             )
 
-            self.is_active = (output.count_nonzero().item() > 0)
+            # WARNING assumes 1 item per batch! this should be OK since this is a SparseyLayer
+            # but if we ever experiment with higher batch sizes for whatever reason we'll need to change this
+            self.is_active = (output[0].count_nonzero(dim=[0,1]) > 0)
 
             if self.training:
                 if tuple(
