@@ -77,7 +77,7 @@ class TrainingRecipe:
 
                 self.optimizer.step()
 
-            print("\n" + "\n" + "\n")
+            #print("\n" + "\n" + "\n")
 
             results.append(result)
 
