@@ -63,6 +63,13 @@ class HPORun():
         self.dataset_config = dataset_config
         self.training_recipe_config = trainer_config
 
+        # only initialize the objective once, in the constructor
+        self.objective = HPOObjective(hpo_config)
+        self.best = None
+        self.best_results = None
+        self.best_run = 0
+        self.num_steps = 0
+
 
     def check_is_value_constraint(self, config):
         """
@@ -202,17 +209,61 @@ class HPORun():
             done = False
             results = None
 
+            # increment step counter
+            self.num_steps += 1
+
             while not done:
                 results, done = training_recipe.step()
-            objective = HPOObjective(hpo_config=self.config_info)
-            hpo_objective = objective.combine_metrics(results)
+            objective_results = self.objective.combine_metrics(results)
             if results is not None:
-                print(results[-1])
+                # final result ready
+                # this one is the best one if 1) there is no previous result or 2) its objective value is higher than the previous best result
+                is_best = (not self.best) or (self.best and objective_results["total"] > self.best["total"])
+
+                print(f"Completed trial {self.num_steps} of {self.num_trials}")
+                if self.best:
+                    print(f"Previous best objective value: {self.best['total']:.5f}")
+
+                self._print_breakdown(objective_results)
+
+                if is_best:
+                    self.best = objective_results
+                    self.best_results = results
+                    self.best_run = self.num_steps
+                    self.best_config = validated_config
+                    print(f"This is the new best value!")
+
+                #print(f"Result: {results[-1]}")
                 wandb.log(
                     {
-                        'hpo_objective': hpo_objective
+                        'hpo_objective': objective_results["total"],
+                        'objective_details': objective_results 
                     }
                 )
+
+                # if this is the final run, also log the best-performing model
+                if self.num_steps >= self.num_trials:
+                    print(f"OPTIMIZATION RUN COMPLETED")
+                    print(f"Best run: {self.best_run}")
+                    self._print_breakdown(self.best)
+                    print(f"Best run configuration: {self.best_config}")
+
+                    wandb.log(
+                        {
+                            'best_objective': self.best["total"],
+                            'best_objective_breakdown': self.best,
+                            'best_results': self.best_results,
+                            'best_params': self.best_config
+                        }
+                    )
+
+
+    def _print_breakdown(self, objective_results):
+        print(f"Objective value: {objective_results['total']:.5f}")
+        print(f"Combination method: {objective_results['combination_method']}")
+        print("Objective term breakdown:")
+        for name, values in objective_results["terms"].items():
+            print(f"* {name:>25}: {values['value']:.5f} with weight {values['weight']}")
 
 
     def run_sweep(self) -> dict:
@@ -227,3 +278,4 @@ class HPORun():
         wandb._teardown()
 
         return dict()
+    
