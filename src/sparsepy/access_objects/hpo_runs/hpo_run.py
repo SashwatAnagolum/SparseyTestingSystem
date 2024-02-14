@@ -11,6 +11,7 @@ import wandb
 from copy import deepcopy
 
 from sparsepy.core.metrics.metric_factory import MetricFactory
+from sparsepy.core.results import HPOResult
 from sparsepy.access_objects.models.model_builder import ModelBuilder
 from sparsepy.cli.config_validation.validate_config import validate_config
 from sparsepy.core.hpo_objectives.hpo_objective import HPOObjective
@@ -241,6 +242,8 @@ class HPORun():
                     }
                 )
 
+                #return HPOResult(results, objective_results)
+
                 # if this is the final run, also log the best-performing model
                 if self.num_steps >= self.num_trials:
                     print(f"OPTIMIZATION RUN COMPLETED")
@@ -248,14 +251,14 @@ class HPORun():
                     self._print_breakdown(self.best)
                     print(f"Best run configuration: {self.best_config}")
 
-                    wandb.log(
-                        {
-                            'best_objective': self.best["total"],
-                            'best_objective_breakdown': self.best,
-                            'best_results': self.best_results,
-                            'best_params': self.best_config
-                        }
-                    )
+                    #wandb.log(
+                    #    {
+                    #        'best_objective': self.best["total"],
+                    #        'best_objective_breakdown': self.best,
+                    #        'best_results': self.best_results,
+                    #        'best_params': self.best_config
+                    #    }
+                    #)
 
 
     def _print_breakdown(self, objective_results):
