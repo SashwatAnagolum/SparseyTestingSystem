@@ -36,7 +36,6 @@ class FeatureCoverageMetric(Metric):
         """
 
         # retrieve the hook data
-        # the behavior of this hook (return flat list of MACs) is a problem for the use case of this metric
         (
             layers, layer_inputs, layer_outputs
         ) = self.hook.get_layer_io()
