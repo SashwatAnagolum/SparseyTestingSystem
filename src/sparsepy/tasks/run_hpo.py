@@ -7,6 +7,7 @@ Run HPO Task: script to run HPO.
 
 from typing import Optional
 
+import os
 import wandb
 
 from sparsepy.access_objects.hpo_runs.hpo_run  import HPORun
@@ -37,5 +38,9 @@ def run_hpo(hpo_config: dict, trainer_config: dict,
         dataset_config, preprocessing_config,
         wandb_api_key
     )
+
+    # if we are in production mode (verbosity 0), suppress the W&B output
+    if hpo_config["verbosity"] == 0:
+        os.environ["WANDB_SILENT"] = "true"
 
     hpo_run.run_sweep()

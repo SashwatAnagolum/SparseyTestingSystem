@@ -159,4 +159,6 @@ optimization_objective:
   combination_method: sum
 
 num_candidates: 10
+
+verbosity: 0
 ...

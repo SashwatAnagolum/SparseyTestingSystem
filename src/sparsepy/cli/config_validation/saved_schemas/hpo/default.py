@@ -204,7 +204,8 @@ class DefaultHpoSchema(AbstractSchema):
                     ],
                     'combination_method': 'sum'
                 },
-                'num_candidates': And(int, schema_utils.is_positive)
+                'num_candidates': And(int, schema_utils.is_positive),
+                'verbosity': int
             }
         )
 
