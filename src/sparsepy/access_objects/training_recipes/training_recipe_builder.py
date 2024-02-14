@@ -38,7 +38,7 @@ class TrainingRecipeBuilder:
         if dataset_config['preprocessed'] is True:
             preprocessed_dataset_stack = PreprocessingStack(dataset_config['preprocessed_stack'])
             dataset = PreprocessedDataset(dataset, preprocessed_dataset_stack)
-            print("PREPROCESSED")
+            #print("PREPROCESSED")
 
         dataloader = DataLoader(
             dataset=dataset, **train_config['dataloader']
