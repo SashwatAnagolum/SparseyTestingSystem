@@ -2,6 +2,7 @@ import abc
 
 from typing import Optional
 
+import numpy as np
 import torch
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.model_layers.sparsey_layer import MAC
@@ -91,8 +92,11 @@ class ExactMatchAccuracyMetric(Metric):
                                     layer_outputs[layer_index][mac_index][image_index]
                                 )
                             )
-
-        if self.reduction is None or self.reduction == "none":
+        # suppress None values from ExactMatchAccuracy
+        # WARNING this hides errors inside EMA from being detected
+        if not np.any(fidelities, axis=(0,1)):
+            return 0.0
+        elif self.reduction is None or self.reduction == "none":
             return fidelities
         elif self.reduction == 'mean':
             return [
