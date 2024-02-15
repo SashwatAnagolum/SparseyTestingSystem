@@ -4,6 +4,18 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+        {
+            "name": "PyTest - test_exact_match_accuracy",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${workspaceFolder}\\test\\unit\\core\\metrics\\test_exact_match_accuracy.py"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
         {
             "name": "Run Current File",
             "type": "python",
