@@ -1,6 +1,9 @@
 import abc
 from typing import Optional
 import torch
+
+from typing import Optional
+
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.model_layers.sparsey_layer import MAC
 from sparsepy.core.hooks import LayerIOHook
@@ -8,6 +11,7 @@ from sparsepy.core.metrics.metrics import Metric
 
 class ApproximateMatchAccuracyMetric(Metric):
 
+    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
     def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
         super().__init__(model)
         # attaches the hook anew for this Metric to gain access to the hook data

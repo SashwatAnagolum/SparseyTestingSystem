@@ -1,5 +1,4 @@
 from sparsepy.core import metrics
-
 from sparsepy.core.metrics.metrics import Metric
 
 
@@ -30,6 +29,8 @@ class MetricFactory:
         """
         Creates a layer passed in based on the layer name and kwargs.
         """
+        print(MetricFactory.allowed_modules)
+
         metric_class = MetricFactory.get_metric_class(metric_name)
 
         metric_obj = metric_class(**kwargs)

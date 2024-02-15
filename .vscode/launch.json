@@ -1,7 +1,4 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
 
@@ -21,9 +18,21 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            //"args": [
-                //...
-            //],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
+            "name": "Run HPO",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}\\scripts\\run_hpo.py",
+            "args": [
+                "--dataset_config", ".\\demo\\dataset.yaml",
+                "--preprocessing_config", ".\\demo\\preprocessing.yaml",
+                "--hpo_config", ".\\demo\\hpo.yaml",
+                "--training_recipe_config", ".\\demo\\trainer.yaml",
+            ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "justMyCode": true

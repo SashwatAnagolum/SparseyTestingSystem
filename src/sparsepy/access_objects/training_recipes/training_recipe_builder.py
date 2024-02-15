@@ -13,7 +13,7 @@ from sparsepy.core.optimizers.optimizer_factory import OptimizerFactory
 from sparsepy.access_objects.datasets.dataset_factory import DatasetFactory
 from sparsepy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
 from sparsepy.core.metrics.metric_factory import MetricFactory
-
+from sparsepy.access_objects.datasets.preprocessed_dataset import PreprocessedDataset
 
 class TrainingRecipeBuilder:
     @staticmethod
@@ -33,6 +33,12 @@ class TrainingRecipeBuilder:
             dataset_config['dataset_type'],
             **dataset_config['params']
         )
+        
+        # if a preprocessed dataset then wrap the dataset and cancel the other preprocessing stack
+        if dataset_config['preprocessed'] is True:
+            preprocessed_dataset_stack = PreprocessingStack(dataset_config['preprocessed_stack'])
+            dataset = PreprocessedDataset(dataset, preprocessed_dataset_stack)
+            print("PREPROCESSED")
 
         dataloader = DataLoader(
             dataset=dataset, **train_config['dataloader']
@@ -44,7 +50,8 @@ class TrainingRecipeBuilder:
             metric = MetricFactory.create_metric(
                 metric_config['name'],
                 #**metric_config['params'],
-                model=model
+                model=model,
+                reduction=metric_config['reduction'] # WARNING this formulation assumes all Metrics support a reduction constructor parameter
             )
 
             metrics_list.append(metric)

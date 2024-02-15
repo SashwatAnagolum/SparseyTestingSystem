@@ -1,5 +1,7 @@
-import torch
 import numpy
+import torch
+
+from typing import Optional
 
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.model_layers.sparsey_layer import MAC, SparseyLayer
@@ -12,9 +14,11 @@ class BasisSetSizeIncreaseMetric(Metric):
     BasisSetSizeIncreaseMetric: metric to keep track
         of basis set sizes across a Sparsey model.
     """
-    def __init__(self, model: torch.nn.Module):
+    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
         super().__init__(model)
         self.old_sizes = self._get_set_sizes(model)
+
+        self.reduction = reduction
 
     def compute(self, m: Model, last_batch: torch.Tensor,
                 labels: torch.Tensor, training: bool = True):
@@ -43,7 +47,18 @@ class BasisSetSizeIncreaseMetric(Metric):
         self.old_sizes = new_sizes
 
         # return the differences
-        return deltas
+        if self.reduction is None or self.reduction == "none":
+            return deltas
+        elif self.reduction == 'mean':
+            return [
+                sum(layer_deltas) / len(layer_deltas) if len(layer_deltas) > 0 else None for layer_deltas in deltas
+            ]
+        elif self.reduction == 'sum':
+            return [
+                sum(layer_deltas) for layer_deltas in deltas
+            ]
+        else:
+            return None
     
 
     def _get_set_sizes(self, m: Model):

@@ -4,4 +4,7 @@
 Init: initialization for the Saved Schemas sub-package.
 """
 
-from . import hpo_run, model, training_recipe, plot, transform, dataset, metric
+from . import (
+    hpo, model, training_recipe, plot,
+    transform, dataset, metric
+)

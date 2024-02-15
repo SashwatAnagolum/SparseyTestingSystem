@@ -80,7 +80,8 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
                     [
                         {
                             'name': str,
-                            Optional('save', default=False): bool
+                            Optional('save', default=False): bool,
+                            Optional('reduction', default=None): str
                         }
                     ]
                 ),
