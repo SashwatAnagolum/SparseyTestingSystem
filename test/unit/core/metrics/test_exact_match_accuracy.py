@@ -7,28 +7,43 @@ from sparsepy.core.metrics.approximate_match_accuracy import ApproximateMatchAcc
 from sparsepy.core.metrics.exact_match_accuracy import ExactMatchAccuracyMetric
 from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
 
-
+input_params = [
+    torch.tensor([[[[0.]], [[0.]], [[0.]], [[0.]]]]),
+    torch.tensor([[[[0.]], [[0.]], [[0.]], [[1.]]]]),
+    torch.tensor([[[[0.]], [[0.]], [[1.]], [[0.]]]]),
+    torch.tensor([[[[0.]], [[0.]], [[1.]], [[1.]]]]),
+    torch.tensor([[[[0.]], [[1.]], [[0.]], [[0.]]]]),
+    torch.tensor([[[[0.]], [[1.]], [[0.]], [[1.]]]]),
+    torch.tensor([[[[0.]], [[1.]], [[1.]], [[0.]]]]),
+    torch.tensor([[[[0.]], [[1.]], [[1.]], [[1.]]]]),
+    torch.tensor([[[[1.]], [[0.]], [[0.]], [[0.]]]]),
+    torch.tensor([[[[1.]], [[0.]], [[0.]], [[1.]]]]),
+    torch.tensor([[[[1.]], [[0.]], [[1.]], [[0.]]]]),
+    torch.tensor([[[[1.]], [[0.]], [[1.]], [[1.]]]]),
+    torch.tensor([[[[1.]], [[1.]], [[0.]], [[0.]]]]),
+    torch.tensor([[[[1.]], [[1.]], [[0.]], [[1.]]]]),
+    torch.tensor([[[[1.]], [[1.]], [[1.]], [[0.]]]]),
+    torch.tensor([[[[1.]], [[1.]], [[1.]], [[1.]]]])
+]
 
 #create 1 layer, 1 mac, 1cm, 1 neuron model, expecting 1x1 input tensor
 m = Model()
-slay = SparseyLayer(1, 1, 1, 1, 1, 2.0, 1, 1, 1, 1, 1, 0, 28.0, 5.0, 0.5, 1.0)
+slay = SparseyLayer(True, 1, 1, 1, 1, 1, 3.0, 1, 1, 2, 2, 4, 0, 28.0, 5.0, 0.5, 1.0)
 m.add_layer(slay)
 emam = ExactMatchAccuracyMetric(m)
 
 
-#create input and pass to model then pass to metric
-input = tensor([[[[1.]]]])
-output1 = m(input)
+@pytest.mark.parametrize('input', input_params)
+def test_exact_match(input):
+    output1 = m(input)
 
-metric_result = emam.compute(m, input, output1, True)
+    metric_result = emam.compute(m, input, output1, True)
 
-output2 = m(input)
-metric_result = emam.compute(m, input, output2, False)
+    output2 = m(input)
+    metric_result = emam.compute(m, input, output2, False)
 
-print(metric_result)
-
-def test_exact_match():
+    print(metric_result)
     if torch.equal(output1, output2):
-        assert metric_result == 1.0
+        assert metric_result == [[1.0]]
     else:
-        print("Outputs were not equal.")
+        assert metric_result == [[0.0]]

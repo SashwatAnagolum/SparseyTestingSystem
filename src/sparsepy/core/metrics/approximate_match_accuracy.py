@@ -12,7 +12,6 @@ from sparsepy.core.metrics.metrics import Metric
 class ApproximateMatchAccuracyMetric(Metric):
 
     def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
-    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
         super().__init__(model)
         # attaches the hook anew for this Metric to gain access to the hook data
         # consider hook managerlater if we need to use many metrics with hooks
