@@ -92,7 +92,7 @@ def test_train_model(model_config_path, dataset_config_path, preprocessing_confi
 
     dataset_config = get_config_info(dataset_config_path)
     dataset_config, is_valid = validate_config(
-        dataset_config, 'dataset', 'image'
+        dataset_config, 'dataset', dataset_config['dataset_type']
     )
 
     preprocessing_config = get_config_info(preprocessing_config_path)

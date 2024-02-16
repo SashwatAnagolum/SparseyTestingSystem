@@ -75,8 +75,8 @@ def main():
         args.dataset_config
     )
 
-    validated_dataset_config, is_valid = validate_config(
-        dataset_config_info, 'dataset', 'image'
+    validated_dataset_config, is_valid = validate_config( # needs updating to support different dataset types
+        dataset_config_info, 'dataset', dataset_config_info['dataset_type']
     )
 
     train_model(

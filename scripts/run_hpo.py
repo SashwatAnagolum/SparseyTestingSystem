@@ -69,7 +69,7 @@ def main():
     # preprocessing config validation
 
     validated_dataset_config, _ = validate_config(
-        dataset_config_info, 'dataset', 'image'
+        dataset_config_info, 'dataset', dataset_config_info['dataset_type']
     )
 
     validated_hpo_config, _ = validate_config(
@@ -83,7 +83,7 @@ def main():
     run_hpo(
         validated_hpo_config, validated_training_recipe_config,
         validated_dataset_config, preprocessing_config_info,
-        "e761ab6db7e51eada8996fa15e9e7eca67414c10"
+        "01d483344ba6fd4351f0948e5b063010e32416fc"
     )
 
 if __name__ == "__main__":
