@@ -1,7 +1,18 @@
 {
     "version": "0.2.0",
     "configurations": [
-
+    
+        {
+            "name": "PyTest - test_hebbian",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${workspaceFolder}\\test\\unit\\core\\optimizers\\test_hebbian.py"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
         {
             "name": "PyTest - test_approximate_match_accuracy",
             "type": "python",
