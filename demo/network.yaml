@@ -18,7 +18,7 @@ layers:
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
-      persistence: 1.0
+      permanence: 1.0
 
   - name: sparsey
     params:
@@ -31,9 +31,9 @@ layers:
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
-      persistence: 0.95
+      permanence: 0.95
 
-  # persistence -> talk to Dr. Rinkus
+  # permanence -> talk to Dr. Rinkus
   # weight freezing thresholds -> talk to Dr. Rinkus
   # activation thresholds -> talk to Dr. Rinkus
 ...

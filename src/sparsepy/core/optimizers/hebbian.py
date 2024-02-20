@@ -119,10 +119,10 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     # BUG: probably does not update weights that are both active on this step *and* frozen
                     weight_updates *= updateable_mask
                     
-                    # apply persistence/weight decay to all weights 
+                    # apply permanence/weight decay to all weights 
                     # (newly changed weights will be reset to 1 in the next step)
                     # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
-                    params = torch.mul(params, mac.persistence)
+                    params = torch.mul(params, mac.permanence)
 
                     # add the new weights to the old ones then clamp to [0,1]
                     params += torch.ge(weight_updates, 1)

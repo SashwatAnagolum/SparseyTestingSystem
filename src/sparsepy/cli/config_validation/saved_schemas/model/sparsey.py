@@ -176,7 +176,7 @@ class SparseyModelSchema(AbstractSchema):
                             'sigmoid_lambda': And(Or(float, int), schema_utils.is_positive),
                             'sigmoid_phi': Or(int, float),
                             'saturation_threshold': And(float, lambda n: 0 <= n <= 1),
-                            'persistence': And(Or(int, float), lambda x: schema_utils.is_between(x, 0.0, 1.0)),
+                            'permanence': And(Or(int, float), lambda x: schema_utils.is_between(x, 0.0, 1.0)),
                         }
                     }
                 ],

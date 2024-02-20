@@ -28,7 +28,7 @@ class MAC(torch.nn.Module):
                  num_neurons_per_cm_in_input: int,
                  layer_index: int, mac_index: int,
                  sigmoid_lambda=28.0, sigmoid_phi=5.0,
-                 persistence=1.0,
+                 permanence=1.0,
                  ) -> None:
         """
         Initializes the MAC object.
@@ -70,7 +70,7 @@ class MAC(torch.nn.Module):
         self.sigmoid_lambda = sigmoid_lambda
         self.sigmoid_phi = sigmoid_phi
 
-        self.persistence = persistence
+        self.permanence = permanence
 
         self.weights = torch.nn.Parameter(
             torch.zeros(
@@ -203,7 +203,7 @@ class SparseyLayer(torch.nn.Module):
         layer_index: int,
         sigmoid_phi: float, sigmoid_lambda: float,
         saturation_threshold: float,
-        persistence: float):
+        permanence: float):
         """
         Initializes the SparseyLayer object.
 
@@ -216,8 +216,8 @@ class SparseyLayer(torch.nn.Module):
         self.num_macs = num_macs
         self.receptive_field_radius = mac_receptive_field_radius
 
-        # save layer-level persistence value; check if we actually need to do this
-        self.persistence = persistence
+        # save layer-level permanence value; check if we actually need to do this
+        self.permanence = permanence
 
         self.mac_positions = self.compute_mac_positions(
             num_macs, mac_grid_num_rows, mac_grid_num_cols
@@ -239,7 +239,7 @@ class SparseyLayer(torch.nn.Module):
                 prev_layer_num_neurons_per_cm, # ORDER MATTERS and this section needs to match the constructor signature exactly
                 layer_index, i, # push mac_index down into MAC
                 sigmoid_lambda, sigmoid_phi,
-                persistence # pass layer persistence value to individual MACs--this might need adjusting so it can be set on a per-MAC basis
+                permanence # pass layer permanence value to individual MACs--this might need adjusting so it can be set on a per-MAC basis
             ) for i in range(num_macs)
         ]
 
