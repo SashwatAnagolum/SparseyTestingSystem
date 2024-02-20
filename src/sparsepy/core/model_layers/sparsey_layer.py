@@ -191,7 +191,7 @@ class SparseyLayer(torch.nn.Module):
         sigmoid_lambda (float): parameter for the familiarity computation.
         sigmoid_phi (float): parameter for the familiarity computation.
     """
-    def __init__(self, autosize_grid: bool, num_macs: int,
+    def __init__(self, autosize_grid: bool, grid_layout: str, num_macs: int,
         num_cms_per_mac: int, num_neurons_per_cm: int,
         mac_grid_num_rows: int, mac_grid_num_cols: int,
         mac_receptive_field_radius: float,
@@ -199,7 +199,7 @@ class SparseyLayer(torch.nn.Module):
         prev_layer_num_neurons_per_cm: int,
         prev_layer_mac_grid_num_rows: int,
         prev_layer_mac_grid_num_cols: int,
-        prev_layer_num_macs: int,
+        prev_layer_num_macs: int, prev_layer_grid_layout: str,
         layer_index: int,
         sigmoid_phi: float, sigmoid_lambda: float,
         saturation_threshold: float,
@@ -220,12 +220,13 @@ class SparseyLayer(torch.nn.Module):
         self.permanence = permanence
 
         self.mac_positions = self.compute_mac_positions(
-            num_macs, mac_grid_num_rows, mac_grid_num_cols
+            num_macs, mac_grid_num_rows, mac_grid_num_cols,
+            grid_layout
         )
 
         prev_layer_mac_positions = self.compute_mac_positions(
             prev_layer_num_macs, prev_layer_mac_grid_num_rows,
-            prev_layer_mac_grid_num_cols
+            prev_layer_mac_grid_num_cols, prev_layer_grid_layout
         )
 
         self.input_connections = self.find_connected_macs_in_prev_layer(
@@ -251,9 +252,11 @@ class SparseyLayer(torch.nn.Module):
         ####Edit out when we have a better mechanism for tracking layers
         self.layer_index = layer_index
 
+
     def compute_mac_positions(
         self, num_macs: int, mac_grid_num_rows: int,
-        mac_grid_num_cols: int) -> List[Tuple[float, float]]:
+        mac_grid_num_cols: int,
+        grid_layout: str) -> List[Tuple[float, float]]:
         """
         Computes the positions of each MAC in this layer.
 
@@ -262,18 +265,23 @@ class SparseyLayer(torch.nn.Module):
             mac_grid_num_rows: int representing the number of rows
                 in the grid for this layer.
             mac_grid_num_cols: int representing the number of columns
-                in the grid for this layer.      
+                in the grid for this layer.   
+            grid_layout: the type of grid layout (rectangular or hexagonal)
+                for the layer.   
 
         Returns:
-            A list[Tuple(int, int)]      
+            (list[Tuple(int, int)]): the positions of all MACs in the layer.      
         """
         mac_positions = []
+        global_col_offset = 0.5 if grid_layout == 'hex' else 0
+        grid_col_spacing = 1 / (mac_grid_num_cols - 1)
+        grid_row_spacing = 1 / (mac_grid_num_rows - 1)
 
         if mac_grid_num_rows == 1:
             row_locations = [0.5]
         else:
             row_locations = [
-                i * (1 / (mac_grid_num_rows - 1))
+                i * grid_row_spacing
                 for i in range(mac_grid_num_rows)
             ]
 
@@ -281,7 +289,7 @@ class SparseyLayer(torch.nn.Module):
             col_locations = [0.5]
         else:
             col_locations = [
-                i * (1 / (mac_grid_num_cols - 1))
+                i * grid_col_spacing
                 for i in range(mac_grid_num_cols)
             ]
 
@@ -289,7 +297,11 @@ class SparseyLayer(torch.nn.Module):
             mac_positions.append(
                 (
                     row_locations[i // mac_grid_num_cols],
-                    col_locations[i % mac_grid_num_cols]
+                    col_locations[i % mac_grid_num_cols] + (
+                        global_col_offset * (
+                            (i % mac_grid_num_rows) % 2
+                        ) * grid_col_spacing
+                    )
                  )
             )
 

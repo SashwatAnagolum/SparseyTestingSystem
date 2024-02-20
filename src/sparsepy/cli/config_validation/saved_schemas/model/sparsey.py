@@ -105,40 +105,44 @@ class SparseyModelSchema(AbstractSchema):
             config_info['input_dimensions']['height'],
             config_info['input_dimensions']['width'] * 
             config_info['input_dimensions']['height'],
-            1, 1
+            1, 1, 'rect'
         )
 
         for index in range(len(config_info['layers'])):
-            for key_index, key in enumerate(
-                [
-                    'prev_layer_mac_grid_num_rows',
-                    'prev_layer_mac_grid_num_cols',
-                    'prev_layer_num_macs',
-                    'prev_layer_num_cms_per_mac',
-                    'prev_layer_num_neurons_per_cm'
-                ]
-            ):
-                config_info['layers'][index][
-                    'params'
-                ][key] = prev_layer_dims[key_index]
+            config_info['layers'][index]['params'][
+                'prev_layer_mac_grid_num_rows'
+            ] = prev_layer_dims[0]
 
-            if config_info['layers'][index]['params']['autosize_grid']:
-                (
-                    config_info['layers'][index]['params']['mac_grid_num_rows'],
-                    config_info['layers'][index]['params']['mac_grid_num_cols']
-                ) = self.compute_grid_size(
-                    config_info['layers'][index]['params']['num_macs']
-                )
+            config_info['layers'][index]['params'][
+                'prev_layer_mac_grid_num_cols'
+            ] = prev_layer_dims[1]
+
+            config_info['layers'][index]['params'][
+                'prev_layer_num_macs'
+            ] = prev_layer_dims[2]
+
+            config_info['layers'][index]['params'][
+                'prev_layer_num_cms_per_mac'
+            ] = prev_layer_dims[3]
+
+            config_info['layers'][index]['params'][
+                'prev_layer_num_neurons_per_cm'
+            ] = prev_layer_dims[4]
+
+            config_info['layers'][index]['params'][
+                'prev_layer_grid_layout'
+            ] = prev_layer_dims[5]
 
             prev_layer_dims = (
                 config_info['layers'][index]['params']['mac_grid_num_rows'],
-                config_info['layers'][index]['params']['mac_grid_num_cols'],
+                config_info['layers'][index]['params']['mac_grid_num_rows'],
                 config_info['layers'][index]['params']['num_macs'],
                 config_info['layers'][index]['params']['num_cms_per_mac'],
-                config_info['layers'][index]['params']['num_neurons_per_cm']
+                config_info['layers'][index]['params']['num_neurons_per_cm'],
+                config_info['layers'][index]['params']['grid_layout'],
             )
 
-        return config_info     
+        return config_info
 
 
     def build_schema(self, schema_params: dict) -> Schema:
