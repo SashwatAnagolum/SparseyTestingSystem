@@ -7,6 +7,7 @@ HPO Run: file holding the HPORun class.
 import torch
 import random
 import wandb
+import traceback
 
 from copy import deepcopy
 
@@ -198,67 +199,69 @@ class HPORun():
             model_config, 'model', self.config_info['model_family']
         )
 
-        if validated_config is not None:
-            model = ModelBuilder.build_model(validated_config)
+        try:
+            if validated_config is not None:
+                model = ModelBuilder.build_model(validated_config)
 
-            training_recipe = TrainingRecipeBuilder.build_training_recipe(
-                model, deepcopy(self.dataset_config),
-                deepcopy(self.preprocessing_config),
-                deepcopy(self.training_recipe_config)
-            )
-
-            done = False
-            results = None
-
-            # increment step counter
-            self.num_steps += 1
-
-            while not done:
-                results, done = training_recipe.step()
-            objective_results = self.objective.combine_metrics(results)
-            if results is not None:
-                # final result ready
-                # this one is the best one if 1) there is no previous result or 2) its objective value is higher than the previous best result
-                is_best = (not self.best) or (self.best and objective_results["total"] > self.best["total"])
-
-                print(f"Completed trial {self.num_steps} of {self.num_trials}")
-                if self.best:
-                    print(f"Previous best objective value: {self.best['total']:.5f}")
-
-                self._print_breakdown(objective_results)
-
-                if is_best:
-                    self.best = objective_results
-                    self.best_results = results
-                    self.best_run = self.num_steps
-                    self.best_config = validated_config
-                    print(f"This is the new best value!")
-
-                #print(f"Result: {results[-1]}")
-                wandb.log(
-                    {
-                        'hpo_objective': objective_results["total"],
-                        'objective_details': objective_results 
-                    }
+                training_recipe = TrainingRecipeBuilder.build_training_recipe(
+                    model, deepcopy(self.dataset_config),
+                    deepcopy(self.preprocessing_config),
+                    deepcopy(self.training_recipe_config)
                 )
 
-                #return HPOResult(results, objective_results)
+                done = False
+                results = None
 
-                # if this is the final run, also log the best-performing model
-                if self.num_steps >= self.num_trials:
-                    print(f"OPTIMIZATION RUN COMPLETED")
-                    print(f"Best run: {self.best_run}")
-                    self._print_breakdown(self.best)
-                    print(f"Best run configuration: {self.best_config}")
+                # increment step counter
+                self.num_steps += 1
 
-                    #wandb.log(
-                    #    {
-                    #        'best_objective': self.best["total"],
-                    #        'best_objective_breakdown': self.best,
-                    #        'best_results': self.best_results,
-                    #        'best_params': self.best_config
-                    #    }
-                    #)
+                while not done:
+                    results, done = training_recipe.step()
+                objective_results = self.objective.combine_metrics(results)
+                if results is not None:
+                    # final result ready
+                    # this one is the best one if 1) there is no previous result or 2) its objective value is higher than the previous best result
+                    is_best = (not self.best) or (self.best and objective_results["total"] > self.best["total"])
+
+                    print(f"Completed trial {self.num_steps} of {self.num_trials}")
+                    if self.best:
+                        print(f"Previous best objective value: {self.best['total']:.5f}")
+
+                    self._print_breakdown(objective_results)
+
+                    if is_best:
+                        self.best = objective_results
+                        self.best_results = results
+                        self.best_run = self.num_steps
+                        self.best_config = validated_config
+                        print(f"This is the new best value!")
+
+                    wandb.log(
+                        {
+                            'hpo_objective': objective_results["total"],
+                            'objective_details': objective_results 
+                        }
+                    )
+
+                    #return HPOResult(results, objective_results)
+
+                    # if this is the final run, also log the best-performing model
+                    if self.num_steps >= self.num_trials:
+                        print(f"OPTIMIZATION RUN COMPLETED")
+                        print(f"Best run: {self.best_run}")
+                        self._print_breakdown(self.best)
+                        print(f"Best run configuration: {self.best_config}")
+
+                        #wandb.log(
+                        #    {
+                        #        'best_objective': self.best["total"],
+                        #        'best_objective_breakdown': self.best,
+                        #        'best_results': self.best_results,
+                        #        'best_params': self.best_config
+                        #    }
+                        #)
+        except Exception as e:
+            print(traceback.format_exc())
 
 
     def _print_breakdown(self, objective_results):

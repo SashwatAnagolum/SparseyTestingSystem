@@ -83,7 +83,7 @@ def main():
     run_hpo(
         validated_hpo_config, validated_training_recipe_config,
         validated_dataset_config, preprocessing_config_info,
-        "01d483344ba6fd4351f0948e5b063010e32416fc"
+        "e761ab6db7e51eada8996fa15e9e7eca67414c10"
     )
 
 if __name__ == "__main__":

@@ -81,10 +81,13 @@ class SparseyModelSchema(AbstractSchema):
         Finds the smallest grid with at least 2 rows 
         that can accomodate num_macs.
         """
-        factor_1, factor_2 = self.compute_factor_pair(num_macs)
+        factor_1 = 1
 
-        if factor_1 == 1:
-            factor_1, factor_2 = self.compute_factor_pair(num_macs + 1)
+        while factor_1 == 1:
+            factor_1, factor_2 = self.compute_factor_pair(num_macs)
+            num_macs += 1
+
+        print(factor_1, factor_2)
 
         return factor_1, factor_2
 
@@ -132,6 +135,13 @@ class SparseyModelSchema(AbstractSchema):
             config_info['layers'][index]['params'][
                 'prev_layer_grid_layout'
             ] = prev_layer_dims[5]
+
+            num_rows, num_cols = self.compute_factor_pair(
+                config_info['layers'][index]['params']['num_macs']
+            )
+
+            config_info['layers'][index]['params']['mac_grid_num_rows'] = num_rows
+            config_info['layers'][index]['params']['mac_grid_num_cols'] = num_cols
 
             prev_layer_dims = (
                 config_info['layers'][index]['params']['mac_grid_num_rows'],
@@ -194,11 +204,12 @@ class SparseyModelSchema(AbstractSchema):
                                 Or(int, float),
                                 lambda x: schema_utils.is_between(x, 0.0, 1.0)
                             ),
-                            'activation_thresholds': And(
-                                list[list],
-                                lambda x: schema_utils.all_elements_satisfy(
-                                    x, lambda a: schema_utils.is_expected_len(a, 2)
-                                )
+                            'activation_threshold_min': int,
+                            'activation_threshold_max': int,
+                            'sigmoid_chi': Or(int, float),
+                            'min_familiarity': And(
+                                float,
+                                lambda x: schema_utils.is_between(x, 0, 1)
                             )
                         }
                     }

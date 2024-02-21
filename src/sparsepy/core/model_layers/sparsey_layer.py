@@ -23,13 +23,15 @@ class MAC(torch.nn.Module):
             of the current MAC.
     """
     def __init__(self, num_cms: int,
-                 num_neurons: int, input_filter: torch.Tensor,
-                 num_cms_per_mac_in_input: int,
-                 num_neurons_per_cm_in_input: int,
-                 layer_index: int, mac_index: int,
-                 sigmoid_lambda: float, sigmoid_phi: float,
-                 permanence: float, activation_thresholds: List
-                 ) -> None:
+        num_neurons: int, input_filter: torch.Tensor,
+        num_cms_per_mac_in_input: int,
+        num_neurons_per_cm_in_input: int,
+        layer_index: int, mac_index: int,
+        sigmoid_lambda: float, sigmoid_phi: float,
+        permanence: float, activation_threshold_min: int,
+        activation_threshold_max: int,
+        sigmoid_chi: float, min_familiarity: float
+    ) -> None:
         """
         Initializes the MAC object.
 
@@ -46,9 +48,17 @@ class MAC(torch.nn.Module):
                 the input.
             sigmoid_lambda (float): parameter for the familiarity computation.
             sigmoid_phi (float): parameter for the familiarity computation.
-            activation_thresholds (list[Or[float, int]]): lower and upper
-                bounds for the number of MACs that need to be active in the 
+            activation_threshold_min (int): lower
+                bound for the number of MACs that need to be active in the 
                 receptive field of the MAC for it to become active.
+            activation_threshold_max (int): upper
+                bound for the number of MACs that need to be active in the 
+                receptive field of the MAC for it to become active.
+            sigmoid_chi: expansion factor for the sigmoid used to compute
+                the distribution over CMs for the CSA.
+            min_familiarity: the minimum average global familiarty required
+                for the CSA to not construct a uniform distribution over
+                neurons in a CM.
         """
         super().__init__()
         num_inputs = input_filter.shape[0]
@@ -69,10 +79,13 @@ class MAC(torch.nn.Module):
 
         self.layer_index = layer_index
         self.mac_index = mac_index
-        self.activation_thresholds = activation_thresholds
+        self.activation_threshold_min = activation_threshold_min
+        self.activation_threshold_max = activation_threshold_max
 
         self.sigmoid_lambda = sigmoid_lambda
         self.sigmoid_phi = sigmoid_phi
+        self.sigmoid_chi = sigmoid_chi
+        self.min_familiarity = min_familiarity
 
         self.permanence = permanence
 
@@ -126,8 +139,8 @@ class MAC(torch.nn.Module):
             # find out if the MAC should be active or not
             # for each sample in the batch
             self.is_active = torch.logical_and(
-                torch.lt(active_input_macs, self.activation_thresholds[1]),
-                torch.ge(active_input_macs, self.activation_thresholds[0])
+                torch.le(active_input_macs, self.activation_threshold_max),
+                torch.ge(active_input_macs, self.activation_threshold_min)
             ).float()
 
             # flatten x, maintaining only the batch dim.
@@ -150,17 +163,28 @@ class MAC(torch.nn.Module):
 
             if self.training:
                 # compute the average familiarity across the MAC
-                average_familiarity = torch.mean(familiarities)
+                average_familiarity = torch.mean(familiarities, dim=1)
+
+                # compute eta for the softmax
+                eta = torch.max(
+                    torch.div(
+                        average_familiarity - self.min_familiarity,
+                        1.0 - self.min_familiarity
+                    ), torch.zeros_like(
+                        average_familiarity,
+                        dtype=torch.float32
+                    )
+                ) * self.sigmoid_chi
 
                 # compute the logits for sampling the active neuron
                 # in each CM
                 cm_logits = torch.log(
                     torch.div(
-                        1.0,
+                        eta.unsqueeze(1).unsqueeze(2).repeat(1, *x.shape[1:]),
                         1.0 + torch.exp(
                             -1.0 * self.sigmoid_lambda * x + self.sigmoid_phi
                         )
-                    )
+                    ) + 1e-5
                 )
 
                 # sample from categorial dist using processed inputs as logits
@@ -225,7 +249,9 @@ class SparseyLayer(torch.nn.Module):
         layer_index: int,
         sigmoid_phi: float, sigmoid_lambda: float,
         saturation_threshold: float,
-        permanence: float, activation_thresholds: list[list]):
+        permanence: float, activation_threshold_min: int,
+        activation_threshold_max: int,
+        min_familiarity: float, sigmoid_chi: float):
         """
         Initializes the SparseyLayer object.
 
@@ -241,7 +267,8 @@ class SparseyLayer(torch.nn.Module):
         # save layer-level permanence value;
         # check if we actually need to do this
         self.permanence = permanence
-        self.activation_thresholds = activation_thresholds
+        self.activation_threshold_min = activation_threshold_min
+        self.activation_threshold_max = activation_threshold_max
 
         self.mac_positions = self.compute_mac_positions(
             num_macs, mac_grid_num_rows, mac_grid_num_cols,
@@ -268,7 +295,9 @@ class SparseyLayer(torch.nn.Module):
                 # pass layer permanence value to individual MACs
                 # this might need adjusting so it can be set
                 # on a per-MAC basis
-                permanence, activation_thresholds[i]
+                permanence, activation_threshold_min,
+                activation_threshold_max,
+                sigmoid_chi, min_familiarity
             ) for i in range(num_macs)
         ]
 
@@ -302,12 +331,14 @@ class SparseyLayer(torch.nn.Module):
         """
         mac_positions = []
         global_col_offset = 0.5 if grid_layout == 'hex' else 0
-        grid_col_spacing = 1 / (mac_grid_num_cols - 1)
-        grid_row_spacing = 1 / (mac_grid_num_rows - 1)
+
+        grid_col_spacing = 0.0
 
         if mac_grid_num_rows == 1:
             row_locations = [0.5]
         else:
+            grid_row_spacing = 1 / (mac_grid_num_rows - 1)
+
             row_locations = [
                 i * grid_row_spacing
                 for i in range(mac_grid_num_rows)
@@ -316,6 +347,8 @@ class SparseyLayer(torch.nn.Module):
         if mac_grid_num_cols == 1:
             col_locations = [0.5]
         else:
+            grid_col_spacing = 1 / (mac_grid_num_cols - 1)
+
             col_locations = [
                 i * grid_col_spacing
                 for i in range(mac_grid_num_cols)

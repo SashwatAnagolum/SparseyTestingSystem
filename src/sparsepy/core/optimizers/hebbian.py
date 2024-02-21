@@ -19,10 +19,12 @@ class HebbianOptimizer(torch.optim.Optimizer):
         super().__init__(model.parameters(), dict())
         self.model = model
         self.saturation_thresholds = []
+
         # BUG this will not operate correctly in certain kinds of model
         for layer in model.children():
             if hasattr(layer, 'saturation_threshold'):
                 self.saturation_thresholds.append(layer.saturation_threshold)
+
         self.model_layer_inputs = []
         self.model_layer_outputs = []
         self.model_layers = []
@@ -103,6 +105,8 @@ class HebbianOptimizer(torch.optim.Optimizer):
                         (1, 0, 2)
                     )
 
+                    params += weight_updates
+
                     # Print the current parameter values for investigation.
                     # Note: Converting to NumPy for easier visualization.
                     if self.verbosity > 0:
@@ -118,14 +122,14 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     # updates for weights that are not updateable (frozen).
                     # BUG: probably does not update weights that are both active on this step *and* frozen
                     weight_updates *= updateable_mask
-                    
+
                     # apply permanence/weight decay to all weights 
                     # (newly changed weights will be reset to 1 in the next step)
                     # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
-                    params = torch.mul(params, mac.permanence)
+                    torch.mul(params, mac.permanence, out=params)
 
                     # add the new weights to the old ones then clamp to [0,1]
                     params += torch.ge(weight_updates, 1)
                     torch.clamp(params, 0, 1, out=params)
-            
+
         return
