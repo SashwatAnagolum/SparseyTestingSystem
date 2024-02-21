@@ -27,8 +27,8 @@ class MAC(torch.nn.Module):
                  num_cms_per_mac_in_input: int,
                  num_neurons_per_cm_in_input: int,
                  layer_index: int, mac_index: int,
-                 sigmoid_lambda=28.0, sigmoid_phi=5.0,
-                 permanence=1.0,
+                 sigmoid_lambda: float, sigmoid_phi: float,
+                 permanence: float, activation_thresholds: List
                  ) -> None:
         """
         Initializes the MAC object.
@@ -46,14 +46,14 @@ class MAC(torch.nn.Module):
                 the input.
             sigmoid_lambda (float): parameter for the familiarity computation.
             sigmoid_phi (float): parameter for the familiarity computation.
+            activation_thresholds (list[Or[float, int]]): lower and upper
+                bounds for the number of MACs that need to be active in the 
+                receptive field of the MAC for it to become active.
         """
         super().__init__()
         num_inputs = input_filter.shape[0]
         num_inputs *= num_cms_per_mac_in_input
         num_inputs *= num_neurons_per_cm_in_input
-
-        self.layer_index = layer_index
-        self.mac_index = mac_index
 
         if len(input_filter) == 0:
             raise ValueError(
@@ -66,6 +66,10 @@ class MAC(torch.nn.Module):
         self.input_num_cms = num_cms_per_mac_in_input
         self.input_num_neurons = num_neurons_per_cm_in_input
         self.input_min_macs = input_filter.shape[0]
+
+        self.layer_index = layer_index
+        self.mac_index = mac_index
+        self.activation_thresholds = activation_thresholds
 
         self.sigmoid_lambda = sigmoid_lambda
         self.sigmoid_phi = sigmoid_phi
@@ -83,7 +87,7 @@ class MAC(torch.nn.Module):
 
         self.input_filter = input_filter
         self.training = True
-        
+
         self.is_active = True
 
 
@@ -111,6 +115,21 @@ class MAC(torch.nn.Module):
             ) with dtype torch.float32
         """
         with torch.no_grad():
+            # compute the number of incoming active MACs
+            # for each sample in the batch
+            active_input_macs = torch.sum(
+                torch.gt(
+                    x.count_nonzero(dim=[2, 3]), 0
+                ), dim=1
+            )
+
+            # find out if the MAC should be active or not
+            # for each sample in the batch
+            self.is_active = torch.logical_and(
+                torch.lt(active_input_macs, self.activation_thresholds[1]),
+                torch.ge(active_input_macs, self.activation_thresholds[0])
+            ).float()
+
             # flatten x, maintaining only the batch dim.
             x = x.view(x.shape[0], -1)
 
@@ -157,9 +176,9 @@ class MAC(torch.nn.Module):
                 torch.ones(x.shape, dtype=torch.float32)
             )
 
-            # WARNING assumes 1 item per batch! this should be OK since this is a SparseyLayer
-            # but if we ever experiment with higher batch sizes for whatever reason we'll need to change this
-            self.is_active = (output[0].count_nonzero(dim=[0,1]) > 0)
+            output = torch.mul(
+                output, self.is_active.unsqueeze(1).unsqueeze(2)
+            )
 
             if self.training:
                 if tuple(
@@ -190,9 +209,12 @@ class SparseyLayer(torch.nn.Module):
         mac_list: list[MAC] containing all the MACs in this layer.
         sigmoid_lambda (float): parameter for the familiarity computation.
         sigmoid_phi (float): parameter for the familiarity computation.
+        activation_thresholds (list[list[Or[int, float]]]): a list
+            of lists containing activation thresholds for each MAC in
+            the Sparsey layer.
     """
-    def __init__(self, autosize_grid: bool, grid_layout: str, num_macs: int,
-        num_cms_per_mac: int, num_neurons_per_cm: int,
+    def __init__(self, autosize_grid: bool, grid_layout: str,
+        num_macs: int, num_cms_per_mac: int, num_neurons_per_cm: int,
         mac_grid_num_rows: int, mac_grid_num_cols: int,
         mac_receptive_field_radius: float,
         prev_layer_num_cms_per_mac: int,
@@ -203,7 +225,7 @@ class SparseyLayer(torch.nn.Module):
         layer_index: int,
         sigmoid_phi: float, sigmoid_lambda: float,
         saturation_threshold: float,
-        permanence: float):
+        permanence: float, activation_thresholds: list[list]):
         """
         Initializes the SparseyLayer object.
 
@@ -216,8 +238,10 @@ class SparseyLayer(torch.nn.Module):
         self.num_macs = num_macs
         self.receptive_field_radius = mac_receptive_field_radius
 
-        # save layer-level permanence value; check if we actually need to do this
+        # save layer-level permanence value;
+        # check if we actually need to do this
         self.permanence = permanence
+        self.activation_thresholds = activation_thresholds
 
         self.mac_positions = self.compute_mac_positions(
             num_macs, mac_grid_num_rows, mac_grid_num_cols,
@@ -237,10 +261,14 @@ class SparseyLayer(torch.nn.Module):
             MAC(
                 num_cms_per_mac, num_neurons_per_cm,
                 self.input_connections[i], prev_layer_num_cms_per_mac,
-                prev_layer_num_neurons_per_cm, # ORDER MATTERS and this section needs to match the constructor signature exactly
-                layer_index, i, # push mac_index down into MAC
+                prev_layer_num_neurons_per_cm,
+                # push mac_index down into MAC
+                layer_index, i,
                 sigmoid_lambda, sigmoid_phi,
-                permanence # pass layer permanence value to individual MACs--this might need adjusting so it can be set on a per-MAC basis
+                # pass layer permanence value to individual MACs
+                # this might need adjusting so it can be set
+                # on a per-MAC basis
+                permanence, activation_thresholds[i]
             ) for i in range(num_macs)
         ]
 

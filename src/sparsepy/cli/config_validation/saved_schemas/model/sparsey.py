@@ -103,7 +103,7 @@ class SparseyModelSchema(AbstractSchema):
         prev_layer_dims = (
             config_info['input_dimensions']['width'],
             config_info['input_dimensions']['height'],
-            config_info['input_dimensions']['width'] * 
+            config_info['input_dimensions']['width'] *
             config_info['input_dimensions']['height'],
             1, 1, 'rect'
         )
@@ -168,19 +168,38 @@ class SparseyModelSchema(AbstractSchema):
                         'name': And(str, 'sparsey'),
                         'params': {
                             Optional('autosize_grid', default=False): bool,
+                            Optional('grid_layout', default='rect'): Or(
+                                'rect', 'hex'
+                            ),
                             'num_macs': And(int, schema_utils.is_positive),
-                            Optional('mac_grid_num_rows', default=1): And(int, schema_utils.is_positive),
-                            Optional('mac_grid_num_cols', default=1): And(int, schema_utils.is_positive),
+                            Optional(
+                                'mac_grid_num_rows', default=1
+                                ): And(int, schema_utils.is_positive),
+                            Optional(
+                                'mac_grid_num_cols', default=1
+                            ): And(int, schema_utils.is_positive),
                             'num_cms_per_mac': And(int, schema_utils.is_positive),
                             'num_neurons_per_cm': And(int, schema_utils.is_positive),
                             'mac_receptive_field_radius': And(
                                 Or(int, float),
                                 schema_utils.is_positive
                             ),
-                            'sigmoid_lambda': And(Or(float, int), schema_utils.is_positive),
+                            'sigmoid_lambda': And(
+                                Or(float, int),
+                                schema_utils.is_positive
+                            ),
                             'sigmoid_phi': Or(int, float),
                             'saturation_threshold': And(float, lambda n: 0 <= n <= 1),
-                            'permanence': And(Or(int, float), lambda x: schema_utils.is_between(x, 0.0, 1.0)),
+                            'permanence': And(
+                                Or(int, float),
+                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
+                            ),
+                            'activation_thresholds': And(
+                                list[list],
+                                lambda x: schema_utils.all_elements_satisfy(
+                                    x, lambda a: schema_utils.is_expected_len(a, 2)
+                                )
+                            )
                         }
                     }
                 ],
