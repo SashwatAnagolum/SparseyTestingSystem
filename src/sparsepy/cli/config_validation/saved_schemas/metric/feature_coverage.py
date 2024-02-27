@@ -27,8 +27,10 @@ class FeatureCoverageMetricSchema(AbstractSchema):
 
         return schema_params
 
+
     def transform_schema(self, config_info: dict) -> dict:
         return config_info
+
 
     def build_schema(self, schema_params: dict) -> Schema:
         """

@@ -5,147 +5,120 @@ import torch
 from typing import Optional
 
 from sparsepy.access_objects.models.model import Model
-from sparsepy.core.model_layers.sparsey_layer import MAC
 from sparsepy.core.hooks import LayerIOHook
 from sparsepy.core.metrics.metrics import Metric
 
 class FeatureCoverageMetric(Metric):
+    """
+    FeatureCoverageMetric: metric computing the feature
+        coverage of MACs and layers in a Sparsey model.
 
-    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
+    Attributes:
+        reduction (str): the type of reduction to apply
+            onto the raw per-layer, per-sample feature coverage
+            results.
+        hook (LayerIOHook): the hook registered with the model
+            being evaluated to obtain references to each layer,
+            and layerwise inputs and outputs.
+    """
+    def __init__(self, model: torch.nn.Module,
+                 reduction: Optional[str] = None) -> None:
+        """
+        Initializes the FeatureCoverageMetric object. 
+
+        Args:
+            model (torch.nn.Module): the model to compute feature
+                coverage using.
+            reduction (Optional[str]): the type of reduction
+                to apply before returning the metric value.
+        """
         super().__init__(model)
 
         self.reduction = reduction
-
-        # attaches the hook anew for this Metric to gain access to the hook data
-        # to check "every code at every level" we require access to the inner model data to determine which MACs have been activated
         self.hook = LayerIOHook(self.model)
 
 
-    def compute(self, m: Model, last_batch: torch.Tensor, labels: torch.Tensor, training: bool = True):
+    def compute(self, m: Model, last_batch: torch.Tensor,
+                labels: torch.Tensor, training: bool = True) -> torch.Tensor:
         """
         Computes the feature coverage of a model for a given batch of inputs.
 
         Args:
-            m: Model to evaluate.
-            last_batch: the model input for the current step (as a Tensor)
-            labels: the model output for the current step (as a Tensor)
-            training: boolean - whether the model is training (store codes) or evaluating (determine approximate match accuracy using stored codes)
+            m (Model): Model to evaluate.
+            last_batch (torch.Tensor): the model input for the current step
+            labels (torch.Tensor): the model output for the current step
+            training (bool): whether the model is training or evaluating
 
         Output:
-            approximate match accuracy as a fraction.
+            (float): feature coverage as a fraction.
         """
+        layers, _, _ = self.hook.get_layer_io()
 
-        # retrieve the hook data
-        (
-            layers, layer_inputs, layer_outputs
-        ) = self.hook.get_layer_io()
+        last_batch = last_batch.view(last_batch.shape[0], -1).bool()
+        rf_cache = [[] for i in range(len(layers))]
+        layer_masks = [
+            torch.zeros(last_batch.shape, dtype=torch.bool)
+            for i in range(len(layers))    
+        ]
 
-        # initialize the result list
-        results = []
+        for mac in layers[0]:
+            rf_cache[0].append(
+                torch.zeros(last_batch.shape, dtype=torch.bool)
+            )
 
-        # for each input
-        for image_index, image_3d in enumerate(last_batch):
+            rf_cache[0][-1][:, mac.input_filter] = True
+            rf_cache[0][-1] = torch.logical_and(
+                rf_cache[0][-1], mac.is_active.unsqueeze(1)
+            )
 
-            # initialize the cache
-            rf_cache = [[] for i in range(len(layers))]
+            layer_masks[0] = torch.bitwise_or(
+                layer_masks[0], rf_cache[0][-1]
+            )
 
-            image = image_3d.flatten()
+        for layer_index, layer in zip(range(1, len(layers)), layers[1:]):
+            for mac in layer:
+                rf_cache[layer_index].append(
+                    torch.zeros(last_batch.shape, dtype=torch.bool)
+                )
 
-            image_results = []
+                for source_mac_index in mac.input_filter:
+                    rf_cache[layer_index][-1] = torch.bitwise_or(
+                        rf_cache[layer_index][-1],
+                        rf_cache[layer_index - 1][source_mac_index]
+                    )
 
-            # for each layer
-            for layer_index, layer in enumerate(layers):
+                rf_cache[layer_index][-1] = torch.logical_and(
+                    rf_cache[layer_index][-1],
+                    mac.is_active.unsqueeze(1)
+                )
 
-                # create the empty layerwise input mask
-                layer_mask = torch.zeros_like(image, dtype=torch.bool)
+                layer_masks[layer_index] = torch.bitwise_or(
+                    layer_masks[layer_index],
+                    rf_cache[layer_index][-1]
+                )
 
-                # for each MAC in that layer
-                for mac_index, mac in enumerate(layer):
-                    
-                    # create a new input mask in the shape of the input
-                    mac_mask = torch.zeros_like(image, dtype=torch.bool)
-                    #print(f"MAC {mac_index} Sources: {[x for x, y in enumerate(mac.input_filter) if y != 0]}")
+        feature_coverage_values = []
+        active_input_pixel_count = torch.count_nonzero(last_batch, 1)
 
-                    # if this MAC is active (=any nonzero neuron outputs = any nonzero values in the 2D tensor for this MAC's output)
-                    if mac.is_active:
-                    #if layer_outputs[layer_index][mac_index][image_index].count_nonzero(dim=[0,1]) > 0:
-                        # then update the MAC input mask with this MAC's input
-                        if layer_index == 0:
-                            # IF we are in layer 1 then the source "MACs" represent pixels in the input that we need to scatter onto the mask
-                            mac_mask.scatter_(0, mac.input_filter, 1)
-                        else:
-                            # otherwise, for each input MAC to this one
-                            for source_index in mac.input_filter:
-                                # get its input filter from the cache and OR it into the mac_mask
-                                # this is slightly inefficient because it does (# of MACs) fetch/OR steps rather than (# of active MACs)
-                                # WARNING double check index numbering!
-                                mac_mask = torch.bitwise_or(mac_mask, rf_cache[layer_index - 1][source_index])
+        for layer_mask in layer_masks:
+            feature_coverage_values.append(
+                torch.nan_to_num(
+                    torch.count_nonzero(
+                        torch.bitwise_and(layer_mask, last_batch), 1
+                    ) / active_input_pixel_count,
+                    1.0
+                )
+            )
 
-                        # then OR this MAC into the current layer mask
-                        layer_mask = torch.bitwise_or(layer_mask, mac_mask)
+        feature_coverage_values = torch.stack(
+            feature_coverage_values
+        )
 
-                    # regardless, save to the cache as the input mask for this MAC
-                    # (this way, MACs that are not active just get an all-zero mask)
-                    rf_cache[mac.layer_index].append(mac_mask)
-
-                # when MAC processing has finished
-
-                # AND the layer mask with the input pixels to get the covered pixels
-                covered_pixels = torch.logical_and(layer_mask, image)
-
-                # count the number of 1s in the covered pixels
-                covered_count = torch.count_nonzero(covered_pixels).item()
-
-                # XOR this with the active pixels to get the uncovered pixels
-                uncovered_pixels = torch.logical_xor(covered_pixels, image)
-
-                # count the number of 1s in the uncovered pixels
-                uncovered_count = torch.count_nonzero(uncovered_pixels).item()
-        
-                # total
-                total_count = image.count_nonzero().item()
-
-                # at Level 3 verbosity print the uncovered pixel mask
-                #print(f"Layer {layer_index}: covered {covered_count} uncovered {uncovered_count}")
-
-                # handle the case of an empty input
-                if total_count == 0:
-                    # if so we have "covered" all zero features
-                    feature_coverage = 1.0
-                else:
-                    # calculate feature coverage in results as covered pixels / input size
-                    feature_coverage = (covered_count / total_count)
-                
-                # append to results for this item
-                image_results.append(feature_coverage)
-
-            # append this item's results
-            results.append(image_results) # confirm dimensions are consistent with other metrics
-
-            # if lesser granularity has been requested, average the layerwise results to achieve a single number 
-            # (n.b. this probably needs to be weighted by # of macs per layer)
-        
-        # then reduce the metrics, if requested
         if self.reduction is None or self.reduction == "none":
-            return [fc for image in results for fc in image]
+            return feature_coverage_values
         elif self.reduction == "sum":
-            return [
-                sum(image) for image in zip(*results)
-            ]
+            return torch.sum(torch.mean(feature_coverage_values, 1))
         elif self.reduction == "mean":
-            return [
-                sum(image)/len(image) if len(image) > 0 else 1.0 for image in zip(*results)
-            ]
+            return torch.mean(feature_coverage_values)
         else:
             return None
-
-        return results
-        #return [5 * sum(x) for x in zip(*results)]
-        #flattened_results = [fc for image in results for fc in image]
-        # return the results
-        #if self.reduction is None:
-        #    return results
-        #elif self.reduction == "sum":
-        #    return [
-
-            #]
