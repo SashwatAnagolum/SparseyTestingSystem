@@ -9,7 +9,7 @@ from sparsepy.core.model_layers.sparsey_layer import MAC
 from sparsepy.core.hooks import LayerIOHook
 from sparsepy.core.metrics.metrics import Metric
 
-class ApproximateMatchAccuracyMetric(Metric):
+class MatchAccuracyMetric(Metric):
 
     def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
         super().__init__(model)

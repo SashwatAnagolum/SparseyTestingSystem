@@ -3,8 +3,7 @@ import torch
 
 from torch import tensor
 from sparsepy.access_objects.models.model import Model
-from sparsepy.core.metrics.approximate_match_accuracy import ApproximateMatchAccuracyMetric
-from sparsepy.core.metrics.exact_match_accuracy import ExactMatchAccuracyMetric
+from sparsepy.core.metrics.match_accuracy import MatchAccuracyMetric
 from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
 
 input_params = [
@@ -30,7 +29,7 @@ input_params = [
 m = Model()
 slay = SparseyLayer(True, 1, 1, 1, 1, 1, 3.0, 1, 1, 2, 2, 4, 0, 28.0, 5.0, 0.5, 1.0)
 m.add_layer(slay)
-emam = ExactMatchAccuracyMetric(m)
+emam = MatchAccuracyMetric(m)
 
 
 @pytest.mark.parametrize('input', input_params)
@@ -47,3 +46,5 @@ def test_exact_match(input):
         assert metric_result == [[1.0]]
     else:
         assert metric_result == [[0.0]]
+
+

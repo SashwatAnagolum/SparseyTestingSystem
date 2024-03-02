@@ -3,7 +3,7 @@ import torch
 
 from torch import tensor
 from sparsepy.access_objects.models.model import Model
-from sparsepy.core.metrics.approximate_match_accuracy import ApproximateMatchAccuracyMetric
+from sparsepy.core.metrics.match_accuracy import MatchAccuracyMetric
 from sparsepy.core.metrics.exact_match_accuracy import ExactMatchAccuracyMetric
 from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
 #this should be more aimed at testing the ability to determine the closest match relative to stored inputs
@@ -13,7 +13,7 @@ def test_approximate_match():
     m = Model()
     slay = SparseyLayer(True, 1, 1, 1, 1, 1, 3.0, 1, 1, 2, 2, 4, 0, 28.0, 5.0, 0.5, 1.0)
     m.add_layer(slay)
-    amam = ApproximateMatchAccuracyMetric(m)
+    amam = MatchAccuracyMetric(m)
 
     #three inputs that are very different from one target input
     diff_in_1 = torch.tensor([[[[1.]], [[1.]], [[1.]], [[1.]]]])

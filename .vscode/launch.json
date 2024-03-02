@@ -1,6 +1,7 @@
 {
     "version": "0.2.0",
     "configurations": [
+
     
         {
             "name": "PyTest - test_hebbian",
@@ -14,23 +15,23 @@
             "justMyCode": true
         },
         {
-            "name": "PyTest - test_approximate_match_accuracy",
-            "type": "python",
-            "request": "launch",
-            "module": "pytest",
-            "args": [
-                "${workspaceFolder}\\test\\unit\\core\\metrics\\test_approximate_match_accuracy.py"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
             "name": "PyTest - test_exact_match_accuracy",
             "type": "python",
             "request": "launch",
             "module": "pytest",
             "args": [
                 "${workspaceFolder}\\test\\unit\\core\\metrics\\test_exact_match_accuracy.py"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "PyTest - test_match_accuracy",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${workspaceFolder}\\test\\unit\\core\\metrics\\test_match_accuracy.py"
             ],
             "console": "integratedTerminal",
             "justMyCode": true
