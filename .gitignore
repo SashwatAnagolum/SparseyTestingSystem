@@ -4,3 +4,4 @@ venv/
 wandb/
 __pycache__/
 .venv/
+.rinkus_experiments/
