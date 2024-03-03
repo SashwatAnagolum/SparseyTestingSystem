@@ -17,64 +17,64 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
     [
         # Each tuple corresponds to a set of paths for a single test run
         (
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc1\model.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc1\dataset.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc1\preprocessing.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc1\trainer.yaml"
+            r"test\system\weight_freezing\test_cases\tc1\model.yaml",
+            r"test\system\weight_freezing\test_cases\tc1\dataset.yaml",
+            r"test\system\weight_freezing\test_cases\tc1\preprocessing.yaml",
+            r"test\system\weight_freezing\test_cases\tc1\trainer.yaml"
         ),
         (
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc2\model.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc2\dataset.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc2\preprocessing.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc2\trainer.yaml"
+            r"test\system\weight_freezing\test_cases\tc2\model.yaml",
+            r"test\system\weight_freezing\test_cases\tc2\dataset.yaml",
+            r"test\system\weight_freezing\test_cases\tc2\preprocessing.yaml",
+            r"test\system\weight_freezing\test_cases\tc2\trainer.yaml"
         ),
         (
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc3\model.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc3\dataset.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc3\preprocessing.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc3\trainer.yaml"
+            r"test\system\weight_freezing\test_cases\tc3\model.yaml",
+            r"test\system\weight_freezing\test_cases\tc3\dataset.yaml",
+            r"test\system\weight_freezing\test_cases\tc3\preprocessing.yaml",
+            r"test\system\weight_freezing\test_cases\tc3\trainer.yaml"
         ),
         (
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc4\model.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc4\dataset.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc4\preprocessing.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc4\trainer.yaml"
+            r"test\system\weight_freezing\test_cases\tc4\model.yaml",
+            r"test\system\weight_freezing\test_cases\tc4\dataset.yaml",
+            r"test\system\weight_freezing\test_cases\tc4\preprocessing.yaml",
+            r"test\system\weight_freezing\test_cases\tc4\trainer.yaml"
         ),
         (
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc5\model.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc5\dataset.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc5\preprocessing.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc5\trainer.yaml"
+            r"test\system\weight_freezing\test_cases\tc5\model.yaml",
+            r"test\system\weight_freezing\test_cases\tc5\dataset.yaml",
+            r"test\system\weight_freezing\test_cases\tc5\preprocessing.yaml",
+            r"test\system\weight_freezing\test_cases\tc5\trainer.yaml"
         ),
         (
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc6\model.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc6\dataset.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc6\preprocessing.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc6\trainer.yaml"
+            r"test\system\weight_freezing\test_cases\tc6\model.yaml",
+            r"test\system\weight_freezing\test_cases\tc6\dataset.yaml",
+            r"test\system\weight_freezing\test_cases\tc6\preprocessing.yaml",
+            r"test\system\weight_freezing\test_cases\tc6\trainer.yaml"
         ),
         (
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc7\model.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc7\dataset.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc7\preprocessing.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc7\trainer.yaml"
+            r"test\system\weight_freezing\test_cases\tc7\model.yaml",
+            r"test\system\weight_freezing\test_cases\tc7\dataset.yaml",
+            r"test\system\weight_freezing\test_cases\tc7\preprocessing.yaml",
+            r"test\system\weight_freezing\test_cases\tc7\trainer.yaml"
         ),
         (
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc8\model.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc8\dataset.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc8\preprocessing.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc8\trainer.yaml"
+            r"test\system\weight_freezing\test_cases\tc8\model.yaml",
+            r"test\system\weight_freezing\test_cases\tc8\dataset.yaml",
+            r"test\system\weight_freezing\test_cases\tc8\preprocessing.yaml",
+            r"test\system\weight_freezing\test_cases\tc8\trainer.yaml"
         ),
         (
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc9\model.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc9\dataset.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc9\preprocessing.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc9\trainer.yaml"
+            r"test\system\weight_freezing\test_cases\tc9\model.yaml",
+            r"test\system\weight_freezing\test_cases\tc9\dataset.yaml",
+            r"test\system\weight_freezing\test_cases\tc9\preprocessing.yaml",
+            r"test\system\weight_freezing\test_cases\tc9\trainer.yaml"
         ),
         (
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc10\model.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc10\dataset.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc10\preprocessing.yaml",
-            r"C:\Users\chris\OneDrive\Desktop\SparseyTestingSystem\SparseyTestingSystem\test\system\weight_freezing\test_cases\tc10\trainer.yaml"
+            r"test\system\weight_freezing\test_cases\tc10\model.yaml",
+            r"test\system\weight_freezing\test_cases\tc10\dataset.yaml",
+            r"test\system\weight_freezing\test_cases\tc10\preprocessing.yaml",
+            r"test\system\weight_freezing\test_cases\tc10\trainer.yaml"
         )
         # Add more tuples as needed for additional test runs
     ]
@@ -129,16 +129,17 @@ def test_train_model(model_config_path, dataset_config_path, preprocessing_confi
 
         #new code
         # Loop to calculate current means for each MAC
-    for mac in current_macs:
-        # This assumes mac.parameters() yields at least one parameter tensor
-        # and that you're interested in the first parameter's data for mean calculation
-        params = next(mac.parameters(), None)
-        if params is not None:
-            mean_input = torch.mean(params.data, dim=1)
-            current_means.append(mean_input)
-        else:
-            # Handle the case where a MAC has no parameters, if possible
-            current_means.append(torch.tensor([]))  # Placeholder for MACs without parameters
+    for current_layer in current_macs:
+        for mac in current_layer:
+            # This assumes mac.parameters() yields at least one parameter tensor
+            # and that you're interested in the first parameter's data for mean calculation
+            params = next(mac.parameters(), None)
+            if params is not None:
+                mean_input = torch.mean(params.data, dim=1)
+                current_means.append(mean_input)
+            else:
+                # Handle the case where a MAC has no parameters, if possible
+                current_means.append(torch.tensor([]))  # Placeholder for MACs without parameters
 
     # Check against previous_means, if they exist
     if previous_means is not None:
@@ -160,22 +161,6 @@ def test_train_model(model_config_path, dataset_config_path, preprocessing_confi
                         f"Non-frozen neurons did not increase or stay the same for MAC {i}. "
                         f"Previous: {prev_mean[not_frozen]}, Current: {curr_mean[not_frozen]}"
                     )
-                    
-        #old code
-
-        #for i, mac in enumerate(current_macs):
-        #    threshold = saturation_thresholds[mac.layer_index]
-
-        #    curr_mean = current_means[i]
-        #    if previous_means is not None:
-        #       prev_mean = previous_means[i]
-
-         #       frozen_neurons = prev_mean > threshold
-         #       if any(frozen_neurons):
-         #           assert torch.all(curr_mean[frozen_neurons] == prev_mean[frozen_neurons]), (
-         #               f"Neurons that surpassed the threshold were updated for MAC{i}. "
-         #              f"Current frozen values: {curr_mean[frozen_neurons]}, Previous frozen values: {prev_mean[frozen_neurons]}"
-          #          )
             
         previous_means = [mean.clone().detach() for mean in current_means]
 
