@@ -2,6 +2,8 @@
     "version": "0.2.0",
     "configurations": [
 
+
+
     
         {
             "name": "PyTest - test_hebbian",
@@ -82,6 +84,17 @@
             "module": "pytest",
             "args": [
                 "${workspaceFolder}\\test\\system\\weight_freezing\\test_weight_freezing.py"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "PyTest - test sparsey dataset configs",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${workspaceFolder}\\test\\unit\\cli\\config_validation\\dataset\\test_sparsey_dataset_configs.py"
             ],
             "console": "integratedTerminal",
             "justMyCode": true
