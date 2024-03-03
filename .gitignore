@@ -3,3 +3,4 @@ venv/
 !.vscode/launch.json
 wandb/
 __pycache__/
+.venv/
