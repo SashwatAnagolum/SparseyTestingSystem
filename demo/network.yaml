@@ -17,7 +17,9 @@ layers:
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
       permanence: 1.0
-      activation_thresholds: [[2, 22], [2, 22], [2, 22], [2, 22]]
+      #activation_thresholds: [[2, 22], [2, 22], [2, 22], [2, 22]]
+      activation_threshold_min: 6
+      activation_threshold_max: 15
       min_familiarity: 0.2
       sigmoid_chi: 2.5
 
@@ -33,9 +35,11 @@ layers:
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
       permanence: 0.95
-      activation_thresholds: [[2, 5], [2, 5], [2, 5], [2, 5]]
+      #activation_thresholds: [[2, 5], [2, 5], [2, 5], [2, 5]]
       min_familiarity: 0.2
       sigmoid_chi: 1.5
+      activation_threshold_min: 6
+      activation_threshold_max: 15
 
   # permanence -> talk to Dr. Rinkus
   # weight freezing thresholds -> talk to Dr. Rinkus
