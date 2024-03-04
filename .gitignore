@@ -1,7 +1,8 @@
+.env
+__pycache__/
+.rinkus_experiments/
+.venv/
 venv/
 .vscode/**
 !.vscode/launch.json
 wandb/
-__pycache__/
-.venv/
-.rinkus_experiments/
