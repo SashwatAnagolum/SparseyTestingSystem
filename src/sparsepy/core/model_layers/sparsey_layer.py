@@ -104,6 +104,13 @@ class MAC(torch.nn.Module):
         self.is_active = True
 
 
+    def get_input_filter(self) -> torch.Tensor:
+        """
+        Returns the input filter for the MAC.
+        """
+        return self.input_filter
+
+
     def train(self, mode: bool = True) -> None:
         self.training = mode
 
@@ -308,6 +315,16 @@ class SparseyLayer(torch.nn.Module):
 
         ####Edit out when we have a better mechanism for tracking layers
         self.layer_index = layer_index
+
+
+    def get_macs(self) -> list[MAC]:
+        """
+        Returns the MACs making up the layer.
+
+        Returns:
+            (list[MAC]): the MACs making up the layer.
+        """
+        return self.mac_list
 
 
     def compute_mac_positions(

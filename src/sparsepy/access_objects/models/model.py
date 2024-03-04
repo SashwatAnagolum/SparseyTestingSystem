@@ -35,7 +35,7 @@ class Model(torch.nn.Module):
 
     def train(self, mode: bool = True) -> None:
         for module in self.children():
-            module.train(mode)
+            module.train(mode)               
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
