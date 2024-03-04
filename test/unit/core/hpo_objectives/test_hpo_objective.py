@@ -48,7 +48,7 @@ class TestHPOObjective:
                     {'metric': {"name": "basis_set_size"}, "weight": 1.0},
                     {'metric': {"name": "exact_match_accuracy"}, "weight": 1},
                     {'metric': {"name": "feature_coverage"}, "weight": 1.0},
-                    {'metric': {"name": "approximate_match_accuracy"}, "weight": 1.0},
+                    {'metric': {"name": "match_accuracy"}, "weight": 1.0},
                     {'metric': {"name": "basis_set_size_increase"}, "weight": 1}
                 ]
             }
@@ -78,7 +78,7 @@ class TestHPOObjective:
             "optimization_objective": {
                 "combination_method": "mean",
                 "objective_terms": [
-                    {'metric': {"name": "approximate_match_accuracy"}, "weight": 1.0},
+                    {'metric': {"name": "match_accuracy"}, "weight": 1.0},
                     {'metric': {"name": "basis_set_size_increase"}, "weight": 0.5}
                 ]
             }

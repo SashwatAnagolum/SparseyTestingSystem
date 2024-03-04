@@ -37,7 +37,7 @@ class MatchAccuracyMetric(Metric):
 
         return torch.mean(torch.lt(diffs, 1e-5).float()).item()
 
-    def compute(self, m: Model, last_batch: torch.Tensor, output: torch.Tensor, training: bool = True):
+    def compute(self, m: Model, last_batch: torch.Tensor, labels: torch.Tensor, training: bool = True):
         """
         Computes the approximate match accuracy of a model for a given batch of inputs.
 
@@ -52,7 +52,7 @@ class MatchAccuracyMetric(Metric):
         """
         
         # fetch the outputs from each model layer using the hook so we can get the codes for the current input item
-        layers, layer_inputs, layer_outputs = self.hook.get_layer_io()
+        layers, _, layer_outputs = self.hook.get_layer_io()
 
         fidelities = [[] for i in range(len(layers))]
 

@@ -234,7 +234,7 @@ optimization_objective:
   # * weight: the weight of this metric in the overall objective function
   objective_terms:
     - metric:
-        name: exact_match_accuracy
+        name: match_accuracy
       weight: 1.0  
 
     - metric:
