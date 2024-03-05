@@ -44,13 +44,13 @@ class TestSparseyDatasetConfigs:
                         }
                     },
                     {
-                        'name': 'binarize_transform',
+                        'name': 'binarize',
                         'params': {
                             'binarize_threshold': 0.5
                         }
                     },
                     {
-                        'name': 'skeletonization_transform',
+                        'name': 'skeletonize',
                         'params': {
                             'sigma': 3
                         }
@@ -103,7 +103,7 @@ class TestSparseyDatasetConfigs:
         where preprocessed is True but preprocessed_stack is missing.
         """
         del sparsey_dataset_schema['preprocessed_stack']
-        with pytest.raises(SchemaMissingKeyError):
+        with pytest.raises(ValueError):
             validate_config(sparsey_dataset_schema, 'dataset', 'image')
 
     def test_invalid_preprocessed_stack(self, sparsey_dataset_schema: dict) -> None:
@@ -112,4 +112,5 @@ class TestSparseyDatasetConfigs:
         where the preprocessed_stack is invalid.
         """
         sparsey_dataset_schema['preprocessed_stack']['transform_list'][0]['name'] = "anything"
-        self.perform_assertion(sparsey_dataset_schema, False)
+        with pytest.raises(SchemaError):
+            validate_config(sparsey_dataset_schema, 'dataset', 'image')
