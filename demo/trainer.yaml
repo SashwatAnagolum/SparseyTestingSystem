@@ -8,11 +8,8 @@ metrics:
     save: True
   - name: basis_set_size_increase
     save: False
-  - name: match_accuracy
+  - name: basis_average
     save: True
-    #reduction: mean
-  #- ##name: match_accuracy
-  #  save: True
 
 dataloader:
   batch_size: 4

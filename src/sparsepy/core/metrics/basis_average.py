@@ -22,7 +22,11 @@ class BasisAverageMetric(Metric):
     Attributes:
         reduction (str): the type of reduction to apply
             onto the raw per-layer, per-sample feature coverage
-            results.
+            results. Valid options are None and 'sparse'. Choosing
+            'sparse' will return the raw averaged inputs to each MAC.
+            Choosing None will return the inputs inserted into
+            their positions in a tensor of the same size as the 
+            input samples to the model.
         hook (LayerIOHook): the hook registered with the model
             being evaluated to obtain references to each layer,
             and layerwise inputs and outputs.
@@ -148,14 +152,27 @@ class BasisAverageMetric(Metric):
                         torch.sum(mac.is_active).item()
                     )
 
-                    print(self.summed_inputs[layer_index][mac_index])
-                    print(self.num_inputs_seen[layer_index][mac_index])
-
-        return [
-            [
-                torch.nan_to_num(
-                    self.summed_inputs[i][j] /
-                    self.num_inputs_seen[i][j]
-                ) for j in range(len(layers[i]))
-            ] for i in range(len(layers))
-        ]
+        if self.reduction is None:
+            return [
+                [
+                    torch.zeros(
+                        self.expected_input_shape,
+                        dtype=torch.float32
+                    ).scatter_(
+                        0, torch.argwhere(self.projected_rfs[i][j]).squeeze(),
+                        torch.nan_to_num(
+                            self.summed_inputs[i][j] /
+                            self.num_inputs_seen[i][j]
+                        )
+                    ) for j in range(len(layers[i]))
+                ] for i in range(len(layers))
+            ]
+        else:
+            return [
+                [
+                    torch.nan_to_num(
+                        self.summed_inputs[i][j] /
+                        self.num_inputs_seen[i][j]
+                    ) for j in range(len(layers[i]))
+                ] for i in range(len(layers))
+            ]
