@@ -148,7 +148,7 @@ class SparseyModelSchema(AbstractSchema):
             ] = float(
                 config_info['layers'][index]['params'][
                     'permanence'
-            ]
+                ]
             )
 
             config_info['layers'][index]['params'][

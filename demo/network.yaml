@@ -12,12 +12,12 @@ layers:
       mac_grid_num_cols: 2
       num_cms_per_mac: 2
       num_neurons_per_cm: 2
-      mac_receptive_field_radius: 0.5
+      mac_receptive_field_radius: 0.6
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
       permanence: 1.0
-      activation_threshold_min: 0.1
+      activation_threshold_min: 0.2
       activation_threshold_max: 1
       min_familiarity: 0.2
       sigmoid_chi: 2.5
@@ -36,7 +36,7 @@ layers:
       permanence: 0.95
       min_familiarity: 0.2
       sigmoid_chi: 1.5
-      activation_threshold_min: 0
+      activation_threshold_min: 0.2
       activation_threshold_max: 1.0
 
   # permanence -> talk to Dr. Rinkus

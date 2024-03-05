@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 """
-Basis Average: file holding the BasisAverageMetricSchema class.
+Num Activations: file holding the NumActivationsMetricSchema class.
 """
 
 
 import typing
 
-from schema import Schema, And, Optional
+from schema import Schema, Or, Optional
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 
 
-class BasisAverageMetricSchema(AbstractSchema):
+class NumActivationsMetricSchema(AbstractSchema):
     def extract_schema_params(self, config_info: dict) -> typing.Optional[dict]:
         """
         Extracts the required schema parameters from the config info dict
@@ -51,9 +51,11 @@ class BasisAverageMetricSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'name': 'basis_average',
+                'name': 'num_activations',
                 Optional('save', default=False): bool,
-                Optional('reduction', default=None): 'sparse'
+                Optional('reduction', default=None): Or(
+                    'layerwise_mean', 'sum', 'mean'
+                )
             }
         )
 
