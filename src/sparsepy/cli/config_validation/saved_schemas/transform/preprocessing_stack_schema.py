@@ -13,11 +13,10 @@ from sparsepy.cli.config_validation.saved_schemas import transform
 from sparsepy.cli.config_validation import schema_factory
 
 # Importing PyTorch to check if a transform is a built-in PyTorch transform
-import torchvision.transforms as torch_transforms
-import os
+import torchvision.transforms.v2 as torch_transforms
 
 
-class PreprocessingStackSchemaTransformSchema(AbstractSchema):
+class PreprocessingStackSchema(AbstractSchema):
     """
     TransformListSchema: schema for lists of transforms.
     """
@@ -51,11 +50,8 @@ class PreprocessingStackSchemaTransformSchema(AbstractSchema):
 
         for ind_transform in config_info['transform_list']:
             transform_name = ind_transform['name']
-            #transform_file_name = f"{transform_name}_transform.py"
-            fake = os.getcwd()
-            if (not self.is_builtin_transform(transform_name)) and (not os.path.isfile(os.path.join(os.getcwd(), f"src\\sparsepy\\cli\\config_validation\\saved_schemas\\transform\\{transform_name}.py"))):
+            if (not self.is_builtin_transform(transform_name)) and (transform_name not in dir(transform)):
                 raise ValueError("Invalid transform on transform list.")
-                #return None
 
             schema_params['transforms'].append(transform_name)
 

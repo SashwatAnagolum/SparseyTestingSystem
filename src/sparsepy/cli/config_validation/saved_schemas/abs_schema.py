@@ -6,10 +6,8 @@ Abs Schema: file containing the base class for all Schemas.
 
 
 import abc
-import sys
 
 from typing import Optional
-
 from schema import Schema
 
 

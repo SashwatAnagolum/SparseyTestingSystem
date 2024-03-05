@@ -5,7 +5,7 @@ Init: initialization for the Transform sub-package.
 """
 
 from . import (
+    binarize,
     preprocessing_stack_schema,
-    binarize_transform,
-    skeletonization_transform
+    skeletonize
 )
