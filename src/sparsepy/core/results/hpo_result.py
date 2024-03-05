@@ -1,22 +1,18 @@
 from datetime import datetime
-from datetime import datetime
-from typing import Dict, List
-from src.sparsepy.core.results import Result
-from src.sparsepy.core.results import HPOStepResult
+from src.sparsepy.core.results import Result, HPOStepResult
 
 class HPOResult(Result):
-    def __init__(self, id: str, start_time: datetime, end_time: datetime, name: str, configs: Dict):
-        super().__init__(id, start_time, end_time)
+    def __init__(self, configs: dict, id: str, name: str):
         self.name = name
-        self.best_run_id = None
-        self.runs: List[HPOStepResult] = []
+        self.best_run_id = id
+        self.runs = []  # List of HPOStepResult objects
         self.configs = configs
 
     def add_step(self, step: HPOStepResult):
-        pass
+        self.runs.append(step)
 
-    def mark_finished(self):
-        pass
+    def get_steps(self) -> list[HPOStepResult]:
+        return self.runs
 
-    def get_best_run(self) -> HPOStepResult:
-        pass
+    def get_top_k_steps(self, k: int) -> list[HPOStepResult]:
+        # Implementation needed to get top k steps

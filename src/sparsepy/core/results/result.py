@@ -1,7 +1,10 @@
 from datetime import datetime
 
 class Result:
-    def __init__(self, id: str, start_time: datetime, end_time: datetime):
-        self.id = id
-        self.start_time = start_time
-        self.end_time = end_time
+    def __init__(self):
+        self.id = None
+        self.start_time = datetime.now()
+        self.end_time = None
+
+    def mark_finished(self):
+        self.end_time = datetime.now()
