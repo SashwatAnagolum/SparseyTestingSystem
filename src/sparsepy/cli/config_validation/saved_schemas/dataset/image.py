@@ -53,14 +53,23 @@ class ImageDatasetSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
-        def validate_preprocessed_stack(config):
+        def validate_preprocessed_stack(ps_config):
             # Check if 'preprocessed' is True in the config
-            if config.get('preprocessed', False):
+            #if config.get('preprocessed', True):
                 # If True, validate preprocessed_stack using PreprocessingStackSchemaTransformSchema
-                return PreprocessingStackSchemaTransformSchema.preprocessing_stack_schema.validate(config.get('preprocessed_stack', {}))
-            else:
+                
+                #return PreprocessingStackSchemaTransformSchema.preprocessing_stack_schema.validate(config.get('preprocessed_stack', {}))
+                #return PreprocessingStackSchemaTransformSchema.build_schema(config.get('preprocessed_stack', {}))
+            preprocessing_schema = PreprocessingStackSchemaTransformSchema()
+                #ps_config = config.get('preprocessed_stack', {})
+            validated_config, is_valid = preprocessing_schema.validate(ps_config)
+            if not is_valid:
+                raise ValueError("Preprocessed stack configuration is invalid.")
+            return True
+            #else:
                 # If preprocessed is False or not set, skip validation for preprocessed_stack
-                return True
+                #return True
+            #return PreprocessingStackSchemaTransformSchema.validate(config.get('preprocessed_stack', {}))
             
         config_schema = Schema(
             {
