@@ -6,13 +6,9 @@ Image dataset schema: the schema for Image dataset config files.
 
 
 import typing
-import os
 
-from schema import Schema, Optional, And
-
+from schema import Schema
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
-from sparsepy.cli.config_validation.saved_schemas.transform.preprocessing_stack_schema import TransformListSchema
-from sparsepy.core import optimizers
 
 
 class BinarizeTransformSchema(AbstractSchema):
@@ -33,9 +29,8 @@ class BinarizeTransformSchema(AbstractSchema):
             a dict (might be None) containing all the required parameters 
                 to build the schema.
         """
-        schema_params = dict()
 
-        return schema_params
+        return config_info
 
 
     def transform_schema(self, config_info: dict) -> dict:
@@ -54,11 +49,11 @@ class BinarizeTransformSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
-        transform_list_schema = TransformListSchema()
         config_schema = Schema(
             {
+                'name' : 'binarize',
                 'params': {
-                    'binarize_threshold': int
+                    'binarize_threshold': float
                 }
             }
         )
