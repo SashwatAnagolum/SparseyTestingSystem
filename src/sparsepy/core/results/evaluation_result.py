@@ -4,13 +4,16 @@ class EvaluationResult(Result):
     def __init__(self, dataset: str):
         super().__init__()
         self.dataset = dataset
-        self.metrics = {}
+        self.metrics = []
 
     def add_metric(self, name: str, values: list):
-        self.metrics[name] = values
+        self.metrics[-1][name] = values
 
-    def get_metric(self, name: str) -> list:
-        return self.metrics.get(name, None)
+    def get_metric(self, batch: int, name: str) -> list:
+        return self.metrics[batch].get(name, None)
 
     def get_metrics(self) -> dict:
         return self.metrics
+
+    def add_batch(self):
+        self.metrics.append({})

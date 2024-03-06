@@ -1,4 +1,3 @@
-from datetime import datetime
 from sparsepy.core.results.result import Result
 from sparsepy.core.results.training_step_result import TrainingStepResult
 
