@@ -1,4 +1,4 @@
-from src.sparsepy.core.results import Result
+from sparsepy.core.results.result import Result
 
 class EvaluationResult(Result):
     def __init__(self, dataset: str):

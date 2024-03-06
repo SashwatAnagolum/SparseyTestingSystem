@@ -1,5 +1,6 @@
 from datetime import datetime
-from src.sparsepy.core.results import Result, HPOStepResult
+from sparsepy.core.results.result import Result
+from sparsepy.core.results.hpo_step_result import HPOStepResult
 
 class HPOResult(Result):
     def __init__(self, configs: dict, id: str, name: str):
