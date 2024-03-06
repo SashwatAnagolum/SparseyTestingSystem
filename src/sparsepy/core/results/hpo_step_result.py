@@ -1,4 +1,7 @@
-from src.sparsepy.core.results import Result, TrainingResult, EvaluationResult
+from sparsepy.core.results.result import Result
+from sparsepy.core.results.evaluation_result import EvaluationResult
+from sparsepy.core.results.training_result import TrainingResult
+
 class HPOStepResult(Result):
     def __init__(self, parent_run: str, id: str, configs: dict):
         super().__init__()

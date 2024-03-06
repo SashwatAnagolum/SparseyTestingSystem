@@ -1,5 +1,6 @@
 from datetime import datetime
-from src.sparsepy.core.results import Result, TrainingStepResult
+from sparsepy.core.results.result import Result
+from sparsepy.core.results.training_step_result import TrainingStepResult
 
 class TrainingResult(Result):
     def __init__(self, id: str, resolution: str):
