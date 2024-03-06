@@ -6,7 +6,6 @@ Transform List Schema: the schema for transform list configs.
 
 from typing import Optional, Tuple
 from schema import SchemaError
-from ... import saved_schemas
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation.saved_schemas import transform
@@ -14,7 +13,6 @@ from sparsepy.cli.config_validation import schema_factory
 
 # Importing PyTorch to check if a transform is a built-in PyTorch transform
 import torchvision.transforms as torch_transforms
-import os
 
 
 class PreprocessingStackSchemaTransformSchema(AbstractSchema):
@@ -31,7 +29,7 @@ class PreprocessingStackSchemaTransformSchema(AbstractSchema):
         Returns:
             True if it is a built-in PyTorch transform, False otherwise.
         """
-        return hasattr(torch_transforms, transform_name.capitalize())
+        return hasattr(torch_transforms, transform_name)
 
     def extract_schema_params(self, config_info: dict) -> Optional[dict]:
         """
@@ -51,11 +49,9 @@ class PreprocessingStackSchemaTransformSchema(AbstractSchema):
 
         for ind_transform in config_info['transform_list']:
             transform_name = ind_transform['name']
-            #transform_file_name = f"{transform_name}_transform.py"
-            fake = os.getcwd()
-            if (not self.is_builtin_transform(transform_name)) and (not os.path.isfile(os.path.join(os.getcwd(), f"src\\sparsepy\\cli\\config_validation\\saved_schemas\\transform\\{transform_name}.py"))):
-                raise ValueError("Invalid transform on transform list.")
-                #return None
+
+            if not self.is_builtin_transform(transform_name) and transform_name not in dir(transform):
+                return None
 
             schema_params['transforms'].append(transform_name)
 
@@ -71,11 +67,6 @@ class PreprocessingStackSchemaTransformSchema(AbstractSchema):
         Returns:
             a list of Schemas or None for built-in transforms.
         """
-        try:
-            schema_module = getattr(saved_schemas, 'transform')
-        except Exception:
-            raise ValueError(f'Invalid schema type transform!')
-
         schema_list = []
 
         for transform_name in schema_params['transforms']:
@@ -83,9 +74,8 @@ class PreprocessingStackSchemaTransformSchema(AbstractSchema):
                 schema_list.append(None)
             else:
                 schema_list.append(
-                    #schema_module = getattr(saved_schemas, 'transform')
                     schema_factory.get_schema_by_name(
-                        schema_module, 'transform', transform_name
+                        transform, 'transform', transform_name
                     )
                 )
 
