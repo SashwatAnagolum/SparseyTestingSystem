@@ -1,5 +1,9 @@
 import wandb
-from sparsepy.core.results import TrainingResult, TrainingStepResult, EvaluationResult, HPOResult, HPOStepResult
+from sparsepy.core.results.training_result import TrainingResult
+from sparsepy.core.results.training_result import TrainingStepResult
+from sparsepy.core.results.evaluation_result import EvaluationResult
+from sparsepy.core.results.hpo_result import HPOResult
+from sparsepy.core.results.hpo_step_result import HPOStepResult
 from sparsepy.access_objects.models.model import Model
 
 """
