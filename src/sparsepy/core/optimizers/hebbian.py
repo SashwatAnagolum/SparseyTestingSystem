@@ -67,6 +67,12 @@ class HebbianOptimizer(torch.optim.Optimizer):
         #Return the mask indicating which weights are updateable (not frozen).
         return updateable_mask
 
+    def forward_perm_func(a, b, x):
+        return ((a-x)**(1/b))/(a**(1/b))
+    
+    def inverse_perm_func(a ,b ,y):
+        return a-(y**b)*a
+
     def step(self, closure=None) -> None:
         """
         Performs a weight update.
@@ -126,7 +132,9 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     # apply permanence/weight decay to all weights 
                     # (newly changed weights will be reset to 1 in the next step)
                     # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
-                    torch.mul(params, mac.permanence, out=params)
+                    #torch.mul(params, mac.permanence_a, out=params)
+                    time_steps = self.inverse_perm_func(mac.permanence_a, mac.permanence_b, params)
+                    params = self.forward_perm_func(mac.permanence_a, mac.permanence_b, time_steps+1)
 
                     # add the new weights to the old ones then clamp to [0,1]
                     params += torch.ge(weight_updates, 1)

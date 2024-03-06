@@ -16,10 +16,14 @@ from sparsepy.cli.config_validation import schema_factory
 import torchvision.transforms.v2 as torch_transforms
 
 
-class PreprocessingStackSchema(AbstractSchema):
+class DefaultPreprocessingStackSchema(AbstractSchema):
     """
     TransformListSchema: schema for lists of transforms.
     """
+
+    accepted_transform_list = dir(torch_transforms)
+
+
     def is_builtin_transform(self, transform_name: str) -> bool:
         """
         Checks if the given transform name corresponds to a built-in PyTorch transform.
@@ -30,7 +34,8 @@ class PreprocessingStackSchema(AbstractSchema):
         Returns:
             True if it is a built-in PyTorch transform, False otherwise.
         """
-        return hasattr(torch_transforms, transform_name.capitalize())
+        transform_name = "".join([i.capitalize() for i in transform_name.split("_")])
+        return transform_name in dir(torch_transforms)
 
     def extract_schema_params(self, config_info: dict) -> Optional[dict]:
         """

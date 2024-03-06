@@ -9,7 +9,7 @@ import typing
 import os
 
 from schema import Schema, And, Use, Optional
-from sparsepy.cli.config_validation.saved_schemas.transform.preprocessing_stack_schema import PreprocessingStackSchema
+from sparsepy.cli.config_validation.saved_schemas.preprocessing_stack.default import DefaultPreprocessingStackSchema
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.core import optimizers
 
@@ -53,9 +53,9 @@ class ImageDatasetSchema(AbstractSchema):
                 
                 #return PreprocessingStackSchemaTransformSchema.preprocessing_stack_schema.validate(config.get('preprocessed_stack', {}))
                 #return PreprocessingStackSchemaTransformSchema.build_schema(config.get('preprocessed_stack', {}))
-                preprocessing_schema = PreprocessingStackSchema()
+                preprocessing_schema = DefaultPreprocessingStackSchema()
                 #ps_config = config.get('preprocessed_stack', {})
-                validated_config, is_valid = preprocessing_schema.validate(ps_config)
+                _, is_valid = preprocessing_schema.validate(ps_config)
                 if not is_valid:
                     raise ValueError("Preprocessed stack configuration is invalid.")
                 return True

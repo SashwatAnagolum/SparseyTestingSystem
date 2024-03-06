@@ -9,20 +9,24 @@ transform_list:
   #    p: 0.5
 
 # convert images to float from uint8, and scale them to [0, 1]
-  - name: to_dtype
-    params:
-      dtype: float32
-      scale: True
+#  - name: ToDtype
+#    params:
+#      dtype: float32
+#      scale: True
       #probability: 0.5
 
+#
+  - name: resize
+    params:
+      size: [8, 8]
+      antialias: True
+
 # binarize
-  - name: grayscale
+  - name: binarize
     params:
-      num_output_channels: 1
-  - name: random_posterize
+      binarize_threshold: 0.5
+
+#skeletonize
+  - name: skeletonize
     params:
-      p: 1.0
-      bits: 1
-  - name: random_autocontrast
-    params:
-      p: 1.0
+      sigma: 3
