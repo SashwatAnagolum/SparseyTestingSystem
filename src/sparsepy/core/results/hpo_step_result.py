@@ -19,3 +19,6 @@ class HPOStepResult(Result):
 
     def get_eval_results(self) -> EvaluationResult:
         return self.eval_results
+    
+    def get_objective(self) -> dict:
+        return self.objective

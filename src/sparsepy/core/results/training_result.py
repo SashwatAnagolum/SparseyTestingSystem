@@ -10,11 +10,12 @@ class TrainingResult(Result):
         self.best_steps = {}
 
     def add_step(self, step: TrainingStepResult):
+        # TODO update metrics to have some kind of average that can compare for best steps
         self.results.append(step)
 
     def get_best_step(self, metric: str) -> TrainingStepResult:
         # Implementation needed to return the best step based on the metric
-        pass
+        return self.best_steps.get(metric, None)
 
     def get_step(self, index: int) -> TrainingStepResult:
         return self.results[index]

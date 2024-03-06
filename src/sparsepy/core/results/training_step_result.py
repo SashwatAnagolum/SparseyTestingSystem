@@ -11,7 +11,7 @@ class TrainingStepResult(Result):
         self.metrics[name] = values
 
     def get_metric(self, name: str) -> list:
-        return self.metrics.get(name, [])
+        return self.metrics.get(name, None)
 
     def get_metrics(self) -> dict:
         return self.metrics
