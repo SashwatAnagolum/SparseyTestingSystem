@@ -23,6 +23,7 @@ class TrainingRecipe:
                  dataloader: DataLoader,
                  preprocessing_stack: PreprocessingStack,
                  metrics_list: list[torch.nn.Module],
+                 metric_config: dict,
                  loss_func: Optional[torch.nn.Module],
                  step_resolution: Optional[int] = None) -> None:
         self.optimizer = optimizer
@@ -41,7 +42,7 @@ class TrainingRecipe:
         self.num_batches = len(self.dataloader)
         self.iterator = iter(self.dataloader)
 
-        #self.ds = DataStorer(train_config)
+        self.ds = DataStorer(metric_config)
 
         # BUG need to have logged in to W&B by the time this is executed
         # BUG reporting fake value currently
@@ -113,9 +114,12 @@ class TrainingRecipe:
         #    [mac.stored_codes for mac in layer.mac_list]
         #    for layer in self.model.layers
         # ]
+            
+        # at this point the step is finished
+        results.mark_finished()
 
         # log the results for this step
-        #DataStorer.save_training_step(self.all_results.id, results)
+        self.ds.save_training_step(self.all_results.id, results)
         # and add them to the TrainingResult
         self.all_results.add_step(results)
 

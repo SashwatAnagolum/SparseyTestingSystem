@@ -13,6 +13,7 @@ from copy import deepcopy
 
 from sparsepy.core.metrics.metric_factory import MetricFactory
 from sparsepy.core.results import HPOResult, HPOStepResult
+from sparsepy.core.data_storage_retrieval import DataStorer
 from sparsepy.access_objects.models.model_builder import ModelBuilder
 from sparsepy.cli.config_validation.validate_config import validate_config
 from sparsepy.core.hpo_objectives.hpo_objective import HPOObjective
@@ -58,7 +59,7 @@ class HPORun():
             'objective_terms'
         ]:
             trainer_config['metrics'].append(
-                metric['metric']
+                metric['metric'] # fix this to also set saved=True for all HPO objective terms
             )
 
         self.preprocessing_config = preprocessing_config
@@ -74,7 +75,11 @@ class HPORun():
             'training_recipe_config': trainer_config,
             'preprocessing_config': preprocessing_config
         }
+        # create the HPOResult (also sets start time)
         self.hpo_results = HPOResult(logged_configs, self.sweep_id, hpo_config['hpo_run_name'])
+
+        # create the DataStorer
+        self.data_storer = DataStorer(trainer_config['metrics'])
 
         # only initialize the objective once, in the constructor
         self.objective = HPOObjective(hpo_config)
@@ -206,6 +211,8 @@ class HPORun():
             dict(wandb.config)
         )
 
+        # need to log invalid config back here if it's supposed to count as a step
+
         validated_config, _ = validate_config(
             model_config, 'model', self.config_info['model_family']
         )
@@ -258,7 +265,7 @@ class HPORun():
                     if self.best:
                         print(f"Previous best objective value: {self.best['total']:.5f}")
 
-                    self._print_breakdown(objective_results)
+                    self._print_breakdown(hpo_step_results)
 
                     if is_best:
                         self.best = objective_results
@@ -297,7 +304,8 @@ class HPORun():
             print(traceback.format_exc())
 
 
-    def _print_breakdown(self, objective_results):
+    def _print_breakdown(self, step_results: HPOStepResult):
+        objective_results = step_results.get_objective()
         # enhance with summary of metrics
         print(f"Objective value: {objective_results['total']:.5f}")
         print(f"Combination method: {objective_results['combination_method']}")
@@ -316,6 +324,8 @@ class HPORun():
         )
 
         wandb._teardown()
+
+        self.hpo_results.mark_finished()
 
         return self.hpo_results
     
