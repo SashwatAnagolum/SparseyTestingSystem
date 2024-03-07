@@ -30,7 +30,7 @@ class TrainingRecipe:
         self.loss_func = loss_func
 
         if step_resolution is None:
-            self.step_resolution = len(self.dataloader)
+            self.step_resolution = 1 #len(self.dataloader)
         else:
             self.step_resolution = step_resolution
 
