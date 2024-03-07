@@ -41,18 +41,22 @@ def train_model(model_config: dict, trainer_config: dict,
     for epoch in range(trainer_config['training']['num_epochs']):
         is_epoch_done = False
         model.train()
+        batch_number = 1
 
         while not is_epoch_done:
             output, is_epoch_done = trainer.step(training=True)
-            print("\n\nTraining results\n--------------------")
+            print(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
             pprint.pprint(output.get_metrics())
+            batch_number+=1
 
         model.eval()
         is_epoch_done = False
+        batch_number = 1
 
         while not is_epoch_done:
             # validate this logic VS the design of our EvaluationResult
             # this looks like old-style logic for which we should remove the "while"
             output, is_epoch_done = trainer.step(training=False)
-            print("\n\nEvaluation results\n--------------------")
+            print(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
             pprint.pprint(output.get_metrics())
+            batch_number+=1
