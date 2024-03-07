@@ -16,6 +16,7 @@ class HPOStepResult(Result):
         self.objective = objective
         self.training_results = training_results
         self.eval_results = eval_results
+        self.mark_finished()
 
     def get_training_results(self) -> TrainingResult:
         return self.training_results
