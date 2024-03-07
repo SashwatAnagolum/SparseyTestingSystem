@@ -45,12 +45,14 @@ def train_model(model_config: dict, trainer_config: dict,
         while not is_epoch_done:
             output, is_epoch_done = trainer.step(training=True)
             print("\n\nTraining results\n--------------------")
-            pprint.pprint(output)
+            pprint.pprint(output.get_metrics())
 
         model.eval()
         is_epoch_done = False
 
         while not is_epoch_done:
+            # validate this logic VS the design of our EvaluationResult
+            # this looks like old-style logic for which we should remove the "while"
             output, is_epoch_done = trainer.step(training=False)
             print("\n\nEvaluation results\n--------------------")
-            pprint.pprint(output)
+            pprint.pprint(output.get_metrics())

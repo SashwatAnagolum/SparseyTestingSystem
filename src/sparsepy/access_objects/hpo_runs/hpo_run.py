@@ -12,7 +12,7 @@ import traceback
 from copy import deepcopy
 
 from sparsepy.core.metrics.metric_factory import MetricFactory
-from sparsepy.core.results import HPOResult
+from sparsepy.core.results import HPOResult, HPOStepResult
 from sparsepy.access_objects.models.model_builder import ModelBuilder
 from sparsepy.cli.config_validation.validate_config import validate_config
 from sparsepy.core.hpo_objectives.hpo_objective import HPOObjective
@@ -51,7 +51,7 @@ class HPORun():
         self.sweep_id = wandb.sweep(sweep=self.sweep_config)
         self.num_trials = hpo_config['num_candidates']
         self.config_info = hpo_config
-
+        
         trainer_config['metrics'] = []
 
         for metric in hpo_config['optimization_objective'][
@@ -64,6 +64,17 @@ class HPORun():
         self.preprocessing_config = preprocessing_config
         self.dataset_config = dataset_config
         self.training_recipe_config = trainer_config
+
+        
+        # BUG does this approach log things in an incorrect order for multithreaded runs?
+        logged_configs = {
+            'hpo_config': hpo_config,
+            'sweep_config': self.sweep_config, # do we need to log this?
+            'dataset_config': dataset_config,
+            'training_recipe_config': trainer_config,
+            'preprocessing_config': preprocessing_config
+        }
+        self.hpo_results = HPOResult(logged_configs, self.sweep_id, hpo_config['hpo_run_name'])
 
         # only initialize the objective once, in the constructor
         self.objective = HPOObjective(hpo_config)
@@ -212,14 +223,34 @@ class HPORun():
                 done = False
                 results = None
 
+                # do we need to move this earlier?
+                hpo_step_results = HPOStepResult(parent_run=self.sweep_id, id=wandb.run.id, configs={
+                    'dataset_config': self.dataset_config,
+                    'preprocessing_config': self.preprocessing_config,
+                    'training_recipe_config': self.training_recipe_config,
+                    'model_config': validate_config
+                })
+
                 # increment step counter
                 self.num_steps += 1
 
                 while not done:
+                    # are we supposed to only use the results from the last step in objective computation?
+                    # we might need to change this
                     results, done = training_recipe.step()
                 objective_results = self.objective.combine_metrics(results)
                 if results is not None:
                     # final result ready
+
+                    # populate the HPOStepResult
+                    hpo_step_results.populate(objective=objective_results, 
+                                              training_results=training_recipe.get_summary(), 
+                                              eval_results=results)
+
+                    # add the HPOStepResults to the HPOResult
+                    self.hpo_results.add_step(hpo_step_results)
+
+                    # OLD LOGIC
                     # this one is the best one if 1) there is no previous result or 2) its objective value is higher than the previous best result
                     is_best = (not self.best) or (self.best and objective_results["total"] > self.best["total"])
 
@@ -246,6 +277,7 @@ class HPORun():
                     #return HPOResult(results, objective_results)
 
                     # if this is the final run, also log the best-performing model
+                    # this should be handled by the DS when it is called to store the HPORun from run_sweep()
                     if self.num_steps >= self.num_trials:
                         print(f"OPTIMIZATION RUN COMPLETED")
                         print(f"Best run: {self.best_run}")
@@ -261,10 +293,12 @@ class HPORun():
                         #    }
                         #)
         except Exception as e:
+            # log HPOStep failure? otherwise order of items in HPOResult will not match total number of steps/step order
             print(traceback.format_exc())
 
 
     def _print_breakdown(self, objective_results):
+        # enhance with summary of metrics
         print(f"Objective value: {objective_results['total']:.5f}")
         print(f"Combination method: {objective_results['combination_method']}")
         print("Objective term breakdown:")
@@ -272,7 +306,7 @@ class HPORun():
             print(f"* {name:>25}: {values['value']:.5f} with weight {values['weight']}")
 
 
-    def run_sweep(self) -> dict:
+    def run_sweep(self) -> HPOResult:
         """
         Run the HPO process based on the WandB sweep config created.
         """
@@ -283,5 +317,6 @@ class HPORun():
 
         wandb._teardown()
 
-        return dict()
+        return self.hpo_results
+    
     

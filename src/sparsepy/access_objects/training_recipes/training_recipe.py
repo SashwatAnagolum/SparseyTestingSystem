@@ -12,7 +12,10 @@ from torch.utils.data import DataLoader
 from torchvision.transforms.v2 import Transform
 
 from sparsepy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
+from sparsepy.core.data_storage_retrieval import DataStorer
+from sparsepy.core.results import EvaluationResult, TrainingStepResult, TrainingResult
 
+import wandb
 
 class TrainingRecipe:
     def __init__(self, model: torch.nn.Module,
@@ -38,6 +41,12 @@ class TrainingRecipe:
         self.num_batches = len(self.dataloader)
         self.iterator = iter(self.dataloader)
 
+        #self.ds = DataStorer(train_config)
+
+        # BUG need to have logged in to W&B by the time this is executed
+        # BUG reporting fake value currently
+        self.all_results = TrainingResult("FIXME", self.step_resolution)
+
 
     def step(self, training: bool = True):
         if self.batch_index + self.step_resolution >= self.num_batches:
@@ -45,10 +54,19 @@ class TrainingRecipe:
         else:
             num_batches_in_step = self.step_resolution
 
-        results = []
+        #results = []
+        if training:
+            results = TrainingStepResult(self.step_resolution)
+        else:
+            # need to be able to access dataset name from TR
+            # BUG incorrect dataset name saved
+            results = EvaluationResult("FIXME")
 
         for _ in range(num_batches_in_step):
             data, labels = next(self.iterator)
+
+            # next_batch method in TSR?
+            results.add_batch()
 
             self.optimizer.zero_grad()
 
@@ -60,7 +78,7 @@ class TrainingRecipe:
 
             model_output = self.model(transformed_data)
 
-            result = {}
+            #result = {}
 
             for metric in self.metrics_list:
                 output = metric.compute(
@@ -68,7 +86,9 @@ class TrainingRecipe:
                     model_output, training
                 )
 
-                result[metric.__class__.__name__] = output
+                #result[metric.__class__.__name__] = output
+                # need to add logic for "save only during training/eval" metrics
+                results.add_metric(metric.__class__.__name__, output)
 
             if training:
                 if self.loss_func is not None:
@@ -78,8 +98,7 @@ class TrainingRecipe:
                 self.optimizer.step()
 
             #print("\n" + "\n" + "\n")
-
-            results.append(result)
+            #results.append(result)
 
         self.batch_index += num_batches_in_step
 
@@ -95,4 +114,12 @@ class TrainingRecipe:
         #    for layer in self.model.layers
         # ]
 
+        # log the results for this step
+        #DataStorer.save_training_step(self.all_results.id, results)
+        # and add them to the TrainingResult
+        self.all_results.add_step(results)
+
         return results, epoch_ended
+
+    def get_summary(self) -> TrainingResult:
+        return self.all_results
