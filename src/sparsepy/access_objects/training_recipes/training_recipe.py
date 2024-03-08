@@ -46,7 +46,7 @@ class TrainingRecipe:
 
         # BUG need to have logged in to W&B by the time this is executed
         # BUG reporting fake value currently
-        self.all_results = TrainingResult("FIXME", self.step_resolution)
+        self.all_results = TrainingResult(wandb.run.id, self.step_resolution)
 
 
     def step(self, training: bool = True):
