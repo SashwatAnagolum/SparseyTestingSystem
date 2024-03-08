@@ -5,11 +5,9 @@ Default HPO Schema: the schema for HPO runs.
 """
 
 
-from logging import config
 import typing
-import sys
 
-from schema import Schema, And, Optional, Or, SchemaError
+from schema import Schema, And, Or
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation import schema_factory
@@ -22,6 +20,37 @@ class DefaultHpoSchema(AbstractSchema):
     """
     Default HPO Schema: class for HPO run schemas.
     """
+    def build_precheck_schema(self) -> Schema:
+        """
+        Builds the precheck schema for the config information
+        passed in by the user. This is used to verify that all parameters
+        can be collected in order to build the actual schema that will
+        be used to verify the entire configuration passed in by the
+        user.
+
+        Returns:
+            (Schema): the precheck schema.
+        """
+        return Schema(
+            {
+                'optimization_objective': {
+                    'objective_terms': [
+                        {
+                            'metric': {
+                                'name': self.check_if_metric_exists
+                            }
+                        }
+                    ]
+                },
+                'metrics': [
+                    {
+                        'name': self.check_if_metric_exists
+                    }
+                ]
+            }, ignore_extra_keys=True
+        )
+
+
     def extract_schema_params(self, config_info: dict) -> typing.Optional[
         dict
     ]:
@@ -37,7 +66,21 @@ class DefaultHpoSchema(AbstractSchema):
             a dict (might be None) containing all the required parameters 
                 to build the schema.
         """
-        schema_params = dict()    
+        schema_params = dict()
+
+        schema_params['metric_schemas'] = []
+        schema_params['computed_metrics'] = []
+
+        for metric_info in config_info['metrics']:
+            schema_params['metric_schemas'].append(
+                schema_factory.get_schema_by_name(
+                    metric, 'metric', metric_info['name']
+                )
+            )
+
+            schema_params['computed_metrics'].append(
+                metric_info['name']
+            )
 
         return schema_params
 
@@ -59,28 +102,18 @@ class DefaultHpoSchema(AbstractSchema):
         return True
 
 
-    def check_if_metric_exists(self, metric_config) -> bool:
+    def check_if_metric_exists(self, metric_name) -> bool:
         """
         Checks if a metric exists or not.
 
         Returns:
             (bool): whether the metric exists or not.
         """
-        if 'name' not in metric_config:
-            return False
-
         try:
-            metric_schema = schema_factory.get_schema_by_name(
-                metric, 'metric', metric_config['name']
+            schema_factory.get_schema_by_name(
+                metric, 'metric', metric_name
             )
         except ValueError:
-            return False
-
-        try:
-            metric_schema.validate(metric_config)
-        except SchemaError as e:
-            print(e)
-
             return False
 
         return True
@@ -125,13 +158,9 @@ class DefaultHpoSchema(AbstractSchema):
                 'values' in config_info.keys() or
                 'value' in config_info.keys()
             ):
-                try:
-                    hyperparam_schema.validate(config_info)
-                except SchemaError as e:
-                    print(e)
-                    sys.exit(0)
+                hyperparam_schema.validate(config_info)
             else:
-                for key, value in config_info.items():
+                for value in config_info.values():
                     self.check_optimizer_hyperparams_validity(value)
         elif isinstance(config_info, list):
             for config_item in config_info:
@@ -143,35 +172,6 @@ class DefaultHpoSchema(AbstractSchema):
             )
 
         return True
-
-
-    def transform_schema(self, config_info: dict) -> dict:
-        """
-        Transforms the config info passed in by the user to 
-        construct the config information required to build the HPORun.
-
-        Args:
-            config_info: dict containing the config information
-
-        Returns:
-            dict containing the transformed config info
-        """
-        for i in range(
-            len(config_info['optimization_objective']['objective_terms'])
-        ):
-            config_info['optimization_objective'][
-                'objective_terms'
-            ][i]['metric'] = schema_factory.get_schema_by_name(
-                metric, 'metric',
-                config_info['optimization_objective']
-                ['objective_terms'][i]['metric']['name']
-            ).validate(
-                config_info['optimization_objective'][
-                    'objective_terms'
-                ][i]['metric']
-            )
-
-        return config_info
 
 
     def build_schema(self, schema_params: dict) -> Schema:
@@ -198,12 +198,17 @@ class DefaultHpoSchema(AbstractSchema):
                 'optimization_objective': {
                     'objective_terms': [
                         {
-                            'metric': self.check_if_metric_exists,
+                            'metric': {
+                                'name': lambda x: (
+                                    x in schema_params['computed_metrics']
+                                )
+                            },
                             'weight': float,
                         }
                     ],
                     'combination_method': 'sum'
                 },
+                'metrics': [Or(*schema_params['metric_schemas'])],
                 'num_candidates': And(int, schema_utils.is_positive),
                 'verbosity': int
             }

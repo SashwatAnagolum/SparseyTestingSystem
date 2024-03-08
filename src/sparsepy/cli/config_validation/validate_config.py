@@ -61,17 +61,19 @@ def get_schema(schema_type, schema_name) -> AbstractSchema:
     except Exception:
         raise ValueError(f'Invalid schema type {schema_type}!')
 
-    config_schema = get_schema_by_name(schema_module, schema_type, schema_name)
+    config_schema = get_schema_by_name(
+        schema_module, schema_type, schema_name
+    )
 
     return config_schema
 
 
 def validate_config(config_info: dict, schema_type: str,
-    schema_name: str) -> Tuple[Optional[dict], bool]:
+    schema_name: str) -> dict:
     """
     Validates the given config file against the given schema. If
     the config is valid, then (the valid config, True) is returned,
-    otherwise (None, false) is returned.
+    otherwise a SchemaError is thrown.
 
     Args:
         config_info: a dict containing the config info passed in.
@@ -81,18 +83,12 @@ def validate_config(config_info: dict, schema_type: str,
             the config file against.
 
     Returns:
-        A dict (might be None) containing the valid config info.
-        A bool indicating whether the config file is valid or not.
+        (dict) the valid config info.
     """
-    is_valid = True
     config_schema = get_schema(schema_type, schema_name)
-
     valid_config = config_schema.validate(config_info)
 
-    if valid_config is None:
-        is_valid = False
-
-    return valid_config, is_valid
+    return valid_config
 
 
 def main() -> None:
