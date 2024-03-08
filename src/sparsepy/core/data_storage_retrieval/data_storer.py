@@ -31,25 +31,49 @@ class DataStorer:
         pass
     
     def save_training_step(self, parent: str, result: TrainingStepResult):
-        # Implementation to save the training step result
-        #for metric_name, metric_vals in result.get_metrics():
-        #    if metric_name in DataStorer.saved_metrics:
-        #        wandb.log()
-        # gather data to log
-        logged_data = {
-            
-        }
+
+        summary_dict = {}
+        full_dict = {}
         
-        logged_data = {
-            'resolution': result.resolution,
-        }
+        # gather the saved metrics for summary in W&B and full storage in the DB
+        for metric_name, metric_val in result.get_metrics()[0].items():
+            if metric_name in self.saved_metrics:
+                summary_dict[metric_name] = self.average_nested_data(metric_val)
+                full_dict[metric_name] = pickle.dumps(metric_val) # pickling
+                #wandb.log({metric_name: self.average_nested_data(metric_val)}, commit=False)
+        
+        # save the summary to W&B
+        # add this if we add step resolution back now that we don't need W&B concordance
+        #summary_dict["resolution"] = result.resolution
+        wandb.log(summary_dict)
 
-        #wandb.log({k:self.average_nested_data(v) for k, v in result.get_metrics() if k in self.saved_metrics}, commit=False)
+        # save the full results to Firestore
+        experiment_ref = self.db.collection("experiments").document(parent)
 
-        #wandb.log(result.resolution, commit=True)
-
-        pass
+        if experiment_ref.get().exists:
+            # add step to existing experiment
+            experiment_ref.update(
+                {
+                    "saved_metrics.training": firestore.ArrayUnion([full_dict])
+                }
+            )
+        #else:
+        # raise exception
     
+    def create_experiment(self, experiment: TrainingResult):
+        # create the DB entry for this experiment in Firestore
+        experiment_ref = self.db.collection("experiments").document(experiment.id)
+
+        experiment_ref.set(
+            {
+                "start_time": experiment.start_time,
+                "saved_metrics": {
+                    "resolution": experiment.resolution
+                },
+                "completed": False
+            }
+        )
+
     def save_training_result(self, result: TrainingResult):
         # Implementation to save the training result
     def save_evaluation_result(self, parent: str, result: EvaluationResult):
