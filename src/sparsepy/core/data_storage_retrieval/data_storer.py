@@ -204,9 +204,6 @@ class DataStorer:
         # Implementation to create and save a wandb.Artifact
         pass
 
-    def set_saved_metrics(self, metrics: list[str]):
-        DataStorer.saved_metrics = metrics
-
     def average_nested_data(self, data):
         if isinstance(data, list):
             return np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
