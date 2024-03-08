@@ -143,6 +143,30 @@ class SparseyModelSchema(AbstractSchema):
             config_info['layers'][index]['params']['mac_grid_num_rows'] = num_rows
             config_info['layers'][index]['params']['mac_grid_num_cols'] = num_cols
 
+            config_info['layers'][index]['params'][
+                'permanence'
+            ] = float(
+                config_info['layers'][index]['params'][
+                    'permanence'
+                ]
+            )
+
+            config_info['layers'][index]['params'][
+                'activation_threshold_min'
+            ] = float(
+                config_info['layers'][index]['params'][
+                    'activation_threshold_min'
+                ]
+            )
+
+            config_info['layers'][index]['params'][
+                'activation_threshold_max'
+            ] = float(
+                config_info['layers'][index]['params'][
+                    'activation_threshold_max'
+                ]
+            )
+
             prev_layer_dims = (
                 config_info['layers'][index]['params']['mac_grid_num_rows'],
                 config_info['layers'][index]['params']['mac_grid_num_rows'],
@@ -204,8 +228,14 @@ class SparseyModelSchema(AbstractSchema):
                                 Or(int, float),
                                 lambda x: schema_utils.is_between(x, 0.0, 1.0)
                             ),
-                            'activation_threshold_min': int,
-                            'activation_threshold_max': int,
+                            'activation_threshold_min': And(
+                                Or(int, float),
+                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
+                            ),
+                            'activation_threshold_max': And(
+                                Or(int, float),
+                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
+                            ),
                             'sigmoid_chi': Or(int, float),
                             'min_familiarity': And(
                                 float,

@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 """
-Basis Set Size Increase: file holding the BasisSetSizeIncreaseMetricSchema class.
+Num Activations: file holding the NumActivationsMetricSchema class.
 """
 
 
 import typing
 
-from schema import Schema, And, Optional
+from schema import Schema, Or, Optional
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 
 
-class BasisSetSizeIncreaseMetricSchema(AbstractSchema):
+class NumActivationsMetricSchema(AbstractSchema):
     def extract_schema_params(self, config_info: dict) -> typing.Optional[dict]:
         """
         Extracts the required schema parameters from the config info dict
@@ -28,13 +28,14 @@ class BasisSetSizeIncreaseMetricSchema(AbstractSchema):
             a dict (might be None) containing all the required parameters
                 to build the schema.
         """
-
         schema_params = dict()
 
         return schema_params
 
+
     def transform_schema(self, config_info: dict) -> dict:
         return config_info
+
 
     def build_schema(self, schema_params: dict) -> Schema:
         """
@@ -50,10 +51,12 @@ class BasisSetSizeIncreaseMetricSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'name':'basis_set_size_increase',
+                'name': 'num_activations',
                 Optional('save', default=False): bool,
-                Optional('reduction', default=None): str
-            }, ignore_extra_keys=True
+                Optional('reduction', default=None): Or(
+                    'layerwise_mean', 'sum', 'mean'
+                )
+            }
         )
 
         return config_schema
