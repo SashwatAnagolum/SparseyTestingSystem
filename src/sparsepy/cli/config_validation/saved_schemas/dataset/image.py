@@ -8,8 +8,8 @@ Image dataset schema: the schema for Image dataset config files.
 import typing
 import os
 
-from schema import Schema, And, Use, Optional
-from sparsepy.cli.config_validation.saved_schemas.transform.preprocessing_stack_schema import PreprocessingStackSchema
+from schema import Schema, Optional, And
+from sparsepy.cli.config_validation.saved_schemas.transform.preprocessing_stack_schema import PreprocessingStackSchemaTransformSchema
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.core import optimizers
 
@@ -34,35 +34,11 @@ class ImageDatasetSchema(AbstractSchema):
         """
         schema_params = dict()
 
-        try:
-            schema_params['preprocessed'] = config_info['preprocessed']
-        except KeyError:
-            return None
-
-
         return schema_params
 
 
     def transform_schema(self, config_info: dict) -> dict:
         return config_info
-
-    def validate_preprocessed_stack(self, ps_config: dict, preprocess: bool):
-            # Check if 'preprocessed' is True in the config
-            if preprocess == True:
-                # If True, validate preprocessed_stack using PreprocessingStackSchemaTransformSchema
-                
-                #return PreprocessingStackSchemaTransformSchema.preprocessing_stack_schema.validate(config.get('preprocessed_stack', {}))
-                #return PreprocessingStackSchemaTransformSchema.build_schema(config.get('preprocessed_stack', {}))
-                preprocessing_schema = PreprocessingStackSchema()
-                #ps_config = config.get('preprocessed_stack', {})
-                validated_config, is_valid = preprocessing_schema.validate(ps_config)
-                if not is_valid:
-                    raise ValueError("Preprocessed stack configuration is invalid.")
-                return True
-            else:
-                # If preprocessed is False or not set, skip validation for preprocessed_stack
-                return True
-            #return PreprocessingStackSchemaTransformSchema.validate(config.get('preprocessed_stack', {}))
 
 
     def build_schema(self, schema_params: dict) -> Schema:
@@ -77,7 +53,23 @@ class ImageDatasetSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
-        
+        def validate_preprocessed_stack(ps_config):
+            # Check if 'preprocessed' is True in the config
+            #if config.get('preprocessed', True):
+                # If True, validate preprocessed_stack using PreprocessingStackSchemaTransformSchema
+                
+                #return PreprocessingStackSchemaTransformSchema.preprocessing_stack_schema.validate(config.get('preprocessed_stack', {}))
+                #return PreprocessingStackSchemaTransformSchema.build_schema(config.get('preprocessed_stack', {}))
+            preprocessing_schema = PreprocessingStackSchemaTransformSchema()
+                #ps_config = config.get('preprocessed_stack', {})
+            validated_config, is_valid = preprocessing_schema.validate(ps_config)
+            if not is_valid:
+                raise ValueError("Preprocessed stack configuration is invalid.")
+            return True
+            #else:
+                # If preprocessed is False or not set, skip validation for preprocessed_stack
+                #return True
+            #return PreprocessingStackSchemaTransformSchema.validate(config.get('preprocessed_stack', {}))
             
         config_schema = Schema(
             {
@@ -87,8 +79,7 @@ class ImageDatasetSchema(AbstractSchema):
                     'image_format': And(str, lambda x: x[0] == '.')
                 },
                 'preprocessed': bool,
-                #Optional('preprocessed_stack'): Use(self.validate_preprocessed_stack),
-                Optional('preprocessed_stack', default=None): (lambda x:self.validate_preprocessed_stack(x, schema_params['preprocessed']))
+                'preprocessed_stack': validate_preprocessed_stack,
             }
         )
 
