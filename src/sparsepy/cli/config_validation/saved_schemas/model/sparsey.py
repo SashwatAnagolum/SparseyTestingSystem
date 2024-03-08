@@ -200,13 +200,9 @@ class SparseyModelSchema(AbstractSchema):
                             ),
                             'sigmoid_phi': Or(int, float),
                             'saturation_threshold': And(float, lambda n: 0 <= n <= 1),
-                            'permanence_a': And(
+                            'permanence': And(
                                 Or(int, float),
-                                lambda x: schema_utils.is_positive(x)
-                            ),
-                            'permanence_b': And(
-                                Or(int, float),
-                                lambda x: schema_utils.is_positive(x)
+                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
                             ),
                             'activation_threshold_min': int,
                             'activation_threshold_max': int,

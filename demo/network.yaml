@@ -16,14 +16,12 @@ layers:
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
-      permanence_a: 0.1
-      permanence_b: 10.0
+      permanence: 1.0
       #activation_thresholds: [[2, 22], [2, 22], [2, 22], [2, 22]]
       activation_threshold_min: 6
       activation_threshold_max: 15
-      sigmoid_chi: 2.5
       min_familiarity: 0.2
-      
+      sigmoid_chi: 2.5
 
   - name: sparsey
     params:
@@ -36,14 +34,12 @@ layers:
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
-      permanence_a: 0.1
-      permanence_b: 0.2
+      permanence: 0.95
       #activation_thresholds: [[2, 5], [2, 5], [2, 5], [2, 5]]
+      min_familiarity: 0.2
+      sigmoid_chi: 1.5
       activation_threshold_min: 6
       activation_threshold_max: 15
-      sigmoid_chi: 1.5
-      min_familiarity: 0.2
-      
 
   # permanence -> talk to Dr. Rinkus
   # weight freezing thresholds -> talk to Dr. Rinkus

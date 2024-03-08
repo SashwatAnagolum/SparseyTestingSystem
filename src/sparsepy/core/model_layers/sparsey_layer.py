@@ -28,8 +28,7 @@ class MAC(torch.nn.Module):
         num_neurons_per_cm_in_input: int,
         layer_index: int, mac_index: int,
         sigmoid_lambda: float, sigmoid_phi: float,
-        permanence_a: float, permanence_b: float,
-        activation_threshold_min: int,
+        permanence: float, activation_threshold_min: int,
         activation_threshold_max: int,
         sigmoid_chi: float, min_familiarity: float
     ) -> None:
@@ -88,8 +87,7 @@ class MAC(torch.nn.Module):
         self.sigmoid_chi = sigmoid_chi
         self.min_familiarity = min_familiarity
 
-        self.permanence_a = permanence_a
-        self.permanence_b = permanence_b
+        self.permanence = permanence
 
         self.weights = torch.nn.Parameter(
             torch.zeros(
@@ -251,8 +249,7 @@ class SparseyLayer(torch.nn.Module):
         layer_index: int,
         sigmoid_phi: float, sigmoid_lambda: float,
         saturation_threshold: float,
-        permanence_a: float, permanence_b: float,
-        activation_threshold_min: int,
+        permanence: float, activation_threshold_min: int,
         activation_threshold_max: int,
         min_familiarity: float, sigmoid_chi: float):
         """
@@ -269,8 +266,7 @@ class SparseyLayer(torch.nn.Module):
 
         # save layer-level permanence value;
         # check if we actually need to do this
-        self.permanence_a = permanence_a
-        self.permanence_b = permanence_b
+        self.permanence = permanence
         self.activation_threshold_min = activation_threshold_min
         self.activation_threshold_max = activation_threshold_max
 
@@ -299,7 +295,7 @@ class SparseyLayer(torch.nn.Module):
                 # pass layer permanence value to individual MACs
                 # this might need adjusting so it can be set
                 # on a per-MAC basis
-                permanence_a, permanence_b, activation_threshold_min,
+                permanence, activation_threshold_min,
                 activation_threshold_max,
                 sigmoid_chi, min_familiarity
             ) for i in range(num_macs)

@@ -11,10 +11,10 @@ def test_permanence():
     model = Model()
 
     #add layer1 assuming 4x4 input tensor, 2x2 MAC Grid, 2CM/MAC, 2N/CM, Saturation thresh of 2.0 which theoretically should never saturate
-    model.add_layer(SparseyLayer(True, 'rect', 4, 2, 2, 2, 2, 2.0, 1, 1, 4, 4, 16, 'rect', 0, 28.0, 5.0, 2.0, 2.0, 2.0, 2, 8, 0.2, 2.5))
+    model.add_layer(SparseyLayer(True, 4, 2, 2, 2, 2, 2.0, 1, 1, 4, 4, 16, 0, 28.0, 5.0, 2.0, 0.5))
 
     #add layer2 assuming, 1x1 MAC Grid 2CM/MAC, 2N/CM, Sat thresh of 2.0
-    model.add_layer(SparseyLayer(True, 'rect', 1, 2, 2, 1, 1, 1.0, 2, 2, 2, 2, 4, 'rect', 1, 28.0, 5.0, 2.0, 2.0, 2.0, 3, 7, .2, 2.5)) 
+    model.add_layer(SparseyLayer(True, 1, 2, 2, 1, 1, 1.0, 2, 2, 2, 2, 4, 1, 28.0, 5.0, 2.0, 0.5)) 
 
     #set up hook for assertion later
     hook = LayerIOHook(model)

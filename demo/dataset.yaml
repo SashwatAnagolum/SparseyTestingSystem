@@ -20,10 +20,10 @@ preprocessed_stack:
       params:
         size: [8, 8]
         antialias: True
-    - name: binarize
+    - name: binarize_transform
       params:
         binarize_threshold: 0.5
-    - name: skeletonize
+    - name: skeletonization_transform
       params:
         sigma: 3
 ...
