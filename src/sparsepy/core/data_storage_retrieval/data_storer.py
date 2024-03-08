@@ -31,9 +31,9 @@ class DataStorer:
             
         }
         
-        logged_data = {
-            'resolution': result.resolution,
-        }
+        #logged_data = {
+        #    'resolution': result.resolution,
+        #}
 
         #wandb.log({k:self.average_nested_data(v) for k, v in result.get_metrics() if k in self.saved_metrics}, commit=False)
 
