@@ -114,6 +114,17 @@
             "console": "integratedTerminal",
             "justMyCode": true
         },
+        {
+            "name": "PyTest - choose file",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${workspaceFolder}\\test\\${input:testCaseStringPicker}"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
     ],
     "inputs": [
         {
@@ -121,6 +132,30 @@
             "type": "promptString",
             "description": "enter the path to the directory containing your HPO config files",
             "default": ".\\demo"
+        },
+        {
+            "id": "testCaseStringPicker",
+            "type": "pickString",
+            "description": "select a test file",
+            "options": [
+                "integration\\test_hpo_step.py",
+                "system\\test_hpo_run.py",
+                "system\\weight_freezing\\test_weight_freezing.py",
+                "unit\\access_objects\\datasets\\test_sparsey_dataset.py",
+                "unit\\access_objects\\models\\test_model_builder.py",
+                "unit\\access_objects\\models\\test_model.py",
+                "unit\\cli\\config_validation\\dataset\\test_sparsey_dataset_configs.py",
+                "unit\\cli\\config_validation\\model\\test_sparsey_model_configs.py",
+                "unit\\cli\\config_validation\\trainer\\test_sparsey_trainer_configs.py",
+                "unit\\core\\hpo_objectives\\test_hpo_objective.py",
+                "unit\\core\\metrics\\test_exact_match_accuracy.py",
+                "unit\\core\\metrics\\test_match_accuracy.py",
+                "unit\\core\\metrics\\test_metric_factory.py",
+                "unit\\core\\model_layers\\test_layer_factory.py",
+                "unit\\core\\model_layers\\test_sparsey_layer.py",
+                "unit\\core\\model_layers\\test_weight_freeze.py",
+                "unit\\core\\optimizers\\test_hebbian.py"
+            ]
         }
     ]
 }
