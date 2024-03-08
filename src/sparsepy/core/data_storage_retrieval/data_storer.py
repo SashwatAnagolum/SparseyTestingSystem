@@ -1,4 +1,7 @@
+from firebase_admin import firestore
+import json
 import numpy as np
+import pickle
 import wandb
 
 from sparsepy.core.results.training_result import TrainingResult
@@ -12,10 +15,16 @@ from sparsepy.access_objects.models.model import Model
 DataStorer: Stores data to weights and biases
 """
 class DataStorer:
-    
+
     def __init__(self, config: dict):
         # configure saved metrics?
         self.saved_metrics = [metric["name"] for metric in config if metric["save"] is True]
+        # create API client
+        self.api = wandb.Api()
+
+        # connect to Firestore
+        self.db = firestore.client()
+        
     
     def save_model(self, m: Model):
         # Implementation to save the model
