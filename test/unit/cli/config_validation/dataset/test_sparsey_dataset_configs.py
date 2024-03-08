@@ -112,5 +112,4 @@ class TestSparseyDatasetConfigs:
         where the preprocessed_stack is invalid.
         """
         sparsey_dataset_schema['preprocessed_stack']['transform_list'][0]['name'] = "anything"
-        with pytest.raises(SchemaError):
-            validate_config(sparsey_dataset_schema, 'dataset', 'image')
+        self.perform_assertion(sparsey_dataset_schema, False)
