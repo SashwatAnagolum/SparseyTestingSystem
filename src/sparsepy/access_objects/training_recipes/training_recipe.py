@@ -48,6 +48,8 @@ class TrainingRecipe:
         # BUG reporting fake value currently
         self.all_results = TrainingResult(wandb.run.id, self.step_resolution)
 
+        self.ds.create_experiment(self.all_results)
+
 
     def step(self, training: bool = True):
         if self.batch_index + self.step_resolution >= self.num_batches:
@@ -127,4 +129,8 @@ class TrainingRecipe:
         return results, epoch_ended
 
     def get_summary(self) -> TrainingResult:
+        # this method implicitly marks the run as finished and commits it to the data store
+        self.all_results.mark_finished()
+        self.ds.save_training_result(self.all_results)
+
         return self.all_results
