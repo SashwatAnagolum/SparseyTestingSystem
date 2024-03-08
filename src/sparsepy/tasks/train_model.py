@@ -9,6 +9,7 @@ import pprint
 
 import torch
 
+from sparsepy.tasks.api_login import log_in
 from sparsepy.access_objects.models.model_builder import ModelBuilder
 from sparsepy.access_objects.training_recipes.training_recipe_builder import (
     TrainingRecipeBuilder
@@ -31,6 +32,7 @@ def train_model(model_config: dict, trainer_config: dict,
         dataset_config (dict): config info to build the dataset
             to train on.
     """
+    log_in()
     model = ModelBuilder.build_model(model_config)
 
     trainer = TrainingRecipeBuilder.build_training_recipe(

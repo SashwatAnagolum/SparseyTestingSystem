@@ -10,6 +10,7 @@ from typing import Optional
 import os
 import wandb
 from pprint import pprint
+from sparsepy.tasks.api_login import log_in
 from sparsepy.access_objects.hpo_runs.hpo_run  import HPORun
 
 
@@ -33,6 +34,8 @@ def run_hpo(hpo_config: dict, trainer_config: dict,
         wandb_api_key (str): the Weights and Biases API key to use
             to log information to Weights and Biases.
     """
+    log_in()
+
     hpo_run = HPORun(
         hpo_config, trainer_config,
         dataset_config, preprocessing_config,

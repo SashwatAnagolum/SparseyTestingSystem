@@ -46,7 +46,7 @@ class HPORun():
             wandb_api_key (str): the Weights and Biases API key to 
                 use to login to WandB and log data.
         """
-        wandb.login(key=wandb_api_key, verify=True)
+        #wandb.login(key=wandb_api_key, verify=True)
 
         self.sweep_config = self.construct_sweep_config(hpo_config)
         self.sweep_id = wandb.sweep(sweep=self.sweep_config)
