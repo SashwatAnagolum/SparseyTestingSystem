@@ -8,7 +8,7 @@ Image dataset schema: the schema for Image dataset config files.
 import typing
 import os
 
-from schema import Schema, Optional, And
+from schema import Schema, Optional, And, Or
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation.saved_schemas.transform.preprocessing_stack_schema import TransformListSchema
@@ -58,7 +58,7 @@ class BinarizeTransformSchema(AbstractSchema):
         config_schema = Schema(
             {
                 'params': {
-                    'binarize_threshold': int
+                    'binarize_threshold': Or(int, float)
                 }
             }
         )
