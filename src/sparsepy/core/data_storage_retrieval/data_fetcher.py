@@ -85,6 +85,7 @@ class DataFetcher:
         Returns:
             EvaluationResult: the EvaluationResult for the experiment of this id in w&b
         """
+        pass
     
     def get_hpo_result(self, experiment_id: str) -> HPOResult:
         """
