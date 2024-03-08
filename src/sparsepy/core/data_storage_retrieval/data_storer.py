@@ -124,11 +124,81 @@ class DataStorer:
 
     def save_hpo_step(self, parent: str, result: HPOStepResult):
         # Implementation to save the HPO step result
-        pass
+
+        # WEIGHTS & BIASES
+        # save the objective and HPO config to this experiment
+
+        objective = result.get_objective()
+        # FIXME correct duplicate logging, only log hpo_objective
+        wandb.log(
+                    {
+                    'hpo_objective': objective["total"],
+                    'objective_details': objective 
+                    }
+                )
+
+        run = self.api.run(wandb.run.path)
+        #run.summary["objective"] = result.get_objective()
+        run.summary["hpo_configs"] = result.configs
+
+        run.summary.update()
     
+        # FIRESTORE
+        # save the objective data into the experiment
+        hpo_step_experiment_ref = self.db.collection("experiments").document(result.id)
+
+        hpo_step_experiment_ref.update(
+            {
+                "hpo_objective": result.get_objective(),
+                "parent_sweep": parent
+            }
+        )
+
+        # mark this HPO step's experiment as belonging to the parent sweep
+        parent_sweep_ref = self.db.collection("hpo_runs").document(parent)
+
+        parent_sweep_ref.update(
+            {
+                "runs": firestore.ArrayUnion([result.id])
+            }
+        )
+
+        
+
+    def create_hpo_sweep(self, sweep: HPOResult):
+        # create the DB entry for this experiment in Firestore
+        sweep_ref = self.db.collection("hpo_runs").document(sweep.id)
+
+        sweep_ref.set(
+            {
+                "name": sweep.name,
+                "start_time": sweep.start_time,
+                "best_run_id": None,
+                "runs": [],
+                "completed": False,
+                "configs": {
+                    conf_name:json.dumps(conf_json) for conf_name, conf_json in sweep.configs.items()
+                }
+            }
+        )
+
+
     def save_hpo_result(self, result: HPOResult):
         # Implementation to save the HPO result
-        pass
+
+        # WEIGHTS & BIASES automatically tracks this already
+
+        # FIRESTORE
+        # set the end time and best run ID and mark as completed
+        sweep_ref = self.db.collection("hpo_runs").document(result.id)
+
+        sweep_ref.update(
+            {
+                "end_time": result.end_time,
+                "best_run_id": result.best_run.id,
+                "completed": True
+            }
+        )
     
     def create_artifact(self, content: dict) -> wandb.Artifact:
         # Implementation to create and save a wandb.Artifact
