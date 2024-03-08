@@ -82,6 +82,8 @@ class HPORun():
         # create the HPOResult (also sets start time)
         self.hpo_results = HPOResult(logged_configs, self.sweep_id, hpo_config['hpo_run_name'])
 
+        # create the sweep
+        self.data_storer.create_hpo_sweep(self.hpo_results)
 
         # only initialize the objective once, in the constructor
         self.objective = HPOObjective(hpo_config)
@@ -276,12 +278,7 @@ class HPORun():
                         self.best_config = validated_config
                         print(f"This is the new best value!")
 
-                    wandb.log(
-                        {
-                            'hpo_objective': objective_results["total"],
-                            'objective_details': objective_results 
-                        }
-                    )
+                    self.data_storer.save_hpo_step(wandb.run.sweep_id, hpo_step_results)
 
                     #return HPOResult(results, objective_results)
 
@@ -328,6 +325,8 @@ class HPORun():
         wandb._teardown()
 
         self.hpo_results.mark_finished()
+
+        self.data_storer.save_hpo_result(self.hpo_results)
 
         return self.hpo_results
     
