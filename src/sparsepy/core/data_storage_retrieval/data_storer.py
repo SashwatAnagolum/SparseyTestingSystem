@@ -76,10 +76,52 @@ class DataStorer:
 
     def save_training_result(self, result: TrainingResult):
         # Implementation to save the training result
+
+        # do we even need to set anything in W&B here? time finished? but W&B should track that
+        # is there something we need to do here to mark end of run?
+        # FIXME save required data if any, else remove
+        run = self.api.run(wandb.run.path)
+
+        experiment_ref = self.db.collection("experiments").document(result.id)
+
+        # every invocation of this costs 1 read call; consider removing
+        if experiment_ref.get().exists:
+            experiment_ref.update(
+                {
+                    "end_time": result.end_time,
+                    "completed": True
+                }
+            )
+
+        # COMMENT THIS IN to test updated config saving
+        #run.config = result.
+
     def save_evaluation_result(self, parent: str, result: EvaluationResult):
         # Implementation to save the evaluation result
-        pass
-    
+
+        # access the current run's summary-level data with the API
+        run = self.api.run(wandb.run.path)
+        
+        # gather the saved metrics for summary in W&B and full storage in the DB        
+        eval_dict = {}
+
+        for metric_name, metric_val in result.get_metrics()[0].items():
+            if metric_name in self.saved_metrics:
+                run.summary["Evaluation" + metric_name] = metric_val
+                eval_dict[metric_name] = pickle.dumps(metric_val) # thank you, Firestore!
+
+        # save summary to W&B
+        run.summary.update()
+        # save the full results to Firestore
+        experiment_ref = self.db.collection("experiments").document(parent)
+        if experiment_ref.get().exists:
+            # add step to existing experiment
+            experiment_ref.update(
+                {
+                    "saved_metrics.evaluation": firestore.ArrayUnion([eval_dict])
+                }
+            )
+
     def save_hpo_step(self, parent: str, result: HPOStepResult):
         # Implementation to save the HPO step result
         pass
