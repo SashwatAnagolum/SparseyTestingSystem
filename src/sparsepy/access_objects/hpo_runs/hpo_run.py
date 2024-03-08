@@ -81,6 +81,10 @@ class HPORun():
         # create the DataStorer
         self.data_storer = DataStorer(trainer_config['metrics'])
 
+        # create the HPOResult (also sets start time)
+        self.hpo_results = HPOResult(logged_configs, self.sweep_id, hpo_config['hpo_run_name'])
+
+
         # only initialize the objective once, in the constructor
         self.objective = HPOObjective(hpo_config)
         self.best = None
@@ -259,16 +263,16 @@ class HPORun():
 
                     # OLD LOGIC
                     # this one is the best one if 1) there is no previous result or 2) its objective value is higher than the previous best result
-                    is_best = (not self.best) or (self.best and objective_results["total"] > self.best["total"])
+                    is_best = (not self.best) or (self.best and objective_results["total"] > self.best.get_objective()["total"])
 
                     print(f"Completed trial {self.num_steps} of {self.num_trials}")
                     if self.best:
-                        print(f"Previous best objective value: {self.best['total']:.5f}")
+                        print(f"Previous best objective value: {self.best.get_objective()['total']:.5f}")
 
                     self._print_breakdown(hpo_step_results)
 
                     if is_best:
-                        self.best = objective_results
+                        self.best = hpo_step_results
                         self.best_results = results
                         self.best_run = self.num_steps
                         self.best_config = validated_config
