@@ -235,7 +235,7 @@ class HPORun():
                     'dataset_config': self.dataset_config,
                     'preprocessing_config': self.preprocessing_config,
                     'training_recipe_config': self.training_recipe_config,
-                    'model_config': validate_config
+                    'model_config': validated_config
                 })
 
                 # increment step counter
@@ -285,11 +285,11 @@ class HPORun():
 
                     # if this is the final run, also log the best-performing model
                     # this should be handled by the DS when it is called to store the HPORun from run_sweep()
-                    if self.num_steps >= self.num_trials:
-                        print(f"OPTIMIZATION RUN COMPLETED")
-                        print(f"Best run: {self.best_run}")
-                        self._print_breakdown(self.best)
-                        print(f"Best run configuration: {self.best_config}")
+                    #if self.num_steps >= self.num_trials:
+                    #    print(f"OPTIMIZATION RUN COMPLETED")
+                    #    print(f"Best run: {self.best_run}")
+                    #    self._print_breakdown(self.best)
+                    #    print(f"Best run configuration: {self.best_config}")
 
                         #wandb.log(
                         #    {
