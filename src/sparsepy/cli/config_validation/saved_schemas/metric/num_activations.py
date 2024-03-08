@@ -54,7 +54,7 @@ class NumActivationsMetricSchema(AbstractSchema):
                 'name': 'num_activations',
                 Optional('save', default=False): bool,
                 Optional('reduction', default=None): Or(
-                    'layerwise_mean', 'sum', 'mean'
+                    'none', 'layerwise_mean', 'sum', 'mean'
                 )
             }
         )

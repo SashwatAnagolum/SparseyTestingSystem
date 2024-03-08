@@ -40,7 +40,7 @@ class NumActivationsMetric(Metric):
             reduction (Optional[str]): the type of reduction
                 to apply before returning the metric value. 
                 Valid options are 'layerwise_mean', 'sum',
-                'mean', and None.
+                'mean', 'none', and None.
         """
         super().__init__(model)
 
@@ -87,7 +87,7 @@ class NumActivationsMetric(Metric):
                     layer_index
                 ][mac_index] = torch.sum(mac.is_active).item()
 
-        if self.reduction is None:
+        if self.reduction is None or self.reduction == 'none':
             return [
                 [mac_activations for mac_activations in layer_activations]
                 for layer_activations in self.num_activations
