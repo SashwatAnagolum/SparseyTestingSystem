@@ -7,7 +7,7 @@
     
         {
             "name": "PyTest - test_hebbian",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "pytest",
             "args": [
@@ -18,7 +18,7 @@
         },
         {
             "name": "PyTest - test_exact_match_accuracy",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "pytest",
             "args": [
@@ -29,7 +29,7 @@
         },
         {
             "name": "PyTest - test_match_accuracy",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "pytest",
             "args": [
@@ -40,7 +40,7 @@
         },
         {
             "name": "Run Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
@@ -49,7 +49,7 @@
         },
         {
             "name": "Run HPO",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}\\scripts\\run_hpo.py",
             "args": [
@@ -64,7 +64,7 @@
         },
         {
             "name": "Train Model",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}\\scripts\\train_model.py",
             "args": [
@@ -79,7 +79,7 @@
         },
         {
             "name": "PyTest - test_weight_freezing",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "pytest",
             "args": [
@@ -90,7 +90,7 @@
         },
         {
             "name": "PyTest - test sparsey dataset configs",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "pytest",
             "args": [
