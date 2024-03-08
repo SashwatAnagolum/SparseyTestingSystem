@@ -43,9 +43,7 @@ class DataStorer:
     
     def save_training_result(self, result: TrainingResult):
         # Implementation to save the training result
-        pass
-    
-    def save_evaluation_result(self, result: EvaluationResult):
+    def save_evaluation_result(self, parent: str, result: EvaluationResult):
         # Implementation to save the evaluation result
         pass
     
