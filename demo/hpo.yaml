@@ -67,9 +67,9 @@ hyperparameters:
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
-          value: 6
+          value: 0.1
         activation_threshold_max:
-          value: 15
+          value: 0.8
         min_familiarity:
           min: 0.3
           max: 0.5
@@ -103,9 +103,9 @@ hyperparameters:
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
-          value: 6
+          value: 0.1
         activation_threshold_max:
-          value: 15
+          value: 0.8
         min_familiarity:
           min: 0.3
           max: 0.5
@@ -139,9 +139,9 @@ hyperparameters:
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
-          value: 6
+          value: 0.1
         activation_threshold_max:
-          value: 15
+          value: 0.8
         min_familiarity:
           min: 0.3
           max: 0.5
@@ -175,9 +175,9 @@ hyperparameters:
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
-          value: 6
+          value: 0.1
         activation_threshold_max:
-          value: 15
+          value: 0.8
         min_familiarity:
           min: 0.3
           max: 0.5
@@ -211,9 +211,9 @@ hyperparameters:
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
-          value: 6
+          value: 0.1
         activation_threshold_max:
-          value: 15
+          value: 0.8
         min_familiarity:
           min: 0.3
           max: 0.5
@@ -253,4 +253,11 @@ num_candidates: 10
 # verbosity: controls how much information about the HPO process is output to the console
 # 0 = minimal; suppresses Weights & Biases HPO console spam
 verbosity: 0
+
+metrics:
+  - name: feature_coverage
+    save: True
+
+  - name: match_accuracy
+    save: True
 ...

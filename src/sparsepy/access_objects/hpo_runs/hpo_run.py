@@ -52,14 +52,7 @@ class HPORun():
         self.num_trials = hpo_config['num_candidates']
         self.config_info = hpo_config
 
-        trainer_config['metrics'] = []
-
-        for metric in hpo_config['optimization_objective'][
-            'objective_terms'
-        ]:
-            trainer_config['metrics'].append(
-                metric['metric']
-            )
+        trainer_config['metrics'] = hpo_config['metrics']
 
         self.preprocessing_config = preprocessing_config
         self.dataset_config = dataset_config

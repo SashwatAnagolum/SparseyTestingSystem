@@ -20,8 +20,21 @@ class AbstractSchema():
         passed in by the user to define model structures, training 
         recipes, HPO runs, and create plots.
     """
-    @abc.abstractmethod
-    def extract_schema_params(self, config_info: dict) -> Optional[dict]:
+    def build_precheck_schema(self) -> Schema:
+        """
+        Builds the precheck schema for the config information
+        passed in by the user. This is used to verify that all parameters
+        can be collected in order to build the actual schema that will
+        be used to verify the entire configuration passed in by the
+        user.
+
+        Returns:
+            (Schema): the precheck schema.
+        """
+        return Schema(object)
+
+
+    def extract_schema_params(self, config_info: dict) -> dict:
         """
         Extracts the required schema parameters from the config info dict
         in order to build the schema to validate against.
@@ -31,9 +44,10 @@ class AbstractSchema():
                 user.
 
         Returns:
-            a dict (might be None) containing all the required parameters 
+            (dict): all the required parameters 
                 to build the schema.
         """
+        return dict()
 
 
     def transform_schema(self, config_info: dict) -> dict:
@@ -45,7 +59,7 @@ class AbstractSchema():
             config_info: dict containing the config information
 
         Returns:
-            dict containing the transformed config info
+            (dict): the transformed config info
         """
         return config_info
 
@@ -79,11 +93,9 @@ class AbstractSchema():
             a dict (might be None) holding the validated
                 (and possibly transformed) user config info.
         """
+        precheck_schema = self.build_precheck_schema()
+        precheck_schema.validate(config_info)
         schema_params = self.extract_schema_params(config_info)
-
-        if schema_params is None:
-            raise ValueError('Invalid schema!')
-
         schema = self.build_schema(schema_params)
         validated_config = schema.validate(config_info)
 
