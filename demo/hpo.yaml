@@ -67,9 +67,9 @@ hyperparameters:
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
-          value: 6
+          value: 0.2
         activation_threshold_max:
-          value: 15
+          value: 0.5
         min_familiarity:
           min: 0.3
           max: 0.5
@@ -103,9 +103,9 @@ hyperparameters:
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
-          value: 6
+          value: 0.2
         activation_threshold_max:
-          value: 15
+          value: 1.0
         min_familiarity:
           min: 0.3
           max: 0.5
@@ -139,9 +139,9 @@ hyperparameters:
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
-          value: 6
+          value: 0.2
         activation_threshold_max:
-          value: 15
+          value: 1.0
         min_familiarity:
           min: 0.3
           max: 0.5
@@ -175,9 +175,9 @@ hyperparameters:
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
-          value: 6
+          value: 0.2
         activation_threshold_max:
-          value: 15
+          value: 1.0
         min_familiarity:
           min: 0.3
           max: 0.5
@@ -211,9 +211,9 @@ hyperparameters:
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
-          value: 6
+          value: 0.2
         activation_threshold_max:
-          value: 15
+          value: 1.0
         min_familiarity:
           min: 0.3
           max: 0.5

@@ -28,8 +28,8 @@ class MAC(torch.nn.Module):
         num_neurons_per_cm_in_input: int,
         layer_index: int, mac_index: int,
         sigmoid_lambda: float, sigmoid_phi: float,
-        permanence: float, activation_threshold_min: int,
-        activation_threshold_max: int,
+        permanence: float, activation_threshold_min: float,
+        activation_threshold_max: float,
         sigmoid_chi: float, min_familiarity: float
     ) -> None:
         """
@@ -75,12 +75,18 @@ class MAC(torch.nn.Module):
 
         self.input_num_cms = num_cms_per_mac_in_input
         self.input_num_neurons = num_neurons_per_cm_in_input
-        self.input_min_macs = input_filter.shape[0]
+        self.input_num_macs = input_filter.shape[0]
 
         self.layer_index = layer_index
         self.mac_index = mac_index
-        self.activation_threshold_min = activation_threshold_min
-        self.activation_threshold_max = activation_threshold_max
+
+        self.activation_threshold_min = (
+            self.input_num_macs * activation_threshold_min
+        )
+
+        self.activation_threshold_max = (
+            self.input_num_macs * activation_threshold_max
+        )
 
         self.sigmoid_lambda = sigmoid_lambda
         self.sigmoid_phi = sigmoid_phi
@@ -102,6 +108,13 @@ class MAC(torch.nn.Module):
         self.training = True
 
         self.is_active = True
+
+
+    def get_input_filter(self) -> torch.Tensor:
+        """
+        Returns the input filter for the MAC.
+        """
+        return self.input_filter
 
 
     def train(self, mode: bool = True) -> None:
@@ -308,6 +321,16 @@ class SparseyLayer(torch.nn.Module):
 
         ####Edit out when we have a better mechanism for tracking layers
         self.layer_index = layer_index
+
+
+    def get_macs(self) -> list[MAC]:
+        """
+        Returns the MACs making up the layer.
+
+        Returns:
+            (list[MAC]): the MACs making up the layer.
+        """
+        return self.mac_list
 
 
     def compute_mac_positions(
