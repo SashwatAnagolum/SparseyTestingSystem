@@ -195,7 +195,7 @@ class HPORun():
             dict(wandb.config)
         )
 
-        validated_config, _ = validate_config(
+        validated_config = validate_config(
             model_config, 'model', self.config_info['model_family']
         )
 

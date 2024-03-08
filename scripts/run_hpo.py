@@ -73,15 +73,15 @@ def main():
 
     # preprocessing config validation
 
-    validated_dataset_config, _ = validate_config(
+    validated_dataset_config = validate_config(
         dataset_config_info, 'dataset', dataset_config_info['dataset_type']
     )
 
-    validated_hpo_config, _ = validate_config(
+    validated_hpo_config = validate_config(
         hpo_config_info, 'hpo', 'default'
     )
 
-    validated_training_recipe_config, _ = validate_config(
+    validated_training_recipe_config = validate_config(
         training_recipe_config_info, 'training_recipe', 'sparsey_hpo'
     )
 
