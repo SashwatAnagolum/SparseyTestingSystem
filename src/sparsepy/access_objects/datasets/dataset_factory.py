@@ -16,10 +16,13 @@ class DatasetFactory:
     allowed_modules = set([i for i in dir(datasets) if i[:2] != '__'])
 
     @staticmethod
-    def get_dataset_class(dataset_type):
+    def get_dataset_class(dataset_type: str):
         """
         Gets the class corresponding to the name passed in.
         Throws an error if the name is not valid.
+
+        Args:
+            dataset_type (str): the type of dataset to create.
         """
         class_name = ''.join(
             [l.capitalize() for l in dataset_type.split('_')] + ['Dataset']
@@ -32,9 +35,12 @@ class DatasetFactory:
     
 
     @staticmethod
-    def create_dataset(dataset_type, **kwargs) -> Dataset:
+    def create_dataset(dataset_type: str, **kwargs) -> Dataset:
         """
         Creates a layer passed in based on the layer name and kwargs.
+
+        Args:
+            dataset_type (str) the type of dataset to create.
         """
         dataset_class = DatasetFactory.get_dataset_class(dataset_type)
 

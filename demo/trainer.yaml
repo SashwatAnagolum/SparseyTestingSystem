@@ -2,21 +2,24 @@
 
 optimizer:
   name: hebbian
-
+  params: {}
 metrics:
   - name: basis_set_size
     save: True
   - name: basis_set_size_increase
     save: False
-  - name: exact_match_accuracy
+  - name: basis_average
     save: True
-  - name: approximate_match_accuracy
+  - name: num_activations
     save: True
+    reduction: layerwise_mean
 
 dataloader:
-  batch_size: 1
+  batch_size: 4
   shuffle: True
 
 training:
   num_epochs: 1
+
+#verbosity: 
 ...

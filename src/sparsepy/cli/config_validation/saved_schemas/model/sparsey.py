@@ -6,8 +6,9 @@ Sparsey Model Schema: the schema for Sparsey model config files.
 
 
 import typing
+import math
 
-from schema import Schema, And, Optional
+from schema import Schema, And, Optional, Or
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation.saved_schemas import schema_utils
@@ -55,6 +56,42 @@ class SparseyModelSchema(AbstractSchema):
         return hook_name in dir(hooks)
 
 
+    def compute_factor_pair(self, num: int) -> typing.Tuple[int, int]:
+        """
+        Returns the pair of factors whose product is num
+        whose elements are closest to sqrt(num)
+
+        Args:
+            num (int): the number to find the factors of.
+
+        Returns:
+            (Tuple[int, int]): the chosen factors
+        """
+        factor = 1
+
+        for i in range(2, math.floor(num ** 0.5) + 1):
+            if not num % i:
+                factor = i
+
+        return factor, num // factor
+
+
+    def compute_grid_size(self, num_macs: int) -> typing.Tuple[int, int]:
+        """
+        Finds the smallest grid with at least 2 rows 
+        that can accomodate num_macs.
+        """
+        factor_1 = 1
+
+        while factor_1 == 1:
+            factor_1, factor_2 = self.compute_factor_pair(num_macs)
+            num_macs += 1
+
+        print(factor_1, factor_2)
+
+        return factor_1, factor_2
+
+
     def transform_schema(self, config_info: dict) -> dict:
         """
         Transforms the config info passed in by the user to 
@@ -69,9 +106,9 @@ class SparseyModelSchema(AbstractSchema):
         prev_layer_dims = (
             config_info['input_dimensions']['width'],
             config_info['input_dimensions']['height'],
-            config_info['input_dimensions']['width'] * 
+            config_info['input_dimensions']['width'] *
             config_info['input_dimensions']['height'],
-            1, 1
+            1, 1, 'rect'
         )
 
         for index in range(len(config_info['layers'])):
@@ -95,15 +132,51 @@ class SparseyModelSchema(AbstractSchema):
                 'prev_layer_num_neurons_per_cm'
             ] = prev_layer_dims[4]
 
+            config_info['layers'][index]['params'][
+                'prev_layer_grid_layout'
+            ] = prev_layer_dims[5]
+
+            num_rows, num_cols = self.compute_factor_pair(
+                config_info['layers'][index]['params']['num_macs']
+            )
+
+            config_info['layers'][index]['params']['mac_grid_num_rows'] = num_rows
+            config_info['layers'][index]['params']['mac_grid_num_cols'] = num_cols
+
+            config_info['layers'][index]['params'][
+                'permanence'
+            ] = float(
+                config_info['layers'][index]['params'][
+                    'permanence'
+                ]
+            )
+
+            config_info['layers'][index]['params'][
+                'activation_threshold_min'
+            ] = float(
+                config_info['layers'][index]['params'][
+                    'activation_threshold_min'
+                ]
+            )
+
+            config_info['layers'][index]['params'][
+                'activation_threshold_max'
+            ] = float(
+                config_info['layers'][index]['params'][
+                    'activation_threshold_max'
+                ]
+            )
+
             prev_layer_dims = (
                 config_info['layers'][index]['params']['mac_grid_num_rows'],
                 config_info['layers'][index]['params']['mac_grid_num_rows'],
                 config_info['layers'][index]['params']['num_macs'],
                 config_info['layers'][index]['params']['num_cms_per_mac'],
-                config_info['layers'][index]['params']['num_neurons_per_cm']
+                config_info['layers'][index]['params']['num_neurons_per_cm'],
+                config_info['layers'][index]['params']['grid_layout'],
             )
 
-        return config_info     
+        return config_info
 
 
     def build_schema(self, schema_params: dict) -> Schema:
@@ -128,17 +201,46 @@ class SparseyModelSchema(AbstractSchema):
                     {
                         'name': And(str, 'sparsey'),
                         'params': {
+                            Optional('autosize_grid', default=False): bool,
+                            Optional('grid_layout', default='rect'): Or(
+                                'rect', 'hex'
+                            ),
                             'num_macs': And(int, schema_utils.is_positive),
-                            'mac_grid_num_rows': And(int, schema_utils.is_positive),
-                            'mac_grid_num_cols': And(int, schema_utils.is_positive),
+                            Optional(
+                                'mac_grid_num_rows', default=1
+                                ): And(int, schema_utils.is_positive),
+                            Optional(
+                                'mac_grid_num_cols', default=1
+                            ): And(int, schema_utils.is_positive),
                             'num_cms_per_mac': And(int, schema_utils.is_positive),
                             'num_neurons_per_cm': And(int, schema_utils.is_positive),
                             'mac_receptive_field_radius': And(
-                                float,
+                                Or(int, float),
                                 schema_utils.is_positive
                             ),
-                            'sigmoid_lambda': And(float, schema_utils.is_positive),
-                            'sigmoid_phi': float
+                            'sigmoid_lambda': And(
+                                Or(float, int),
+                                schema_utils.is_positive
+                            ),
+                            'sigmoid_phi': Or(int, float),
+                            'saturation_threshold': And(float, lambda n: 0 <= n <= 1),
+                            'permanence': And(
+                                Or(int, float),
+                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
+                            ),
+                            'activation_threshold_min': And(
+                                Or(int, float),
+                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
+                            ),
+                            'activation_threshold_max': And(
+                                Or(int, float),
+                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
+                            ),
+                            'sigmoid_chi': Or(int, float),
+                            'min_familiarity': And(
+                                float,
+                                lambda x: schema_utils.is_between(x, 0, 1)
+                            )
                         }
                     }
                 ],

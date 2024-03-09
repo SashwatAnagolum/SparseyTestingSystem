@@ -1,0 +1,23 @@
+---
+
+optimizer:
+  name: hebbian
+  params: {}
+metrics:
+  - name: basis_set_size
+    save: True
+  - name: basis_set_size_increase
+    save: False
+  - name: match_accuracy
+    save: True
+
+
+dataloader:
+  batch_size: 1
+  shuffle: True
+
+training:
+  num_epochs: 1
+
+#verbosity: 
+...

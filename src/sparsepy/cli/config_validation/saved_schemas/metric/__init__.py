@@ -1,1 +1,5 @@
-from . import basis_set_size, basis_set_size_increase, exact_match_accuracy, approximate_match_accuracy
+from . import (
+    basis_set_size, basis_set_size_increase,
+    feature_coverage,
+    match_accuracy, basis_average, num_activations
+)

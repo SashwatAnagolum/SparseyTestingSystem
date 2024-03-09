@@ -9,7 +9,7 @@ import typing
 import os
 
 from schema import Schema, Optional, And
-
+from sparsepy.cli.config_validation.saved_schemas.transform.preprocessing_stack_schema import PreprocessingStackSchemaTransformSchema
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.core import optimizers
 
@@ -53,13 +53,24 @@ class ImageDatasetSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
+        def validate_preprocessed_stack(config):
+            # Check if 'preprocessed' is True in the config
+            if config.get('preprocessed', False):
+                # If True, validate preprocessed_stack using PreprocessingStackSchemaTransformSchema
+                return PreprocessingStackSchemaTransformSchema.preprocessing_stack_schema.validate(config.get('preprocessed_stack', {}))
+            else:
+                # If preprocessed is False or not set, skip validation for preprocessed_stack
+                return True
+            
         config_schema = Schema(
             {
                 'dataset_type': 'image',
                 'params': {
                     'data_dir': And(str, os.path.exists),
                     'image_format': And(str, lambda x: x[0] == '.')
-                }
+                },
+                'preprocessed': bool,
+                'preprocessed_stack': validate_preprocessed_stack,
             }
         )
 

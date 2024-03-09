@@ -51,7 +51,7 @@ def main():
     args = parse_args()
 
     model_config_info = get_config_info(args.model_config)
-    validated_config, is_valid = validate_config(
+    validated_config = validate_config(
         model_config_info, 'model', 'sparsey'
     )
 
@@ -59,7 +59,7 @@ def main():
         args.training_recipe_config
     )
 
-    validated_trainer_config, is_valid = validate_config(
+    validated_trainer_config = validate_config(
         training_recipe_config_info, 'training_recipe', 'sparsey'
     )
 
@@ -67,14 +67,16 @@ def main():
         args.preprocessing_config
     )
 
-    # validated_preprocessing_config
+    validated_preprocessing_config = validate_config(
+        preprocessing_config_info, 'transform', 'preprocessing_stack_schema'
+    )
     
     dataset_config_info = get_config_info(
         args.dataset_config
     )
 
-    validated_dataset_config, is_valid = validate_config(
-        dataset_config_info, 'dataset', 'image'
+    validated_dataset_config = validate_config( # needs updating to support different dataset types
+        dataset_config_info, 'dataset', dataset_config_info['dataset_type']
     )
 
     train_model(

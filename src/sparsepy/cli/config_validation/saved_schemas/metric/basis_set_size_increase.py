@@ -1,35 +1,16 @@
-import typing
+# -*- coding: utf-8 -*-
 
-from schema import Schema, And, Optional
+"""
+Basis Set Size Increase: file holding the BasisSetSizeIncreaseMetricSchema class.
+"""
+
+
+from schema import Schema, Or, Optional
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
-from sparsepy.cli.config_validation.saved_schemas import schema_utils
 
 
-class BasisSetSizeIncreaseSchema(AbstractSchema):
-    def extract_schema_params(self, config_info: dict) -> typing.Optional[dict]:
-        """
-        Extracts the required schema parameters from the config info dict
-        in order to build the schema to validate against.
-
-        In this instance, there are no parameters.
-
-        Args:
-            config_info: a dict containing the config info from the
-                user.
-
-        Returns:
-            a dict (might be None) containing all the required parameters
-                to build the schema.
-        """
-
-        schema_params = dict()
-
-        return schema_params
-
-    def transform_schema(self, config_info: dict) -> dict:
-        return config_info
-
+class BasisSetSizeIncreaseMetricSchema(AbstractSchema):
     def build_schema(self, schema_params: dict) -> Schema:
         """
         Builds a schema that can be used to validate the passed in
@@ -45,7 +26,8 @@ class BasisSetSizeIncreaseSchema(AbstractSchema):
         config_schema = Schema(
             {
                 'name':'basis_set_size_increase',
-                Optional('save', default=False): bool
+                Optional('save', default=False): bool,
+                Optional('reduction', default=None): Or('mean', 'none', 'sum')
             }, ignore_extra_keys=True
         )
 
