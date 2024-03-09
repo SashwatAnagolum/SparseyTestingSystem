@@ -1,0 +1,263 @@
+---
+model_family: sparsey
+# hpo_run_name: the name to use for this run in Weights & Biases
+hpo_run_name: sample_hpo_run
+# project_name: the project in Weights & Biases to which to log this run's results
+project_name: sparsey_hpo_presentation_3
+
+verbosity: 0
+
+hyperparameters:
+  # GENERAL HYPERPARAMETER OPTIONS
+  # in general, hyperparameters have three specific types: a single value, a set of values, or a sampling distribution
+  # SINGLE VALUE
+  # hyperparameter:
+  #   value: 7.5
+  # RANGE OF VALUES
+  # hyperparameter:
+  #   values: [X, Y, Z]
+  # DISTRIBUTION
+  # hyperparameter:
+  #   min: 0
+  #   max: 10 (note that maximum must be STRICTLY GREATER THAN minimum to use this; if you only want a single value, use "value" instead)
+  #   distribution: uniform (currently supports "int_uniform" for integer values only (e.g. 3) and "uniform" for float values (can give 3.05))
+
+  # input_dimensions: the dimensions to which to resize the input during HPO
+  # width and height can be any positive integer values not larger than the input, and do not need to be the same
+  input_dimensions: 
+    width: 
+      value: 4
+    height:
+      value: 4
+
+  # num_layers: int > 0 = the number of layers to be used in the model
+  # the actual properties of the layers are defined below; this just controls the *number* of layers
+  # if you define more layers than num_layers below, num_layers controls (even if you specify 3 layers if "num_layers" is 1 you will get 1 layer)
+  num_layers:
+    value: 4
+
+  # the layers section defines the properties of individual layers in the Sparey model
+  # each entry in its list is a new layer, in order from the bottom of the model to the top
+  layers:
+    - name: 
+        value: sparsey
+      params:
+        grid_layout:
+          value: rect
+        autosize_grid:
+          value: True
+        num_cms_per_mac:
+          value: 2
+        num_macs:
+          values: [4, 9]
+        num_neurons_per_cm:
+          min: 2
+          max: 10
+          distribution: int_uniform
+        mac_receptive_field_radius:
+          values: [0.75, 1.0, 1.5]
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+        permanence:
+          min: 0.2
+          max: 0.9
+          distribution: uniform
+        saturation_threshold:
+          value: 0.8
+        activation_threshold_min:
+          value: 0.1
+        activation_threshold_max:
+          value: 0.8
+        min_familiarity:
+          min: 0.3
+          max: 0.5
+          distribution: uniform
+        sigmoid_chi:
+          values: [0.5, 1.0, 2.5, 5.0]
+
+    - name: 
+        value: sparsey
+      params:
+        grid_layout:
+          value: rect
+        autosize_grid:
+          value: True
+        num_neurons_per_cm:
+          value: 2
+        num_macs:
+          values: [4, 9]
+        num_cms_per_mac:
+          values: [5, 10, 15, 20, 25]
+        mac_receptive_field_radius:
+          value: 1.0
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+        permanence:
+          min: 0.2
+          max: 0.9
+          distribution: uniform
+        saturation_threshold:
+          value: 0.8
+        activation_threshold_min:
+          value: 0.1
+        activation_threshold_max:
+          value: 0.8
+        min_familiarity:
+          min: 0.3
+          max: 0.5
+          distribution: uniform
+        sigmoid_chi:
+          values: [0.5, 1.0, 2.5, 5.0]
+
+    - name: 
+        value: sparsey
+      params:
+        grid_layout:
+          value: rect
+        autosize_grid:
+          value: True
+        num_neurons_per_cm:
+          value: 2
+        num_macs:
+          values: [4, 9]
+        num_cms_per_mac:
+          value: 2
+        mac_receptive_field_radius:
+          values: [1.0, 1.5]
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+        permanence:
+          min: 0.2
+          max: 0.9
+          distribution: uniform
+        saturation_threshold:
+          value: 0.8
+        activation_threshold_min:
+          value: 0.1
+        activation_threshold_max:
+          value: 0.8
+        min_familiarity:
+          min: 0.3
+          max: 0.5
+          distribution: uniform
+        sigmoid_chi:
+          values: [0.5, 1.0, 2.5, 5.0]
+
+    - name: 
+        value: sparsey
+      params:
+        grid_layout:
+          value: rect
+        autosize_grid:
+          value: True
+        num_cms_per_mac:
+          value: 2
+        num_neurons_per_cm:
+          value: 2
+        num_macs:
+          values: [4, 9]
+        mac_receptive_field_radius:
+          value: 1.0
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+        permanence:
+          min: 0.2
+          max: 0.9
+          distribution: uniform
+        saturation_threshold:
+          value: 0.8
+        activation_threshold_min:
+          value: 0.1
+        activation_threshold_max:
+          value: 0.8
+        min_familiarity:
+          min: 0.3
+          max: 0.5
+          distribution: uniform
+        sigmoid_chi:
+          values: [0.5, 1.0, 2.5, 5.0]
+
+    - name: 
+        value: sparsey
+      params:
+        grid_layout:
+          value: rect
+        autosize_grid:
+          value: True
+        num_cms_per_mac:
+          value: 2
+        num_neurons_per_cm:
+          value: 2
+        num_macs:
+          value: 4
+        mac_receptive_field_radius:
+          value: 0.75
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+        permanence:
+          min: 0.2
+          max: 0.9
+          distribution: uniform
+        saturation_threshold:
+          value: 0.8
+        activation_threshold_min:
+          value: 0.1
+        activation_threshold_max:
+          value: 0.8
+        min_familiarity:
+          min: 0.3
+          max: 0.5
+          distribution: uniform
+        sigmoid_chi:
+          values: [0.5, 1.0, 2.5, 5.0]
+
+# hpo_strategy: the name of the HPO strategy to use; can be any strategy supported by the system
+# the currently supported strategy is "random" but "bayesian" will be added in the future
+hpo_strategy: random
+
+# optimization_objective: describes the desired objective function
+# consists of a list of one or more objective terms and a combination method to describe how they should be combined to produce the objective value
+optimization_objective:
+  # objective_terms: the individual terms in the objective
+  # one list entry for each metric
+  # * name: the name of the metric; can be any metric supported by the system
+  # * weight: the weight of this metric in the overall objective function
+  objective_terms:
+    - metric:
+        name: match_accuracy
+      weight: 1.0  
+
+    - metric:
+        name: feature_coverage
+      weight: 0.5
+  # combination_method: how the objective terms will be combined to produce the objective value
+  # * "sum" for a weighted sum
+  # * "mean" for a weighted average
+  # * "product" to multiply all the terms and their weights together
+  combination_method: sum
+
+# num_candidates: int > 0
+# the number of candidate models to try/steps of HPO to perform 
+num_candidates: 10
+
+# verbosity: controls how much information about the HPO process is output to the console
+# 0 = minimal; suppresses Weights & Biases HPO console spam
+verbosity: 0
+
+metrics:
+  - name: feature_coverage
+    save: True
+
+  - name: match_accuracy
+    save: True
+...

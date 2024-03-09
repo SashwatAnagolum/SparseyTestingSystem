@@ -51,9 +51,7 @@ class DefaultHpoSchema(AbstractSchema):
         )
 
 
-    def extract_schema_params(self, config_info: dict) -> typing.Optional[
-        dict
-    ]:
+    def extract_schema_params(self, config_info: dict) -> dict:
         """
         Extracts the required schema parameters from the config info dict
         in order to build the schema to validate against.
@@ -119,7 +117,7 @@ class DefaultHpoSchema(AbstractSchema):
         return True
 
 
-    def check_optimizer_hyperparams_validity(self, config_info):
+    def check_optimized_hyperparams_validity(self, config_info):
         """
         Checks whether the config for the hyperparameters to be
         optimized is valid or not.
@@ -161,10 +159,10 @@ class DefaultHpoSchema(AbstractSchema):
                 hyperparam_schema.validate(config_info)
             else:
                 for value in config_info.values():
-                    self.check_optimizer_hyperparams_validity(value)
+                    self.check_optimized_hyperparams_validity(value)
         elif isinstance(config_info, list):
             for config_item in config_info:
-                self.check_optimizer_hyperparams_validity(config_item)
+                self.check_optimized_hyperparams_validity(config_item)
         else:
             raise ValueError(
                 f'{config_info} is not a valid configuration' +
@@ -192,7 +190,7 @@ class DefaultHpoSchema(AbstractSchema):
                 'hpo_run_name': str,
                 'project_name': str,
                 'hyperparameters': And(
-                    dict, self.check_optimizer_hyperparams_validity
+                    dict, self.check_optimized_hyperparams_validity
                 ),
                 'hpo_strategy': Or('random', 'grid', 'bayes'),
                 'optimization_objective': {
