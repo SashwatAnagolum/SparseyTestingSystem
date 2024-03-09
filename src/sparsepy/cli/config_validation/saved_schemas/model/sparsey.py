@@ -226,7 +226,7 @@ class SparseyModelSchema(AbstractSchema):
                             'saturation_threshold': And(float, lambda n: 0 <= n <= 1),
                             'permanence': And(
                                 Or(int, float),
-                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
+                                lambda n: 0 < n <= 1
                             ),
                             'activation_threshold_min': And(
                                 Or(int, float),
