@@ -50,6 +50,8 @@ class TestSparseyModelConfigs:
             sparsey_model_schema: a dict containing the valid
             sparsey model schema to be used for testing, passed in 
             via pytest's fixture functionality.
+
+        Test case ID: TC-01-01
         """
         validated_config = validate_config(
             sparsey_model_schema, 'model', 'sparsey'
@@ -70,7 +72,7 @@ class TestSparseyModelConfigs:
             sparsey model schema to be used for testing, passed in 
             via pytest's fixture functionality.
 
-        Test case ID: TC-01-01
+        Test case ID: TC-01-16
         """
         del sparsey_model_schema['input_dimensions']
 
