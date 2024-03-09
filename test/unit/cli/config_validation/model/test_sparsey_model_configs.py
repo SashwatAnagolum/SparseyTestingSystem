@@ -105,7 +105,9 @@ class TestSparseyModelConfigs:
     def test_out_of_bounds_activation_thresholds(
             self, sparsey_model_schema: dict) -> None:
         """
-        TODO
+        Test whether the config validation throws an error
+        or not when the activation thresholds specfied are out of
+        bounds.
         
         Args:
             sparsey_model_schema: a dict containing the valid
@@ -127,7 +129,8 @@ class TestSparseyModelConfigs:
     def test_permanence_high_boundary(
             self, sparsey_model_schema: dict) -> None:
         """
-        TODO
+        Test whether the config validation accepts the
+        high boundary of the permanence parameter as valid or not.
         
         Args:
             sparsey_model_schema: a dict containing the valid
@@ -151,7 +154,8 @@ class TestSparseyModelConfigs:
     def test_permanence_low_boundary(
             self, sparsey_model_schema: dict) -> None:
         """
-        TODO
+        Test whether the config validation throws an
+        error when the permanence valus <= 0 or not.
         
         Args:
             sparsey_model_schema: a dict containing the valid
@@ -173,7 +177,8 @@ class TestSparseyModelConfigs:
     def test_receptive_field_radius_low_boundary(
             self, sparsey_model_schema: dict) -> None:
         """
-        TODO
+        Test whether the config validation throws an error 
+        when the receptive field size <= 0 or not.
         
         Args:
             sparsey_model_schema: a dict containing the valid

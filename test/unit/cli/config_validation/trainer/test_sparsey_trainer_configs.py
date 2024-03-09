@@ -6,9 +6,14 @@ Test Sparsey Trainer Configs: tests covering the config files for
 """
 
 
+import os
 import pytest
 
-from sparsepy.cli.config_validation.validate_config import validate_config
+from schema import SchemaError
+
+from sparsepy.cli.config_validation.validate_config import (
+    validate_config, get_config_info
+)
 
 
 class TestSparseyTrainerConfigs:
@@ -24,47 +29,35 @@ class TestSparseyTrainerConfigs:
         Returns:
             a dict containing a valid Sparsey trainer schema
         """
-        valid_schema = {
-            'optimizer': {
-                'name': 'sparsey'
-            }, 
-            'metrics': [
-                {
-                    'name': 'accuracy',
-                    'save': True
-                },
-                {
-                    'name': 'exact_match_retrieval'
-                }
-            ]
-        }
+        config_filepath = os.path.join(
+            './test/unit/cli/config_validation/trainer',
+            'valid_sparsey_trainer_config.yaml'
+        )
+
+        valid_schema = get_config_info(config_filepath)
 
         return valid_schema
 
 
-    def perform_assertion(self, schema: dict, expected_value: bool) -> None:
-        """
-        Performs an assertion based on the return value
-        of a call to validate_config.
-        """
-        assert validate_config(
-            schema, 'trainer',
-            'sparsey'
-        )[1] == expected_value
-
-
-    def test_valid_trainer_schema(self, sparsey_trainer_schema: dict) -> None:
+    def test_valid_trainer_schema(
+            self, sparsey_trainer_schema: dict) -> None:
         """
         Tests the config file validation for the case
-        where the config file for a Sparsey model is fully
+        where the config file for a trainer is fully
         valid.
 
         Args:
             sparsey_trainer_schema: a dict containing the valid
             sparsey trainer schema to be used for testing, passed in 
             via pytest's fixture functionality.
-        """        
-        self.perform_assertion(sparsey_trainer_schema, True)
+
+        Test case ID: TC-01-03
+        """
+        validated_config = validate_config(
+            sparsey_trainer_schema, 'training_recipe', 'sparsey'
+        )
+
+        assert isinstance(validated_config, dict)
 
 
     def test_missing_optimizer_name(self, sparsey_trainer_schema: dict) -> None:
@@ -77,10 +70,15 @@ class TestSparseyTrainerConfigs:
             sparsey_trainer_schema: a dict containing the valid
             sparsey trainer schema to be used for testing, passed in 
             via pytest's fixture functionality.
-        """        
+
+        Test case ID: TC-01-17
+        """
         del sparsey_trainer_schema['optimizer']['name']
 
-        self.perform_assertion(sparsey_trainer_schema, False)
+        with pytest.raises(SchemaError):
+            validate_config(
+                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+            )
 
 
     def test_invalid_optimizer_name(self, sparsey_trainer_schema: dict) -> None:
@@ -93,26 +91,116 @@ class TestSparseyTrainerConfigs:
             sparsey_trainer_schema: a dict containing the valid
             sparsey trainer schema to be used for testing, passed in 
             via pytest's fixture functionality.
-        """        
+
+        Test case ID: TC-01-18
+        """
         sparsey_trainer_schema['optimizer']['name'] = 'invalid_name'
 
-        self.perform_assertion(sparsey_trainer_schema, False)
+        with pytest.raises(SchemaError):
+            validate_config(
+                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+            )
 
 
-    def test_missing_metrics(self, sparsey_trainer_schema: dict) -> None:
+    def test_batch_size_lower_boundary_valid(
+            self, sparsey_trainer_schema: dict) -> None:
         """
-        Tests the config file validation for the case
-        where the config file for a Sparsey model is fully
-        valid.
+        TODO
 
         Args:
             sparsey_trainer_schema: a dict containing the valid
             sparsey trainer schema to be used for testing, passed in 
             via pytest's fixture functionality.
-        """        
+
+        Test case ID: TC-01-19
+        """
+        sparsey_trainer_schema['dataloader']['batch_size'] = 1
+
+        validated_config = validate_config(
+            sparsey_trainer_schema, 'training_recipe', 'sparsey'
+        )
+
+        assert isinstance(validated_config, dict)
+
+
+    def test_batch_size_lower_boundary_invalid(
+            self, sparsey_trainer_schema: dict) -> None:
+        """
+        TODO
+
+        Args:
+            sparsey_trainer_schema: a dict containing the valid
+            sparsey trainer schema to be used for testing, passed in 
+            via pytest's fixture functionality.
+
+        Test case ID: TC-01-20
+        """
+        sparsey_trainer_schema['dataloader']['batch_size'] = 0
+
+        with pytest.raises(SchemaError):
+            validate_config(
+                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+            )
+
+
+    def test_num_epochs_lower_boundary_valid(
+            self, sparsey_trainer_schema: dict) -> None:
+        """
+        TODO
+
+        Args:
+            sparsey_trainer_schema: a dict containing the valid
+            sparsey trainer schema to be used for testing, passed in 
+            via pytest's fixture functionality.
+
+        Test case ID: TC-01-21
+        """
+        sparsey_trainer_schema['training']['num_epochs'] = 1
+
+        validated_config = validate_config(
+            sparsey_trainer_schema, 'training_recipe', 'sparsey'
+        )
+
+        assert isinstance(validated_config, dict)
+
+
+    def test_num_epochs_lower_boundary_invalid(
+            self, sparsey_trainer_schema: dict) -> None:
+        """
+        TODO
+
+        Args:
+            sparsey_trainer_schema: a dict containing the valid
+            sparsey trainer schema to be used for testing, passed in 
+            via pytest's fixture functionality.
+
+        Test case ID: TC-01-21
+        """
+        sparsey_trainer_schema['training']['num_epochs'] = 0
+
+        with pytest.raises(SchemaError):
+            validate_config(
+                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+            )
+
+
+    def test_missing_metric_list(self, sparsey_trainer_schema: dict) -> None:
+        """
+        TODO
+
+        Args:
+            sparsey_trainer_schema: a dict containing the valid
+            sparsey trainer schema to be used for testing, passed in 
+            via pytest's fixture functionality.
+
+        Test case ID: TC-01-04
+        """
         del sparsey_trainer_schema['metrics']
 
-        self.perform_assertion(sparsey_trainer_schema, False)
+        with pytest.raises(SchemaError):
+            validate_config(
+                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+            )
 
 
     def test_no_listed_metrics(self, sparsey_trainer_schema: dict) -> None:
@@ -125,7 +213,12 @@ class TestSparseyTrainerConfigs:
             sparsey_trainer_schema: a dict containing the valid
             sparsey trainer schema to be used for testing, passed in 
             via pytest's fixture functionality.
-        """        
+
+        Test case ID: TC-01-23
+        """
         sparsey_trainer_schema['metrics'] = []
 
-        self.perform_assertion(sparsey_trainer_schema, False)
+        with pytest.raises(SchemaError):
+            validate_config(
+                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+            )

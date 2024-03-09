@@ -57,7 +57,7 @@ class SparseyHpoTrainingRecipeSchema(AbstractSchema):
 
     def transform_schema(self, config_info: dict) -> dict:
         config_info['optimizer']['params'] = dict()
-        
+
         return config_info
 
 
