@@ -11,11 +11,10 @@ import os
 from schema import Schema, Optional, And
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
-from sparsepy.cli.config_validation.saved_schemas.transform.preprocessing_stack_schema import TransformListSchema
 from sparsepy.core import optimizers
 
 
-class SkeletonizationTransformSchema(AbstractSchema):
+class SkeletonizeTransformSchema(AbstractSchema):
     """
     SparseyTrainerSchema: schema for Sparsey trainers.
     """
@@ -54,9 +53,9 @@ class SkeletonizationTransformSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
-        transform_list_schema = TransformListSchema()
         config_schema = Schema(
             {
+                'name': 'skeletonize',
                 'params': {
                     'sigma': int
                 }
