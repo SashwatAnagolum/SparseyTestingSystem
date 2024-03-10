@@ -22,7 +22,7 @@ class TestImageDataset:
         dataloader = DataLoader(mnist_dataset, batch_size=10, shuffle=True)
         images, labels = next(iter(dataloader))
         assert images.shape[0] == 10  # Batch size
-        assert images.dim() == 4  # Assuming batched CxHxW format for images
+        assert images.dim() == 4  # CxHxW format for images
         assert len(labels) == 10  # Batch size
         assert all(0 <= label <= 9 for label in labels)  # MNIST labels are from 0 to 9
 """

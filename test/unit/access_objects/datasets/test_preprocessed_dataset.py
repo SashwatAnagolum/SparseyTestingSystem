@@ -2,23 +2,21 @@ import pytest
 import torch
 import time
 
-# Assuming these imports match your project structure
 from sparsepy.access_objects.datasets import ImageDataset
 from sparsepy.access_objects.datasets import PreprocessedDataset
 from sparsepy.core.transforms.transfom_factory import TransformFactory
 from sparsepy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
-# Define a basic TransformFactory for this example
+
 class BasicTransformFactory:
     @staticmethod
     def create_transform(name, **params):
         if name == 'ToTensor':
-            return torch.nn.Identity()  # Assuming images are already Tensors; replace with actual transformation
+            return torch.nn.Identity()
         elif name == 'Normalize':
-            return torch.nn.Identity()  # Dummy placeholder for normalization; replace with actual transformation
+            return torch.nn.Identity() 
         else:
             raise ValueError(f"Unknown transform: {name}")
 
-# Mock the actual TransformFactory used in your PreprocessingStack
 TransformFactory.create_transform = BasicTransformFactory.create_transform
 
 # Setup for tests
@@ -33,7 +31,7 @@ def simple_preprocessing_stack():
     transform_configs = {
         'transform_list': [
             {'name': 'ToTensor', 'params': {}},
-            {'name': 'Normalize', 'params': {'mean': 0.5, 'std': 0.5}}  # Adjust these values as needed
+            {'name': 'Normalize', 'params': {'mean': 0.5, 'std': 0.5}} 
         ]
     }
     return PreprocessingStack(transform_configs)
@@ -49,7 +47,6 @@ def test_preprocessed_dataset_length(preprocessed_mnist_dataset, mnist_image_dat
 def test_preprocessing_applied(preprocessed_mnist_dataset):
     preprocessed_data, label = preprocessed_mnist_dataset[0]
     assert isinstance(preprocessed_data, torch.Tensor), "Preprocessed data is not a torch.Tensor"
-    # Additional checks can be added here to verify the preprocessing effects
 
 def test_preprocessing_cache(preprocessed_mnist_dataset):
     # First retrieval - likely not cached yet, so it might take longer
