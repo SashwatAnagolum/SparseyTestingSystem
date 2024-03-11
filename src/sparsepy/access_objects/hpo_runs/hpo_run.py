@@ -236,6 +236,17 @@ class HPORun():
                         }
                     )
 
+                    run_path = wandb.run.path
+                    # finish the run - wandb.run may no longer be correct below this point
+                    wandb.finish()
+                    # strip unused layers from W&B side config
+                    # this must occur after .finish() due to a bug in W&B
+                    max_layers = len(model_config['layers'])
+                    run = wandb.Api().run(run_path)
+                    for k in run.config.copy():
+                       if ("layers_" in k) and (int(k[7:]) >= max_layers):
+                           del run.config[k]
+                    run.update()
                     #return HPOResult(results, objective_results)
 
                     # if this is the final run, also log the best-performing model
