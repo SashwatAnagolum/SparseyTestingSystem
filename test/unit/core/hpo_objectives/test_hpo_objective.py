@@ -25,16 +25,14 @@ class TestHPOObjective:
         test_metric_data = [
             {
                 'BasisSetSizeMetric': [[1,2,3,4], [5,6,7,8]],
-                'ExactMatchAccuracyMetric': [[1,1,1,1], [1,1,1,1]],
+                'MatchAccuracyMetric': [[1,1,1,1], [1,1,1,1]],
                 'FeatureCoverageMetric': [[1.0, 0.1]],
-                'ApproximateMatchAccuracyMetric': 1,
                 'BasisSetSizeIncreaseMetric': [np.array([1,1,1,1]), np.array([1,1,1,1])]
             },
             {
                 'BasisSetSizeMetric': [[1,1,1,1], [1,1,1,1]],
-                'ExactMatchAccuracyMetric': [[1,1,1,1], [1,1,1,1]],
+                'MatchAccuracyMetric': [[1,1,1,1], [1,1,1,1]],
                 'FeatureCoverageMetric': [1.0, 1.0],
-                'ApproximateMatchAccuracyMetric': 1,
                 'BasisSetSizeIncreaseMetric': [np.array([1,1,1,1]), np.array([1,1,1,1])]
             },
             # Add more entries as needed
@@ -46,9 +44,8 @@ class TestHPOObjective:
                 "combination_method": "mean",
                 "objective_terms": [
                     {'metric': {"name": "basis_set_size"}, "weight": 1.0},
-                    {'metric': {"name": "exact_match_accuracy"}, "weight": 1},
+                    {'metric': {"name": "match_accuracy"}, "weight": 1},
                     {'metric': {"name": "feature_coverage"}, "weight": 1.0},
-                    {'metric': {"name": "match_accuracy"}, "weight": 1.0},
                     {'metric': {"name": "basis_set_size_increase"}, "weight": 1}
                 ]
             }
@@ -60,14 +57,14 @@ class TestHPOObjective:
         # Calculate combined metric
         combined_metric = hpo_objective.combine_metrics(test_metric_data)
         # assert metric values
-        assert combined_metric['total'] == 1.3050000000000002
+        assert combined_metric['total'] == 1.38125
         test_metric_data = [
             {
-                'ApproximateMatchAccuracyMetric': 5,
+                'MatchAccuracyMetric': 5,
                 'BasisSetSizeIncreaseMetric': [np.array([3,5,5,7]), np.array([1,9,1,9])]
             },
             {
-                'ApproximateMatchAccuracyMetric': 3,
+                'MatchAccuracyMetric': 3,
                 'BasisSetSizeIncreaseMetric': [np.array([1,5,1,5]), np.array([2,4,2,4])]
             },
             # Add more entries as needed
