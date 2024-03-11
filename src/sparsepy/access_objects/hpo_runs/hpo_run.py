@@ -167,7 +167,7 @@ class HPORun():
             elif (key != 'num_layers'):
                 model_config[key] = value
 
-        for i in range(len(layer_keys)):
+        for i in range(wandb_config['num_layers']):
             layers.append(layer_keys[f'layers_{i}'])
 
         model_config['layers'] = layers
