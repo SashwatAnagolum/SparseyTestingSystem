@@ -23,7 +23,7 @@ TransformFactory.create_transform = BasicTransformFactory.create_transform
 @pytest.fixture
 def mnist_image_dataset():
     # Adjust the `data_dir` path to where your MNIST dataset is located
-    return ImageDataset(data_dir="C:\\Users\\toddk\\Downloads\\SparseyTestingSystem\\demo\\sample_mnist_dataset", image_format=".png")
+    return ImageDataset(data_dir=".\\demo\\sample_mnist_dataset", image_format=".png")
 
 @pytest.fixture
 def simple_preprocessing_stack():
