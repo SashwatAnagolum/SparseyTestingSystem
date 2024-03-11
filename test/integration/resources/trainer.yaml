@@ -1,0 +1,22 @@
+---
+
+optimizer:
+  name: hebbian
+  params: {}
+metrics:
+  - name: basis_average
+    save: True
+  - name: num_activations
+    save: True
+    reduction: layerwise_mean
+
+dataloader:
+  batch_size: 4
+  shuffle: True
+
+training:
+  num_epochs: 1
+  step_resolution: 1
+
+#verbosity: 
+...
