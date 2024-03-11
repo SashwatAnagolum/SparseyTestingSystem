@@ -22,16 +22,35 @@ class TestMAC:
         tests with.
         """
         sparsey_layer = SparseyLayer(
-            num_macs=12, num_cms_per_mac=8,
-            num_neurons_per_cm=16, mac_grid_num_rows=4,
-            mac_grid_num_cols=4, mac_receptive_field_radius=0.5,
-            prev_layer_cms_per_mac=12, prev_layer_neurons_per_cm=10,
-            prev_layer_mac_positions=[
-                (0.0, 0.0), (0.0, 0.5), (0.0, 1.0),
-                (0.5, 0.0), (0.5, 0.5), (0.5, 1.0),
-                (1.0, 0.0), (1.0, 0.5), (1.0, 1.0),
-            ]            
-        )
+            autosize_grid=False, 
+            grid_layout="rect",
+            num_macs=12, 
+            num_cms_per_mac=8,
+            num_neurons_per_cm=16, 
+            mac_grid_num_rows=4,
+            mac_grid_num_cols=4, 
+            prev_layer_num_macs=9,
+            mac_receptive_field_radius=0.5,
+            prev_layer_num_cms_per_mac=12, 
+            prev_layer_num_neurons_per_cm=10,
+            prev_layer_mac_grid_num_rows=3,
+            prev_layer_mac_grid_num_cols=3,
+            prev_layer_grid_layout="rect", 
+            layer_index=2,
+            sigmoid_phi=5.0, 
+            sigmoid_lambda=28.0,
+            saturation_threshold=0.5, 
+            permanence=1.0,
+            activation_threshold_max=1.0, 
+            activation_threshold_min=0.2,
+            min_familiarity=0.2, 
+            sigmoid_chi=2.5
+            # prev_layer_mac_positions=[
+            #     (0.0, 0.0), (0.0, 0.5), (0.0, 1.0),
+            #     (0.5, 0.0), (0.5, 0.5), (0.5, 1.0),
+            #     (1.0, 0.0), (1.0, 0.5), (1.0, 1.0),
+            # ]            
+            )
 
         return sparsey_layer
 
