@@ -88,7 +88,7 @@ class DefaultHpoSchema(AbstractSchema):
         Checks if a model family with the name model_family exists.
 
         Returns:
-            (bool): whether the model famly exists or not
+            (bool): whether the model family exists or not
         """
         try:
             schema_factory.get_schema_by_name(
@@ -128,26 +128,29 @@ class DefaultHpoSchema(AbstractSchema):
         hyperparam_schema = Schema(
             Or(
                 {
-                    'min': Or(int, float),
-                    'max': Or(int, float),
+                    'min': Or(int, float, error="min must be an int or float"),
+                    'max': Or(int, float, error="max must be an int or float"),
                     'distribution': Or(
                         'int_uniform', 'uniform', 'categorical',
                         'q_uniform', 'log_uniform', 'log_uniform_values',
                         'q_log_uniform', 'q_log_uniform_values',
                         'inv_log_uniform', 'normal', 'q_normal',
-                        'log_normal', 'q_log_normal'
+                        'log_normal', 'q_log_normal',
+                        error="Invalid distribution type"
                     )
                 },
                 {
                     'values': And(
                         list,
-                        schema_utils.all_elements_are_same_type
+                        schema_utils.all_elements_are_same_type,
+                        error="values must be a list of elements of the same type"
                     )
                 },
                 {
-                    'value': Or(str, int, float, bool)
+                    'value': Or(str, int, float, bool, error="value must be of type str, int, float, or bool")
                 }
-            )
+            ),
+            error="Invalid hyperparameter configuration"
         )
 
         if isinstance(config_info, dict):
@@ -165,8 +168,7 @@ class DefaultHpoSchema(AbstractSchema):
                 self.check_optimized_hyperparams_validity(config_item)
         else:
             raise ValueError(
-                f'{config_info} is not a valid configuration' +
-                'for hyperparameters to optimize!'
+                f'{config_info} is not a valid configuration for hyperparameters to optimize!'
             )
 
         return True
@@ -186,30 +188,31 @@ class DefaultHpoSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'model_family': And(str, self.check_if_model_family_exists),
-                'hpo_run_name': str,
-                'project_name': str,
+                'model_family': And(str, self.check_if_model_family_exists, error="Model family does not exist"),
+                'hpo_run_name': And(str, error="HPO run name must be a string"),
+                'project_name': And(str, error="Project name must be a string"),
                 'hyperparameters': And(
-                    dict, self.check_optimized_hyperparams_validity
+                    dict, self.check_optimized_hyperparams_validity, error="Invalid hyperparameter configuration"
                 ),
-                'hpo_strategy': Or('random', 'grid', 'bayes'),
+                'hpo_strategy': Or('random', 'grid', 'bayes', error="Invalid HPO strategy"),
                 'optimization_objective': {
                     'objective_terms': [
                         {
                             'metric': {
-                                'name': lambda x: (
+                                'name': Schema(lambda x: (
                                     x in schema_params['computed_metrics']
-                                )
+                                ), error="Metric not computed")
                             },
-                            'weight': float,
+                            'weight': And(float, error="Weight must be a float")
                         }
                     ],
-                    'combination_method': 'sum'
+                    'combination_method': Or('sum', error="Invalid combination method")
                 },
-                'metrics': [Or(*schema_params['metric_schemas'])],
-                'num_candidates': And(int, schema_utils.is_positive),
-                'verbosity': int
-            }
+                'metrics': [Or(*schema_params['metric_schemas'], error="Invalid metric schema")],
+                'num_candidates': And(int, schema_utils.is_positive, error="Number of candidates must be a positive integer"),
+                'verbosity': And(int, error="Verbosity must be an integer")
+            },
+            error="Invalid HPO configuration"
         )
 
         return config_schema

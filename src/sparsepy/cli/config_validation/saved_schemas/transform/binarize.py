@@ -55,9 +55,9 @@ class BinarizeTransformSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'name': 'binarize',
+                'name': And(str, lambda n: n == 'binarize', error="Name must be 'binarize'."),
                 'params': {
-                    'binarize_threshold': float
+                    'binarize_threshold': And(float, lambda t: 0.0 <= t <= 1.0, error="Binarize threshold must be a float between 0.0 and 1.0 inclusive.")
                 }
             }
         )

@@ -68,18 +68,22 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
         Returns:
             (Schema): the precheck schema.
         """
-        return Schema(
-            {
-                'optimizer': {
-                    'name': self.check_if_optimizer_exists
-                },
-                'metrics': [
-                    {
-                        'name': self.check_if_metric_exists
-                    }
-                ]
-            }, ignore_extra_keys=True
-        )
+        return Schema({
+            'optimizer': {
+                'name': And(
+                    lambda n: self.check_if_optimizer_exists(n),
+                    error="Optimizer does not exist. Please ensure the name is correct."
+                )
+            },
+            'metrics': [
+                {
+                    'name': And(
+                        lambda n: self.check_if_metric_exists(n),
+                        error="Metric does not exist. Please ensure the name is correct."
+                    )
+                }
+            ]
+        }, ignore_extra_keys=True)
 
 
     def extract_schema_params(
@@ -142,24 +146,23 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
-        config_schema = Schema(
-            {
-                'optimizer': schema_params['optimizer_schema'],
-                'metrics': And(
-                    list, lambda x: len(x) > 0,
-                    [Or(*schema_params['metric_schemas'])]
-                ),
-                'dataloader': {
-                    'batch_size': And(int, schema_utils.is_positive),
-                    'shuffle': bool
-                },
-                'training': {
-                    'num_epochs': And(int, schema_utils.is_positive),
-                    Optional('step_resolution', default=None): And(
-                        int, schema_utils.is_positive
-                    )
-                }
+        config_schema = Schema({
+            'optimizer': schema_params['optimizer_schema'],
+            'metrics': And(
+                list,
+                Schema(lambda x: len(x) > 0, error="At least one metric must be specified."),
+                [Or(*schema_params['metric_schemas'], error="Specified metric is not valid.")]
+            ),
+            'dataloader': {
+                'batch_size': And(int, schema_utils.is_positive, error="Batch size must be a positive integer."),
+                'shuffle': And(bool, error="Shuffle must be a boolean value.")
+            },
+            'training': {
+                'num_epochs': And(int, schema_utils.is_positive, error="Num_epochs must be a positive integer."),
+                Optional('step_resolution', default=None): And(
+                    int, schema_utils.is_positive, error="Step_resolution must be a positive integer if specified."
+                )
             }
-        )
+        })
 
         return config_schema

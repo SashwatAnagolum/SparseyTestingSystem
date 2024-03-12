@@ -8,7 +8,7 @@ Default Preprocessing stack schema: file holding the schema for default
 
 import typing
 
-from schema import Schema, And, Or
+from schema import Schema, And, Or, Use
 from torchvision.transforms import v2
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
@@ -62,7 +62,11 @@ class DefaultPreprocessingStackSchema(AbstractSchema):
             {
                 'transform_list': [
                     {
-                        'name': self.check_if_transform_exists
+                        'name': And(
+                            Use(str),
+                            self.check_if_transform_exists,
+                            error="Transform name does not exist in the defined schemas or torchvision."
+                        )
                     }
                 ]
             }, ignore_extra_keys=True
@@ -138,12 +142,15 @@ class DefaultPreprocessingStackSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'transform_list': lambda x: (
-                    self.check_transform_schema_validity(
+                'transform_list': And(
+                    [dict],  # Ensures the input is a list of dictionaries
+                    Use(list),  # Ensures the input is processed as a list
+                    lambda x: self.check_transform_schema_validity(
                         x, schema_params['transform_schemas']
-                    )
+                    ),
+                    error="Invalid configuration for one or more transforms in the transform list."
                 )
             }
         )
-
+        
         return config_schema

@@ -194,62 +194,37 @@ class SparseyModelSchema(AbstractSchema):
         config_schema = Schema(
             {
                 'input_dimensions': {
-                    'width': And(int, schema_utils.is_positive),
-                    'height': And(int, schema_utils.is_positive)
-                },
-                'layers': [
-                    {
-                        'name': And(str, 'sparsey'),
-                        'params': {
-                            Optional('autosize_grid', default=False): bool,
-                            Optional('grid_layout', default='rect'): Or(
-                                'rect', 'hex'
-                            ),
-                            'num_macs': And(int, schema_utils.is_positive),
-                            Optional(
-                                'mac_grid_num_rows', default=1
-                                ): And(int, schema_utils.is_positive),
-                            Optional(
-                                'mac_grid_num_cols', default=1
-                            ): And(int, schema_utils.is_positive),
-                            'num_cms_per_mac': And(int, schema_utils.is_positive),
-                            'num_neurons_per_cm': And(int, schema_utils.is_positive),
-                            'mac_receptive_field_radius': And(
-                                Or(int, float),
-                                schema_utils.is_positive
-                            ),
-                            'sigmoid_lambda': And(
-                                Or(float, int),
-                                schema_utils.is_positive
-                            ),
-                            'sigmoid_phi': Or(int, float),
-                            'saturation_threshold': And(float, lambda n: 0 <= n <= 1),
-                            'permanence': And(
-                                Or(int, float),
-                                lambda n: 0 < n <= 1
-                            ),
-                            'activation_threshold_min': And(
-                                Or(int, float),
-                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
-                            ),
-                            'activation_threshold_max': And(
-                                Or(int, float),
-                                lambda x: schema_utils.is_between(x, 0.0, 1.0)
-                            ),
-                            'sigmoid_chi': Or(int, float),
-                            'min_familiarity': And(
-                                float,
-                                lambda x: schema_utils.is_between(x, 0, 1)
-                            )
-                        }
+                    'width': And(int, schema_utils.is_positive, error="Width must be a positive integer"),
+                    'height': And(int, schema_utils.is_positive, error="Height must be a positive integer")
+            },
+            'layers': [
+                {
+                    'name': And(str, lambda n: n == 'sparsey', error="Layer name must be 'sparsey'"),
+                    'params': {
+                        Optional('autosize_grid', default=False): bool,
+                        Optional('grid_layout', default='rect'): Or('rect', 'hex', error="Grid layout must be 'rect' or 'hex'"),
+                        'num_macs': And(int, schema_utils.is_positive, error="Number of MACs must be a positive integer"),
+                        Optional('mac_grid_num_rows', default=1): And(int, schema_utils.is_positive, error="MAC grid number of rows must be a positive integer"),
+                        Optional('mac_grid_num_cols', default=1): And(int, schema_utils.is_positive, error="MAC grid number of columns must be a positive integer"),
+                        'num_cms_per_mac': And(int, schema_utils.is_positive, error="Number of CMs per MAC must be a positive integer"),
+                        'num_neurons_per_cm': And(int, schema_utils.is_positive, error="Number of neurons per CM must be a positive integer"),
+                        'mac_receptive_field_radius': And(Or(int, float), schema_utils.is_positive, error="MAC receptive field radius must be a positive number"),
+                        'sigmoid_lambda': And(Or(float, int), schema_utils.is_positive, error="Sigmoid lambda must be a positive number"),
+                        'sigmoid_phi': Or(int, float, error="Sigmoid phi must be an integer or float"),
+                        'saturation_threshold': And(float, lambda n: 0 <= n <= 1, error="Saturation threshold must be between 0 and 1"),
+                        'permanence': And(Or(int, float), lambda n: 0 < n <= 1, error="Permanence must be between 0 (exclusive) and 1 (inclusive)"),
+                        'activation_threshold_min': And(Or(int, float), lambda x: schema_utils.is_between(x, 0.0, 1.0), error="Activation threshold min must be between 0 and 1"),
+                        'activation_threshold_max': And(Or(int, float), lambda x: schema_utils.is_between(x, 0.0, 1.0), error="Activation threshold max must be between 0 and 1"),
+                        'sigmoid_chi': Or(int, float, error="Sigmoid chi must be an integer or float"),
+                        'min_familiarity': And(float, lambda x: schema_utils.is_between(x, 0, 1), error="Min familiarity must be between 0 and 1")
                     }
-                ],
-                Optional('hooks'): [
-                    {
-                        'name': And(str, self.check_if_hook_exists)
-                    }
-                ]
-            }
-        )
+                }
+            ],
+            Optional('hooks'): [
+                {
+                    'name': And(str, self.check_if_hook_exists, error="Specified hook does not exist")
+                }
+            ]
+        })
 
         return config_schema

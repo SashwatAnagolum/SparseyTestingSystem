@@ -7,8 +7,12 @@ class HPOObjective:
     # using nan_to_num() carries significant performance penalties so we should redo this
     def average_nested_data(self, data):
         if isinstance(data, list):
+            if data.__len__() == 0:
+                data=[0]
             return np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
         elif hasattr(data, 'tolist'):  # numpy array
+            if data.__len__() == 0:
+                data=[0]
             return np.mean(np.nan_to_num(data))
         else:
             # Scalar value

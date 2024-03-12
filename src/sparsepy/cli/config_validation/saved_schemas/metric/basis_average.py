@@ -27,10 +27,12 @@ class BasisAverageMetricSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'name': 'basis_average',
-                Optional('save', default=False): bool,
-                Optional('reduction', default=None): 'sparse'
-            }
+                'name': And(str, lambda n: n == 'basis_average', error="name must be 'basis_average'"),
+                Optional('save', default=False): And(bool, error="save must be a boolean value"),
+                Optional('reduction', default=None): And(lambda r: r == 'sparse' or r is None, error="reduction must be 'sparse' or None")
+            },
+            error="Invalid configuration for basis_average_metric"
         )
 
         return config_schema
+
