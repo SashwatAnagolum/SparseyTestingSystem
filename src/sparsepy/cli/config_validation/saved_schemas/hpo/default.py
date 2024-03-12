@@ -215,7 +215,7 @@ class DefaultHpoSchema(AbstractSchema):
             [
                 'Number of layers specified',
                 f"({len(hyperparams_info['layers'])})",
-                'is less than the mximum value num_layers can take',
+                'is less than the maximum value num_layers can take',
                 f'({num_layers_required})!'
             ]
         )
