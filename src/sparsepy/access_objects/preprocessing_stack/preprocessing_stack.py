@@ -7,7 +7,7 @@ Preprocessing Stack: class to contains ordered lists of PyTorch transforms.
 
 import torch
 
-from sparsepy.core.transforms.transfom_factory import TransformFactory
+from sparsepy.core.transforms.transform_factory import TransformFactory
 
 
 class PreprocessingStack(torch.nn.Module):

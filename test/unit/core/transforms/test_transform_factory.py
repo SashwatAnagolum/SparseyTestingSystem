@@ -2,7 +2,7 @@ import pytest
 import torch
 from torchvision.transforms import ToTensor
 from sparsepy.core.transforms.skeletonization_transform import SkeletonizationTransform
-from sparsepy.core.transforms.transfom_factory import TransformFactory 
+from sparsepy.core.transforms.transform_factory import TransformFactory 
 
 def test_create_to_tensor_transform():
     # Create a ToTensor transform
