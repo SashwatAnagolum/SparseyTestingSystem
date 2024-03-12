@@ -1,15 +1,15 @@
 import pytest
 import torch
 from torchvision.transforms import ToTensor
-from sparsepy.core.transforms.skeletonization_transform import SkeletonizationTransform
+from sparsepy.core.transforms.skeletonize_transform import SkeletonizeTransform
 from sparsepy.core.transforms.transform_factory import TransformFactory 
 
 def test_create_to_tensor_transform():
     # Create a ToTensor transform
-    transform = TransformFactory.create_transform('skeletonization_transform')
+    transform = TransformFactory.create_transform('skeletonize')
     
-    # Check if the transform is an instance of  SkeletonizationTransform
-    assert isinstance(transform, SkeletonizationTransform), "Failed to create a  SkeletonizationTransform transform."
+    # Check if the transform is an instance of  SkeletonizeTransform
+    assert isinstance(transform, SkeletonizeTransform), "Failed to create a  SkeletonizeTransform transform."
 
 def test_invalid_transform_creation():
     # Attempt to create a transform with an invalid name

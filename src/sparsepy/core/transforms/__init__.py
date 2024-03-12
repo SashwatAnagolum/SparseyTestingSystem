@@ -1,2 +1,2 @@
-from .skeletonization_transform import SkeletonizationTransform
+from .skeletonize_transform import SkeletonizeTransform
 from .binarize_transform import BinarizeTransform
