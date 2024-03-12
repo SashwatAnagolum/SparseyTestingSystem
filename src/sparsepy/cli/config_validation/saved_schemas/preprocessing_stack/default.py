@@ -86,10 +86,10 @@ class DefaultPreprocessingStackSchema(AbstractSchema):
 
         schema_params['transform_schemas'] = []
 
-        for metric_info in config_info['transform_list']:
+        for transform_info in config_info['transform_list']:
             try:
                 transform_schema = schema_factory.get_schema_by_name(
-                    metric, 'metric', metric_info['name']
+                    transform, 'transform', transform_info['name']
                 )
             except ValueError:
                 transform_schema = Schema(object)
