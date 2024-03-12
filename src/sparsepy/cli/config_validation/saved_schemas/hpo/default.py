@@ -33,6 +33,9 @@ class DefaultHpoSchema(AbstractSchema):
         """
         return Schema(
             {
+                'hyperparameters': {
+                    'num_layers': self.check_optimized_hyperparams_validity
+                },
                 'optimization_objective': {
                     'objective_terms': [
                         {
@@ -49,6 +52,21 @@ class DefaultHpoSchema(AbstractSchema):
                 ]
             }, ignore_extra_keys=True
         )
+
+
+    def get_max_num_layers(self, num_layers_info: dict) -> int:
+        """
+        Get the maximum value that can be assigned to the
+        num_layers hyperparameter.
+        Returns:
+            (int): the maximum number of layers possible.
+        """
+        if 'value' in num_layers_info:
+            return num_layers_info['value']
+        elif 'max' in num_layers_info:
+            return num_layers_info['max']
+        else:
+            return max(num_layers_info['values'])
 
 
     def extract_schema_params(self, config_info: dict) -> dict:
@@ -68,6 +86,9 @@ class DefaultHpoSchema(AbstractSchema):
 
         schema_params['metric_schemas'] = []
         schema_params['computed_metrics'] = []
+        schema_params['layers_min_len'] = self.get_max_num_layers(
+            config_info['hyperparameters']['num_layers']
+        )
 
         for metric_info in config_info['metrics']:
             schema_params['metric_schemas'].append(
@@ -174,6 +195,43 @@ class DefaultHpoSchema(AbstractSchema):
         return True
 
 
+    def has_enough_layer_configs(
+            self, hyperparams_info: dict,
+            num_layers_required: int) -> bool:
+        """
+        Checks if the layer configs specified contains
+        enough layers to allow model generation even if
+        the model with the maximum number of layers
+        specified in the hyerparameter ranges is constructed.
+        Args:
+            hyperparams_info (dict): the hyperparams configs
+            nu_layers_required (int): the minimum number
+                of layers required in the config file.
+        Returns:
+            (bool): whether the model can be constructed or not.
+        """
+        error_string = ' '.join(
+            [
+                'Number of layers specified',
+                f"({len(hyperparams_info['layers'])})",
+                'is less than the maximum value num_layers can take',
+                f'({num_layers_required})!'
+            ]
+        )
+
+        Schema(
+            {
+                'layers': And(
+                    list,
+                    lambda x: len(x) >= num_layers_required,
+                    error=error_string
+                )
+            }, ignore_extra_keys=True
+        ).validate(hyperparams_info)
+
+        return True
+
+
     def build_schema(self, schema_params: dict) -> Schema:
         """
         Builds a schema that can be used to validate the passed in
@@ -192,7 +250,10 @@ class DefaultHpoSchema(AbstractSchema):
                 'hpo_run_name': And(str, error="HPO run name must be a string"),
                 'project_name': And(str, error="Project name must be a string"),
                 'hyperparameters': And(
-                    dict, self.check_optimized_hyperparams_validity, error="Invalid hyperparameter configuration"
+                    dict, self.check_optimized_hyperparams_validity,
+                    lambda x: self.has_enough_layer_configs(
+                        x, schema_params['layers_min_len']
+                    )
                 ),
                 'hpo_strategy': Or('random', 'grid', 'bayes', error="Invalid HPO strategy"),
                 'optimization_objective': {
