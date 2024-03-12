@@ -68,7 +68,7 @@ def main():
     )
 
     validated_preprocessing_config = validate_config(
-        preprocessing_config_info, 'transform', 'preprocessing_stack_schema'
+        preprocessing_config_info, 'preprocessing_stack', 'default'
     )
     
     dataset_config_info = get_config_info(
