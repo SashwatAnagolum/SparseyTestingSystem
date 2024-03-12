@@ -57,7 +57,7 @@ class BinarizeTransformSchema(AbstractSchema):
             {
                 'name': 'binarize',
                 'params': {
-                    'binarize_threshold': int
+                    'binarize_threshold': float
                 }
             }
         )
