@@ -58,6 +58,7 @@ class DefaultHpoSchema(AbstractSchema):
         """
         Get the maximum value that can be assigned to the
         num_layers hyperparameter.
+
         Returns:
             (int): the maximum number of layers possible.
         """
