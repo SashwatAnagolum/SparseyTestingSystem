@@ -1,11 +1,21 @@
 ---
+# Specify the name of the optimizer
+# For Dr. Rinkus use hebbian
 optimizer:
+  # name: string
   name: hebbian
 
+# Dataloader parameters
 dataloader:
+  # Num of inputs per batch
+  # batch_size: int > 0
   batch_size: 1
+  # Toggle shuffled inputs
+  # shuffle: bool
   shuffle: True
 
 training:
+  # number of epochs during training
+  # num_epochs: int > 0
   num_epochs: 1
 ...

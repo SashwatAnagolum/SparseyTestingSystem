@@ -1,24 +1,44 @@
 ---
 
 optimizer:
+# Dr. Rinkus -> use hebbian
+# name: string
   name: hebbian
   params: {}
+
+# metric classes are defined in core/metrics
+# metrics can be added to the config in the metrics list below
+# custom metrics must also have schemas in cli/config_validation/saved_schemas/metric
 metrics:
+  # metric name must be written in snake case
+  # name: string
   - name: basis_set_size
+    # toggle saving this metric as a part of the stored result object
+    # save: bool
     save: True
+    # see some additional metrics we have completed below
   - name: basis_set_size_increase
     save: False
   - name: basis_average
     save: True
   - name: num_activations
     save: True
+    # specifies the shape and value of the returned tensor from the compute function of the metric, specifically if it is assessed
+    # reduction: string in {none, layerwise_mean, sum, mean}
+    # check the returns of the metric compute() functions to see which reductions are applicable to which metrics
     reduction: layerwise_mean
 
 dataloader:
+  # Num of inputs per batch
+  # batch_size: int > 0
   batch_size: 4
+  # Toggle shuffled inputs
+  # shuffle: bool
   shuffle: True
 
 training:
+  # number of epochs during training
+  # num_epochs: int > 0
   num_epochs: 1
 
 #verbosity: 

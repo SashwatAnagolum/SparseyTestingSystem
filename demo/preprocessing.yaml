@@ -1,12 +1,21 @@
 transform_list:
-# other transforms
+# In this list, you can include custom transforms (located in core/transforms) as well as the transforms PyTorch provides in torchvision.transforms.v2
+
+
+# Examples of custom transforms
+# - name: binarize
+#   params:
+#     binarize_threshold: 0.5 # float, 0. < bin_thr < 1. 
+#
+
+# All of the transforms below are examples of using the transform classes available in torchvision.transforms.v2
+# Desired class name should be typed in snake case
+# name: string
   - name: resize
+  # params: dict containing the parameters listed in torchvision.transforms.v2 documentation for the given transform
     params:
       size: [8, 8]
       antialias: True
-  #- name: random_vertical_flip
-  #  params:
-  #    p: 0.5
 
 # convert images to float from uint8, and scale them to [0, 1]
   - name: to_dtype
