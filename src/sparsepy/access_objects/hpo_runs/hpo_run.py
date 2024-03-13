@@ -205,7 +205,7 @@ class HPORun():
         )
 
         validated_config = validate_config(
-            model_config, 'model', self.config_info['model_family']
+            model_config, 'model', self.config_info['model_family'], survive_with_exception=True
         )
 
         try:
