@@ -25,9 +25,9 @@ class BasisSetSizeIncreaseMetricSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'name':'basis_set_size_increase',
-                Optional('save', default=False): bool,
-                Optional('reduction', default=None): Or('mean', 'none', 'sum')
+                'name': Schema('basis_set_size_increase', error="name must be 'basis_set_size_increase'"),
+                Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
+                Optional('reduction', default=None): Schema(Or('mean', 'none', 'sum', error="reduction must be 'mean', 'none', or 'sum'"), error="Invalid reduction value")
             }, ignore_extra_keys=True
         )
 

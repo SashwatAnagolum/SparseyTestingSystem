@@ -55,13 +55,13 @@ class HebbianOptimizerSchema(AbstractSchema):
             a Schema that can be used to validate the config info.
         """
         optimizer_params_schema = {
-            Optional('thresh'): And(Use(float), lambda t: 0.0 <= t <= 1.0)
+            Optional('thresh', default=None): And(Use(float), lambda t: 0.0 <= t <= 1.0, error="thresh must be a float between 0.0 and 1.0 inclusive")
         }
 
         config_schema = Schema(
             {
-                'name':'hebbian',
-                Optional('params'): optimizer_params_schema,
+                'name': Schema('hebbian', error="name must be 'hebbian'"),
+                Optional('params'): Schema(optimizer_params_schema, error="Invalid params configuration for Hebbian optimizer")
             }, ignore_extra_keys=True
         )
 

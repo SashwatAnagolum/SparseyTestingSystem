@@ -1,4 +1,6 @@
 ---
+# hpo.yaml - hyperparameter optimization configuration file
+
 # model_family: string
 #     the type of model to optimize for; currently "sparsey"
 model_family: sparsey

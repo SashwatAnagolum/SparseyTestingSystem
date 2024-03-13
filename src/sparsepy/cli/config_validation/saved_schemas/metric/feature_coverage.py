@@ -20,9 +20,9 @@ class FeatureCoverageMetricSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'name':'feature_coverage',
-                Optional('save', default=False): bool,
-                Optional('reduction', default=None): Or('none', 'sum', 'mean')
+                'name': Schema('feature_coverage', error="name must be 'feature_coverage'"),
+                Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
+                Optional('reduction', default=None): Schema(Or('none', 'sum', 'mean', error="reduction must be 'none', 'sum', or 'mean'"), error="Invalid reduction value")
             }, ignore_extra_keys=True
         )
 

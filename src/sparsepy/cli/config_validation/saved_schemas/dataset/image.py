@@ -68,12 +68,12 @@ class ImageDatasetSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'dataset_type': 'image',
-                'params': {
-                    'data_dir': And(str, os.path.exists),
-                    'image_format': And(str, lambda x: x[0] == '.')
-                },
-                Optional('preprocessed', default=False): bool,
+                'dataset_type': Schema('image', error="dataset_type must be 'image'"),
+                'params': Schema({
+                    'data_dir': Schema(And(str, os.path.exists), error=f"Invalid data_dir path. The directory must exist."),
+                    'image_format': Schema(And(str, lambda x: x[0] == '.'), error=f"Invalid image_format. The format must start with '.'")
+                }, error="Invalid params"),
+                Optional('preprocessed', default=False): Schema(bool, error="preprocessed must be a boolean value"),
                 'preprocessed_stack': schema_params[
                     'preprocessing_stack_schema'
                 ],
