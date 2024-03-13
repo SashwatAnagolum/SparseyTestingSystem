@@ -1,21 +1,28 @@
 ---
-# Specify the name of the optimizer
-# For Dr. Rinkus use hebbian
+# trainer_hpo.yaml - trainer config for an HPO run
+#     NOTE: trainer configs for HPO will soon be deprecated 
+#     and the relevant settings merged into hpo.yaml
+
+# optimizer settings
 optimizer:
-  # name: string
+  # name: string - the optimizer class to load and use
+  #    for Sparsey models you should always use "hebbian"
   name: hebbian
 
-# Dataloader parameters
+# dataloader: controls the dataloader parameters to use
 dataloader:
-  # Num of inputs per batch
   # batch_size: int > 0
+  #    number of input items per batch
   batch_size: 1
-  # Toggle shuffled inputs
   # shuffle: bool
+  #    whether to randomize the inputs as they are drawn from the dataloader
   shuffle: True
 
+# training: training-related hyperparameters
 training:
-  # number of epochs during training
   # num_epochs: int > 0
+  #     number of epochs to train for
+  #     for Sparsey single-shot learning this will always be 1
+  #     but the setting exists for potential future compatibility
   num_epochs: 1
 ...
