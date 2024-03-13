@@ -123,7 +123,8 @@ def validate_config(config_info: dict, schema_type: str,
                     print(se.autos[0])
                     if se.errors[-1]:
                         print(se.errors[-1])
-                    print(se.args[0])
+                    else:
+                        print(se.args[0])
             else:
                 print("SCHEMA ERROR")
                 print(se.code)
