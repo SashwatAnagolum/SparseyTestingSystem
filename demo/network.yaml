@@ -1,4 +1,6 @@
 ---
+# network.yaml - Sparsey model config file for an individual experiment
+
 # input_dimensions: the dimensions to which to resize the input during HPO
 #     width and height can be any positive integer values and do not need to be the same;
 #     however, the model's input dimensions 

@@ -1,4 +1,5 @@
 ---
+# dataset.yaml - system dataset config file
 
 # dataset_type: string
 #    the dataset class to use to load the dataset
@@ -27,8 +28,13 @@ preprocessed_stack:
   #     one entry per transform; general format:
   #     name: the system or PyTorch transform class to use
   #     params: if required by the specific transform, additional configuration parameters
+  # WARNING: Any transforms placed in this list will only be applied once the first time
+  # an item is loaded, and the cached result will be returned for further requests.
+  # If you need a transform to be randomized per-experiment it should go in preprocessing.yaml.
+  # Stochastic transforms in this list will only be applied once across ALL runs in an experiment. 
+  # If you are using random transforms for data augmentation this WILL NOT achieve the intended result.
+  # this list otherwise works exactly like the one in preprocessing.yaml; see there for example configuration
   transform_list:
-  # other transforms
     - name: resize
       params:
         size: [8, 8]
