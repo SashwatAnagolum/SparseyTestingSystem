@@ -119,7 +119,8 @@ class TrainingRecipe:
         results.mark_finished()
 
         # log the results for this step
-        self.ds.save_training_step(self.all_results.id, results)
+        if training:
+            self.ds.save_training_step(self.all_results.id, results)
         # and add them to the TrainingResult
         self.all_results.add_step(results)
 
