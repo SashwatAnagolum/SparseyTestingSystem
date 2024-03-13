@@ -11,11 +11,10 @@ import os
 from schema import Schema, Optional, And
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
-from sparsepy.cli.config_validation.saved_schemas.transform.preprocessing_stack_schema import TransformListSchema
 from sparsepy.core import optimizers
 
 
-class SkeletonizationTransformSchema(AbstractSchema):
+class BinarizeTransformSchema(AbstractSchema):
     """
     SparseyTrainerSchema: schema for Sparsey trainers.
     """
@@ -54,11 +53,11 @@ class SkeletonizationTransformSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
-        transform_list_schema = TransformListSchema()
         config_schema = Schema(
             {
+                'name': And(str, lambda n: n == 'binarize', error="Name must be 'binarize'."),
                 'params': {
-                    'sigma': int
+                    'binarize_threshold': And(float, lambda t: 0.0 <= t <= 1.0, error="Binarize threshold must be a float between 0.0 and 1.0 inclusive.")
                 }
             }
         )

@@ -48,10 +48,10 @@ class MAC(torch.nn.Module):
                 the input.
             sigmoid_lambda (float): parameter for the familiarity computation.
             sigmoid_phi (float): parameter for the familiarity computation.
-            activation_threshold_min (int): lower
+            activation_threshold_min (float): lower
                 bound for the number of MACs that need to be active in the 
                 receptive field of the MAC for it to become active.
-            activation_threshold_max (int): upper
+            activation_threshold_max (float): upper
                 bound for the number of MACs that need to be active in the 
                 receptive field of the MAC for it to become active.
             sigmoid_chi: expansion factor for the sigmoid used to compute
@@ -262,8 +262,8 @@ class SparseyLayer(torch.nn.Module):
         layer_index: int,
         sigmoid_phi: float, sigmoid_lambda: float,
         saturation_threshold: float,
-        permanence: float, activation_threshold_min: int,
-        activation_threshold_max: int,
+        permanence: float, activation_threshold_min: float,
+        activation_threshold_max: float,
         min_familiarity: float, sigmoid_chi: float):
         """
         Initializes the SparseyLayer object.

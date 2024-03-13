@@ -4,7 +4,6 @@
 Num Activations: file holding the NumActivationsMetricSchema class.
 """
 
-
 import typing
 
 from schema import Schema, Or, Optional
@@ -51,11 +50,11 @@ class NumActivationsMetricSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'name': 'num_activations',
-                Optional('save', default=False): bool,
-                Optional('reduction', default=None): Or(
-                    'none', 'layerwise_mean', 'sum', 'mean'
-                )
+                'name': Schema('num_activations', error="name must be 'num_activations'"),
+                Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
+                Optional('reduction', default=None): Schema(Or(
+                    'none', 'layerwise_mean', 'sum', 'mean', error="reduction must be 'none', 'layerwise_mean', 'sum', or 'mean'"
+                ), error="Invalid reduction value")
             }
         )
 

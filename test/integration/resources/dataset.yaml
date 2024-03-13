@@ -1,0 +1,29 @@
+---
+
+# the name by which to refer to the dataset
+dataset_type: image
+
+# information about the dataset
+params:
+  # the folder which the directory is stored in
+  data_dir: '.\test\integration\resources\sample_mnist_dataset'
+
+  # what file format the images are in
+  image_format: '.png'
+
+preprocessed: True
+
+preprocessed_stack:
+  transform_list:
+  # other transforms
+    - name: resize
+      params:
+        size: [8, 8]
+        antialias: True
+    - name: binarize
+      params:
+        binarize_threshold: 0.5
+    - name: skeletonize
+      params:
+        sigma: 3
+...

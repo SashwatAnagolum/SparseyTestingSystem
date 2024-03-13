@@ -57,7 +57,7 @@ class SparseyHpoTrainingRecipeSchema(AbstractSchema):
 
     def transform_schema(self, config_info: dict) -> dict:
         config_info['optimizer']['params'] = dict()
-        
+
         return config_info
 
 
@@ -77,13 +77,13 @@ class SparseyHpoTrainingRecipeSchema(AbstractSchema):
             {
                 'optimizer': schema_params['optimizer_schema'],
                 'dataloader': {
-                    'batch_size': And(int, schema_utils.is_positive),
-                    'shuffle': bool
+                    'batch_size': And(int, schema_utils.is_positive, error="Batch size must be a positive integer"),
+                    'shuffle': And(bool, error="Shuffle must be a boolean value")
                 },
                 'training': {
-                    'num_epochs': And(int, schema_utils.is_positive),
+                    'num_epochs': And(int, schema_utils.is_positive, error="Num_epochs must be a positive integer"),
                     Optional('step_resolution', default=None): And(
-                        int, schema_utils.is_positive
+                        int, schema_utils.is_positive, error="Step_resolution must be a positive integer if specified"
                     )
                 }
             }

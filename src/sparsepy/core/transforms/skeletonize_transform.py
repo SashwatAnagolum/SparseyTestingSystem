@@ -2,7 +2,7 @@ import torch
 from skimage import feature, morphology
 from .abstract_transform import AbstractTransform
 
-class SkeletonizationTransform(AbstractTransform):
+class SkeletonizeTransform(AbstractTransform):
     """
     A transform to apply Canny edge detection followed by skeletonization.
     """

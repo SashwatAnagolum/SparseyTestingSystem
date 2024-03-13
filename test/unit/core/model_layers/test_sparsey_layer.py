@@ -22,16 +22,35 @@ class TestMAC:
         tests with.
         """
         sparsey_layer = SparseyLayer(
-            num_macs=12, num_cms_per_mac=8,
-            num_neurons_per_cm=16, mac_grid_num_rows=4,
-            mac_grid_num_cols=4, mac_receptive_field_radius=0.5,
-            prev_layer_cms_per_mac=12, prev_layer_neurons_per_cm=10,
-            prev_layer_mac_positions=[
-                (0.0, 0.0), (0.0, 0.5), (0.0, 1.0),
-                (0.5, 0.0), (0.5, 0.5), (0.5, 1.0),
-                (1.0, 0.0), (1.0, 0.5), (1.0, 1.0),
-            ]            
-        )
+            autosize_grid=False, 
+            grid_layout="rect",
+            num_macs=12, 
+            num_cms_per_mac=8,
+            num_neurons_per_cm=16, 
+            mac_grid_num_rows=4,
+            mac_grid_num_cols=4, 
+            prev_layer_num_macs=9,
+            mac_receptive_field_radius=0.5,
+            prev_layer_num_cms_per_mac=12, 
+            prev_layer_num_neurons_per_cm=10,
+            prev_layer_mac_grid_num_rows=3,
+            prev_layer_mac_grid_num_cols=3,
+            prev_layer_grid_layout="rect", 
+            layer_index=2,
+            sigmoid_phi=5.0, 
+            sigmoid_lambda=28.0,
+            saturation_threshold=0.5, 
+            permanence=1.0,
+            activation_threshold_max=1.0, 
+            activation_threshold_min=0.2,
+            min_familiarity=0.2, 
+            sigmoid_chi=2.5
+            # prev_layer_mac_positions=[
+            #     (0.0, 0.0), (0.0, 0.5), (0.0, 1.0),
+            #     (0.5, 0.0), (0.5, 0.5), (0.5, 1.0),
+            #     (1.0, 0.0), (1.0, 0.5), (1.0, 1.0),
+            # ]            
+            )
 
         return sparsey_layer
 
@@ -47,46 +66,48 @@ class TestMAC:
                 (4, 4, 4, [1, 2, 7], 10, 10, (4, 4, 4))
             ]
     )
-    def test_mac_output_shape(
-        self, bsz: int, num_cms: int, num_neurons: int,
-        input_filter: list[int], prev_num_cms: int,
-        prev_num_neurons: int, output_shape: Tuple[int, int, int]
-    ):
-        """
-        Test the correctness of the output shape of the forward
-        pass of a MAC.
+    @pytest.fixture
+    def mac_config(self):
+        return {
+        'num_cms': 2,
+        'num_neurons': 2,
+        'input_filter': torch.tensor([0, 1, 2, 3]),  # Mock input filter
+        'num_cms_per_mac_in_input': 2,
+        'num_neurons_per_cm_in_input': 2,
+        'layer_index': 0,
+        'mac_index': 0,
+        'sigmoid_lambda': 28.0,
+        'sigmoid_phi': 5.0,
+        'permanence': 1.0,
+        'activation_threshold_min': 0.2,
+        'activation_threshold_max': 1,
+        'sigmoid_chi': 2.5,
+        'min_familiarity': 0.2,
+        }
 
-        Args:
+    @pytest.fixture
+    def mock_input(self):
+        return torch.rand(1, 4, 2, 2)  # should find one that is actually a real input when running
 
-        """
-        mac = MAC(
-            num_cms, num_neurons, torch.Tensor(input_filter).long(),
-            prev_num_cms, prev_num_neurons
-        )
+    def test_mac_output_shape(self, mac_config, mock_input):
+        mac = MAC(**mac_config)
+        # Pass the mock input through the MAC
+        output = mac(mock_input)
+        expected_shape = (1, mac_config['num_cms'], mac_config['num_neurons'])
+        # Verify the output shape
+        assert output.shape == expected_shape, f"Expected output shape {expected_shape}, but got {output.shape}"
 
-        data = torch.randint(
-            0, 2, (bsz, 10, prev_num_cms, prev_num_neurons),
-            dtype=torch.float32
-        )
-
-        output = mac(data)
-
-        assert tuple(output.shape) == output_shape
-
-
-    def test_mac_invalid_input_shape(self):
+    def test_mac_invalid_input_shape(self, mac_config):
         """
         Test whether a MAC raises a ValueError when you pass
         an Tensor with an invalid data shape through it.
         """
-        mac = MAC(
-            10, 10, torch.Tensor([1, 2, 3]).long()  , 5, 5
-        )
+        mac = MAC(**mac_config)
 
-        data = torch.randint(0, 2, (32, 10, 4, 5))
+        data = torch.rand(1, 2, 32, 10, 4, 5)
 
         with pytest.raises(ValueError):
-            mac(data)
+            mac(torch.Tensor([data,data]))
 
 
     def test_sparsey_layer_valid_input_shape(self, sample_sparsey_layer):

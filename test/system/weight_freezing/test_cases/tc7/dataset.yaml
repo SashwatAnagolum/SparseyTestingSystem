@@ -23,7 +23,7 @@ preprocessed_stack:
     - name: binarize_transform
       params:
         binarize_threshold: 0.5
-    - name: skeletonization_transform
+    - name: skeletonize
       params:
         sigma: 3
 ...

@@ -85,10 +85,13 @@ def main():
         training_recipe_config_info, 'training_recipe', 'sparsey_hpo'
     )
 
+    if os.getenv("WANDB_API_KEY", None) is None:
+        raise ValueError("The WANDB_API_KEY environment variable / .env file entry does not exist.")
+
     run_hpo(
         validated_hpo_config, validated_training_recipe_config,
         validated_dataset_config, preprocessing_config_info,
-        os.getenv("WANDB_API_KEY", "e761ab6db7e51eada8996fa15e9e7eca67414c10")
+        os.getenv("WANDB_API_KEY")
     )
 
 if __name__ == "__main__":

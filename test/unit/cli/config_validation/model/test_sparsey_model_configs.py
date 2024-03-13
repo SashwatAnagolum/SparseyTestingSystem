@@ -6,9 +6,14 @@ Test Sparsey Model Configs: tests covering the config files for
 """
 
 
+import os
 import pytest
 
-from sparsepy.cli.config_validation.validate_config import validate_config
+from schema import SchemaError
+
+from sparsepy.cli.config_validation.validate_config import (
+    validate_config, get_config_info
+)
 
 
 class TestSparseyModelConfigs:
@@ -24,34 +29,14 @@ class TestSparseyModelConfigs:
         Returns:
             a valid Sparsey model schema
         """
-        valid_schema = {
-            'input_dimensions': {
-                'width': 28,
-                'height': 28
-            },
-            'num_layers': 5,
-            'layerwise_configs': {
-                'num_macs': [50, 40, 30, 20, 10],
-                'mac_grid_num_rows': [5, 4, 3, 2, 1],
-                'mac_grid_num_cols': [10, 10, 10, 10, 10],
-                'num_cms_per_mac': [5, 5, 5, 5, 5],
-                'num_neurons_per_cm': [10, 10, 10, 10, 10],
-                'receptive_field_radii': [2.0, 2.0, 5.1, 3.2, 4.2]
-            }
-        }
+        config_filepath = os.path.join(
+            './test/unit/cli/config_validation/model',
+            'valid_sparsey_config.yaml'
+        )
+
+        valid_schema = get_config_info(config_filepath)
 
         return valid_schema
-
-
-    def perform_assertion(self, schema: dict, expected_value: bool) -> None:
-        """
-        Performs an assertion based on the return value
-        of a call to validate_config.
-        """
-        assert validate_config(
-            schema, 'model',
-            'sparsey'
-        )[1] == expected_value
 
 
     def test_valid_sparsey_model_schema(
@@ -65,25 +50,14 @@ class TestSparseyModelConfigs:
             sparsey_model_schema: a dict containing the valid
             sparsey model schema to be used for testing, passed in 
             via pytest's fixture functionality.
+
+        Test case ID: TC-01-01
         """
-        self.perform_assertion(sparsey_model_schema, True)
+        validated_config = validate_config(
+            sparsey_model_schema, 'model', 'sparsey'
+        )
 
-
-    def test_missing_num_layers(
-            self, sparsey_model_schema: dict) -> None:
-        """
-        Tests the config file validation for the case
-        where the config file for a Sparsey model is fully
-        valid.
-
-        Args:
-            sparsey_model_schema: a dict containing the valid
-            sparsey model schema to be used for testing, passed in 
-            via pytest's fixture functionality.
-        """
-        del sparsey_model_schema['num_layers']
-
-        self.perform_assertion(sparsey_model_schema, False)
+        assert isinstance(validated_config, dict)
 
 
     def test_missing_input_dimensions(
@@ -97,10 +71,15 @@ class TestSparseyModelConfigs:
             sparsey_model_schema: a dict containing the valid
             sparsey model schema to be used for testing, passed in 
             via pytest's fixture functionality.
+
+        Test case ID: TC-01-16
         """
         del sparsey_model_schema['input_dimensions']
 
-        self.perform_assertion(sparsey_model_schema, False)
+        with pytest.raises(SchemaError):
+             validate_config(
+                sparsey_model_schema, 'model', 'sparsey'
+            )
 
 
     def test_missing_layerwise_configs(
@@ -114,77 +93,107 @@ class TestSparseyModelConfigs:
             sparsey_model_schema: a dict containing the valid
             sparsey model schema to be used for testing, passed in 
             via pytest's fixture functionality.
+
+        Test case ID: TC-01-14
         """
-        del sparsey_model_schema['layerwise_configs']
+        del sparsey_model_schema['layers']
 
-        self.perform_assertion(sparsey_model_schema, False)
+        with pytest.raises(SchemaError):
+            validate_config(
+                sparsey_model_schema, 'model', 'sparsey'
+            )
 
 
-    def test_incorrect_data_type_layerwise_configs(
+    def test_out_of_bounds_activation_thresholds(
             self, sparsey_model_schema: dict) -> None:
         """
-        Tests the config file validation for the case
-        where the config file for a Sparsey model is fully
-        valid.
-
+        Test whether the config validation throws an error
+        or not when the activation thresholds specfied are out of
+        bounds.
+        
         Args:
             sparsey_model_schema: a dict containing the valid
             sparsey model schema to be used for testing, passed in 
             via pytest's fixture functionality.
+
+        Test case ID: TC-01-02
         """
-        sparsey_model_schema['layerwise_configs']['num_macs'][0] = 50.0
+        sparsey_model_schema['layers'][0]['params'][
+            'activation_threshold_min'
+        ] = -0.1
 
-        self.perform_assertion(sparsey_model_schema, False)
+        with pytest.raises(SchemaError):
+            validate_config(
+                sparsey_model_schema, 'model', 'sparsey'
+            )
 
 
-    def test_incorrect_length_layerwise_configs(
+    def test_permanence_high_boundary(
             self, sparsey_model_schema: dict) -> None:
         """
-        Tests the config file validation for the case
-        where the config file for a Sparsey model is fully
-        valid.
-
+        Test whether the config validation accepts the
+        high boundary of the permanence parameter as valid or not.
+        
         Args:
             sparsey_model_schema: a dict containing the valid
             sparsey model schema to be used for testing, passed in 
             via pytest's fixture functionality.
+
+        Test case ID: TC-01-12
         """
-        sparsey_model_schema['layerwise_configs']['num_cms_per_mac'].append(
-            45
+        sparsey_model_schema['layers'][0]['params'][
+            'permanence'
+        ] = 1.0
+
+        validated_config = validate_config(
+            sparsey_model_schema, 'model', 'sparsey'
         )
 
-        self.perform_assertion(sparsey_model_schema, False)
+        assert isinstance(validated_config, dict)
 
 
-    def test_negative_num_layers(
+
+    def test_permanence_low_boundary(
             self, sparsey_model_schema: dict) -> None:
         """
-        Tests the config file validation for the case
-        where the config file for a Sparsey model is fully
-        valid.
-
+        Test whether the config validation throws an
+        error when the permanence valus <= 0 or not.
+        
         Args:
             sparsey_model_schema: a dict containing the valid
             sparsey model schema to be used for testing, passed in 
             via pytest's fixture functionality.
+
+        Test case ID: TC-01-15
         """
-        sparsey_model_schema['num_layers'] = -2
+        sparsey_model_schema['layers'][0]['params'][
+            'permanence'
+        ] = 0.0
 
-        self.perform_assertion(sparsey_model_schema, False)
+        with pytest.raises(SchemaError):
+            validate_config(
+                sparsey_model_schema, 'model', 'sparsey'
+            )
 
 
-    def test_negative_layerwise_configs(
+    def test_receptive_field_radius_low_boundary(
             self, sparsey_model_schema: dict) -> None:
         """
-        Tests the config file validation for the case
-        where the config file for a Sparsey model is fully
-        valid.
-
+        Test whether the config validation throws an error 
+        when the receptive field size <= 0 or not.
+        
         Args:
             sparsey_model_schema: a dict containing the valid
             sparsey model schema to be used for testing, passed in 
             via pytest's fixture functionality.
-        """
-        sparsey_model_schema['layerwise_configs']['mac_grid_num_cols']= -3
 
-        self.perform_assertion(sparsey_model_schema, False)
+        Test case ID: TC-01-13
+        """
+        sparsey_model_schema['layers'][0]['params'][
+            'mac_receptive_field_radius'
+        ] = 0.0
+
+        with pytest.raises(SchemaError):
+            validate_config(
+                sparsey_model_schema, 'model', 'sparsey'
+            )

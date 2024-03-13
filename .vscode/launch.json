@@ -1,46 +1,9 @@
 {
     "version": "0.2.0",
     "configurations": [
-
-
-
-    
-        {
-            "name": "PyTest - test_hebbian",
-            "type": "python",
-            "request": "launch",
-            "module": "pytest",
-            "args": [
-                "${workspaceFolder}\\test\\unit\\core\\optimizers\\test_hebbian.py"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
-            "name": "PyTest - test_exact_match_accuracy",
-            "type": "python",
-            "request": "launch",
-            "module": "pytest",
-            "args": [
-                "${workspaceFolder}\\test\\unit\\core\\metrics\\test_exact_match_accuracy.py"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
-            "name": "PyTest - test_match_accuracy",
-            "type": "python",
-            "request": "launch",
-            "module": "pytest",
-            "args": [
-                "${workspaceFolder}\\test\\unit\\core\\metrics\\test_match_accuracy.py"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
         {
             "name": "Run Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
@@ -49,7 +12,7 @@
         },
         {
             "name": "Run HPO",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}\\scripts\\run_hpo.py",
             "args": [
@@ -63,8 +26,23 @@
             "justMyCode": true
         },
         {
+            "name": "Run HPO - custom configs",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\scripts\\run_hpo.py",
+            "args": [
+                "--dataset_config", "${input:getSparseyConfigDirectoryString}\\dataset.yaml",
+                "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
+                "--hpo_config", "${input:getSparseyConfigDirectoryString}\\hpo.yaml",
+                "--training_recipe_config", "${input:getSparseyConfigDirectoryString}\\trainer_hpo.yaml",
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
             "name": "Train Model",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}\\scripts\\train_model.py",
             "args": [
@@ -77,27 +55,13 @@
             "cwd": "${workspaceFolder}",
             "justMyCode": true
         },
+    ],
+    "inputs": [
         {
-            "name": "PyTest - test_weight_freezing",
-            "type": "python",
-            "request": "launch",
-            "module": "pytest",
-            "args": [
-                "${workspaceFolder}\\test\\system\\weight_freezing\\test_weight_freezing.py"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
+            "id": "getSparseyConfigDirectoryString",
+            "type": "promptString",
+            "description": "enter the path to the directory containing your HPO config files",
+            "default": ".\\demo"
         },
-        {
-            "name": "PyTest - test sparsey dataset configs",
-            "type": "python",
-            "request": "launch",
-            "module": "pytest",
-            "args": [
-                "${workspaceFolder}\\test\\unit\\cli\\config_validation\\dataset\\test_sparsey_dataset_configs.py"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
-        }
     ]
 }

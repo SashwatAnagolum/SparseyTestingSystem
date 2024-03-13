@@ -6,5 +6,5 @@ Init: initialization for the Saved Schemas sub-package.
 
 from . import (
     hpo, model, training_recipe, plot,
-    transform, dataset, metric
+    transform, dataset, metric, preprocessing_stack
 )

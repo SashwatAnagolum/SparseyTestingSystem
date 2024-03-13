@@ -11,6 +11,7 @@ import argparse
 import sys
 from typing import Tuple, Optional
 
+from schema import SchemaError, SchemaMissingKeyError
 import yaml
 
 from .schema_factory import get_schema_by_name
@@ -69,7 +70,7 @@ def get_schema(schema_type, schema_name) -> AbstractSchema:
 
 
 def validate_config(config_info: dict, schema_type: str,
-    schema_name: str) -> dict:
+    schema_name: str, survive_with_exception=False) -> dict:
     """
     Validates the given config file against the given schema. If
     the config is valid, then (the valid config, True) is returned,
@@ -81,12 +82,57 @@ def validate_config(config_info: dict, schema_type: str,
             (model / trainer / HPO / plot).
         schema_name: a str containing the name of the schema to validate
             the config file against.
+        survive_with_exception (bool): if validation fails,
+            whether to exit the program (default) or throw an exception (True)
 
     Returns:
         (dict) the valid config info.
     """
-    config_schema = get_schema(schema_type, schema_name)
-    valid_config = config_schema.validate(config_info)
+    try:
+        config_schema = get_schema(schema_type, schema_name)
+        valid_config = config_schema.validate(config_info)
+    except ValueError as ve:
+        # attempting to create a schema class that does not exist
+        print("INVALID SCHEMA TYPE")
+        print(f"{schema_name} is not a valid {schema_type} schema")
+        for arg in ve.args:
+            print(arg)
+        # HPO model validation needs to be able to recover rather than exit
+        if survive_with_exception:
+            raise ve
+        else:
+            sys.exit(-1)
+
+    except (SchemaError, SchemaMissingKeyError) as se:
+        # schema validation error for a schema that exists
+        print("\n=========\nCONFIG VALIDATION FAILED\n=========")
+        print(f"Error in {schema_type} config!")
+        
+        if isinstance(se, SchemaMissingKeyError):
+            # missing top-level key
+            print("MISSING KEY")
+            print(se.autos[0])
+        elif isinstance(se, SchemaError):
+            # other schema error (including some keys)
+            if se.autos[0] and "Key '" in se.autos[0]:
+                if "Missing" in se.autos[-1]:
+                    print("MISSING KEY")
+                    print(se.autos[-1])
+                else:
+                    print("INVALID VALUE")
+                    print(se.autos[0])
+                    if se.errors[-1]:
+                        print(se.errors[-1])
+                    else:
+                        print(se.args[0])
+            else:
+                print("SCHEMA ERROR")
+                print(se.code)
+        
+        if survive_with_exception:
+            raise se
+        else:
+            sys.exit(-1)
 
     return valid_config
 

@@ -9,9 +9,10 @@ import typing
 import os
 
 from schema import Schema, Optional, And
-from sparsepy.cli.config_validation.saved_schemas.transform.preprocessing_stack_schema import PreprocessingStackSchemaTransformSchema
+
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
-from sparsepy.core import optimizers
+from sparsepy.cli.config_validation import schema_factory
+from sparsepy.cli.config_validation.saved_schemas import preprocessing_stack
 
 
 class ImageDatasetSchema(AbstractSchema):
@@ -34,6 +35,18 @@ class ImageDatasetSchema(AbstractSchema):
         """
         schema_params = dict()
 
+        if config_info.get('preprocessed', False):
+            schema_params[
+                'preprocessing_stack_schema'
+            ] = schema_factory.get_schema_by_name(
+                preprocessing_stack, 'preprocessing_stack',
+                'default'
+            )
+        else:
+            schema_params[
+                'preprocessing_stack_schema'
+            ] = Schema(object)          
+
         return schema_params
 
 
@@ -53,24 +66,17 @@ class ImageDatasetSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
-        def validate_preprocessed_stack(config):
-            # Check if 'preprocessed' is True in the config
-            if config.get('preprocessed', False):
-                # If True, validate preprocessed_stack using PreprocessingStackSchemaTransformSchema
-                return PreprocessingStackSchemaTransformSchema.preprocessing_stack_schema.validate(config.get('preprocessed_stack', {}))
-            else:
-                # If preprocessed is False or not set, skip validation for preprocessed_stack
-                return True
-            
         config_schema = Schema(
             {
-                'dataset_type': 'image',
-                'params': {
-                    'data_dir': And(str, os.path.exists),
-                    'image_format': And(str, lambda x: x[0] == '.')
-                },
-                'preprocessed': bool,
-                'preprocessed_stack': validate_preprocessed_stack,
+                'dataset_type': Schema('image', error="dataset_type must be 'image'"),
+                'params': Schema({
+                    'data_dir': Schema(And(str, os.path.exists), error=f"Invalid data_dir path. The directory must exist."),
+                    'image_format': Schema(And(str, lambda x: x[0] == '.'), error=f"Invalid image_format. The format must start with '.'")
+                }, error="Invalid params"),
+                Optional('preprocessed', default=False): Schema(bool, error="preprocessed must be a boolean value"),
+                'preprocessed_stack': schema_params[
+                    'preprocessing_stack_schema'
+                ],
             }
         )
 

@@ -20,9 +20,9 @@ class MatchAccuracyMetricSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'name':'match_accuracy',
-                Optional('save', default=False): bool,
-                Optional('reduction', default=None): Or('none', 'mean', 'sum')
+                'name': Schema('match_accuracy', error="name must be 'match_accuracy'"),
+                Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
+                Optional('reduction', default=None): Schema(Or('none', 'mean', 'sum', error="reduction must be 'none', 'mean', or 'sum'"), error="Invalid reduction value")
             }, ignore_extra_keys=True
         )
 

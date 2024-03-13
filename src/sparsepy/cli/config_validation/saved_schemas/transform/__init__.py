@@ -4,6 +4,5 @@
 Init: initialization for the Transform sub-package.
 """
 
-from . import (
-    preprocessing_stack_schema
-)
+from .skeletonize import SkeletonizeTransformSchema
+from .binarize import BinarizeTransformSchema

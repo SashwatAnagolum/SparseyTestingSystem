@@ -4,6 +4,7 @@
 Transform Factory: class to build transforms.
 """
 
+import inspect
 
 import torch
 
@@ -29,9 +30,12 @@ class TransformFactory:
         Gets the class corresponding to the name passed in.
         Throws an error if the name is not valid.
         """
-        if class_name in TransformFactory.allowed_modules:
-            return getattr(transforms, class_name)
-        elif class_name in dir(v2):
+        # input is TransformName but standard for our classes is TransformNameTransform
+        if class_name + 'Transform' in TransformFactory.allowed_modules:
+            return getattr(transforms, class_name + 'Transform')
+        # torchvision modules contain multiple classes; use reflection to get all the
+        # torchvision class members' names and see if ours is among them
+        elif class_name in [cls[0] for cls in inspect.getmembers(v2, inspect.isclass)]:
             return getattr(v2, class_name)
         else:
             raise ValueError(f'Invalid transform name: {class_name}!')
