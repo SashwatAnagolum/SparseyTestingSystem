@@ -88,42 +88,45 @@ def validate_config(config_info: dict, schema_type: str,
     Returns:
         (dict) the valid config info.
     """
-    configs = {
-        "": "trainer.yaml",
-        "": ""
-    }
     try:
         config_schema = get_schema(schema_type, schema_name)
         valid_config = config_schema.validate(config_info)
     except ValueError as ve:
+        # attempting to create a schema class that does not exist
         print("INVALID SCHEMA TYPE")
         print(f"{schema_name} is not a valid {schema_type} schema")
         for arg in ve.args:
             print(arg)
-        sys.exit(-1)
+        # HPO model validation needs to be able to recover rather than exit
+        if survive_with_exception:
+            raise ve
+        else:
+            sys.exit(-1)
+
     except (SchemaError, SchemaMissingKeyError) as se:
+        # schema validation error for a schema that exists
         print("\n=========\nCONFIG VALIDATION FAILED\n=========")
         print(f"Error in {schema_type} config!")
-        if isinstance(se, ValueError):
-            print("INVALID SCHEMA TYPE")
-            print(se.code)
-        elif isinstance(se, SchemaMissingKeyError):
+        
+        if isinstance(se, SchemaMissingKeyError):
+            # missing top-level key
             print("MISSING KEY")
             print(se.autos[0])
         elif isinstance(se, SchemaError):
+            # other schema error (including some keys)
             if se.autos[0] and "Key '" in se.autos[0]:
                 if "Missing" in se.autos[-1]:
                     print("MISSING KEY")
-                    print(se.autos[0])
                     print(se.autos[-1])
                 else:
                     print("INVALID VALUE")
                     print(se.autos[0])
-                    print(se.errors[-1])
+                    if se.errors[-1]:
+                        print(se.errors[-1])
+                    print(se.args[0])
             else:
                 print("SCHEMA ERROR")
                 print(se.code)
-
         
         if survive_with_exception:
             raise se
