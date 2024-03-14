@@ -8,7 +8,9 @@ Train Model: script to train models.
 import pprint
 
 import torch
+import wandb
 
+from sparsepy.tasks.api_login import log_in
 from sparsepy.access_objects.models.model_builder import ModelBuilder
 from sparsepy.access_objects.training_recipes.training_recipe_builder import (
     TrainingRecipeBuilder
@@ -31,6 +33,12 @@ def train_model(model_config: dict, trainer_config: dict,
         dataset_config (dict): config info to build the dataset
             to train on.
     """
+    log_in()
+
+    wandb.init(
+        project="wandb_run_log_testing", entity="sparsey-testing-system" # FIXME add W&B project name to trainer config
+    )
+
     model = ModelBuilder.build_model(model_config)
 
     trainer = TrainingRecipeBuilder.build_training_recipe(
@@ -60,3 +68,11 @@ def train_model(model_config: dict, trainer_config: dict,
             print(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
             pprint.pprint(output.get_metrics())
             batch_number+=1
+
+        # print summary here in model script
+        # if not printing you still need to call this to finalize the results
+        # FIXME confirm this is the correct location
+        # FIXME we are not correctly updating eval results in the DB if we do this
+        # 
+        trainer.get_summary()
+        #wandb.finish()

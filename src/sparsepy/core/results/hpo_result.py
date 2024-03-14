@@ -4,6 +4,7 @@ from sparsepy.core.results.hpo_step_result import HPOStepResult
 
 class HPOResult(Result):
     def __init__(self, configs: dict, id: str, name: str):
+        super().__init__()
         self.name = name
         self.id = id
         self.best_run = None
