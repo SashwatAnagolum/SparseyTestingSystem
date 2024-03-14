@@ -91,7 +91,7 @@ class TrainingRecipe:
 
                 #result[metric.__class__.__name__] = output
                 # need to add logic for "save only during training/eval" metrics
-                results.add_metric(metric.__class__.__name__, output)
+                results.add_metric(metric.get_name(), output)
 
             if training:
                 if self.loss_func is not None:

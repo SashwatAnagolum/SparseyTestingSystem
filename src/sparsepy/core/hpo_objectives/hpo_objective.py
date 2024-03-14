@@ -51,7 +51,8 @@ class HPOObjective:
         # for each metric in the objective
         for term in objective_terms:
             # get the correct format of the name
-            metric_name = self._convert_name(term["metric"]["name"])
+            metric_name = term["metric"]["name"]
+            #metric_name = self._convert_name(term["metric"]["name"])
             # for each result in the results get the averaged value of that metric into a list
             # REVIEW this since it will probably be broken by the TSR change
             term_values = [self.average_nested_data(result[metric_name]) for result in results.get_metrics()]
