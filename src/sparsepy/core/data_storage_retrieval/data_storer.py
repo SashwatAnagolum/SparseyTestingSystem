@@ -1,9 +1,7 @@
-import json
-import pickle
-
-import boto3
 from firebase_admin import firestore
+import json
 import numpy as np
+import pickle
 import wandb
 
 from sparsepy.core.results.training_result import TrainingResult
@@ -23,12 +21,9 @@ class DataStorer:
         self.saved_metrics = [metric["name"] for metric in config if metric["save"] is True]
         # create API client
         self.api = wandb.Api()
+
         # connect to Firestore
-        self.firestore_db = firestore.client()
-        # connect to DynamoDB
-        self.db = boto3.resource('dynamodb')
-        self.experiments_table = self.db.Table("sts_experiments")
-        self.hpo_table = self.db.Table("sts_hpo_runs")
+        self.db = firestore.client()
         
     
     def save_model(self, m: Model):
@@ -53,7 +48,7 @@ class DataStorer:
         wandb.log(summary_dict)
 
         # save the full results to Firestore
-        experiment_ref = self.firestore_db.collection("experiments").document(parent)
+        experiment_ref = self.db.collection("experiments").document(parent)
 
         if experiment_ref.get().exists:
             # add step to existing experiment
@@ -64,38 +59,20 @@ class DataStorer:
             )
         #else:
         # raise exception
-            
-        # save results to DynamoDB
-        self.experiments_table.update_item(
-            Key={"id": parent},
-            UpdateExpression="SET #tm = list_append(#tm, :v)",
-            ExpressionAttributeNames={"#tm": "saved_metrics.training"},
-            ExpressionAttributeValues={":v": [{(":"+k):v for k, v in full_dict.items()}]}
-        )
     
     def create_experiment(self, experiment: TrainingResult):
-        # create the DB entry in DynamoDB
-        self.experiments_table.put_item(Item={
-            "id": experiment.id,
-            "start_time": experiment.start_time.isoformat(), # save as string since DynamoDB does not support datetime
-            "saved_metrics": {
-                "training": [], # DynamoDB requires the list to already exist to append to it
-                "evaluation": [],
-                "resolution": experiment.resolution
-            },
-            "completed": False
-        })
-        
         # create the DB entry for this experiment in Firestore
-        experiment_ref = self.firestore_db.collection("experiments").document(experiment.id)
-        experiment_ref.set({
-            "id": experiment.id,
-            "start_time": experiment.start_time.isoformat(),
-            "saved_metrics": {
-                "resolution": experiment.resolution
-            },
-            "completed": False
-            })
+        experiment_ref = self.db.collection("experiments").document(experiment.id)
+
+        experiment_ref.set(
+            {
+                "start_time": experiment.start_time,
+                "saved_metrics": {
+                    "resolution": experiment.resolution
+                },
+                "completed": False
+            }
+        )
 
     def save_training_result(self, result: TrainingResult):
         # Implementation to save the training result
@@ -103,9 +80,9 @@ class DataStorer:
         # do we even need to set anything in W&B here? time finished? but W&B should track that
         # is there something we need to do here to mark end of run?
         # FIXME save required data if any, else remove
-        #run = self.api.run(wandb.run.path)
+        run = self.api.run(wandb.run.path)
 
-        experiment_ref = self.firestore_db.collection("experiments").document(result.id)
+        experiment_ref = self.db.collection("experiments").document(result.id)
 
         # every invocation of this costs 1 read call; consider removing
         if experiment_ref.get().exists:
@@ -136,7 +113,7 @@ class DataStorer:
         # save summary to W&B
         run.summary.update()
         # save the full results to Firestore
-        experiment_ref = self.firestore_db.collection("experiments").document(parent)
+        experiment_ref = self.db.collection("experiments").document(parent)
         if experiment_ref.get().exists:
             # add step to existing experiment
             experiment_ref.update(
@@ -168,7 +145,7 @@ class DataStorer:
     
         # FIRESTORE
         # save the objective data into the experiment
-        hpo_step_experiment_ref = self.firestore_db.collection("experiments").document(result.id)
+        hpo_step_experiment_ref = self.db.collection("experiments").document(result.id)
 
         hpo_step_experiment_ref.update(
             {
@@ -178,7 +155,7 @@ class DataStorer:
         )
 
         # mark this HPO step's experiment as belonging to the parent sweep
-        parent_sweep_ref = self.firestore_db.collection("hpo_runs").document(parent)
+        parent_sweep_ref = self.db.collection("hpo_runs").document(parent)
 
         parent_sweep_ref.update(
             {
@@ -189,37 +166,21 @@ class DataStorer:
         
 
     def create_hpo_sweep(self, sweep: HPOResult):
-        
-        # set up the data
-        new_sweep_data = {
-            "id": sweep.id,
-            "name": sweep.name,
-            "start_time": sweep.start_time.isoformat(),
-            "best_run_id": None,
-            "runs": [],
-            "completed": False,
-            "configs": {
-                conf_name:json.dumps(conf_json) for conf_name, conf_json in sweep.configs.items()
-            }
-        }
-
-        self.hpo_table.put_item(Item=new_sweep_data)
-
         # create the DB entry for this experiment in Firestore
-        sweep_ref = self.firestore_db.collection("hpo_runs").document(sweep.id)
-        sweep_ref.set({
-            "id": sweep.id,
-            "name": sweep.name,
-            "start_time": sweep.start_time,
-            "best_run_id": None,
-            "runs": [],
-            "completed": False,
-            "configs": {
-                conf_name:json.dumps(conf_json) for conf_name, conf_json in sweep.configs.items()
-            }
-            })
+        sweep_ref = self.db.collection("hpo_runs").document(sweep.id)
 
-        # and in DynamoDB
+        sweep_ref.set(
+            {
+                "name": sweep.name,
+                "start_time": sweep.start_time,
+                "best_run_id": None,
+                "runs": [],
+                "completed": False,
+                "configs": {
+                    conf_name:json.dumps(conf_json) for conf_name, conf_json in sweep.configs.items()
+                }
+            }
+        )
 
 
     def save_hpo_result(self, result: HPOResult):
@@ -229,24 +190,13 @@ class DataStorer:
 
         # FIRESTORE
         # set the end time and best run ID and mark as completed
-        sweep_ref = self.firestore_db.collection("hpo_runs").document(result.id)
+        sweep_ref = self.db.collection("hpo_runs").document(result.id)
 
         sweep_ref.update(
             {
                 "end_time": result.end_time,
                 "best_run_id": result.best_run.id,
                 "completed": True
-            }
-        )
-
-        # DynamoDB
-        self.hpo_table.update_item(
-            Key={"id": result.id},
-            UpdateExpression="SET end_time=:et, best_run_id=:brid, completed=:c",
-            ExpressionAttributeValues={
-                ":et": result.end_time.isoformat(),
-                ":brid": result.best_run.id,
-                ":c": True
             }
         )
     
