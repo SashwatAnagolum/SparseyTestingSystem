@@ -4,9 +4,9 @@ DataFetcher: Fetches data from weights and biases
 """
 
 import pickle
-
+import json
 from firebase_admin import firestore
-
+from datetime import datetime
 import wandb
 
 from sparsepy.core.results.training_result import TrainingResult
@@ -87,14 +87,43 @@ class DataFetcher:
         """
         pass
     
-    def get_hpo_result(self, experiment_id: str) -> HPOResult:
+    def get_hpo_result(self, hpo_run_id: str) -> HPOResult:
         """
-        Get the hyperparameter optimization result for an experiment.
+        Gets the HPO result for a specific HPO run.
 
         Args:
-            experiment_id (str): The ID of the experiment.
+            hpo_run_id (str): The ID of the HPO run.
 
         Returns:
-            HPOResult: the HPOResult for the experiment of this id in w&b
+            HPOResult: This HPO run's HPOResult from the database
         """
-        pass
+
+        # Fetch this HPO run's data back from Firestore
+        hpo_run_ref = self.db.collection("hpo_runs").document(hpo_run_id)
+        hpo_run = hpo_run_ref.get().to_dict()
+
+        # Parse configs from JSON to dict
+        configs = {
+            "dataset_config": json.loads(hpo_run["configs"]["dataset_config"]),
+            "hpo_config": json.loads(hpo_run["configs"]["hpo_config"]),
+            "preprocessing_config": json.loads(hpo_run["configs"]["preprocessing_config"]),
+            "sweep_config": json.loads(hpo_run["configs"]["sweep_config"]),
+            "training_recipe_config": json.loads(hpo_run["configs"]["training_recipe_config"])
+        }
+
+        # Reconstruct HPOResult object
+        hpo_result = HPOResult(configs=configs, id=hpo_run_id, name=hpo_run["name"])
+
+        # Set best_run_id from the data
+        hpo_result.best_run = hpo_run["best_run_id"]
+        # TODO ADD logic for reconstructing HPOStepResults
+        # Fetch and add each HPOStepResult to the HPOResult object
+        #for run_id in hpo_run["runs"]:
+        #    step_result = self.get_hpo_step_result(run_id)
+        #    hpo_result.add_step(step_result)
+
+        # TODO convert to date time
+        hpo_result.start_time = hpo_run["start_time"]
+        hpo_result.end_time = hpo_run["end_time"]
+
+        return hpo_result
