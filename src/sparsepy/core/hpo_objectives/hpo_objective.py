@@ -12,14 +12,16 @@ class HPOObjective:
         if isinstance(data, list):
             if data.__len__() == 0:
                 data=[0]
-            return np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
+            ret = np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
         elif hasattr(data, 'tolist'):  # numpy array
             if data.__len__() == 0:
                 data=[0]
-            return np.mean(np.nan_to_num(data))
+            ret = np.mean(np.nan_to_num(data))
         else:
             # Scalar value
-            return data
+            ret = data
+
+        return ret.item() if isinstance(ret, np.generic) else ret
 
 
     def _convert_name(self, metric_name):
