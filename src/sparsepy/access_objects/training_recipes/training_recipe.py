@@ -24,6 +24,7 @@ class TrainingRecipe:
                  preprocessing_stack: PreprocessingStack,
                  metrics_list: list[torch.nn.Module],
                  metric_config: dict,
+                 database_resolution: str,
                  loss_func: Optional[torch.nn.Module],
                  step_resolution: Optional[int] = None) -> None:
         self.optimizer = optimizer
@@ -42,7 +43,7 @@ class TrainingRecipe:
         self.num_batches = len(self.dataloader)
         self.iterator = iter(self.dataloader)
 
-        self.ds = DataStorer(metric_config)
+        self.ds = DataStorer(metric_config, database_resolution)
 
         # BUG need to have logged in to W&B by the time this is executed
         # BUG reporting fake value currently

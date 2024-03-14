@@ -147,6 +147,7 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
             a Schema that can be used to validate the config info.
         """
         config_schema = Schema({
+            Optional('database_resolution', default='none'): Or('none', 'summary', 'full'),
             'optimizer': schema_params['optimizer_schema'],
             'metrics': And(
                 list,

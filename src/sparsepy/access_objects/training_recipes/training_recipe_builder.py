@@ -70,6 +70,7 @@ class TrainingRecipeBuilder:
             model, optimizer, dataloader,
             preprocessing_stack, metrics_list,
             train_config['metrics'], # ensure this will also save metrics added only as HPO objectives!
+            train_config['database_resolution'],
             loss_func,
             train_config['training']['step_resolution']
         )

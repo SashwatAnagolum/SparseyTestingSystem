@@ -16,7 +16,7 @@ DataStorer: Stores data to weights and biases
 """
 class DataStorer:
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, database_resolution="none"):
         # configure saved metrics?
         self.saved_metrics = [metric["name"] for metric in config if metric["save"] is True]
         # create API client
@@ -24,6 +24,8 @@ class DataStorer:
 
         # connect to Firestore
         self.db = firestore.client()
+
+        self.database_resolution = database_resolution
         
     
     def save_model(self, m: Model):
@@ -47,32 +49,36 @@ class DataStorer:
         #summary_dict["resolution"] = result.resolution
         wandb.log(summary_dict)
 
-        # save the full results to Firestore
-        experiment_ref = self.db.collection("experiments").document(parent)
+        if self.database_resolution == "full":
 
-        if experiment_ref.get().exists:
-            # add step to existing experiment
-            experiment_ref.update(
-                {
-                    "saved_metrics.training": firestore.ArrayUnion([full_dict])
-                }
-            )
-        #else:
-        # raise exception
+            # save the full results to Firestore
+            experiment_ref = self.db.collection("experiments").document(parent)
+
+            if experiment_ref.get().exists:
+                # add step to existing experiment
+                experiment_ref.update(
+                    {
+                        "saved_metrics.training": firestore.ArrayUnion([full_dict])
+                    }
+                )
+            #else:
+            # raise exception
     
     def create_experiment(self, experiment: TrainingResult):
-        # create the DB entry for this experiment in Firestore
-        experiment_ref = self.db.collection("experiments").document(experiment.id)
+        
+        if self.database_resolution != "none":
+            # create the DB entry for this experiment in Firestore
+            experiment_ref = self.db.collection("experiments").document(experiment.id)
 
-        experiment_ref.set(
-            {
-                "start_time": experiment.start_time,
-                "saved_metrics": {
-                    "resolution": experiment.resolution
-                },
-                "completed": False
-            }
-        )
+            experiment_ref.set(
+                {
+                    "start_time": experiment.start_time,
+                    "saved_metrics": {
+                        "resolution": experiment.resolution
+                    },
+                    "completed": False
+                }
+            )
 
     def save_training_result(self, result: TrainingResult):
         # Implementation to save the training result
@@ -82,16 +88,18 @@ class DataStorer:
         # FIXME save required data if any, else remove
         run = self.api.run(wandb.run.path)
 
-        experiment_ref = self.db.collection("experiments").document(result.id)
+        if self.database_resolution != "none":
 
-        # every invocation of this costs 1 read call; consider removing
-        if experiment_ref.get().exists:
-            experiment_ref.update(
-                {
-                    "end_time": result.end_time,
-                    "completed": True
-                }
-            )
+            experiment_ref = self.db.collection("experiments").document(result.id)
+
+            # every invocation of this costs 1 read call; consider removing
+            if experiment_ref.get().exists:
+                experiment_ref.update(
+                    {
+                        "end_time": result.end_time,
+                        "completed": True
+                    }
+                )
 
         # COMMENT THIS IN to test updated config saving
         #run.config = result.
@@ -102,25 +110,27 @@ class DataStorer:
         # access the current run's summary-level data with the API
         run = self.api.run(wandb.run.path)
         
-        # gather the saved metrics for summary in W&B and full storage in the DB        
-        eval_dict = {}
+        if self.database_resolution != "none":
+        
+            # gather the saved metrics for summary in W&B and full storage in the DB        
+            eval_dict = {}
 
-        for metric_name, metric_val in result.get_metrics()[0].items():
-            if metric_name in self.saved_metrics:
-                run.summary["Evaluation" + metric_name] = metric_val
-                eval_dict[metric_name] = pickle.dumps(metric_val) # thank you, Firestore!
+            for metric_name, metric_val in result.get_metrics()[0].items():
+                if metric_name in self.saved_metrics:
+                    run.summary["Evaluation" + metric_name] = metric_val
+                    eval_dict[metric_name] = pickle.dumps(metric_val) # thank you, Firestore!
 
-        # save summary to W&B
-        run.summary.update()
-        # save the full results to Firestore
-        experiment_ref = self.db.collection("experiments").document(parent)
-        if experiment_ref.get().exists:
-            # add step to existing experiment
-            experiment_ref.update(
-                {
-                    "saved_metrics.evaluation": firestore.ArrayUnion([eval_dict])
-                }
-            )
+            # save summary to W&B
+            run.summary.update()
+            # save the full results to Firestore
+            experiment_ref = self.db.collection("experiments").document(parent)
+            if experiment_ref.get().exists:
+                # add step to existing experiment
+                experiment_ref.update(
+                    {
+                        "saved_metrics.evaluation": firestore.ArrayUnion([eval_dict])
+                    }
+                )
 
     def save_hpo_step(self, parent: str, result: HPOStepResult):
         # Implementation to save the HPO step result
@@ -144,43 +154,46 @@ class DataStorer:
         run.summary.update()
     
         # FIRESTORE
-        # save the objective data into the experiment
-        hpo_step_experiment_ref = self.db.collection("experiments").document(result.id)
+        if self.database_resolution != "none":
+            # save the objective data into the experiment
+            hpo_step_experiment_ref = self.db.collection("experiments").document(result.id)
 
-        hpo_step_experiment_ref.update(
-            {
-                "hpo_objective": result.get_objective(),
-                "parent_sweep": parent
-            }
-        )
+            hpo_step_experiment_ref.update(
+                {
+                    "hpo_objective": result.get_objective(),
+                    "parent_sweep": parent
+                }
+            )
 
-        # mark this HPO step's experiment as belonging to the parent sweep
-        parent_sweep_ref = self.db.collection("hpo_runs").document(parent)
+            # mark this HPO step's experiment as belonging to the parent sweep
+            parent_sweep_ref = self.db.collection("hpo_runs").document(parent)
 
-        parent_sweep_ref.update(
-            {
-                "runs": firestore.ArrayUnion([result.id])
-            }
-        )
+            parent_sweep_ref.update(
+                {
+                    "runs": firestore.ArrayUnion([result.id])
+                }
+            )
 
         
 
     def create_hpo_sweep(self, sweep: HPOResult):
-        # create the DB entry for this experiment in Firestore
-        sweep_ref = self.db.collection("hpo_runs").document(sweep.id)
+        if self.database_resolution != "none":
+        
+            # create the DB entry for this experiment in Firestore
+            sweep_ref = self.db.collection("hpo_runs").document(sweep.id)
 
-        sweep_ref.set(
-            {
-                "name": sweep.name,
-                "start_time": sweep.start_time,
-                "best_run_id": None,
-                "runs": [],
-                "completed": False,
-                "configs": {
-                    conf_name:json.dumps(conf_json) for conf_name, conf_json in sweep.configs.items()
+            sweep_ref.set(
+                {
+                    "name": sweep.name,
+                    "start_time": sweep.start_time,
+                    "best_run_id": None,
+                    "runs": [],
+                    "completed": False,
+                    "configs": {
+                        conf_name:json.dumps(conf_json) for conf_name, conf_json in sweep.configs.items()
+                    }
                 }
-            }
-        )
+            )
 
 
     def save_hpo_result(self, result: HPOResult):
@@ -190,15 +203,17 @@ class DataStorer:
 
         # FIRESTORE
         # set the end time and best run ID and mark as completed
-        sweep_ref = self.db.collection("hpo_runs").document(result.id)
+        if self.database_resolution != "none":
+        
+            sweep_ref = self.db.collection("hpo_runs").document(result.id)
 
-        sweep_ref.update(
-            {
-                "end_time": result.end_time,
-                "best_run_id": result.best_run.id,
-                "completed": True
-            }
-        )
+            sweep_ref.update(
+                {
+                    "end_time": result.end_time,
+                    "best_run_id": result.best_run.id,
+                    "completed": True
+                }
+            )
     
     def create_artifact(self, content: dict) -> wandb.Artifact:
         # Implementation to create and save a wandb.Artifact

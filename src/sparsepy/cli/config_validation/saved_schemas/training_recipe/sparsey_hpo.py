@@ -8,7 +8,7 @@ Sparsey HPO Trainer Schema: the schema for Sparsey trainer config files
 
 import typing
 
-from schema import Schema, Optional, And
+from schema import Schema, Optional, And, Or
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparsepy.cli.config_validation.saved_schemas import optimizer
@@ -75,6 +75,7 @@ class SparseyHpoTrainingRecipeSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
+                Optional('database_resolution', default='none'): Or('none', 'summary', 'full'),
                 'optimizer': schema_params['optimizer_schema'],
                 'dataloader': {
                     'batch_size': And(int, schema_utils.is_positive, error="Batch size must be a positive integer"),

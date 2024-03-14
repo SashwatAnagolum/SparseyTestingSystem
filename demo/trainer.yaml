@@ -1,6 +1,13 @@
 ---
 # trainer.yaml - training recipe configuration for a single experiment
 
+# database_resolution: DEBUG parameter that controls saving of data to the DB
+# none (default) = save nothing to Firestore
+# summary = save only TrainingResult, HPOStepResult, HPOResult (3 writes per run)
+# full = save everything (1 write per training step)
+# NOTE: this ONLY affects Firestore; full step-level data is still always logged to W&B
+database_resolution: none
+
 # optimizer settings
 optimizer:
   # name: string - the optimizer class to load and use

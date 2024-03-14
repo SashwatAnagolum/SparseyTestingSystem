@@ -70,7 +70,7 @@ class HPORun():
         }
         
         # create the DataStorer
-        self.data_storer = DataStorer(trainer_config['metrics'])
+        self.data_storer = DataStorer(trainer_config['metrics'], trainer_config['database_resolution'])
 
         # create the HPOResult (also sets start time)
         self.hpo_results = HPOResult(logged_configs, self.sweep_id, hpo_config['hpo_run_name'])
