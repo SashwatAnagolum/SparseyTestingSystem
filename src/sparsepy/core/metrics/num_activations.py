@@ -42,7 +42,7 @@ class NumActivationsMetric(Metric):
                 Valid options are 'layerwise_mean', 'sum',
                 'mean', 'none', and None.
         """
-        super().__init__(model)
+        super().__init__(model, "num_activations")
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)

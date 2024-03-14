@@ -9,7 +9,7 @@ from sparsepy.access_objects.models.model import Model
 
 class BasisSetSizeMetric(Metric):
     def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
-        super().__init__(model)
+        super().__init__(model, "basis_set_size")
 
         self.reduction = reduction
 

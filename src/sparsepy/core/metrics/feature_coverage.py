@@ -32,7 +32,7 @@ class FeatureCoverageMetric(Metric):
             reduction (Optional[str]): the type of reduction
                 to apply before returning the metric value.
         """
-        super().__init__(model)
+        super().__init__(model, "feature_coverage")
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)

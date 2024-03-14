@@ -11,8 +11,9 @@ class Metric:
         required for Dr. Rinkus' experiments.
     """
 
-    def __init__(self, model: torch.nn.Module):
+    def __init__(self, model: torch.nn.Module, name: str):
         self.model = model
+        self.name = name
 
 
     @abc.abstractmethod
@@ -30,3 +31,9 @@ class Metric:
         Returns:
             the Metric's results as a dict.
         """
+
+    def get_name(self):
+        """
+        Returns the name of this metric.
+        """
+        return self.name

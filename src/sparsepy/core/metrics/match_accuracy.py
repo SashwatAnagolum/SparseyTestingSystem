@@ -12,7 +12,7 @@ from sparsepy.core.metrics.metrics import Metric
 class MatchAccuracyMetric(Metric):
 
     def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
-        super().__init__(model)
+        super().__init__(model, "match_accuracy")
         # attaches the hook anew for this Metric to gain access to the hook data
         # consider hook managerlater if we need to use many metrics with hooks
         self.hook = LayerIOHook(self.model)
