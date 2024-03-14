@@ -12,7 +12,7 @@ def log_in():
         load_dotenv()
 
         # W&B login
-        wandb_api_key = os.getenv("WANDB_API_KEY", "e761ab6db7e51eada8996fa15e9e7eca67414c10")
+        wandb_api_key = os.getenv("WANDB_API_KEY")
         wandb.login(key=wandb_api_key, verify=True)
 
         # Firebase login
