@@ -75,4 +75,4 @@ def train_model(model_config: dict, trainer_config: dict,
         # FIXME we are not correctly updating eval results in the DB if we do this
         # 
         trainer.get_summary()
-        #wandb.finish()
+        wandb.finish()
