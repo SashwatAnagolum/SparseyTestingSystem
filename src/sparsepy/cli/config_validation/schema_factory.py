@@ -34,3 +34,16 @@ def get_schema_by_name(schema_module,
     )
 
     return getattr(schema_module, schema_class_name)()
+
+def schema_exists_by_name(schema_module, schema_type: str, schema_name: str) -> bool:
+    """
+    Checks whether a schema exists corresponding to the passed-in type and name.
+
+    Args:
+        schema_type: a str containing the type of schema to be used
+        schema_name: a str containing the name of the schame to be used
+
+    Returns:
+        (bool) whether the schema exists
+    """
+    return schema_name in dir(schema_module)

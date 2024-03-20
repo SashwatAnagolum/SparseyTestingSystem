@@ -47,14 +47,17 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
         Returns:
             (bool): whether the metric exists or not.
         """
-        try:
-            schema_factory.get_schema_by_name(
-                metric, 'metric', metric_name
-            )
-        except ValueError:
-            return False
-
-        return True
+        return schema_factory.schema_exists_by_name(
+            metric, 'metric', metric_name
+        )
+        #try:
+        #    schema_factory.get_schema_by_name(
+        #        metric, 'metric', metric_name
+        #    )
+        #except ValueError:
+        #    return False
+        #
+        #return True
 
 
     def build_precheck_schema(self) -> Schema:
