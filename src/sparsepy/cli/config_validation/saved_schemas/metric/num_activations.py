@@ -6,10 +6,10 @@ Num Activations: file holding the NumActivationsMetricSchema class.
 
 import typing
 
-from schema import Schema, Or, Optional
+from schema import Schema, Or, Optional, And, Use
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
-
+from sparsepy.core.metrics.metric_factory import MetricFactory
 
 class NumActivationsMetricSchema(AbstractSchema):
     def extract_schema_params(self, config_info: dict) -> typing.Optional[dict]:
@@ -54,8 +54,14 @@ class NumActivationsMetricSchema(AbstractSchema):
                 Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
                 Optional('reduction', default=None): Schema(Or(
                     'none', 'layerwise_mean', 'sum', 'mean', error="reduction must be 'none', 'layerwise_mean', 'sum', or 'mean'"
-                ), error="Invalid reduction value")
-            }
+                ), error="Invalid reduction value"),
+                Optional('best_value', default='max_by_layerwise_mean'): Schema(
+                        And(
+                            Use(MetricFactory.is_valid_comparision), True
+                            ), error="best_value must be the name of a valid comparison function from comparisons.py")
+            },
+            ignore_extra_keys=True,
+            error="Invalid configuration for num_activations metric"
         )
 
         return config_schema

@@ -5,9 +5,10 @@ Basis Set Size Increase: file holding the BasisSetSizeIncreaseMetricSchema class
 """
 
 
-from schema import Schema, Or, Optional
+from schema import Schema, Or, Optional, And, Use
 
 from sparsepy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
+from sparsepy.core.metrics.metric_factory import MetricFactory
 
 
 class BasisSetSizeIncreaseMetricSchema(AbstractSchema):
@@ -27,8 +28,14 @@ class BasisSetSizeIncreaseMetricSchema(AbstractSchema):
             {
                 'name': Schema('basis_set_size_increase', error="name must be 'basis_set_size_increase'"),
                 Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
-                Optional('reduction', default=None): Schema(Or('mean', 'none', 'sum', error="reduction must be 'mean', 'none', or 'sum'"), error="Invalid reduction value")
-            }, ignore_extra_keys=True
+                Optional('reduction', default=None): Schema(Or('mean', 'none', 'sum', error="reduction must be 'mean', 'none', or 'sum'"), error="Invalid reduction value"),
+                Optional('best_value', default='max_by_layerwise_mean'): Schema(
+                        And(
+                            Use(MetricFactory.is_valid_comparision), True
+                            ), error="best_value must be the name of a valid comparison function from comparisons.py")
+            }, 
+            ignore_extra_keys=True,
+            error="Invalid configuration for basis_set_size_increase metric"
         )
 
         return config_schema
