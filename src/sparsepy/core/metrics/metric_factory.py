@@ -41,7 +41,18 @@ class MetricFactory:
         metric_obj = metric_class(**kwargs)
 
         return metric_obj
-    
+
+    @staticmethod
+    def is_valid_metric_class(metric_name: str) -> bool:
+        """
+        Checks whether a metric class exists corresponding to the passed-in name.
+        """
+        class_name = ''.join(
+            [l.capitalize() for l in metric_name.split('_')] + ['Metric']
+        )
+
+        return class_name in MetricFactory.allowed_modules
+
     @staticmethod
     def is_valid_comparision(comparison_name: str) -> bool:
         """
