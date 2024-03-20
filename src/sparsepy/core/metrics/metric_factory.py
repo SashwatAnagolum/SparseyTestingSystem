@@ -1,9 +1,13 @@
+import inspect
+
 from sparsepy.core import metrics
 from sparsepy.core.metrics.metrics import Metric
+import sparsepy.core.metrics.comparisons as comparisons
 
 
 class MetricFactory:
     allowed_modules = set([i for i in dir(metrics) if i[:2] != '__'])
+    allowed_comparisons = set([i[0] for i in inspect.getmembers(comparisons, inspect.isfunction)])
 
     @staticmethod
     def get_metric_class(metric_name):
@@ -31,6 +35,16 @@ class MetricFactory:
         """
         metric_class = MetricFactory.get_metric_class(metric_name)
 
+        if "best_value" in kwargs.keys():
+            kwargs["best_value"] = getattr(comparisons, kwargs["best_value"])
+
         metric_obj = metric_class(**kwargs)
 
         return metric_obj
+    
+    @staticmethod
+    def is_valid_comparision(comparison_name: str) -> bool:
+        """
+        Checks whether a given comparison function exists.
+        """
+        return comparison_name in MetricFactory.allowed_comparisons
