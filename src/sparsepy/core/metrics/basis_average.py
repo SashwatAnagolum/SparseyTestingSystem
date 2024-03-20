@@ -12,7 +12,7 @@ import torch
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.hooks import LayerIOHook
 from sparsepy.core.metrics.metrics import Metric
-from sparsepy.core.metrics.comparisons import max_by_layerwise_average
+from sparsepy.core.metrics.comparisons import max_by_layerwise_mean
 
 
 class BasisAverageMetric(Metric):
@@ -43,7 +43,7 @@ class BasisAverageMetric(Metric):
             reduction (Optional[str]): the type of reduction
                 to apply before returning the metric value.
         """
-        super().__init__(model, "basis_average", max_by_layerwise_average)
+        super().__init__(model, "basis_average", max_by_layerwise_mean)
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)

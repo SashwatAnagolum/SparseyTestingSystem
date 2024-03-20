@@ -12,7 +12,7 @@ import torch
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.hooks import LayerIOHook
 from sparsepy.core.metrics.metrics import Metric
-from sparsepy.core.metrics.comparisons import max_by_layerwise_average
+from sparsepy.core.metrics.comparisons import max_by_layerwise_mean
 
 
 class NumActivationsMetric(Metric):
@@ -43,7 +43,7 @@ class NumActivationsMetric(Metric):
                 Valid options are 'layerwise_mean', 'sum',
                 'mean', 'none', and None.
         """
-        super().__init__(model, "num_activations", max_by_layerwise_average)
+        super().__init__(model, "num_activations", max_by_layerwise_mean)
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)

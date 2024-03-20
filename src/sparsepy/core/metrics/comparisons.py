@@ -25,14 +25,14 @@ def average_nested_data(data):
 
 
 #### BUILT IN COMPARISON FUNCTIONS ####
-def max_by_layerwise_average(x, y):
+def max_by_layerwise_mean(x, y):
     """
     Returns the maximum value by layerwise average of x and y.
     """
     return x if average_nested_data(x) >= average_nested_data(y) else y
 
 
-def min_by_layerwise_average(x, y):
+def min_by_layerwise_mean(x, y):
     """
     Returns the minimum value by layerwise average of x and y.
     """
