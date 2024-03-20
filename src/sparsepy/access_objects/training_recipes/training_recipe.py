@@ -13,7 +13,7 @@ from torchvision.transforms.v2 import Transform
 
 from sparsepy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
 from sparsepy.core.data_storage_retrieval import DataStorer
-from sparsepy.core.results import EvaluationResult, TrainingStepResult, TrainingResult
+from sparsepy.core.results import TrainingStepResult, TrainingResult
 
 import wandb
 
@@ -76,8 +76,7 @@ class TrainingRecipe:
         for _ in range(num_batches_in_step):
             data, labels = next(self.iterator)
 
-            # next_batch method in TSR?
-            results.add_batch()
+
 
             self.optimizer.zero_grad()
 
@@ -134,6 +133,7 @@ class TrainingRecipe:
             self.training_results.add_step(results)
         else:
             #self.ds.save_evaluation_step(self.evaluation_results.id, results)
+            self.ds.save_evaluation_step(self.training_results.id, results)
             self.eval_results.add_step(results)
         # and add them to the TrainingResult
         self.training_results.add_step(results)

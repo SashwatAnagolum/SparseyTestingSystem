@@ -30,10 +30,10 @@ class TrainingResult(Result):
             # if that metric has no best value OR
             # if running the "best_function" comparison retrieved from the Metric at construction time
             # tells us that this value is better than the best value
-            if best_data["best_value"] is None or best_data["best_function"](step_metrics[0][metric_name], best_data["best_value"]):
+            if best_data["best_value"] is None or best_data["best_function"](step_metrics[metric_name], best_data["best_value"]):
                 # then update the best value and index for this metric to be the current step
                 best_data['best_index'] = len(self.results)
-                best_data['best_value'] = step_metrics[0][metric_name]
+                best_data['best_value'] = step_metrics[metric_name]
 
     def get_best_step(self, metric: str) -> TrainingStepResult:
         return self.results[self.best_steps[metric]["best_index"]]

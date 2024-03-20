@@ -38,7 +38,7 @@ class DataStorer:
         full_dict = {}
         
         # gather the saved metrics for summary in W&B and full storage in the DB
-        for metric_name, metric_val in result.get_metrics()[0].items():
+        for metric_name, metric_val in result.get_metrics().items():
             if metric_name in self.saved_metrics:
                 summary_dict[metric_name] = self.average_nested_data(metric_val)
                 full_dict[metric_name] = pickle.dumps(metric_val) # pickling
@@ -64,6 +64,28 @@ class DataStorer:
             #else:
             # raise exception
     
+    def save_evaluation_step(self, parent: str, result: TrainingStepResult):
+        # gather the saved metrics for summary in W&B and full storage in the DB
+        full_dict = {}
+        for metric_name, metric_val in result.get_metrics().items():
+            if metric_name in self.saved_metrics:
+                full_dict[metric_name] = pickle.dumps(metric_val) # pickling
+
+        if self.database_resolution == "full":
+
+            # save the full results to Firestore
+            experiment_ref = self.db.collection("experiments").document(parent)
+
+            if experiment_ref.get().exists:
+                # add step to existing experiment
+                experiment_ref.update(
+                    {
+                        "saved_metrics.evaluation": firestore.ArrayUnion([full_dict])
+                    }
+                )
+            #else:
+            # raise exception
+
     def create_experiment(self, experiment: TrainingResult):
         
         if self.database_resolution != "none":
@@ -72,10 +94,14 @@ class DataStorer:
 
             experiment_ref.set(
                 {
-                    "start_time": experiment.start_time,
+                    "start_times": {
+                        "experiment": experiment.start_time,
+                        "training": experiment.start_time
+                    },
                     "saved_metrics": {
                         "resolution": experiment.resolution
                     },
+                    "end_times": {},
                     "completed": False
                 }
             )
@@ -96,7 +122,9 @@ class DataStorer:
             if experiment_ref.get().exists:
                 experiment_ref.update(
                     {
-                        "end_time": result.end_time,
+                        "end_times": {
+                            "training": result.end_time
+                            },
                         "completed": True
                     }
                 )
@@ -115,7 +143,7 @@ class DataStorer:
             # gather the saved metrics for summary in W&B and full storage in the DB        
             eval_dict = {}
 
-            for metric_name, metric_val in result.get_metrics()[0].items():
+            for metric_name, metric_val in result.get_metrics().items():
                 if metric_name in self.saved_metrics:
                     run.summary["Evaluation" + metric_name] = metric_val
                     eval_dict[metric_name] = pickle.dumps(metric_val) # thank you, Firestore!
