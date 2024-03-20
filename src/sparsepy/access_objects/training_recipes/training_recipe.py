@@ -4,7 +4,7 @@
 Training Recipe: class representing training recipes, which are used to train models.
 """
 
-
+from datetime import datetime
 from typing import Optional
 
 import torch
@@ -47,9 +47,11 @@ class TrainingRecipe:
 
         # BUG need to have logged in to W&B by the time this is executed
         # BUG reporting fake value currently
-        self.all_results = TrainingResult(wandb.run.id, self.step_resolution)
+        self.training_results = TrainingResult(wandb.run.id, "training", self.step_resolution, self.metrics_list)
+        self.eval_results = TrainingResult(wandb.run.id, "evaluation", self.step_resolution, self.metrics_list)
+        self.first_eval = True
 
-        self.ds.create_experiment(self.all_results)
+        self.ds.create_experiment(self.training_results)
 
 
     def step(self, training: bool = True):
@@ -58,13 +60,18 @@ class TrainingRecipe:
         else:
             num_batches_in_step = self.step_resolution
 
+        if not training and self.first_eval:
+                self.first_eval = False
+                self.eval_results.start_time = datetime.now()
+
         #results = []
-        if training:
-            results = TrainingStepResult(self.step_resolution)
-        else:
-            # need to be able to access dataset name from TR
-            # BUG incorrect dataset name saved
-            results = EvaluationResult("FIXME")
+        #if training:
+        #    results = TrainingStepResult(self.step_resolution)
+        #else:
+        #    # need to be able to access dataset name from TR
+        #    # BUG incorrect dataset name saved
+        #    results = ProcessStepResult(self.step_resolution)
+        results = TrainingStepResult(self.step_resolution)
 
         for _ in range(num_batches_in_step):
             data, labels = next(self.iterator)
@@ -123,7 +130,11 @@ class TrainingRecipe:
 
         # log the results for this step
         if training:
-            self.ds.save_training_step(self.all_results.id, results)
+            self.ds.save_training_step(self.training_results.id, results)
+            self.training_results.add_step(results)
+        else:
+            #self.ds.save_evaluation_step(self.evaluation_results.id, results)
+            self.eval_results.add_step(results)
         # and add them to the TrainingResult
         self.all_results.add_step(results)
 
