@@ -2,7 +2,7 @@ import abc
 import numpy as np
 import torch
 
-from typing import Optional
+from typing import Optional, Callable
 
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.hooks import LayerIOHook
@@ -23,7 +23,8 @@ class FeatureCoverageMetric(Metric):
             and layerwise inputs and outputs.
     """
     def __init__(self, model: torch.nn.Module,
-                 reduction: Optional[str] = None) -> None:
+                 reduction: Optional[str] = None,
+                 best_value: Optional[Callable] = max_by_layerwise_mean) -> None:
         """
         Initializes the FeatureCoverageMetric object. 
 
@@ -33,7 +34,7 @@ class FeatureCoverageMetric(Metric):
             reduction (Optional[str]): the type of reduction
                 to apply before returning the metric value.
         """
-        super().__init__(model, "feature_coverage", max_by_layerwise_mean)
+        super().__init__(model, "feature_coverage", best_value)
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)

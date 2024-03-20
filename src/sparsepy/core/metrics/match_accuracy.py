@@ -2,7 +2,7 @@ import abc
 from typing import Optional
 import torch
 
-from typing import Optional
+from typing import Optional, Callable
 
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.model_layers.sparsey_layer import MAC
@@ -12,8 +12,11 @@ from sparsepy.core.metrics.comparisons import max_by_layerwise_mean
 
 class MatchAccuracyMetric(Metric):
 
-    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
-        super().__init__(model, "match_accuracy", max_by_layerwise_mean)
+    def __init__(self, 
+                 model: torch.nn.Module, 
+                 reduction: Optional[str] = None,
+                 best_value: Optional[Callable] = max_by_layerwise_mean):
+        super().__init__(model, "match_accuracy", best_value)
         # attaches the hook anew for this Metric to gain access to the hook data
         # consider hook managerlater if we need to use many metrics with hooks
         self.hook = LayerIOHook(self.model)

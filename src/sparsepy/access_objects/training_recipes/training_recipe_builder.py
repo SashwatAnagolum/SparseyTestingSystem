@@ -46,12 +46,15 @@ class TrainingRecipeBuilder:
 
         metrics_list = []
 
+        # BUG this is a bad way to do metric initialization and will break every time we add a Metric parameter
+        # we should revisit it
         for metric_config in train_config['metrics']:
             metric = MetricFactory.create_metric(
                 metric_config['name'],
                 #**metric_config['params'],
                 model=model,
-                reduction=metric_config['reduction'] # WARNING this formulation assumes all Metrics support a reduction constructor parameter
+                reduction=metric_config['reduction'], # WARNING this formulation assumes all Metrics support a reduction constructor parameter
+                best_value=metric_config['best_value']
             )
 
             metrics_list.append(metric)

@@ -1,6 +1,6 @@
 import torch
 
-from typing import Optional
+from typing import Optional, Callable
 
 from sparsepy.core.metrics.metrics import Metric
 from sparsepy.core.metrics.comparisons import min_by_layerwise_mean
@@ -9,8 +9,8 @@ from sparsepy.access_objects.models.model import Model
 
 
 class BasisSetSizeMetric(Metric):
-    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
-        super().__init__(model, "basis_set_size", min_by_layerwise_mean)
+    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None, best_value: Optional[Callable] = min_by_layerwise_mean):
+        super().__init__(model, "basis_set_size", best_value)
 
         self.reduction = reduction
 

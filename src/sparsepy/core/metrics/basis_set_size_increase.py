@@ -1,7 +1,7 @@
 import numpy
 import torch
 
-from typing import Optional
+from typing import Optional, Callable
 
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.model_layers.sparsey_layer import MAC, SparseyLayer
@@ -15,8 +15,8 @@ class BasisSetSizeIncreaseMetric(Metric):
     BasisSetSizeIncreaseMetric: metric to keep track
         of basis set sizes across a Sparsey model.
     """
-    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
-        super().__init__(model, "basis_set_size_increase", max_by_layerwise_mean)
+    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None, best_value: Optional[Callable] = max_by_layerwise_mean):
+        super().__init__(model, "basis_set_size_increase", best_value)
         self.old_sizes = self._get_set_sizes(model)
 
         self.reduction = reduction

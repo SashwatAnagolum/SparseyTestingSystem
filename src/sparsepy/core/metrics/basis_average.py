@@ -5,7 +5,7 @@ Basis Average: file holding the BasisAverageMetric class.
 """
 
 
-from typing import Optional
+from typing import Optional, Callable
 
 import torch
 
@@ -33,7 +33,8 @@ class BasisAverageMetric(Metric):
             and layerwise inputs and outputs.
     """
     def __init__(self, model: torch.nn.Module,
-                 reduction: Optional[str] = None) -> None:
+                 reduction: Optional[str] = None,
+                 best_value: Optional[Callable] = max_by_layerwise_mean) -> None:
         """
         Initializes the BasisAverageMetric object. 
 
@@ -43,7 +44,7 @@ class BasisAverageMetric(Metric):
             reduction (Optional[str]): the type of reduction
                 to apply before returning the metric value.
         """
-        super().__init__(model, "basis_average", max_by_layerwise_mean)
+        super().__init__(model, "basis_average", best_value)
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)

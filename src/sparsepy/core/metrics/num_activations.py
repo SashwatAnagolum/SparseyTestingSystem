@@ -5,7 +5,7 @@ Num Activations: file holding the NumActivationsMetric class.
 """
 
 
-from typing import Optional
+from typing import Optional, Callable
 
 import torch
 
@@ -31,7 +31,8 @@ class NumActivationsMetric(Metric):
             fr each MAC in each layer of the model.
     """
     def __init__(self, model: torch.nn.Module,
-                 reduction: Optional[str] = None) -> None:
+                 reduction: Optional[str] = None,
+                 best_value: Optional[Callable] = max_by_layerwise_mean) -> None:
         """
         Initializes the NumActivationsMetric object. 
 
@@ -43,7 +44,7 @@ class NumActivationsMetric(Metric):
                 Valid options are 'layerwise_mean', 'sum',
                 'mean', 'none', and None.
         """
-        super().__init__(model, "num_activations", max_by_layerwise_mean)
+        super().__init__(model, "num_activations", best_value)
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)
