@@ -136,13 +136,13 @@ class TrainingRecipe:
             #self.ds.save_evaluation_step(self.evaluation_results.id, results)
             self.eval_results.add_step(results)
         # and add them to the TrainingResult
-        self.all_results.add_step(results)
+        self.training_results.add_step(results)
 
         return results, epoch_ended
 
     def get_summary(self) -> TrainingResult:
         # this method implicitly marks the run as finished and commits it to the data store
-        self.all_results.mark_finished()
-        self.ds.save_training_result(self.all_results)
+        self.training_results.mark_finished()
+        self.ds.save_training_result(self.training_results)
 
-        return self.all_results
+        return self.training_results
