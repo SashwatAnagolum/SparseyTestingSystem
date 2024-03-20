@@ -3,13 +3,14 @@ import torch
 from typing import Optional
 
 from sparsepy.core.metrics.metrics import Metric
+from sparsepy.core.metrics.comparisons import min_by_layerwise_average
 from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
 from sparsepy.access_objects.models.model import Model
 
 
 class BasisSetSizeMetric(Metric):
     def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
-        super().__init__(model, "basis_set_size")
+        super().__init__(model, "basis_set_size", min_by_layerwise_average)
 
         self.reduction = reduction
 

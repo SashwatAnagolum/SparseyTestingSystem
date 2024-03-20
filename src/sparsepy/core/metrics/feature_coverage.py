@@ -7,6 +7,7 @@ from typing import Optional
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.hooks import LayerIOHook
 from sparsepy.core.metrics.metrics import Metric
+from sparsepy.core.metrics.comparisons import max_by_layerwise_average
 
 class FeatureCoverageMetric(Metric):
     """
@@ -32,7 +33,7 @@ class FeatureCoverageMetric(Metric):
             reduction (Optional[str]): the type of reduction
                 to apply before returning the metric value.
         """
-        super().__init__(model, "feature_coverage")
+        super().__init__(model, "feature_coverage", max_by_layerwise_average)
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)

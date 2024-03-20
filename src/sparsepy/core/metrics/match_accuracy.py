@@ -8,11 +8,12 @@ from sparsepy.access_objects.models.model import Model
 from sparsepy.core.model_layers.sparsey_layer import MAC
 from sparsepy.core.hooks import LayerIOHook
 from sparsepy.core.metrics.metrics import Metric
+from sparsepy.core.metrics.comparisons import max_by_layerwise_average
 
 class MatchAccuracyMetric(Metric):
 
     def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None):
-        super().__init__(model, "match_accuracy")
+        super().__init__(model, "match_accuracy", max_by_layerwise_average)
         # attaches the hook anew for this Metric to gain access to the hook data
         # consider hook managerlater if we need to use many metrics with hooks
         self.hook = LayerIOHook(self.model)

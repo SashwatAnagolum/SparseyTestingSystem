@@ -1,4 +1,5 @@
 import abc
+from typing import Callable
 
 import torch
 from sparsepy.access_objects.models.model import Model
@@ -11,9 +12,10 @@ class Metric:
         required for Dr. Rinkus' experiments.
     """
 
-    def __init__(self, model: torch.nn.Module, name: str):
+    def __init__(self, model: torch.nn.Module, name: str, best_comparison: Callable):
         self.model = model
         self.name = name
+        self.best_comparison = best_comparison
 
 
     @abc.abstractmethod
@@ -37,3 +39,9 @@ class Metric:
         Returns the name of this metric.
         """
         return self.name
+
+    def get_best_comparison_function(self):
+        """
+        Returns the function to use to obtain the "best" instance of this metric.
+        """
+        return self.best_comparison
