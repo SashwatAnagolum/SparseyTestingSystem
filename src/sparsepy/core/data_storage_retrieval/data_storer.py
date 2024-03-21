@@ -64,7 +64,7 @@ class DataStorer:
             # raise exception
     
     def save_evaluation_step(self, parent: str, result: TrainingStepResult):
-        # gather the saved metrics for summary in W&B and full storage in the DB
+        # gather the saved metrics for storage in the DB
         full_dict = {}
         for metric_name, metric_val in result.get_metrics().items():
             if metric_name in self.saved_metrics:
@@ -110,8 +110,6 @@ class DataStorer:
 
         # do we even need to set anything in W&B here? time finished? but W&B should track that
         # is there something we need to do here to mark end of run?
-        # FIXME save required data if any, else remove
-        run = self.api.run(wandb.run.path)
 
         if self.database_resolution != "none":
 
@@ -121,13 +119,16 @@ class DataStorer:
             if experiment_ref.get().exists:
                 experiment_ref.update(
                     {
-                        "start_times": {
-                            "training": result.start_time
-                        },
-                        "end_times": {
-                            "training": result.end_time
-                            },
-                        "completed": True
+                        "start_times.training": result.start_time,
+                        "end_times.training": result.end_time,
+                        "completed": True,
+                        "best_steps.training": {
+                                metric_name:{
+                                    'best_index': metric_vals["best_index"],
+                                    'best_value': pickle.dumps(metric_vals["best_value"]),
+                                    'best_function': metric_vals["best_function"].__name__} 
+                                for metric_name, metric_vals in result.best_steps.items()
+                            }
                     }
                 )
 
@@ -161,14 +162,17 @@ class DataStorer:
                 # add step to existing experiment
                 experiment_ref.update(
                     {
-                        "start_times": {
-                            "evaluation": result.start_time
-                        },
-                        "end_times": {
-                            "evaluation": result.end_time,
-                            "experiment": result.end_time
-                        },
-                        "completed": True
+                        "start_times.evaluation": result.start_time,
+                        "end_times.evaluation": result.end_time,
+                        "end_times.experiment": result.end_time,
+                        "completed": True,
+                        "best_steps.evaluation": {
+                                metric_name:{
+                                    'best_index': metric_vals["best_index"],
+                                    'best_value': pickle.dumps(metric_vals["best_value"]),
+                                    'best_function': metric_vals["best_function"].__name__} 
+                                for metric_name, metric_vals in result.best_steps.items()
+                            }
                     }
                 )
 
