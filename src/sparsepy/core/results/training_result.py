@@ -1,15 +1,18 @@
+from typing import Optional
+
 from sparsepy.core.results.result import Result
 from sparsepy.core.results.training_step_result import TrainingStepResult
 from sparsepy.core.metrics.metrics import Metric
 
 class TrainingResult(Result):
-    def __init__(self, id: str, result_type: str, resolution: str, metrics: list[Metric]):
+    def __init__(self, id: str, result_type: str, resolution: str, metrics: list[Metric], configs: Optional[dict] = None):
         super().__init__()
         self.id = id
         self.resolution = resolution
         self.result_type = result_type
         self.results = []  # List of TrainingStepResult objects
         self.best_steps = {}
+        self.configs = configs if configs else {}
 
         # get the best_item functions
         self.best_steps = {}
@@ -43,3 +46,9 @@ class TrainingResult(Result):
 
     def get_steps(self) -> list[TrainingStepResult]:
         return self.results
+
+    def add_config(self, name, config):
+        self.configs[name] = config
+
+    def get_configs(self) -> dict:
+        return self.configs
