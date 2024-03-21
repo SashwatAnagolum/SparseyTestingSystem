@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-DataFetcher: Fetches data from weights and biases
+DataFetcher: Fetches data from weights and biases and the database (firestore)
 """
 
-import pickle
 import json
-from firebase_admin import firestore
+import pickle
 from datetime import datetime
+from firebase_admin import firestore
+import numpy as np
 import wandb
+from functools import lru_cache
+from datetime import datetime
+from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 
 from sparsepy.core.results.training_result import TrainingResult
 from sparsepy.core.results.training_step_result import TrainingStepResult
@@ -15,16 +19,59 @@ from sparsepy.core.results.hpo_result import HPOResult
 from sparsepy.core.results.hpo_step_result import HPOStepResult
 
 class DataFetcher:
-    """Fetches data related to sparsey models and results."""
+    """
+    A class for fetching data from a Firestore database, including experiment data, HPO run data, and model weights.
 
+    This class provides methods to access and deserialize data related to sparsey experiments stored in Firestore.
+    It supports caching for efficient data retrieval.
+    """
     def __init__(self):
-        
-        # create API client
-        self.api = wandb.Api()
-
-        # connect to Firestore
+        """
+        Initializes the DataFetcher instance by setting up a connection to the Firestore database.
+        (credentials need to have been set before using this)
+        """
         self.db = firestore.client()
     
+    def _deserialize_metric(self, serialized_metric):
+        """
+        Deserializes a metric value stored as a pickled string.
+
+        Args:
+            serialized_metric (bytes): The pickled representation of a metric.
+
+        Returns:
+            object: The deserialized metric value.
+        """
+        return pickle.loads(serialized_metric)
+
+    @lru_cache(maxsize=None)
+    def _get_experiment_data(self, experiment_id):
+        """
+        Retrieves and caches the data for a specific experiment from Firestore.
+
+        Args:
+            experiment_id (str): The unique identifier for the experiment.
+
+        Returns:
+            dict: A dictionary containing the experiment data.
+        """
+        experiment_ref = self.db.collection("experiments").document(experiment_id)
+        return experiment_ref.get().to_dict()
+
+    @lru_cache(maxsize=None)
+    def _get_hpo_run_data(self, hpo_run_id):
+        """
+        Retrieves and caches the data for a specific HPO run from Firestore.
+
+        Args:
+            hpo_run_id (str): The unique identifier for the HPO run.
+
+        Returns:
+            dict: A dictionary containing the HPO run data.
+        """
+        hpo_run_ref = self.db.collection("hpo_runs").document(hpo_run_id)
+        return hpo_run_ref.get().to_dict()
+
     def get_model_weights(self, model_id: str) -> dict:
         """
         Fetches model weights for a given model ID.
@@ -36,93 +83,135 @@ class DataFetcher:
             dict: A dictionary of model weights.
         """
         pass
-    
+
+    def get_training_step_result(self, experiment_id, step_index):
+        """
+        Retrieves the result of a specific training step within an experiment.
+
+        Args:
+            experiment_id (str): The unique identifier for the experiment.
+            step_index (int): The index of the training step to retrieve.
+
+        Returns:
+            TrainingStepResult: An instance of TrainingStepResult containing the step's metrics.
+
+        Raises:
+            ValueError: If the step index is out of bounds for the given experiment.
+        """
+        experiment_data = self._get_experiment_data(experiment_id)
+        training_steps = experiment_data.get("saved_metrics", {}).get("training", [])
+        if step_index < 0 or step_index >= len(training_steps):
+            raise ValueError("Step index is out of bounds for the given experiment.")
+
+        step_data = training_steps[step_index]
+        step_result = TrainingStepResult(resolution=experiment_data["saved_metrics"]["resolution"])
+        
+        for metric_name, metric_data in step_data.items():
+            step_result.add_metric(name=metric_name, values=self._deserialize_metric(metric_data))
+
+        return step_result
+
     def get_training_result(self, experiment_id: str) -> TrainingResult:
         """
-        Gets the training result for a specific experiment.
+        Retrieves the training result for a given experiment.
+
+        This method compiles the results of individual training steps within an experiment into a single TrainingResult object.
+        It includes overall metrics, step-by-step results, and information about the start and end times of the experiment,
+        as well as the best performing steps.
 
         Args:
-            experiment_id (str): The ID of the experiment.
+            experiment_id (str): The unique identifier for the experiment.
 
         Returns:
-            TrainingResult: This Experiment's TrainingResult from w&b
+            TrainingResult: An instance of TrainingResult containing aggregated metrics and outcomes from the experiment's training steps.
         """
+        experiment_data = self._get_experiment_data(experiment_id)
 
-        # fetch this experiment's data back from Firestore
-        experiment_ref = self.db.collection("experiments").document(experiment_id)
-        # this fetches ALL the data for the object and should be used sparingly
-        experiment = experiment_ref.get().to_dict()
+        metrics = []
+        tr = TrainingResult(id=experiment_id, result_type="training", resolution=experiment_data["saved_metrics"]["resolution"], metrics=metrics)
 
-        # create a new TrainingResult object to hold the retrieved data
-        tr = TrainingResult(experiment_id, experiment["saved_metrics"]["resolution"])
+        for step_index in range(len(experiment_data.get("saved_metrics", {}).get("training", []))):
+            step_result = self.get_training_step_result(experiment_id, step_index)
+            tr.add_step(step_result)
 
-        # populate all the training steps
-        for train_step in experiment["saved_metrics"]["training"]:
-            tsr = TrainingStepResult(experiment["saved_metrics"]["resolution"])
-            tsr.metrics = [
-                {
-                    met_name:pickle.loads(encoded_val) for met_name, encoded_val in train_step.items()
-                }
-            ]
-            tr.add_step(tsr)
-
-        # populate summary-level data: start, end, best steps
-        tr.start_time = experiment["start_time"]
-        tr.end_time = experiment["end_time"]
-        # FIXME implement best step retrieval
-        #tr.best_steps = experiment["best_steps"]
-
+        tr.start_time = self.convert_firestore_timestamp(experiment_data.get("start_times", {}).get("training"))
+        tr.end_time = self.convert_firestore_timestamp(experiment_data.get("end_times", {}).get("training"))
+        tr.best_steps = experiment_data["best_steps"]
         return tr
 
-    def get_eval_result(self, experiment_id: str) -> TrainingResult:
+    def get_hpo_step_result(self, hpo_run_id, experiment_id):
         """
-        Get the evaluation result for a given experiment.
+        Retrieves the result of a specific experiment step within an HPO run.
+
+        This method combines experiment data and HPO configuration to create a comprehensive
+        step result for hpo.
 
         Args:
-            experiment_id (str): The ID of the experiment.
+            hpo_run_id (str): The unique identifier for the HPO run.
+            experiment_id (str): The unique identifier for the experiment within the HPO run.
 
         Returns:
-            EvaluationResult: the EvaluationResult for the experiment of this id in w&b
+            HPOStepResult: An instance of HPOStepResult representing the experiment step within the HPO run.
         """
-        pass
-    
+        # Assuming this method will utilize get_training_result to fetch associated training and evaluation results
+        experiment_data = self._get_experiment_data(experiment_id)
+        training_result = self.get_training_result(experiment_id)
+        hpo_run_data = self._get_hpo_run_data(hpo_run_id)
+        # TODO Populate model configs
+        # TODO Check if the configs will be stored in experiments
+        hpo_step_result = HPOStepResult(parent_run=hpo_run_id, id=experiment_id, configs={
+                    'dataset_config': hpo_run_data["configs"]["dataset_config"],
+                    'preprocessing_config': hpo_run_data["configs"]["preprocessing_config"],
+                    'training_recipe_config': hpo_run_data["configs"]["training_recipe_config"],
+                    'model_config': {}
+                })
+        hpo_step_result.populate(objective=experiment_data["hpo_objective"], training_results=training_result, eval_results=training_result)
+        return hpo_step_result
+
     def get_hpo_result(self, hpo_run_id: str) -> HPOResult:
         """
-        Gets the HPO result for a specific HPO run.
+        Retrieves the overall result of a specific hyperparameter optimization (HPO) run.
+
+        This method aggregates the results of individual experiments within an HPO run, and provides a comprehensive 
+        view of the HPO run, including start and end times, configuration settings, and the best-performing experiment.
 
         Args:
-            hpo_run_id (str): The ID of the HPO run.
+            hpo_run_id (str): The unique identifier for the HPO run.
 
         Returns:
-            HPOResult: This HPO run's HPOResult from the database
+            HPOResult: An instance of HPOResult containing aggregated results and configuration info from the HPO run.
         """
+        hpo_run_data = self._get_hpo_run_data(hpo_run_id)
 
-        # Fetch this HPO run's data back from Firestore
-        hpo_run_ref = self.db.collection("hpo_runs").document(hpo_run_id)
-        hpo_run = hpo_run_ref.get().to_dict()
+        configs = {conf_name: json.loads(conf_json) for conf_name, conf_json in hpo_run_data["configs"].items()}
+        hpo_result = HPOResult(configs=configs, id=hpo_run_id, name=hpo_run_data["name"])
 
-        # Parse configs from JSON to dict
-        configs = {
-            "dataset_config": json.loads(hpo_run["configs"]["dataset_config"]),
-            "hpo_config": json.loads(hpo_run["configs"]["hpo_config"]),
-            "preprocessing_config": json.loads(hpo_run["configs"]["preprocessing_config"]),
-            "sweep_config": json.loads(hpo_run["configs"]["sweep_config"]),
-            "training_recipe_config": json.loads(hpo_run["configs"]["training_recipe_config"])
-        }
-
-        # Reconstruct HPOResult object
-        hpo_result = HPOResult(configs=configs, id=hpo_run_id, name=hpo_run["name"])
-
-        # Set best_run_id from the data
-        hpo_result.best_run = hpo_run["best_run_id"]
-        # TODO ADD logic for reconstructing HPOStepResults
-        # Fetch and add each HPOStepResult to the HPOResult object
-        #for run_id in hpo_run["runs"]:
-        #    step_result = self.get_hpo_step_result(run_id)
-        #    hpo_result.add_step(step_result)
-
-        # TODO convert to date time
-        hpo_result.start_time = hpo_run["start_time"]
-        hpo_result.end_time = hpo_run["end_time"]
-
+        for experiment_id in hpo_run_data["runs"]:
+            step_result = self.get_hpo_step_result(hpo_run_id, experiment_id)
+            hpo_result.add_step(step_result)
+            
+        hpo_result.best_run = self.get_hpo_step_result(hpo_run_id, hpo_run_data["best_run_id"])
+        hpo_result.start_time = self.convert_firestore_timestamp(hpo_run_data["start_time"])
+        hpo_result.end_time = self.convert_firestore_timestamp(hpo_run_data["end_time"])
         return hpo_result
+    
+    def convert_firestore_timestamp(self, firestore_timestamp: DatetimeWithNanoseconds) -> datetime:
+        """
+        Converts a Firestore DatetimeWithNanoseconds object to a standard Python datetime object.
+
+        Args:
+            firestore_timestamp (DatetimeWithNanoseconds): The Firestore timestamp to convert.
+
+        Returns:
+            datetime: A standard Python datetime object representing the same point in time.
+        """
+        converted_datetime = datetime(
+            year=firestore_timestamp.year,
+            month=firestore_timestamp.month,
+            day=firestore_timestamp.day,
+            hour=firestore_timestamp.hour,
+            minute=firestore_timestamp.minute,
+            second=firestore_timestamp.second,
+            microsecond=firestore_timestamp.microsecond,
+        )
+        return converted_datetime
