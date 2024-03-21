@@ -20,5 +20,5 @@ class HPOResult(Result):
         return self.runs
 
     def get_top_k_steps(self, k: int) -> list[HPOStepResult]:
-        # Implementation needed to get top k steps
-        pass
+        # sort copy by objective total, return top k
+        return sorted(self.runs, key = lambda x : x.get_objective()["total"], reverse=True)[:k]

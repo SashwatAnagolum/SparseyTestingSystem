@@ -247,6 +247,7 @@ class DataStorer:
 
         # FIRESTORE
         # set the end time and best run ID and mark as completed
+
         if self.database_resolution != "none":
         
             sweep_ref = self.db.collection("hpo_runs").document(result.id)
@@ -255,7 +256,8 @@ class DataStorer:
                 {
                     "end_time": result.end_time,
                     "best_run_id": result.best_run.id,
-                    "completed": True
+                    "completed": True,
+                    "runs_by_objective": [step.id for step in result.get_top_k_steps(len(result.runs))]
                 }
             )
     
