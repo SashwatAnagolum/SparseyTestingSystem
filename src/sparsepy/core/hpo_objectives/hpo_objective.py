@@ -52,14 +52,9 @@ class HPOObjective:
         for term in objective_terms:
             # get the correct format of the name
             metric_name = term["metric"]["name"]
-            #metric_name = self._convert_name(term["metric"]["name"])
             # for each result in the results get the averaged value of that metric into a list
             # REVIEW this since it will probably be broken by the TSR change
-            term_values = []
-            for step in results.get_steps():
-                term_values.append(self.average_nested_data(step.get_metric(metric_name)))
-
-            #term_values = [self.average_nested_data(step[metric_name]) for step in results.get_steps()]
+            term_values = [self.average_nested_data(step.get_metric(metric_name)) for step in results.get_steps()]
             
             # average the values across all the steps to get the subtotal; also record the weight
             obj_vals["terms"][metric_name] = {'value': np.mean(term_values), 
