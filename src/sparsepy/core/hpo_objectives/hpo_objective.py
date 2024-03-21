@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from sparsepy.core.results import TrainingStepResult
+from sparsepy.core.results import TrainingResult
 
 class HPOObjective:
     def __init__(self, hpo_config: dict):
@@ -30,7 +30,7 @@ class HPOObjective:
                 )
 
 
-    def combine_metrics(self, results: TrainingStepResult) -> float:
+    def combine_metrics(self, results: TrainingResult) -> float:
         """
         Combines multiple metric results into a single scalar value using a specified operation and weights,
         averaging values at different levels within each metric. Only metrics specified in the HPO configuration are used.
@@ -55,9 +55,13 @@ class HPOObjective:
             #metric_name = self._convert_name(term["metric"]["name"])
             # for each result in the results get the averaged value of that metric into a list
             # REVIEW this since it will probably be broken by the TSR change
-            term_values = [self.average_nested_data(result[metric_name]) for result in results.get_metrics()]
+            term_values = []
+            for step in results.get_steps():
+                term_values.append(self.average_nested_data(step.get_metric(metric_name)))
+
+            #term_values = [self.average_nested_data(step[metric_name]) for step in results.get_steps()]
             
-            # average the values across all the results to get the subtotal; also record the weight
+            # average the values across all the steps to get the subtotal; also record the weight
             obj_vals["terms"][metric_name] = {'value': np.mean(term_values), 
                                                   'weight': term["weight"]}
 
