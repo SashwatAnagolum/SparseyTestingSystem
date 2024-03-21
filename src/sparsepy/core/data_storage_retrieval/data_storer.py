@@ -142,18 +142,21 @@ class DataStorer:
         
         if self.database_resolution != "none":
         
-            # gather the saved metrics for summary in W&B and full storage in the DB        
-            eval_dict = {}
-
-            for metric_name, metric_val in result.get_metrics().items():
-                if metric_name in self.saved_metrics:
-                    run.summary["evaluation_" + metric_name] = metric_val
-                    eval_dict[metric_name] = pickle.dumps(metric_val) # thank you, Firestore!
-
+            # gather the saved metrics for summary in W&B      
+            eval_dict = {
+                # create a key for each saved metric containing the nested average
+                # of the results of the metric for each step in the evaluation
+                saved_metric:self.average_nested_data(
+                    [step.get_metric(saved_metric) for step in result.get_steps()]
+                                                      ) for saved_metric in self.saved_metrics
+            }
+            # then add those as "evaluation_" results to the W&B summary level
+            for metric_name, metric_val in eval_dict.items():
+                run.summary["evaluation_" + metric_name] = metric_val
             # save summary to W&B
             run.summary.update()
             # save the full results to Firestore
-            experiment_ref = self.db.collection("experiments").document(parent)
+            experiment_ref = self.db.collection("experiments").document(result.id)
             if experiment_ref.get().exists:
                 # add step to existing experiment
                 experiment_ref.update(
