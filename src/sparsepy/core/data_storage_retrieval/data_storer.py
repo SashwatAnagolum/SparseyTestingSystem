@@ -134,7 +134,7 @@ class DataStorer:
         # COMMENT THIS IN to test updated config saving
         #run.config = result.
 
-    def save_evaluation_results(self, result: TrainingResult):
+    def save_evaluation_result(self, result: TrainingResult):
         # Implementation to save the evaluation result
 
         # access the current run's summary-level data with the API

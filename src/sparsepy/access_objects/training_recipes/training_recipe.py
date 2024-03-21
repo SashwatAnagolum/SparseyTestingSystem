@@ -145,5 +145,5 @@ class TrainingRecipe:
             return self.training_results
         else:
             self.eval_results.mark_finished()
-            self.ds.save_evaluation_results(self.eval_results)
+            self.ds.save_evaluation_result(self.eval_results)
             return self.eval_results
