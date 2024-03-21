@@ -127,7 +127,7 @@ class TrainingRecipe:
         # at this point the step is finished
         results.mark_finished()
 
-        # log the results for this step
+        # log the results for this step and add them to the TrainingResult
         if training:
             self.ds.save_training_step(self.training_results.id, results)
             self.training_results.add_step(results)
@@ -135,8 +135,6 @@ class TrainingRecipe:
             #self.ds.save_evaluation_step(self.evaluation_results.id, results)
             self.ds.save_evaluation_step(self.training_results.id, results)
             self.eval_results.add_step(results)
-        # and add them to the TrainingResult
-        self.training_results.add_step(results)
 
         return results, epoch_ended
 
