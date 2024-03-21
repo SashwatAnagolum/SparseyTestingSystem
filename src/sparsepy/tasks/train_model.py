@@ -46,8 +46,8 @@ def train_model(model_config: dict, trainer_config: dict,
         trainer_config
     )
 
+    # print training run summary
     met_separator = "\n* "
-
     print(f"""
 TRAINING RUN SUMMARY
 Dataset type: {dataset_config['dataset_type']}
@@ -63,12 +63,14 @@ Selected metrics:
         model.train()
         batch_number = 1
 
+        # perform training
         while not is_epoch_done:
             output, is_epoch_done = trainer.step(training=True)
             print(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
             pprint.pprint(output.get_metrics())
             batch_number+=1
 
+        # summarize the best training steps
         train_summary = trainer.get_summary("training")
         print("\n\nTRAINING - SUMMARY\n")
         print("Best metric steps:")
@@ -80,6 +82,7 @@ Selected metrics:
         is_epoch_done = False
         batch_number = 1
 
+        # perform evaluation
         while not is_epoch_done:
             # validate this logic VS the design of our EvaluationResult
             # this looks like old-style logic for which we should remove the "while"
