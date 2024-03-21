@@ -6,7 +6,6 @@ import wandb
 
 from sparsepy.core.results.training_result import TrainingResult
 from sparsepy.core.results.training_result import TrainingStepResult
-from sparsepy.core.results.evaluation_result import EvaluationResult
 from sparsepy.core.results.hpo_result import HPOResult
 from sparsepy.core.results.hpo_step_result import HPOStepResult
 from sparsepy.access_objects.models.model import Model
@@ -122,6 +121,9 @@ class DataStorer:
             if experiment_ref.get().exists:
                 experiment_ref.update(
                     {
+                        "start_times": {
+                            "training": result.start_time
+                        },
                         "end_times": {
                             "training": result.end_time
                             },
@@ -132,7 +134,7 @@ class DataStorer:
         # COMMENT THIS IN to test updated config saving
         #run.config = result.
 
-    def save_evaluation_result(self, parent: str, result: EvaluationResult):
+    def save_evaluation_results(self, result: TrainingResult):
         # Implementation to save the evaluation result
 
         # access the current run's summary-level data with the API
@@ -145,7 +147,7 @@ class DataStorer:
 
             for metric_name, metric_val in result.get_metrics().items():
                 if metric_name in self.saved_metrics:
-                    run.summary["Evaluation" + metric_name] = metric_val
+                    run.summary["evaluation_" + metric_name] = metric_val
                     eval_dict[metric_name] = pickle.dumps(metric_val) # thank you, Firestore!
 
             # save summary to W&B
@@ -156,7 +158,14 @@ class DataStorer:
                 # add step to existing experiment
                 experiment_ref.update(
                     {
-                        "saved_metrics.evaluation": firestore.ArrayUnion([eval_dict])
+                        "start_times": {
+                            "evaluation": result.start_time
+                        },
+                        "end_times": {
+                            "evaluation": result.end_time,
+                            "experiment": result.end_time
+                        },
+                        "completed": True
                     }
                 )
 

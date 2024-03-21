@@ -11,7 +11,6 @@ import wandb
 
 from sparsepy.core.results.training_result import TrainingResult
 from sparsepy.core.results.training_step_result import TrainingStepResult
-from sparsepy.core.results.evaluation_result import EvaluationResult
 from sparsepy.core.results.hpo_result import HPOResult
 from sparsepy.core.results.hpo_step_result import HPOStepResult
 
@@ -75,7 +74,7 @@ class DataFetcher:
 
         return tr
 
-    def get_eval_result(self, experiment_id: str) -> EvaluationResult:
+    def get_eval_result(self, experiment_id: str) -> TrainingResult:
         """
         Get the evaluation result for a given experiment.
 
