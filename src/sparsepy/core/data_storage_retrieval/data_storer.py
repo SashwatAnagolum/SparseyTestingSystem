@@ -258,9 +258,15 @@ class DataStorer:
 
     def average_nested_data(self, data):
         if isinstance(data, list):
-            return np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
+            if data.__len__() == 0:
+                data=[0]
+            ret = np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
         elif hasattr(data, 'tolist'):  # numpy array
-            return np.mean(np.nan_to_num(data))
+            if data.__len__() == 0:
+                data=[0]
+            ret = np.mean(np.nan_to_num(data))
         else:
             # Scalar value
-            return data
+            ret = data
+
+        return ret.item() if isinstance(ret, np.generic) else ret
