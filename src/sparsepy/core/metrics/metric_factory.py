@@ -1,4 +1,5 @@
 import inspect
+from typing import Callable
 
 from sparsepy.core import metrics
 from sparsepy.core.metrics.metrics import Metric
@@ -59,3 +60,10 @@ class MetricFactory:
         Checks whether a given comparison function exists.
         """
         return comparison_name in MetricFactory.allowed_comparisons
+
+    @staticmethod
+    def get_comparison_function(comparison_name: str) -> Callable:
+        if comparison_name in MetricFactory.allowed_comparisons:
+            return getattr(comparisons, comparison_name)
+        else:
+            raise ValueError("Invalid comparison function name!")
