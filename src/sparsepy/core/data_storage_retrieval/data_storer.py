@@ -64,7 +64,7 @@ class DataStorer:
             # raise exception
     
     def save_evaluation_step(self, parent: str, result: TrainingStepResult):
-        # gather the saved metrics for summary in W&B and full storage in the DB
+        # gather the saved metrics for storage in the DB
         full_dict = {}
         for metric_name, metric_val in result.get_metrics().items():
             if metric_name in self.saved_metrics:
@@ -110,8 +110,6 @@ class DataStorer:
 
         # do we even need to set anything in W&B here? time finished? but W&B should track that
         # is there something we need to do here to mark end of run?
-        # FIXME save required data if any, else remove
-        run = self.api.run(wandb.run.path)
 
         if self.database_resolution != "none":
 
@@ -121,13 +119,16 @@ class DataStorer:
             if experiment_ref.get().exists:
                 experiment_ref.update(
                     {
-                        "start_times": {
-                            "training": result.start_time
-                        },
-                        "end_times": {
-                            "training": result.end_time
-                            },
-                        "completed": True
+                        "start_times.training": result.start_time,
+                        "end_times.training": result.end_time,
+                        "completed": True,
+                        "best_steps.training": {
+                                metric_name:{
+                                    'best_index': metric_vals["best_index"],
+                                    'best_value': pickle.dumps(metric_vals["best_value"]),
+                                    'best_function': metric_vals["best_function"].__name__} 
+                                for metric_name, metric_vals in result.best_steps.items()
+                            }
                     }
                 )
 
@@ -142,30 +143,36 @@ class DataStorer:
         
         if self.database_resolution != "none":
         
-            # gather the saved metrics for summary in W&B and full storage in the DB        
-            eval_dict = {}
-
-            for metric_name, metric_val in result.get_metrics().items():
-                if metric_name in self.saved_metrics:
-                    run.summary["evaluation_" + metric_name] = metric_val
-                    eval_dict[metric_name] = pickle.dumps(metric_val) # thank you, Firestore!
-
+            # gather the saved metrics for summary in W&B      
+            eval_dict = {
+                # create a key for each saved metric containing the nested average
+                # of the results of the metric for each step in the evaluation
+                saved_metric:self.average_nested_data(
+                    [step.get_metric(saved_metric) for step in result.get_steps()]
+                                                      ) for saved_metric in self.saved_metrics
+            }
+            # then add those as "evaluation_" results to the W&B summary level
+            for metric_name, metric_val in eval_dict.items():
+                run.summary["evaluation_" + metric_name] = metric_val
             # save summary to W&B
             run.summary.update()
             # save the full results to Firestore
-            experiment_ref = self.db.collection("experiments").document(parent)
+            experiment_ref = self.db.collection("experiments").document(result.id)
             if experiment_ref.get().exists:
                 # add step to existing experiment
                 experiment_ref.update(
                     {
-                        "start_times": {
-                            "evaluation": result.start_time
-                        },
-                        "end_times": {
-                            "evaluation": result.end_time,
-                            "experiment": result.end_time
-                        },
-                        "completed": True
+                        "start_times.evaluation": result.start_time,
+                        "end_times.evaluation": result.end_time,
+                        "end_times.experiment": result.end_time,
+                        "completed": True,
+                        "best_steps.evaluation": {
+                                metric_name:{
+                                    'best_index': metric_vals["best_index"],
+                                    'best_value': pickle.dumps(metric_vals["best_value"]),
+                                    'best_function': metric_vals["best_function"].__name__} 
+                                for metric_name, metric_vals in result.best_steps.items()
+                            }
                     }
                 )
 
@@ -240,6 +247,7 @@ class DataStorer:
 
         # FIRESTORE
         # set the end time and best run ID and mark as completed
+
         if self.database_resolution != "none":
         
             sweep_ref = self.db.collection("hpo_runs").document(result.id)
@@ -248,7 +256,8 @@ class DataStorer:
                 {
                     "end_time": result.end_time,
                     "best_run_id": result.best_run.id,
-                    "completed": True
+                    "completed": True,
+                    "runs_by_objective": [step.id for step in result.get_top_k_steps(len(result.runs))]
                 }
             )
     
@@ -258,9 +267,15 @@ class DataStorer:
 
     def average_nested_data(self, data):
         if isinstance(data, list):
-            return np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
+            if data.__len__() == 0:
+                data=[0]
+            ret = np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
         elif hasattr(data, 'tolist'):  # numpy array
-            return np.mean(np.nan_to_num(data))
+            if data.__len__() == 0:
+                data=[0]
+            ret = np.mean(np.nan_to_num(data))
         else:
             # Scalar value
-            return data
+            ret = data
+
+        return ret.item() if isinstance(ret, np.generic) else ret
