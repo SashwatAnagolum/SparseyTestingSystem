@@ -9,6 +9,7 @@ from datetime import datetime
 from firebase_admin import firestore
 import numpy as np
 import wandb
+from sparsepy.core.metrics import comparisons
 from functools import lru_cache
 from datetime import datetime
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
@@ -136,7 +137,27 @@ class DataFetcher:
 
         tr.start_time = self.convert_firestore_timestamp(experiment_data.get("start_times", {}).get("training"))
         tr.end_time = self.convert_firestore_timestamp(experiment_data.get("end_times", {}).get("training"))
-        tr.best_steps = experiment_data["best_steps"]
+        best_steps = {}
+        for phase in ['evaluation', 'training']:
+            phase_data = experiment_data.get("best_steps", {}).get(phase, {})
+            best_steps[phase] = {}
+            for metric, metric_data in phase_data.items():
+                best_function = metric_data.get("best_function")
+                best_index = metric_data.get("best_index")
+                best_value_bytes = metric_data.get("best_value")
+                
+                # Check if best_value_bytes is indeed a bytes object and not None
+                if isinstance(best_value_bytes, bytes):
+                    best_value = self._deserialize_metric(best_value_bytes)
+                else:
+                    best_value = None  # or other default
+
+                best_steps[phase][metric] = {
+                    "best_function": getattr(comparisons, best_function),
+                    "best_index": best_index,
+                    "best_value": best_value
+                }
+        tr.best_steps = best_steps
         return tr
 
     def get_hpo_step_result(self, hpo_run_id, experiment_id):
