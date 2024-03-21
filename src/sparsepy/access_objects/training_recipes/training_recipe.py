@@ -138,9 +138,12 @@ class TrainingRecipe:
 
         return results, epoch_ended
 
-    def get_summary(self) -> TrainingResult:
-        # this method implicitly marks the run as finished and commits it to the data store
-        self.training_results.mark_finished()
-        self.ds.save_training_result(self.training_results)
-
-        return self.training_results
+    def get_summary(self, phase: str = "training") -> TrainingResult:
+        if phase == "training":
+            self.training_results.mark_finished()
+            self.ds.save_training_result(self.training_results)
+            return self.training_results
+        else:
+            self.eval_results.mark_finished()
+            self.ds.save_evaluation_results(self.eval_results)
+            return self.eval_results
