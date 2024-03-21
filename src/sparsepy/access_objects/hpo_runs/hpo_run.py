@@ -236,18 +236,30 @@ class HPORun():
                 # increment step counter
                 self.num_steps += 1
 
+                # perform training
                 while not done:
                     # are we supposed to only use the results from the last step in objective computation?
                     # we might need to change this
                     results, done = training_recipe.step()
-                objective_results = self.objective.combine_metrics(results)
+                # fetch training results
+                training_results = training_recipe.get_summary("training")
+                # perform evaluation
+                done = False
+                while not done:
+                    results, done = training_recipe.step(training=False)
+                # fetch evaluation results
+                eval_results = training_recipe.get_summary("evaluation")
+
+                # calculate the objective from the evaluation results
+                objective_results = self.objective.combine_metrics(eval_results)
+                
                 if results is not None:
                     # final result ready
 
                     # populate the HPOStepResult
                     hpo_step_results.populate(objective=objective_results, 
-                                              training_results=training_recipe.get_summary(), 
-                                              eval_results=results)
+                                              training_results=training_results,
+                                              eval_results=eval_results)
 
                     # add the HPOStepResults to the HPOResult
                     self.hpo_results.add_step(hpo_step_results)
@@ -271,6 +283,7 @@ class HPORun():
 
                     self.data_storer.save_hpo_step(wandb.run.sweep_id, hpo_step_results)
 
+                    # cache run path for updating config
                     run_path = wandb.run.path
                     # finish the run - wandb.run may no longer be correct below this point
                     wandb.finish()
