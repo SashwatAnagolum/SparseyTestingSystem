@@ -46,6 +46,31 @@ def run_hpo(hpo_config: dict, trainer_config: dict,
     if hpo_config["verbosity"] == 0:
         os.environ["WANDB_SILENT"] = "true"
 
+    met_separator = "\n* "
+    combination_item = "{mn:<25} (weight: {mw:.5f})"
+
+    obj_vals = [
+        combination_item.format(mn=x['metric']['name'], mw=x['weight']) 
+        for x in hpo_config['optimization_objective']['objective_terms']
+        ]
+    
+    print(f"""
+HYPERPARAMETER OPTIMIZATION SUMMARY
+          
+W&B project name: {hpo_config['project_name']}
+W&B sweep name: {hpo_config['hpo_run_name']}
+
+Model family: {hpo_config['model_family']}
+Optimization strategy: {hpo_config['hpo_strategy']}
+Number of runs: {hpo_config['num_candidates']}
+
+Selected metrics: 
+* {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
+
+Objective calculation: {hpo_config['optimization_objective']['combination_method']} of
+* {met_separator.join(obj_vals)}
+""")
+
     hpo_results = hpo_run.run_sweep()
     print(f"OPTIMIZATION RUN COMPLETED")
     print(f"Best run: {hpo_results.best_run.id}")
