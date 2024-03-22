@@ -36,7 +36,7 @@ def train_model(model_config: dict, trainer_config: dict,
     log_in()
 
     wandb.init(
-        project="wandb_run_log_testing", entity="sparsey-testing-system" # FIXME add W&B project name to trainer config
+        project="wandb_run_log_testing" # FIXME add W&B project name to trainer config
     )
 
     model = ModelBuilder.build_model(model_config)
