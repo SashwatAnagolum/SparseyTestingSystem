@@ -51,7 +51,6 @@ def train_model(model_config: dict, trainer_config: dict,
     print(f"""
 TRAINING RUN SUMMARY
 Dataset type: {dataset_config['dataset_type']}
-Dataset path: {dataset_config["params"]["data_dir"]}
 Batch size: 1
 Number of batches: {trainer.num_batches}
 Selected metrics: 
