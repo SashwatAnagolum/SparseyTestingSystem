@@ -7,7 +7,7 @@ from sparsepy.access_objects.models.model import Model
 from sparsepy.core.model_layers.sparsey_layer import MAC, SparseyLayer
 from sparsepy.core.hooks import LayerIOHook
 from sparsepy.core.metrics.metrics import Metric
-from sparsepy.core.metrics.comparisons import max_by_layerwise_mean
+from sparsepy.core.metrics.comparisons import min_by_layerwise_mean
 
 
 class BasisSetSizeIncreaseMetric(Metric):
@@ -15,7 +15,7 @@ class BasisSetSizeIncreaseMetric(Metric):
     BasisSetSizeIncreaseMetric: metric to keep track
         of basis set sizes across a Sparsey model.
     """
-    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None, best_value: Optional[Callable] = max_by_layerwise_mean):
+    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None, best_value: Optional[Callable] = min_by_layerwise_mean):
         super().__init__(model, "basis_set_size_increase", best_value)
         self.old_sizes = self._get_set_sizes(model)
 

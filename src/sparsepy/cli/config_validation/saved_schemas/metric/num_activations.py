@@ -55,7 +55,7 @@ class NumActivationsMetricSchema(AbstractSchema):
                 Optional('reduction', default=None): Schema(Or(
                     'none', 'layerwise_mean', 'sum', 'mean', error="reduction must be 'none', 'layerwise_mean', 'sum', or 'mean'"
                 ), error="Invalid reduction value"),
-                Optional('best_value', default='max_by_layerwise_mean'): Schema(
+                Optional('best_value', default='min_by_layerwise_mean'): Schema(
                         And(
                             Use(MetricFactory.is_valid_comparision), True
                             ), error="best_value must be the name of a valid comparison function from comparisons.py")

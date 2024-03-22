@@ -32,7 +32,7 @@ class NumActivationsMetric(Metric):
     """
     def __init__(self, model: torch.nn.Module,
                  reduction: Optional[str] = None,
-                 best_value: Optional[Callable] = max_by_layerwise_mean) -> None:
+                 best_value: Optional[Callable] = min_by_layerwise_mean) -> None:
         """
         Initializes the NumActivationsMetric object. 
 
