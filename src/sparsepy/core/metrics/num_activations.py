@@ -12,7 +12,7 @@ import torch
 from sparsepy.access_objects.models.model import Model
 from sparsepy.core.hooks import LayerIOHook
 from sparsepy.core.metrics.metrics import Metric
-from sparsepy.core.metrics.comparisons import max_by_layerwise_mean
+from sparsepy.core.metrics.comparisons import min_by_layerwise_mean
 
 
 class NumActivationsMetric(Metric):
