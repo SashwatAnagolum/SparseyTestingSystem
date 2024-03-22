@@ -112,7 +112,7 @@ class DataFetcher:
 
         return step_result
 
-    def get_training_result(self, experiment_id: str) -> TrainingResult:
+    def get_training_result(self, experiment_id: str, result_type: str = "training") -> TrainingResult:
         """
         Retrieves the training result for a given experiment.
 
@@ -129,36 +129,42 @@ class DataFetcher:
         experiment_data = self._get_experiment_data(experiment_id)
 
         metrics = []
-        tr = TrainingResult(id=experiment_id, result_type="training", resolution=experiment_data["saved_metrics"]["resolution"], metrics=metrics)
+        tr = TrainingResult(id=experiment_id, result_type=result_type, resolution=experiment_data["saved_metrics"]["resolution"], metrics=metrics)
 
-        for step_index in range(len(experiment_data.get("saved_metrics", {}).get("training", []))):
+        for step_index in range(len(experiment_data.get("saved_metrics", {}).get(result_type, []))):
             step_result = self.get_training_step_result(experiment_id, step_index)
             tr.add_step(step_result)
 
-        tr.start_time = self.convert_firestore_timestamp(experiment_data.get("start_times", {}).get("training"))
-        tr.end_time = self.convert_firestore_timestamp(experiment_data.get("end_times", {}).get("training"))
+        tr.start_time = self.convert_firestore_timestamp(experiment_data.get("start_times", {}).get(result_type))
+        tr.end_time = self.convert_firestore_timestamp(experiment_data.get("end_times", {}).get(result_type))
         best_steps = {}
-        for phase in ['evaluation', 'training']:
-            phase_data = experiment_data.get("best_steps", {}).get(phase, {})
-            best_steps[phase] = {}
-            for metric, metric_data in phase_data.items():
-                best_function = metric_data.get("best_function")
-                best_index = metric_data.get("best_index")
-                best_value_bytes = metric_data.get("best_value")
-                
-                # Check if best_value_bytes is indeed a bytes object and not None
-                if isinstance(best_value_bytes, bytes):
-                    best_value = self._deserialize_metric(best_value_bytes)
-                else:
-                    best_value = None  # or other default
+        
+        phase_data = experiment_data.get("best_steps", {}).get(result_type, {})
+        best_steps = {}
+        for metric, metric_data in phase_data.items():
+            best_function = metric_data.get("best_function")
+            best_index = metric_data.get("best_index")
+            best_value_bytes = metric_data.get("best_value")
 
-                best_steps[phase][metric] = {
-                    "best_function": getattr(comparisons, best_function),
-                    "best_index": best_index,
-                    "best_value": best_value
-                }
+            best_steps[metric] = {
+                "best_function": getattr(comparisons, best_function),
+                "best_index": best_index,
+                "best_value": self._deserialize_metric(best_value_bytes)
+            }
         tr.best_steps = best_steps
         return tr
+    
+    def get_evaluation_result(self, experiment_id: str) -> TrainingResult:
+        """
+        Get the evaluation result for a given experiment.
+
+        Args:
+            experiment_id (str): The ID of the experiment.
+
+        Returns:
+            EvaluationResult: the EvaluationResult for the experiment of this id in w&b
+        """
+        return self.get_training_result(experiment_id=experiment_id, result_type="evaluation")
 
     def get_hpo_step_result(self, hpo_run_id, experiment_id):
         """
@@ -177,16 +183,12 @@ class DataFetcher:
         # Assuming this method will utilize get_training_result to fetch associated training and evaluation results
         experiment_data = self._get_experiment_data(experiment_id)
         training_result = self.get_training_result(experiment_id)
+        evaluation_result = self.get_evaluation_result(experiment_id)
         hpo_run_data = self._get_hpo_run_data(hpo_run_id)
         # TODO Populate model configs
         # TODO Check if the configs will be stored in experiments
-        hpo_step_result = HPOStepResult(parent_run=hpo_run_id, id=experiment_id, configs={
-                    'dataset_config': hpo_run_data["configs"]["dataset_config"],
-                    'preprocessing_config': hpo_run_data["configs"]["preprocessing_config"],
-                    'training_recipe_config': hpo_run_data["configs"]["training_recipe_config"],
-                    'model_config': {}
-                })
-        hpo_step_result.populate(objective=experiment_data["hpo_objective"], training_results=training_result, eval_results=training_result)
+        hpo_step_result = HPOStepResult(parent_run=hpo_run_id, id=experiment_id, configs={conf_name:json.loads(conf_json) for conf_name, conf_json in hpo_run_data["configs"].items()})
+        hpo_step_result.populate(objective=experiment_data["hpo_objective"], training_results=training_result, eval_results=evaluation_result)
         return hpo_step_result
 
     def get_hpo_result(self, hpo_run_id: str) -> HPOResult:
