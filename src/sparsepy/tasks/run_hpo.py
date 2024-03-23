@@ -16,7 +16,7 @@ from sparsepy.access_objects.hpo_runs.hpo_run  import HPORun
 
 def run_hpo(hpo_config: dict, trainer_config: dict,
             dataset_config: dict, preprocessing_config: dict,
-            wandb_api_key: Optional[str] = ''):
+            system_config: dict):
     """
     Runs hyperparameter optimization
     over the specified network hyperparameters
@@ -31,8 +31,7 @@ def run_hpo(hpo_config: dict, trainer_config: dict,
             dataset object.
         preprocessing_config (dict): config info used to build the
             preprocessing stack.
-        wandb_api_key (str): the Weights and Biases API key to use
-            to log information to Weights and Biases.
+        system_config (dict): config info for the overall system
     """
     log_in()
 

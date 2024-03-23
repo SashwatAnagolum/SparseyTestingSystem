@@ -18,7 +18,8 @@ from sparsepy.access_objects.training_recipes.training_recipe_builder import (
 
 
 def train_model(model_config: dict, trainer_config: dict,
-                preprocessing_config: dict, dataset_config: dict):
+                preprocessing_config: dict, dataset_config: dict,
+                system_config: dict):
     """
     Builds a model using the model_config, and trains
     it using the trainer built using trainer_config on 
@@ -32,6 +33,7 @@ def train_model(model_config: dict, trainer_config: dict,
             preprocessing stack.
         dataset_config (dict): config info to build the dataset
             to train on.
+        system_config (dict): config info for the overall system
     """
     log_in()
 
