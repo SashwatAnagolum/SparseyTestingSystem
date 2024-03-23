@@ -24,7 +24,6 @@ class TrainingRecipe:
                  preprocessing_stack: PreprocessingStack,
                  metrics_list: list[torch.nn.Module],
                  metric_config: dict,
-                 database_resolution: str,
                  loss_func: Optional[torch.nn.Module],
                  step_resolution: Optional[int] = None) -> None:
         self.optimizer = optimizer

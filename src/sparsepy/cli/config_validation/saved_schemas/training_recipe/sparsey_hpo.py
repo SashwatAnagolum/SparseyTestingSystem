@@ -75,7 +75,6 @@ class SparseyHpoTrainingRecipeSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                Optional('database_resolution', default='none'): Or('none', 'summary', 'full'),
                 'optimizer': schema_params['optimizer_schema'],
                 'dataloader': {
                     'batch_size': And(int, schema_utils.is_positive, error="Batch size must be a positive integer"),
