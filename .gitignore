@@ -6,3 +6,5 @@ venv/
 .vscode/**
 !.vscode/launch.json
 wandb/
+firebase_service_account_key.json
+datasets/preprocessed_dataset

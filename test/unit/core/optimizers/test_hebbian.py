@@ -1,9 +1,9 @@
 import pytest
 import torch
-from sparsepy.core.optimizers.hebbian import HebbianOptimizer
-from sparsepy.access_objects.models.model import Model
-from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
-from sparsepy.core.hooks import LayerIOHook
+from sparseypy.core.optimizers.hebbian import HebbianOptimizer
+from sparseypy.access_objects.models.model import Model
+from sparseypy.core.model_layers.sparsey_layer import SparseyLayer
+from sparseypy.core.hooks import LayerIOHook
 
 
 def test_permanence():

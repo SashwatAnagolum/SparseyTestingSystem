@@ -9,7 +9,7 @@ import pytest
 
 # Import the main function from hpo_run_task.py
 # Ensure that hpo_run_task.py is in the Python path
-from sparsepy.tasks.run_hpo_task import main
+from sparseypy.tasks.run_hpo import main
 
 class TestHPORunTask:
     """
@@ -30,7 +30,7 @@ class TestHPORunTask:
         except Exception as e:
             pytest.fail(f"Execution of hpo_run_task.py failed: {e}")
     
-    def test_run_hpo_task_invalid_filepath():
+    def test_run_hpo_task_invalid_filepath(self):
         """
         This test calls the main function of hpo_run_task.py and checks
         for a no such file error if an incorrect path is given

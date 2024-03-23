@@ -8,12 +8,12 @@ Test Layer Factory: test cases for the LayerFactory class.
 import pytest
 import torch
 
-from sparsepy.core import metrics
-from sparsepy.core.metrics.metric_factory import MetricFactory
-from sparsepy.core.metrics.metrics import Metric
-from sparsepy.core.metrics.feature_coverage import FeatureCoverageMetric
-from sparsepy.access_objects.models.model import Model
-from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
+from sparseypy.core import metrics
+from sparseypy.core.metrics.metric_factory import MetricFactory
+from sparseypy.core.metrics.metrics import Metric
+from sparseypy.core.metrics.feature_coverage import FeatureCoverageMetric
+from sparseypy.access_objects.models.model import Model
+from sparseypy.core.model_layers.sparsey_layer import SparseyLayer
 
 class TestMetricFactory:
     """

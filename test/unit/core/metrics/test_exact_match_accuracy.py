@@ -2,9 +2,9 @@ import pytest
 import torch
 
 from torch import tensor
-from sparsepy.access_objects.models.model import Model
-from sparsepy.core.metrics.match_accuracy import MatchAccuracyMetric
-from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
+from sparseypy.access_objects.models.model import Model
+from sparseypy.core.metrics.match_accuracy import MatchAccuracyMetric
+from sparseypy.core.model_layers.sparsey_layer import SparseyLayer
 
 input_params = [
     torch.tensor([[[[0.]], [[0.]], [[0.]], [[0.]]]]),

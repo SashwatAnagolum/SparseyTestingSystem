@@ -7,9 +7,9 @@ the last experiment result.
 """
 
 import pytest
-from sparsepy.core.hpo_stratagies.hpo_stratagy import HPOStrategy
-from sparsepy.core.hpo_stratagies.experiment_result import ExperimentResult
-from sparsepy.core.hpo_strategies.exceptions import UntrackableParameterException
+from sparseypy.core.hpo_stratagies.hpo_stratagy import HPOStrategy
+from sparseypy.core.hpo_stratagies.experiment_result import ExperimentResult
+from sparseypy.core.hpo_strategies.exceptions import UntrackableParameterException
 
 class TestHPOStrategy:
     """

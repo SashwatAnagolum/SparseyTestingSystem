@@ -20,6 +20,7 @@ metrics:
     # save: bool
     #     whether the results of this metric should be stored to Weights & Biases
     save: True
+    best_step: max_by_layerwise_mean
   - name: basis_set_size_increase
     save: False
   - name: basis_average

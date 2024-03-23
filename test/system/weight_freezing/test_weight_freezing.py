@@ -2,13 +2,13 @@ import pytest
 import torch
 import logging
 
-from sparsepy.cli.config_validation.validate_config import (
+from sparseypy.cli.config_validation.validate_config import (
     validate_config, get_config_info
 )
-from sparsepy.access_objects.models.model_builder import ModelBuilder
-from sparsepy.access_objects.training_recipes.training_recipe_builder import TrainingRecipeBuilder
-from sparsepy.access_objects.models.model import Model
-from sparsepy.core.optimizers.hebbian import HebbianOptimizer
+from sparseypy.access_objects.models.model_builder import ModelBuilder
+from sparseypy.access_objects.training_recipes.training_recipe_builder import TrainingRecipeBuilder
+from sparseypy.access_objects.models.model import Model
+from sparseypy.core.optimizers.hebbian import HebbianOptimizer
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 

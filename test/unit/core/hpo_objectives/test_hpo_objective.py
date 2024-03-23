@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import torch
 
-from sparsepy.core.hpo_objectives.hpo_objective import HPOObjective
+from sparseypy.core.hpo_objectives.hpo_objective import HPOObjective
 
 
 class TestHPOObjective:

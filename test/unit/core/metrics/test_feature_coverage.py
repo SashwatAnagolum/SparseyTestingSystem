@@ -1,9 +1,9 @@
 import torch
 import pytest
 from unittest.mock import Mock
-from sparsepy.core.metrics.feature_coverage import FeatureCoverageMetric
-from sparsepy.access_objects.models.model import Model
-from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
+from sparseypy.core.metrics.feature_coverage import FeatureCoverageMetric
+from sparseypy.access_objects.models.model import Model
+from sparseypy.core.model_layers.sparsey_layer import SparseyLayer
 
 def test_feature_coverage_compute():
     model = Model()

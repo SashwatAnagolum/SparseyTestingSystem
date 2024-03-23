@@ -1,6 +1,6 @@
 import pytest
 import torch
-from sparsepy.core.model_layers.sparsey_layer import MAC 
+from sparseypy.core.model_layers.sparsey_layer import MAC 
 
 @pytest.fixture
 def mac_config():

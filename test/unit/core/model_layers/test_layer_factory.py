@@ -8,8 +8,8 @@ Test Layer Factory: test cases for the LayerFactory class.
 import pytest
 import torch
 
-from sparsepy.core.model_layers.layer_factory import LayerFactory
-from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
+from sparseypy.core.model_layers.layer_factory import LayerFactory
+from sparseypy.core.model_layers.sparsey_layer import SparseyLayer
 
 
 class TestLayerFactory:

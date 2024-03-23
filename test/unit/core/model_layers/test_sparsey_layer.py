@@ -11,7 +11,7 @@ from typing import Tuple
 import torch
 import pytest
 
-from sparsepy.core.model_layers.sparsey_layer import MAC, SparseyLayer
+from sparseypy.core.model_layers.sparsey_layer import MAC, SparseyLayer
 
 
 class TestMAC:

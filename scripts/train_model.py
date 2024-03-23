@@ -6,11 +6,13 @@ Train model: script to train models.
 
 import argparse
 
-from sparsepy.cli.config_validation.validate_config import (
+from dotenv import load_dotenv
+
+from sparseypy.cli.config_validation.validate_config import (
     validate_config, get_config_info
 )
 
-from sparsepy.tasks.train_model import train_model
+from sparseypy.tasks.train_model import train_model
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,6 +44,11 @@ def parse_args() -> argparse.Namespace:
         help='The location of the dataset config file.'
     )
 
+    parser.add_argument(
+        '--system_config', type=str,
+        help='The location of the system config file.'
+    )
+
     args = parser.parse_args()
 
     return args
@@ -49,6 +56,13 @@ def parse_args() -> argparse.Namespace:
 
 def main():
     args = parse_args()
+
+    load_dotenv()
+
+    system_config_info = get_config_info(args.system_config)
+    validated_system_config = validate_config(
+        system_config_info, 'system', 'default'
+    )
 
     model_config_info = get_config_info(args.model_config)
     validated_config = validate_config(
@@ -80,10 +94,11 @@ def main():
     )
 
     train_model(
-        validated_config,
-        validated_trainer_config,
-        preprocessing_config_info,
-        validated_dataset_config
+        model_config=validated_config,
+        trainer_config=validated_trainer_config,
+        preprocessing_config=preprocessing_config_info,
+        dataset_config=validated_dataset_config,
+        system_config=validated_system_config
     )
 
 if __name__ == "__main__":

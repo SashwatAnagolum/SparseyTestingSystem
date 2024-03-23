@@ -1,5 +1,5 @@
 import pytest
-from sparsepy.access_objects.datasets import ImageDataset  # Adjust the import according to your file structure
+from sparseypy.access_objects.datasets import ImageDataset  # Adjust the import according to your file structure
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
