@@ -74,12 +74,12 @@ class DataStorer:
             # get the data for each metric
             for metric_name, metric_val in result.get_metrics().items():
                 # if that metric is requested for saving and is at least 1D in layers (is a list)
-                if metric_name in self.saved_metrics and isinstance(metric_val, list):
+                if metric_name in self.saved_metrics and (isinstance(metric_val, list) or hasattr(metric_val, 'tolist')):
                     # then break out each layer as a separate metric for W&B using prefix grouping
                     for idx, layer_data in enumerate(metric_val):
                         layerwise_dict[f"{metric_name}/layer_{idx}"] = self.average_nested_data(layer_data)
                         # if the resolution is 2 (MAC-level), also log the MAC-level data with prefix grouping
-                        if self.wandb_resolution == 2 and isinstance(layer_data, list):
+                        if self.wandb_resolution == 2 and (isinstance(layer_data, list) or hasattr(metric_val, 'tolist')):
                             for idy, mac_data in enumerate(layer_data):
                                 layerwise_dict[f"{metric_name}/layer_{idx}/mac_{idy}"] = self.average_nested_data(mac_data)
             # then log without updating the step (done when the summary is logged below)
