@@ -55,7 +55,7 @@ def train_model(model_config: dict, trainer_config: dict,
     print(f"""
 TRAINING RUN SUMMARY
 Dataset type: {dataset_config['dataset_type']}
-Batch size: 1
+Batch size: {trainer_config['dataloader']['batch_size']}
 Number of batches: {trainer.num_batches}
 Selected metrics: 
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
