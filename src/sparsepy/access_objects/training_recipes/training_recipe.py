@@ -43,7 +43,7 @@ class TrainingRecipe:
         self.num_batches = len(self.dataloader)
         self.iterator = iter(self.dataloader)
 
-        self.ds = DataStorer(metric_config, database_resolution)
+        self.ds = DataStorer(metric_config)
 
         # BUG need to have logged in to W&B by the time this is executed
         # BUG reporting fake value currently

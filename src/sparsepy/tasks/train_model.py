@@ -10,11 +10,11 @@ import pprint
 import torch
 import wandb
 
-from sparsepy.tasks.api_login import log_in
 from sparsepy.access_objects.models.model_builder import ModelBuilder
 from sparsepy.access_objects.training_recipes.training_recipe_builder import (
     TrainingRecipeBuilder
 ) 
+from sparsepy.core.data_storage_retrieval import DataStorer
 
 
 def train_model(model_config: dict, trainer_config: dict,
@@ -35,10 +35,12 @@ def train_model(model_config: dict, trainer_config: dict,
             to train on.
         system_config (dict): config info for the overall system
     """
-    log_in()
+
+    # initialize the DataStorer (logs into W&B and Firestore)
+    DataStorer.configure(system_config)
 
     wandb.init(
-        project="wandb_run_log_testing" # FIXME add W&B project name to trainer config
+        project=system_config["wandb"]["project_name"]
     )
 
     model = ModelBuilder.build_model(model_config)

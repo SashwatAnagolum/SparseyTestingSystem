@@ -12,6 +12,7 @@ import wandb
 from pprint import pprint
 from sparsepy.tasks.api_login import log_in
 from sparsepy.access_objects.hpo_runs.hpo_run  import HPORun
+from sparsepy.core.data_storage_retrieval.data_storer import DataStorer
 
 
 def run_hpo(hpo_config: dict, trainer_config: dict,
@@ -33,12 +34,13 @@ def run_hpo(hpo_config: dict, trainer_config: dict,
             preprocessing stack.
         system_config (dict): config info for the overall system
     """
-    log_in()
+    
+    # initialize the DataStorer (logs into W&B and Firestore)
+    DataStorer.configure(system_config)
 
     hpo_run = HPORun(
         hpo_config, trainer_config,
-        dataset_config, preprocessing_config,
-        wandb_api_key
+        dataset_config, preprocessing_config
     )
 
     # if we are in production mode (verbosity 0), suppress the W&B output

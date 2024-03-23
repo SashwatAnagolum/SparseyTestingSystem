@@ -31,8 +31,7 @@ class HPORun():
             candidates to try out during the HPO process
     """
     def __init__(self, hpo_config: dict, trainer_config: dict,
-        dataset_config: dict, preprocessing_config: dict,
-        wandb_api_key: str):
+        dataset_config: dict, preprocessing_config: dict):
         """
         Initializes the HPORun object.
 
@@ -46,7 +45,6 @@ class HPORun():
             wandb_api_key (str): the Weights and Biases API key to 
                 use to login to WandB and log data.
         """
-        #wandb.login(key=wandb_api_key, verify=True)
 
         self.sweep_config = self.construct_sweep_config(hpo_config)
         self.sweep_id = wandb.sweep(sweep=self.sweep_config)
@@ -70,7 +68,7 @@ class HPORun():
         }
         
         # create the DataStorer
-        self.data_storer = DataStorer(trainer_config['metrics'], trainer_config['database_resolution'])
+        self.data_storer = DataStorer(trainer_config['metrics'])
 
         # create the HPOResult (also sets start time)
         self.hpo_results = HPOResult(logged_configs, self.sweep_id, hpo_config['hpo_run_name'])

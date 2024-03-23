@@ -1,4 +1,4 @@
-from firebase_admin import firestore
+import firebase_admin
 import json
 import numpy as np
 import pickle
@@ -15,21 +15,43 @@ DataStorer: Stores data to weights and biases
 """
 class DataStorer:
 
-    def __init__(self, config: dict, database_resolution="none"):
+    # static variables
+    is_initialized = False
+    wandb_config = {}
+    firestore_config = {}
+
+
+    def __init__(self, metric_config: dict):
         # configure saved metrics?
-        self.saved_metrics = [metric["name"] for metric in config if metric["save"] is True]
+        self.saved_metrics = [metric["name"] for metric in metric_config if metric["save"] is True]
         # create API client
         self.api = wandb.Api()
 
         # connect to Firestore
         self.db = firestore.client()
-
-        self.database_resolution = database_resolution
-
-        # TODO automatically log layerwise data, pending config option
-        self.store_wandb_layerwise = True
         
-    
+        self.wandb_resolution = DataStorer.wandb_config["data_resolution"]
+        self.firestore_resolution = DataStorer.firestore_config["data_resolution"]
+        
+    @staticmethod
+    def configure(ds_config: dict):
+        """
+        Configures the DataStorer and initializes its database connection.
+        """
+        if not DataStorer.is_initialized:
+
+            # initialize W&B
+            wandb.login(key=ds_config['wandb']['api_key'], verify=True)
+
+            # initialize Firestore
+            cred_obj = firebase_admin.credentials.Certificate(ds_config['database']['write_databases'][0]['firebase_service_key_path'])
+            firebase_admin.initialize_app(cred_obj)
+
+            DataStorer.wandb_config = ds_config['wandb']
+            DataStorer.firestore_config = ds_config["database"]["write_databases"][0]
+
+            DataStorer.is_initialized = True
+
     def save_model(self, m: Model):
         # Implementation to save the model
         pass
@@ -46,7 +68,7 @@ class DataStorer:
                 full_dict[metric_name] = pickle.dumps(metric_val) # pickling
 
         # log layerwise data to W&B, if requested
-        if self.store_wandb_layerwise:
+        if self.wandb_resolution > 0:
             layerwise_dict = {}
             # get the data for each metric
             for metric_name, metric_val in result.get_metrics().items():
@@ -63,7 +85,8 @@ class DataStorer:
         #summary_dict["resolution"] = result.resolution
         wandb.log(summary_dict)
 
-        if self.database_resolution == "full":
+        # save to Firestore on "step" resolution only
+        if self.firestore_resolution == 2:
 
             # save the full results to Firestore
             experiment_ref = self.db.collection("experiments").document(parent)
@@ -85,7 +108,8 @@ class DataStorer:
             if metric_name in self.saved_metrics:
                 full_dict[metric_name] = pickle.dumps(metric_val) # pickling
 
-        if self.database_resolution == "full":
+        # save to Firestore on "step" resolution only
+        if self.firestore_resolution == 2:
 
             # save the full results to Firestore
             experiment_ref = self.db.collection("experiments").document(parent)
@@ -102,7 +126,8 @@ class DataStorer:
 
     def create_experiment(self, experiment: TrainingResult):
         
-        if self.database_resolution != "none":
+        # save on "summary" or better
+        if self.firestore_resolution > 0:
             # create the DB entry for this experiment in Firestore
             experiment_ref = self.db.collection("experiments").document(experiment.id)
 
@@ -126,7 +151,8 @@ class DataStorer:
         # do we even need to set anything in W&B here? time finished? but W&B should track that
         # is there something we need to do here to mark end of run?
 
-        if self.database_resolution != "none":
+        # save on "summary" or better
+        if self.firestore_resolution > 0:
 
             experiment_ref = self.db.collection("experiments").document(result.id)
 
@@ -156,7 +182,7 @@ class DataStorer:
         # access the current run's summary-level data with the API
         run = self.api.run(wandb.run.path)
         
-        if self.database_resolution != "none":
+        if self.firestore_resolution > 0:
         
             # gather the saved metrics for summary in W&B      
             eval_dict = {
@@ -213,7 +239,7 @@ class DataStorer:
         run.summary.update()
     
         # FIRESTORE
-        if self.database_resolution != "none":
+        if self.firestore_resolution > 0:
             # save the objective data into the experiment
             hpo_step_experiment_ref = self.db.collection("experiments").document(result.id)
 
@@ -236,7 +262,7 @@ class DataStorer:
         
 
     def create_hpo_sweep(self, sweep: HPOResult):
-        if self.database_resolution != "none":
+        if self.firestore_resolution > 0:
         
             # create the DB entry for this experiment in Firestore
             sweep_ref = self.db.collection("hpo_runs").document(sweep.id)
@@ -263,7 +289,7 @@ class DataStorer:
         # FIRESTORE
         # set the end time and best run ID and mark as completed
 
-        if self.database_resolution != "none":
+        if self.firestore_resolution > 0:
         
             sweep_ref = self.db.collection("hpo_runs").document(result.id)
 
