@@ -54,6 +54,10 @@ database:
       #     should read the path to the service account key required to access the Firestore database
       #     (this key also contains the path to the DB and all other required information)
       firebase_service_key_path: FIREBASE_CONFIG_FILE
+      # data_resolution: int - the level of data to log back to Firestore, default 0 ("nothing")
+      # 0 = nothing, 1 = only summary data, 2 = every step
+      # to log data back to Firestore you need to raise this value
+      data_resolution: 0
     # - name: dynamodb
     #   sso_profile: $AWS_SSO_PROFILE
     # - name: mongo
