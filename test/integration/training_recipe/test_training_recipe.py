@@ -10,9 +10,9 @@ import os
 
 import pytest
 
-from sparsepy.cli.config_validation.validate_config import get_config_info
-from sparsepy.access_objects.models.model_builder import ModelBuilder
-from sparsepy.access_objects.training_recipes.training_recipe_builder import (
+from sparseypy.cli.config_validation.validate_config import get_config_info
+from sparseypy.access_objects.models.model_builder import ModelBuilder
+from sparseypy.access_objects.training_recipes.training_recipe_builder import (
     TrainingRecipeBuilder, TrainingRecipe
 )
 

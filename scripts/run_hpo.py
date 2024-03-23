@@ -10,11 +10,11 @@ import os
 
 from dotenv import load_dotenv
 
-from sparsepy.cli.config_validation.validate_config import (
+from sparseypy.cli.config_validation.validate_config import (
     validate_config, get_config_info
 )
 
-from sparsepy.tasks.run_hpo import run_hpo
+from sparseypy.tasks.run_hpo import run_hpo
 
 
 def parse_args() -> argparse.Namespace:

@@ -11,7 +11,7 @@ import pytest
 
 from schema import SchemaError
 
-from sparsepy.cli.config_validation.validate_config import (
+from sparseypy.cli.config_validation.validate_config import (
     validate_config, get_config_info
 )
 

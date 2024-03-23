@@ -7,7 +7,7 @@ correctly retrieves model weights and training results.
 
 import pytest
 from unittest.mock import Mock
-from sparsepy.core.data_storage_retrieval import DataFetcher, TrainingResult
+from sparseypy.core.data_storage_retrieval import DataFetcher, TrainingResult
 
 class TestDataFetcher:
     """

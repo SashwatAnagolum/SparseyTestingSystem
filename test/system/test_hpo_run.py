@@ -9,7 +9,7 @@ import pytest
 
 # Import the main function from hpo_run_task.py
 # Ensure that hpo_run_task.py is in the Python path
-from sparsepy.tasks.run_hpo import main
+from sparseypy.tasks.run_hpo import main
 
 class TestHPORunTask:
     """

@@ -2,10 +2,10 @@ import pytest
 import torch
 
 from torch import tensor
-from sparsepy.access_objects.models.model import Model
-from sparsepy.core.metrics.match_accuracy import MatchAccuracyMetric
-from sparsepy.core.metrics.match_accuracy import MatchAccuracyMetric
-from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
+from sparseypy.access_objects.models.model import Model
+from sparseypy.core.metrics.match_accuracy import MatchAccuracyMetric
+from sparseypy.core.metrics.match_accuracy import MatchAccuracyMetric
+from sparseypy.core.model_layers.sparsey_layer import SparseyLayer
 #this should be more aimed at testing the ability to determine the closest match relative to stored inputs
 
 def test_approximate_match():

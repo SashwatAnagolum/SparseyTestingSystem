@@ -8,11 +8,11 @@ import argparse
 
 from dotenv import load_dotenv
 
-from sparsepy.cli.config_validation.validate_config import (
+from sparseypy.cli.config_validation.validate_config import (
     validate_config, get_config_info
 )
 
-from sparsepy.tasks.train_model import train_model
+from sparseypy.tasks.train_model import train_model
 
 
 def parse_args() -> argparse.Namespace:

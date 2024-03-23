@@ -7,7 +7,7 @@ Test Sparsey Dataset: test cases for the SparseyDataset class.
 import pytest
 import torch
 
-from sparsepy.access_objects.datasets import SparseyDataset
+from sparseypy.access_objects.datasets import SparseyDataset
 
 class TestSparseyDataset:
     """

@@ -2,10 +2,10 @@ import pytest
 import torch
 import time
 
-from sparsepy.access_objects.datasets import ImageDataset
-from sparsepy.access_objects.datasets import PreprocessedDataset
-from sparsepy.core.transforms.transform_factory import TransformFactory
-from sparsepy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
+from sparseypy.access_objects.datasets import ImageDataset
+from sparseypy.access_objects.datasets import PreprocessedDataset
+from sparseypy.core.transforms.transform_factory import TransformFactory
+from sparseypy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
 
 class BasicTransformFactory:
     @staticmethod

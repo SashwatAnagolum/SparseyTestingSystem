@@ -7,8 +7,8 @@ based on the activity of the inputs.
 
 import pytest
 import torch
-from sparsepy.core.model_layers.sparsey_layer import MAC
-from sparsepy.core.model_layers.sparsey_layer import SparseyLayer
+from sparseypy.core.model_layers.sparsey_layer import MAC
+from sparseypy.core.model_layers.sparsey_layer import SparseyLayer
 
 @pytest.fixture
 def layer(num_macs=10, num_cms_per_mac=5, num_neurons_per_mac=100, 
