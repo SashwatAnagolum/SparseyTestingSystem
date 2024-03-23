@@ -74,6 +74,7 @@ class ImageDatasetSchema(AbstractSchema):
                     'image_format': Schema(And(str, lambda x: x[0] == '.'), error=f"Invalid image_format. The format must start with '.'")
                 }, error="Invalid params"),
                 Optional('preprocessed', default=False): Schema(bool, error="preprocessed must be a boolean value"),
+                Optional('preprocessed_temp_dir', default='datasets/preprocessed_dataset'): Schema(str, error="preprocessed_temp_dir must be a valid path"),
                 'preprocessed_stack': schema_params[
                     'preprocessing_stack_schema'
                 ],

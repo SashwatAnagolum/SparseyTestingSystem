@@ -37,7 +37,7 @@ class TrainingRecipeBuilder:
         # if a preprocessed dataset then wrap the dataset and cancel the other preprocessing stack
         if dataset_config['preprocessed'] is True:
             preprocessed_dataset_stack = PreprocessingStack(dataset_config['preprocessed_stack'])
-            dataset = PreprocessedDataset(dataset, preprocessed_dataset_stack)
+            dataset = PreprocessedDataset(dataset, preprocessed_dataset_stack, dataset_config['preprocessed_temp_dir'])
             #print("PREPROCESSED")
 
         dataloader = DataLoader(

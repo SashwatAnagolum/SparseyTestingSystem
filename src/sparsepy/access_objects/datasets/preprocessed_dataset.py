@@ -18,7 +18,7 @@ class PreprocessedDataset(Dataset):
         preprocessed_flags (list[bool]): A boolean list indicating whether an item has been preprocessed.
     """
 
-    def __init__(self, dataset: Dataset, preprocessing_stack: PreprocessingStack, preprocessed_dir: str = "datasets/preprocessed_datasets"):
+    def __init__(self, dataset: Dataset, preprocessing_stack: PreprocessingStack, preprocessed_dir: str = "datasets/preprocessed_dataset"):
         """
         Initialize the PreprocessedDataset.
         Args:

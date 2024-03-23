@@ -75,6 +75,7 @@ class SparseyDatasetSchema(AbstractSchema):
                     'height': And(int, lambda x : x > 0, error="Height must be a positive integer")
                 }, error="Invalid params"),
                 Optional('preprocessed', default=False): Schema(bool, error="preprocessed must be a boolean value"),
+                Optional('preprocessed_temp_dir', default='datasets/preprocessed_dataset'): Schema(str, error="preprocessed_temp_dir must be a valid path"),
                 'preprocessed_stack': schema_params[
                     'preprocessing_stack_schema'
                 ],

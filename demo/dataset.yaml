@@ -19,6 +19,10 @@ params:
 #     whether to use a preprocessing stack to transform the dataset and cache results
 #     if set to True, you must also define the preprocessed_stack key and contents below
 preprocessed: True
+# preprocessed_temp_dir: optional, str
+#     specifies the location where the preprocessed dataset should cache its temporary files
+#     default, if not otherwise specified: datasets/preprocessed_dataset
+# preprocessed_temp_dir: datasets/some_other_directory
 # preprocessed_stack: defines the preprocessing stack and transforms to use with the dataset
 #     only used when preprocessed is True
 #     contains a transform_list with a list of transform classes to apply
