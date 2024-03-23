@@ -25,6 +25,9 @@ class DataStorer:
         self.db = firestore.client()
 
         self.database_resolution = database_resolution
+
+        # TODO automatically log layerwise data, pending config option
+        self.store_wandb_layerwise = True
         
     
     def save_model(self, m: Model):
@@ -41,8 +44,20 @@ class DataStorer:
             if metric_name in self.saved_metrics:
                 summary_dict[metric_name] = self.average_nested_data(metric_val)
                 full_dict[metric_name] = pickle.dumps(metric_val) # pickling
-                #wandb.log({metric_name: self.average_nested_data(metric_val)}, commit=False)
-        
+
+        # log layerwise data to W&B, if requested
+        if self.store_wandb_layerwise:
+            layerwise_dict = {}
+            # get the data for each metric
+            for metric_name, metric_val in result.get_metrics().items():
+                # if that metric is requested for saving and is at least 1D in layers (is a list)
+                if metric_name in self.saved_metrics and isinstance(metric_val, list):
+                    # then break out each layer as a separate metric for W&B using prefix grouping
+                    for idx, layer_data in enumerate(metric_val):
+                        layerwise_dict[f"{metric_name}/layer_{idx}"] = self.average_nested_data(layer_data)
+            # then log without updating the step (done when the summary is logged below)
+            wandb.log(layerwise_dict, commit=False)
+
         # save the summary to W&B
         # add this if we add step resolution back now that we don't need W&B concordance
         #summary_dict["resolution"] = result.resolution
