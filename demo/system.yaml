@@ -20,13 +20,13 @@ wandb:
   #     implementing this requires deleting folders on the host machine because W&B doesn't do it for you
   #     https://github.com/wandb/wandb/issues/3564 so I want more testing first
   save_locally: True
-  # data_resolution: int 0 "model" (one value per training input), 1 "layer", or 2 "mac", default 1 "layer" 
+  # data_resolution: int 0 "model" (one value per training input), 1 "layer", or 2 "mac", default 2 "mac" 
   #     the granularity of data to log to W&B
   #     each level includes the previous one (e.g. "mac" will log both data for individual MACs 
   #     and an average for all the MACs in a layer)
   #     NOTE that using "mac" level can substantially increase W&B data usage
   #     expansion factor is (# of layers * # of macs) in the amount of metric data stored
-  data_resolution: 1
+  data_resolution: 2
 
 # database: configuration settings for one or more backend databases
 database:
