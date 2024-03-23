@@ -20,6 +20,7 @@
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
                 "--hpo_config", ".\\demo\\hpo.yaml",
                 "--training_recipe_config", ".\\demo\\trainer_hpo.yaml",
+                "--system_config", ".\\demo\\system.yaml"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
@@ -35,6 +36,7 @@
                 "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
                 "--hpo_config", "${input:getSparseyConfigDirectoryString}\\hpo.yaml",
                 "--training_recipe_config", "${input:getSparseyConfigDirectoryString}\\trainer_hpo.yaml",
+                "--system_config", "${input:getSparseyConfigDirectoryString}\\system.yaml",
                 ">", "${input:getPipedOutputDirectoryString}"
             ],
             "console": "integratedTerminal",
@@ -51,6 +53,7 @@
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
                 "--model_config", ".\\demo\\network.yaml",
                 "--training_recipe_config", ".\\demo\\trainer.yaml",
+                "--system_config", ".\\demo\\system.yaml"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
@@ -66,6 +69,7 @@
                 "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
                 "--model_config", "${input:getSparseyConfigDirectoryString}\\network.yaml",
                 "--training_recipe_config", "${input:getSparseyConfigDirectoryString}\\trainer.yaml",
+                "--system_config", "${input:getSparseyConfigDirectoryString}\\system.yaml",
                 ">", "${input:getPipedOutputDirectoryString}"
             ],
             "console": "integratedTerminal",
