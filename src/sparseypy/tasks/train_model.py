@@ -10,7 +10,6 @@ import pprint
 import torch
 import wandb
 
-from sparseypy.access_objects.models.model_builder import ModelBuilder
 from sparseypy.access_objects.training_recipes.training_recipe_builder import (
     TrainingRecipeBuilder
 ) 
@@ -43,10 +42,8 @@ def train_model(model_config: dict, trainer_config: dict,
         project=system_config["wandb"]["project_name"]
     )
 
-    model = ModelBuilder.build_model(model_config)
-
     trainer = TrainingRecipeBuilder.build_training_recipe(
-        model, dataset_config, preprocessing_config,
+        model_config, dataset_config, preprocessing_config,
         trainer_config
     )
 
@@ -63,7 +60,7 @@ Selected metrics:
 
     for epoch in range(trainer_config['training']['num_epochs']):
         is_epoch_done = False
-        model.train()
+        trainer.model.train()
         batch_number = 1
 
         # perform training
@@ -81,7 +78,7 @@ Selected metrics:
             print(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
 
-        model.eval()
+        trainer.model.eval()
         is_epoch_done = False
         batch_number = 1
 

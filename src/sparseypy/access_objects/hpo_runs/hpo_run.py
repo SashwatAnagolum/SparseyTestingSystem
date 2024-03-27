@@ -207,112 +207,101 @@ class HPORun():
         )
 
         validated_config = validate_config(
-            model_config, 'model', self.config_info['model_family'], survive_with_exception=True
+            model_config, 'model', self.config_info['model_family'],
+            survive_with_exception=True
         )
 
         try:
-            if validated_config is not None:
-                model = ModelBuilder.build_model(validated_config)
+            training_recipe = TrainingRecipeBuilder.build_training_recipe(
+                validated_config, deepcopy(self.dataset_config),
+                deepcopy(self.preprocessing_config),
+                deepcopy(self.training_recipe_config)
+            )
 
-                training_recipe = TrainingRecipeBuilder.build_training_recipe(
-                    model, deepcopy(self.dataset_config),
-                    deepcopy(self.preprocessing_config),
-                    deepcopy(self.training_recipe_config)
-                )
+            done = False
+            results = None
 
-                done = False
-                results = None
-
-                # do we need to move this earlier?
-                hpo_step_results = HPOStepResult(parent_run=self.sweep_id, id=wandb.run.id, configs={
+            # do we need to move this earlier?
+            hpo_step_results = HPOStepResult(
+                parent_run=self.sweep_id, id=wandb.run.id,
+                configs={
                     'dataset_config': self.dataset_config,
                     'preprocessing_config': self.preprocessing_config,
                     'training_recipe_config': self.training_recipe_config,
                     'model_config': validated_config
-                })
+                }
+            )
 
-                # increment step counter
-                self.num_steps += 1
+            # increment step counter
+            self.num_steps += 1
 
-                # perform training
-                while not done:
-                    # are we supposed to only use the results from the last step in objective computation?
-                    # we might need to change this
-                    results, done = training_recipe.step()
-                # fetch training results
-                training_results = training_recipe.get_summary("training")
-                # perform evaluation
-                done = False
-                while not done:
-                    results, done = training_recipe.step(training=False)
-                # fetch evaluation results
-                eval_results = training_recipe.get_summary("evaluation")
+            # perform training
+            while not done:
+                # are we supposed to only use the results from the last step in objective computation?
+                # we might need to change this
+                results, done = training_recipe.step()
+            # fetch training results
+            training_results = training_recipe.get_summary("training")
+            # perform evaluation
+            done = False
+            while not done:
+                results, done = training_recipe.step(training=False)
+            # fetch evaluation results
+            eval_results = training_recipe.get_summary("evaluation")
 
-                # calculate the objective from the evaluation results
-                objective_results = self.objective.combine_metrics(eval_results)
+            # calculate the objective from the evaluation results
+            objective_results = self.objective.combine_metrics(eval_results)
                 
-                if results is not None:
-                    # final result ready
+            if results is not None:
+                # final result ready
 
-                    # populate the HPOStepResult
-                    hpo_step_results.populate(objective=objective_results, 
-                                              training_results=training_results,
-                                              eval_results=eval_results)
+                # populate the HPOStepResult
+                hpo_step_results.populate(
+                    objective=objective_results, 
+                    training_results=training_results,
+                    eval_results=eval_results
+                )
 
-                    # add the HPOStepResults to the HPOResult
-                    self.hpo_results.add_step(hpo_step_results)
+                # add the HPOStepResults to the HPOResult
+                self.hpo_results.add_step(hpo_step_results)
 
-                    # OLD LOGIC
-                    # this one is the best one if 1) there is no previous result or 2) its objective value is higher than the previous best result
-                    is_best = (not self.best) or (self.best and objective_results["total"] > self.best.get_objective()["total"])
+                # OLD LOGIC
+                # this one is the best one if 1) there is no previous result or 2) its objective value is higher than the previous best result
+                is_best = (not self.best) or (self.best and objective_results["total"] > self.best.get_objective()["total"])
 
-                    print(f"Completed trial {self.num_steps} of {self.num_trials}")
-                    if self.best:
-                        print(f"Previous best objective value: {self.best.get_objective()['total']:.5f}")
+                print(f"Completed trial {self.num_steps} of {self.num_trials}")
 
-                    self._print_breakdown(hpo_step_results)
+                if self.best:
+                    print(f"Previous best objective value: {self.best.get_objective()['total']:.5f}")
 
-                    if is_best:
-                        self.best = hpo_step_results
-                        self.best_results = results
-                        self.best_run = self.num_steps
-                        self.best_config = validated_config
-                        print(f"This is the new best value!")
+                self._print_breakdown(hpo_step_results)
 
-                    self.data_storer.save_hpo_step(wandb.run.sweep_id, hpo_step_results)
+                if is_best:
+                    self.best = hpo_step_results
+                    self.best_results = results
+                    self.best_run = self.num_steps
+                    self.best_config = validated_config
+                    print(f"This is the new best value!")
 
-                    # cache run path for updating config
-                    run_path = wandb.run.path
-                    # finish the run - wandb.run may no longer be correct below this point
-                    wandb.finish()
-                    # strip unused layers from W&B side config
-                    # this must occur after .finish() due to a bug in W&B
-                    max_layers = len(model_config['layers'])
-                    run = wandb.Api().run(run_path)
-                    for k in run.config.copy():
-                       if ("layers_" in k) and (int(k[7:]) >= max_layers):
-                           del run.config[k]
-                    run.update()
-                    #return HPOResult(results, objective_results)
+                self.data_storer.save_hpo_step(wandb.run.sweep_id, hpo_step_results)
 
-                    # if this is the final run, also log the best-performing model
-                    # this should be handled by the DS when it is called to store the HPORun from run_sweep()
-                    #if self.num_steps >= self.num_trials:
-                    #    print(f"OPTIMIZATION RUN COMPLETED")
-                    #    print(f"Best run: {self.best_run}")
-                    #    self._print_breakdown(self.best)
-                    #    print(f"Best run configuration: {self.best_config}")
+                # cache run path for updating config
+                run_path = wandb.run.path
+                    
+                # finish the run - wandb.run may no longer be correct below this point
+                wandb.finish()
+                
+                # strip unused layers from W&B side config
+                # this must occur after .finish() due to a bug in W&B
+                max_layers = len(model_config['layers'])
+                run = wandb.Api().run(run_path)
 
-                        #wandb.log(
-                        #    {
-                        #        'best_objective': self.best["total"],
-                        #        'best_objective_breakdown': self.best,
-                        #        'best_results': self.best_results,
-                        #        'best_params': self.best_config
-                        #    }
-                        #)
+                for k in run.config.copy():
+                    if ("layers_" in k) and (int(k[7:]) >= max_layers):
+                        del run.config[k]
+                
+                run.update()
         except Exception as e:
-            # log HPOStep failure? otherwise order of items in HPOResult will not match total number of steps/step order
             print(traceback.format_exc())
 
 
