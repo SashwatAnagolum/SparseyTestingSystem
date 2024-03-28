@@ -9,6 +9,7 @@ import pprint
 
 import torch
 import wandb
+from tqdm import tqdm
 
 from sparseypy.access_objects.models.model_builder import ModelBuilder
 from sparseypy.access_objects.training_recipes.training_recipe_builder import (
@@ -61,24 +62,26 @@ Selected metrics:
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
 """)
 
-    for epoch in range(trainer_config['training']['num_epochs']):
+    for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs"):
         is_epoch_done = False
         model.train()
         batch_number = 1
 
         # perform training
-        while not is_epoch_done:
-            output, is_epoch_done = trainer.step(training=True)
-            print(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
-            pprint.pprint(output.get_metrics())
-            batch_number+=1
-
+        with tqdm(total=trainer.num_batches, desc="Training", leave=False) as pbar:
+            while not is_epoch_done:
+                output, is_epoch_done = trainer.step(training=True)
+                tqdm.write(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
+                metric_str = str(pprint.pprint(output.get_metrics()))
+                tqdm.write(metric_str)
+                batch_number+=1
+                pbar.update(1)
         # summarize the best training steps
         train_summary = trainer.get_summary("training")
-        print("\n\nTRAINING - SUMMARY\n")
-        print("Best metric steps:")
+        tqdm.write("\n\nTRAINING - SUMMARY\n")
+        tqdm.write("Best metric steps:")
         for metric, val in train_summary.best_steps.items():
-            print(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
+            tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
 
         model.eval()
@@ -86,13 +89,16 @@ Selected metrics:
         batch_number = 1
 
         # perform evaluation
-        while not is_epoch_done:
-            # validate this logic VS the design of our EvaluationResult
-            # this looks like old-style logic for which we should remove the "while"
-            output, is_epoch_done = trainer.step(training=False)
-            print(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
-            pprint.pprint(output.get_metrics())
-            batch_number+=1
+        with tqdm(total=trainer.num_batches, desc="Evaluation", leave=False) as pbar:
+            while not is_epoch_done:
+                # validate this logic VS the design of our EvaluationResult
+                # this looks like old-style logic for which we should remove the "while"
+                output, is_epoch_done = trainer.step(training=False)
+                tqdm.write(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
+                metric_str = str(pprint.pprint(output.get_metrics()))
+                tqdm.write(metric_str)
+                batch_number+=1
+                pbar.update(1)
 
         # print summary here in model script
         # if not printing you still need to call this to finalize the results
@@ -101,9 +107,9 @@ Selected metrics:
         # 
         eval_summary = trainer.get_summary("evaluation")
 
-        print("\n\nEVALUATION - SUMMARY\n")
-        print("Best metric steps:")
+        tqdm.write("\n\nEVALUATION - SUMMARY\n")
+        tqdm.write("Best metric steps:")
         for metric, val in eval_summary.best_steps.items():
-            print(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
+            tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
         wandb.finish()
