@@ -53,7 +53,7 @@ def train_model(model_config: dict, trainer_config: dict,
 
     # print training run summary
     met_separator = "\n* "
-    print(f"""
+    tqdm.write(f"""
 TRAINING RUN SUMMARY
 Dataset type: {dataset_config['dataset_type']}
 Batch size: {trainer_config['dataloader']['batch_size']}
@@ -72,7 +72,7 @@ Selected metrics:
             while not is_epoch_done:
                 output, is_epoch_done = trainer.step(training=True)
                 tqdm.write(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
-                metric_str = str(pprint.pprint(output.get_metrics()))
+                metric_str = pprint.pformat(output.get_metrics())
                 tqdm.write(metric_str)
                 batch_number+=1
                 pbar.update(1)
@@ -95,7 +95,7 @@ Selected metrics:
                 # this looks like old-style logic for which we should remove the "while"
                 output, is_epoch_done = trainer.step(training=False)
                 tqdm.write(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
-                metric_str = str(pprint.pprint(output.get_metrics()))
+                metric_str = pprint.pformat(output.get_metrics())
                 tqdm.write(metric_str)
                 batch_number+=1
                 pbar.update(1)
