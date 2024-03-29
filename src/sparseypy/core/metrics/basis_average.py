@@ -65,7 +65,7 @@ class BasisAverageMetric(Metric):
         """
         projected_rfs = [
             [
-                torch.zeros((input_shape), dtype=torch.bool)
+                torch.zeros(input_shape, dtype=torch.bool)
                 for j in range(len(layers[i]))
             ] for i in range(len(layers))
         ]
@@ -84,7 +84,7 @@ class BasisAverageMetric(Metric):
         return projected_rfs
 
 
-    def initialize_shapes(self, layers, last_batch) -> None:
+    def initialize_shapes(self, layers, last_batch: torch.Tensor) -> None:
         """
         Initialize the shapes of different storage objects in the model
         based on the shape of the inputs and the model structure.
@@ -95,7 +95,11 @@ class BasisAverageMetric(Metric):
             last_batch (torch.Tensor): the last set of inputs shown
                 to the model.
         """
-        self.expected_input_shape = last_batch.shape[1]
+        self.expected_input_shape = int(
+            last_batch.numel() / last_batch.shape[0]
+        )
+
+        print(self.expected_input_shape)
 
         self.projected_rfs = self.get_projected_receptive_fields(
             layers, self.expected_input_shape
@@ -119,7 +123,7 @@ class BasisAverageMetric(Metric):
     def compute(self, m: Model, last_batch: torch.Tensor,
                 labels: torch.Tensor, training: bool = True) -> torch.Tensor:
         """
-        Computes the feature coverage of a model for a given batch of inputs.
+        Computes the basis average of a model.
 
         Args:
             m (Model): Model to evaluate.
@@ -137,7 +141,7 @@ class BasisAverageMetric(Metric):
             self.initialize_shapes(layers, last_batch)
 
         if training:
-            last_batch = last_batch.squeeze()
+            last_batch = last_batch.view(last_batch.shape[0], -1)
 
             for layer_index, layer in enumerate(layers):
                 for mac_index, mac in enumerate(layer):

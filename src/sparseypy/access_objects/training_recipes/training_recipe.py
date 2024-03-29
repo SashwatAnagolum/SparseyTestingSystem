@@ -75,20 +75,15 @@ class TrainingRecipe:
 
         for _ in range(num_batches_in_step):
             data, labels = next(self.iterator)
-
-
-
             self.optimizer.zero_grad()
 
-            transformed_data = self.preprocessing_stack(data)
-
-            transformed_data = transformed_data.view(
-                (transformed_data.shape[0], -1, 1, 1)
-            )
+            transformed_data = self.preprocessing_stack(
+                data
+            ).reshape(
+                data.shape[0], *data.shape[2:]
+            ).unsqueeze(-1).unsqueeze(-1)
 
             model_output = self.model(transformed_data)
-
-            #result = {}
 
             for metric in self.metrics_list:
                 output = metric.compute(
@@ -96,7 +91,6 @@ class TrainingRecipe:
                     model_output, training
                 )
 
-                #result[metric.__class__.__name__] = output
                 # need to add logic for "save only during training/eval" metrics
                 results.add_metric(metric.get_name(), output)
 

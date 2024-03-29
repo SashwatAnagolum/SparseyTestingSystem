@@ -50,12 +50,12 @@ def train_model(model_config: dict, trainer_config: dict,
     # print training run summary
     met_separator = "\n* "
     print(f"""
-TRAINING RUN SUMMARY
-Dataset type: {dataset_config['dataset_type']}
-Batch size: {trainer_config['dataloader']['batch_size']}
-Number of batches: {trainer.num_batches}
-Selected metrics: 
-* {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
+    TRAINING RUN SUMMARY
+    Dataset type: {dataset_config['dataset_type']}
+    Batch size: {trainer_config['dataloader']['batch_size']}
+    Number of batches: {trainer.num_batches}
+    Selected metrics: 
+    * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
 """)
 
     for epoch in range(trainer_config['training']['num_epochs']):
