@@ -41,10 +41,6 @@ def parse_args() -> argparse.Namespace:
         help='The location of the hyperparameter optimization (HPO) config file.'
     )
 
-    parser.add_argument(
-        '--training_recipe_config', type=str,
-        help='The location of the training recipe config file.'
-    )
 
     parser.add_argument(
         '--system_config', type=str,
@@ -72,9 +68,6 @@ def main():
         args.dataset_config
     )
 
-    training_recipe_config_info = get_config_info(
-        args.training_recipe_config
-    )
 
     hpo_config_info = get_config_info(
         args.hpo_config
@@ -94,13 +87,10 @@ def main():
         hpo_config_info, 'hpo', 'default'
     )
 
-    validated_training_recipe_config = validate_config(
-        training_recipe_config_info, 'training_recipe', 'sparsey_hpo'
-    )
 
 
     run_hpo(
-        validated_hpo_config, validated_training_recipe_config,
+        validated_hpo_config,
         validated_dataset_config, preprocessing_config_info,
         validated_system_config
     )
