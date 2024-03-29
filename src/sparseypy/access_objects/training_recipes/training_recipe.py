@@ -23,7 +23,7 @@ class TrainingRecipe:
                  dataloader: DataLoader,
                  preprocessing_stack: PreprocessingStack,
                  metrics_list: list[torch.nn.Module],
-                 metric_config: dict,
+                 metric_config: dict, model_config: dict,
                  loss_func: Optional[torch.nn.Module],
                  step_resolution: Optional[int] = None) -> None:
         self.optimizer = optimizer
@@ -32,6 +32,7 @@ class TrainingRecipe:
         self.preprocessing_stack = preprocessing_stack
         self.metrics_list = metrics_list
         self.loss_func = loss_func
+        self.model_config = model_config
 
         if step_resolution is None:
             self.step_resolution = 1 #len(self.dataloader)
