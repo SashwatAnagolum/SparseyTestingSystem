@@ -10,6 +10,7 @@ from sparseypy.core.hooks import LayerIOHook
 from sparseypy.core.metrics.metrics import Metric
 from sparseypy.core.metrics.comparisons import max_by_layerwise_mean
 
+
 class MatchAccuracyMetric(Metric):
 
     def __init__(self, 
@@ -24,6 +25,7 @@ class MatchAccuracyMetric(Metric):
         self.stored_inputs = {}
         self.input_images = []
         self.reduction = reduction
+
 
     def get_normalized_hamming_distance(self,
         stored_code: torch.Tensor,
@@ -40,6 +42,7 @@ class MatchAccuracyMetric(Metric):
         diffs = torch.abs(torch.sub(stored_code, selected_code))
 
         return torch.mean(torch.lt(diffs, 1e-5).float()).item()
+
 
     def compute(self, m: Model, last_batch: torch.Tensor, labels: torch.Tensor, training: bool = True):
         """

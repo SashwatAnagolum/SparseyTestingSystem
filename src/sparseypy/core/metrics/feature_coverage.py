@@ -60,7 +60,7 @@ class FeatureCoverageMetric(Metric):
         rf_cache = [[] for i in range(len(layers))]
         layer_masks = [
             torch.zeros(last_batch.shape, dtype=torch.bool)
-            for i in range(len(layers))    
+            for i in range(len(layers))
         ]
 
         for mac in layers[0]:

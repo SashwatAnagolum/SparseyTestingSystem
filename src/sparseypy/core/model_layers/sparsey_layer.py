@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 
 """
 Sparsey Layer: code for building and using individual layers
@@ -276,6 +276,22 @@ class SparseyLayer(torch.nn.Module):
         self.is_grid_autosized = autosize_grid
         self.num_macs = num_macs
         self.receptive_field_radius = mac_receptive_field_radius
+        self.grid_size = (
+            mac_grid_num_rows,
+            mac_grid_num_cols
+        )
+
+        self.prev_layer_grid_size = (
+            prev_layer_mac_grid_num_rows,
+            prev_layer_mac_grid_num_cols
+        )
+
+        self.prev_layer_output_shape = (
+            prev_layer_mac_grid_num_rows,
+            prev_layer_mac_grid_num_cols,
+            prev_layer_num_cms_per_mac,
+            prev_layer_num_neurons_per_cm
+        )
 
         # save layer-level permanence value;
         # check if we actually need to do this
@@ -453,7 +469,8 @@ class SparseyLayer(torch.nn.Module):
         Args:
             x: torch.Tensor of size (
                 batch_size,
-                num_macs_in_prev_layer,
+                prev_layer_mac_grid_num_rows,
+                prev_layer_mac_grid_num_cols,
                 prev_layer_num_cms_per_mac,
                 prev_layer_num_neurons_per_cm
             ) of dtype torch.float32
@@ -461,11 +478,21 @@ class SparseyLayer(torch.nn.Module):
         Returns:
             torch.Tensor of size (
                 batch_size,
-                num_macs,
+                mac_grid_num_rows,
+                mac_grid_num_cols,
                 num_cms_per_mac,
                 num_neurons_per_cm
             ) of dtype torch.float32
         """
+        if tuple(x.shape[1:]) != self.prev_layer_output_shape:
+            raise ValueError(
+                'Input shape is incorrect! '
+                f'Expected shape {self.prev_layer_output_shape} but received '
+                f'{tuple(x.shape[1:])} instead.'    
+            )
+
+        x = x.view(x.shape[0], -1, *x.shape[3:])
+
         # apply input filter to select only the
         # input signals (neurons) that this MAC
         # cares about.
@@ -477,4 +504,11 @@ class SparseyLayer(torch.nn.Module):
             )
         ]
 
-        return torch.stack(mac_outputs, dim=1)
+        out = torch.stack(mac_outputs, dim=1)
+        out = out.reshape(
+            (out.shape[0], *self.grid_size, *out.shape[2:])
+        )
+
+        print(self.grid_size, out.shape)
+
+        return out
