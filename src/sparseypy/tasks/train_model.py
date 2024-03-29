@@ -63,13 +63,13 @@ Selected metrics:
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
 """)
 
-    for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs"):
+    for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs", position=0):
         is_epoch_done = False
         trainer.model.train()
         batch_number = 1
 
         # perform training
-        with tqdm(total=trainer.num_batches, desc="Training", leave=False) as pbar:
+        with tqdm(total=trainer.num_batches, desc="Training", leave=False, position=1) as pbar:
             while not is_epoch_done:
                 output, is_epoch_done = trainer.step(training=True)
                 tqdm.write(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
@@ -90,7 +90,7 @@ Selected metrics:
         batch_number = 1
 
         # perform evaluation
-        with tqdm(total=trainer.num_batches, desc="Evaluation", leave=False) as pbar:
+        with tqdm(total=trainer.num_batches, desc="Evaluation", leave=False, position=1) as pbar:
             while not is_epoch_done:
                 # validate this logic VS the design of our EvaluationResult
                 # this looks like old-style logic for which we should remove the "while"
