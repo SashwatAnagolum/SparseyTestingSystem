@@ -31,7 +31,7 @@ class HPORun():
         num_steps_to_perform (int): the total number of 
             candidates to try out during the HPO process
     """
-    def __init__(self, hpo_config: dict, trainer_config: dict,
+    def __init__(self, hpo_config: dict,
         dataset_config: dict, preprocessing_config: dict):
         """
         Initializes the HPORun object.
@@ -52,7 +52,8 @@ class HPORun():
         self.num_trials = hpo_config['num_candidates']
         self.config_info = hpo_config
 
-        trainer_config['metrics'] = hpo_config['metrics']
+        trainer_config = hpo_config['trainer']
+        #trainer_config['metrics'] = hpo_config['metrics']
 
         self.preprocessing_config = preprocessing_config
         self.dataset_config = dataset_config

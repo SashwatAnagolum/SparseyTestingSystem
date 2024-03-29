@@ -15,6 +15,8 @@ from sparseypy.cli.config_validation.saved_schemas import (
     model, schema_utils, metric
 )
 
+from sparseypy.cli.config_validation.saved_schemas import training_recipe
+
 
 class DefaultHpoSchema(AbstractSchema):
     """
@@ -45,11 +47,13 @@ class DefaultHpoSchema(AbstractSchema):
                         }
                     ]
                 },
-                'metrics': [
-                    {
-                        'name': self.check_if_metric_exists
-                    }
-                ]
+                'trainer': {
+                    'metrics': [
+                        {
+                            'name': self.check_if_metric_exists
+                        }
+                    ]
+                }
             }, ignore_extra_keys=True
         )
 
@@ -91,7 +95,7 @@ class DefaultHpoSchema(AbstractSchema):
             config_info['hyperparameters']['num_layers']
         )
 
-        for metric_info in config_info['metrics']:
+        for metric_info in config_info['trainer']['metrics']:
             schema_params['metric_schemas'].append(
                 schema_factory.get_schema_by_name(
                     metric, 'metric', metric_info['name']
@@ -101,6 +105,10 @@ class DefaultHpoSchema(AbstractSchema):
             schema_params['computed_metrics'].append(
                 metric_info['name']
             )
+
+        schema_params['trainer'] = schema_factory.get_schema_by_name(
+            training_recipe, 'training_recipe', 'sparsey'
+        )
 
         return schema_params
 
@@ -245,6 +253,7 @@ class DefaultHpoSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
+
         config_schema = Schema(
             {
                 'model_family': And(str, self.check_if_model_family_exists, error="Model family does not exist"),
@@ -270,9 +279,11 @@ class DefaultHpoSchema(AbstractSchema):
                     ],
                     'combination_method': Or('sum', error="Invalid combination method")
                 },
-                'metrics': [Or(*schema_params['metric_schemas'], error="Invalid metric schema")],
+                #'metrics': [Or(*schema_params['metric_schemas'], error="Invalid metric schema")],
                 'num_candidates': And(int, schema_utils.is_positive, error="Number of candidates must be a positive integer"),
-                'verbosity': And(int, error="Verbosity must be an integer")
+                'verbosity': And(int, error="Verbosity must be an integer"),
+                #**sparsey_config_schema.schema
+                'trainer': schema_params['trainer']
             },
             error="Invalid HPO configuration"
         )
