@@ -36,9 +36,9 @@ hyperparameters:
   #     NOTE: future system versions will enforce matching preprocessing output and model input dimensions
   input_dimensions: 
     width: 
-      value: 4
+      value: 8
     height:
-      value: 4
+      value: 8
 
   # num_layers: int > 0
   #     the number of layers to be used in the model
