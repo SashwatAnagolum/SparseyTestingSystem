@@ -509,6 +509,4 @@ class SparseyLayer(torch.nn.Module):
             (out.shape[0], *self.grid_size, *out.shape[2:])
         )
 
-        # print(self.grid_size, out.shape)
-
         return out
