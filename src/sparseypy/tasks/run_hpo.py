@@ -10,12 +10,13 @@ from typing import Optional
 import os
 import wandb
 from pprint import pprint
+from tqdm import tqdm
 from sparseypy.tasks.api_login import log_in
 from sparseypy.access_objects.hpo_runs.hpo_run  import HPORun
 from sparseypy.core.data_storage_retrieval.data_storer import DataStorer
 
 
-def run_hpo(hpo_config: dict, trainer_config: dict,
+def run_hpo(hpo_config: dict,
             dataset_config: dict, preprocessing_config: dict,
             system_config: dict):
     """
@@ -26,8 +27,6 @@ def run_hpo(hpo_config: dict, trainer_config: dict,
     Args:
         hpo_config (dict): config info used to build the
             HPORun object.
-        trainer_config (dict): config info used to build the 
-            trainer.
         dataset_config (dict): config info used to build the
             dataset object.
         preprocessing_config (dict): config info used to build the
@@ -39,7 +38,7 @@ def run_hpo(hpo_config: dict, trainer_config: dict,
     DataStorer.configure(system_config)
 
     hpo_run = HPORun(
-        hpo_config, trainer_config,
+        hpo_config,
         dataset_config, preprocessing_config
     )
 
@@ -55,7 +54,7 @@ def run_hpo(hpo_config: dict, trainer_config: dict,
         for x in hpo_config['optimization_objective']['objective_terms']
         ]
     
-    print(f"""
+    tqdm.write(f"""
 HYPERPARAMETER OPTIMIZATION SUMMARY
           
 W&B project name: {hpo_config['project_name']}
@@ -66,7 +65,7 @@ Optimization strategy: {hpo_config['hpo_strategy']}
 Number of runs: {hpo_config['num_candidates']}
 
 Selected metrics: 
-* {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
+* {met_separator.join([x["name"] for x in hpo_config["trainer"]["metrics"]])}
 
 Objective calculation: {hpo_config['optimization_objective']['combination_method']} of
 * {met_separator.join(obj_vals)}
