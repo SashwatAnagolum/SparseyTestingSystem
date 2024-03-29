@@ -8,7 +8,7 @@ import torch
 import random
 import wandb
 import traceback
-
+from tqdm import tqdm
 from copy import deepcopy
 
 from sparseypy.core.metrics.metric_factory import MetricFactory
@@ -23,6 +23,7 @@ from sparseypy.access_objects.training_recipes.training_recipe_builder import (
 
 
 class HPORun():
+    tqdm_bar = None
     """
     HPORun: class for performing HPO Runs.
 
@@ -82,6 +83,8 @@ class HPORun():
         self.best_results = None
         self.best_run = 0
         self.num_steps = 0
+        if HPORun.tqdm_bar is None:
+            HPORun.tqdm_bar = tqdm(total=self.num_trials, desc="HPO Trials", position=0)
 
 
     def check_is_value_constraint(self, config):
@@ -266,9 +269,9 @@ class HPORun():
                     # this one is the best one if 1) there is no previous result or 2) its objective value is higher than the previous best result
                     is_best = (not self.best) or (self.best and objective_results["total"] > self.best.get_objective()["total"])
 
-                    print(f"Completed trial {self.num_steps} of {self.num_trials}")
+                    tqdm.write(f"Completed trial {self.num_steps} of {self.num_trials}")
                     if self.best:
-                        print(f"Previous best objective value: {self.best.get_objective()['total']:.5f}")
+                        tqdm.write(f"Previous best objective value: {self.best.get_objective()['total']:.5f}")
 
                     self._print_breakdown(hpo_step_results)
 
@@ -277,7 +280,7 @@ class HPORun():
                         self.best_results = results
                         self.best_run = self.num_steps
                         self.best_config = validated_config
-                        print(f"This is the new best value!")
+                        tqdm.write(f"This is the new best value!")
 
                     self.data_storer.save_hpo_step(wandb.run.sweep_id, hpo_step_results)
 
@@ -298,10 +301,10 @@ class HPORun():
                     # if this is the final run, also log the best-performing model
                     # this should be handled by the DS when it is called to store the HPORun from run_sweep()
                     #if self.num_steps >= self.num_trials:
-                    #    print(f"OPTIMIZATION RUN COMPLETED")
-                    #    print(f"Best run: {self.best_run}")
+                    #    tqdm.write(f"OPTIMIZATION RUN COMPLETED")
+                    #    tqdm.write(f"Best run: {self.best_run}")
                     #    self._print_breakdown(self.best)
-                    #    print(f"Best run configuration: {self.best_config}")
+                    #    tqdm.write(f"Best run configuration: {self.best_config}")
 
                         #wandb.log(
                         #    {
@@ -313,17 +316,24 @@ class HPORun():
                         #)
         except Exception as e:
             # log HPOStep failure? otherwise order of items in HPOResult will not match total number of steps/step order
-            print(traceback.format_exc())
-
+            tqdm.write(traceback.format_exc())
+        if HPORun.tqdm_bar is not None:
+            HPORun.tqdm_bar.update(1)
+    
+    @classmethod
+    def close_tqdm(cls):
+        if cls.tqdm_bar is not None:
+            cls.tqdm_bar.close()
+            cls.tqdm_bar = None
 
     def _print_breakdown(self, step_results: HPOStepResult):
         objective_results = step_results.get_objective()
         # enhance with summary of metrics
-        print(f"Objective value: {objective_results['total']:.5f}")
-        print(f"Combination method: {objective_results['combination_method']}")
-        print("Objective term breakdown:")
+        tqdm.write(f"Objective value: {objective_results['total']:.5f}")
+        tqdm.write(f"Combination method: {objective_results['combination_method']}")
+        tqdm.write("Objective term breakdown:")
         for name, values in objective_results["terms"].items():
-            print(f"* {name:>25}: {values['value']:.5f} with weight {values['weight']}")
+            tqdm.write(f"* {name:>25}: {values['value']:.5f} with weight {values['weight']}")
 
 
     def run_sweep(self) -> HPOResult:
@@ -340,7 +350,7 @@ class HPORun():
         self.hpo_results.mark_finished()
 
         self.data_storer.save_hpo_result(self.hpo_results)
-
+        HPORun.close_tqdm()
         return self.hpo_results
     
     
