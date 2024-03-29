@@ -109,4 +109,4 @@ Selected metrics:
         for metric, val in eval_summary.best_steps.items():
             tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
-        wandb.finish()
+    wandb.finish()
