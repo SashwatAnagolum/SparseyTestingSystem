@@ -10,7 +10,11 @@ import pprint
 import torch
 import wandb
 from tqdm import tqdm
+import warnings
 
+# Ignore specific UserWarnings from wandb reading console output that doessn't effect our functionality
+# Wandb when using tqdm tries to read the last update after the last run which is not needed
+warnings.filterwarnings("ignore", message="Run (.*) is finished. The call to `_console_raw_callback` will be ignored.")
 from sparseypy.access_objects.training_recipes.training_recipe_builder import (
     TrainingRecipeBuilder
 ) 
@@ -109,4 +113,4 @@ Selected metrics:
         for metric, val in eval_summary.best_steps.items():
             tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
-    wandb.finish()
+        wandb.finish()

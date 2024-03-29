@@ -10,7 +10,11 @@ import wandb
 import traceback
 from tqdm import tqdm
 from copy import deepcopy
+import warnings
 
+# Ignore specific UserWarnings from wandb reading console output that doessn't effect our functionality
+# Wandb when using tqdm tries to read the last update after the last run in an HPO sweep finishes which is not needed
+warnings.filterwarnings("ignore", message="Run (.*) is finished. The call to `_console_raw_callback` will be ignored.")
 from sparseypy.core.metrics.metric_factory import MetricFactory
 from sparseypy.core.results import HPOResult, HPOStepResult
 from sparseypy.core.data_storage_retrieval import DataStorer

@@ -10,6 +10,7 @@ from typing import Optional
 import os
 import wandb
 from pprint import pprint
+from tqdm import tqdm
 from sparseypy.tasks.api_login import log_in
 from sparseypy.access_objects.hpo_runs.hpo_run  import HPORun
 from sparseypy.core.data_storage_retrieval.data_storer import DataStorer
@@ -53,7 +54,7 @@ def run_hpo(hpo_config: dict,
         for x in hpo_config['optimization_objective']['objective_terms']
         ]
     
-    print(f"""
+    tqdm.write(f"""
 HYPERPARAMETER OPTIMIZATION SUMMARY
           
 W&B project name: {hpo_config['project_name']}
