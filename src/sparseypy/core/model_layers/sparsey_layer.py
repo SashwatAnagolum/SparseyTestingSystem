@@ -286,6 +286,13 @@ class SparseyLayer(torch.nn.Module):
             prev_layer_mac_grid_num_cols
         )
 
+        self.prev_layer_output_shape = (
+            prev_layer_mac_grid_num_rows,
+            prev_layer_mac_grid_num_cols,
+            prev_layer_num_cms_per_mac,
+            prev_layer_num_neurons_per_cm
+        )
+
         # save layer-level permanence value;
         # check if we actually need to do this
         self.permanence = permanence
@@ -477,6 +484,13 @@ class SparseyLayer(torch.nn.Module):
                 num_neurons_per_cm
             ) of dtype torch.float32
         """
+        if tuple(x.shape[1:]) != self.prev_layer_output_shape:
+            raise ValueError(
+                'Input shape is incorrect! '
+                f'Expected shape {self.prev_layer_output_shape} but received '
+                f'{tuple(x.shape[1:])} instead.'    
+            )
+
         x = x.view(x.shape[0], -1, *x.shape[3:])
 
         # apply input filter to select only the
