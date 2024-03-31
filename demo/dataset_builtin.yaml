@@ -1,0 +1,22 @@
+---
+dataset_type: built_in
+
+params:
+  name: MNIST
+  transform: PIL_to_tensor
+
+preprocessed: True
+
+preprocessed_stack:
+  transform_list:
+    - name: resize
+      params:
+        size: [8, 8]
+        antialias: True
+    - name: binarize
+      params:
+        binarize_threshold: 0.5
+    - name: skeletonize
+      params:
+        sigma: 3
+...

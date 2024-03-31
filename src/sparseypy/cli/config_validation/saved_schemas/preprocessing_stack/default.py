@@ -38,7 +38,7 @@ class DefaultPreprocessingStackSchema(AbstractSchema):
             )
         except ValueError:
             converted_transform_name = ''.join(
-                [word.capitalize() for word in transform_name.split('_')]
+                [word[:1].upper() + word[1:] for word in transform_name.split('_')]
             )
 
             if not hasattr(v2, converted_transform_name):
