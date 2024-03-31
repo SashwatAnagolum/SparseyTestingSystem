@@ -18,6 +18,7 @@ from .schema_factory import get_schema_by_name
 from .saved_schemas.abs_schema import AbstractSchema
 from . import saved_schemas
 
+
 def get_config_info(config_filepath: str) -> dict:
     """
     Reads the file at the filepath passed in by the user.

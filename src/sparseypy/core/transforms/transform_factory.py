@@ -19,7 +19,7 @@ class TransformFactory:
     @staticmethod
     def get_transform_name(transform_name):
         class_name = ''.join(
-            [l.capitalize() for l in transform_name.split('_')]
+            [l[:1].upper() + l[1:] for l in transform_name.split('_')]
         )
 
         return class_name
@@ -35,7 +35,9 @@ class TransformFactory:
             return getattr(transforms, class_name + 'Transform')
         # torchvision modules contain multiple classes; use reflection to get all the
         # torchvision class members' names and see if ours is among them
-        elif class_name in [cls[0] for cls in inspect.getmembers(v2, inspect.isclass)]:
+        elif class_name in [
+            cls[0] for cls in inspect.getmembers(v2, inspect.isclass)
+        ]:
             return getattr(v2, class_name)
         else:
             raise ValueError(f'Invalid transform name: {class_name}!')
@@ -47,6 +49,8 @@ class TransformFactory:
         Creates a transform passed in based on the transform name and kwargs.
         """
         transform_name = TransformFactory.get_transform_name(transform_name)
+
+        print(transform_name)
 
         transform_class = TransformFactory.get_transform_class(transform_name)
 
