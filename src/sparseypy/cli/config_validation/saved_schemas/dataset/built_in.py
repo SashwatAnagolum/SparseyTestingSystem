@@ -72,12 +72,23 @@ class BuiltInDatasetSchema(AbstractSchema):
             {
                 'dataset_type': Schema('built_in', error="dataset_type must be 'built_in'"),
                 'params': Schema({
-                    'name': Schema(And(str, And(Const(Use(DatasetFactory.is_valid_builtin_dataset), True))), error="The dataset name is invalid or does not exist."),
-                    'data_dir': Schema(And(str, os.path.exists), error="The path at which the built-in dataset will be saved must exist."),
+                    'name': Schema(
+                        And(str, And(
+                            Const(
+                                Use(DatasetFactory.is_valid_builtin_dataset), True)
+                                )
+                                ), error="The dataset name is invalid or does not exist."),
+                    'root': Schema(And(
+                        str,
+                        os.path.exists),
+                        error="The path at which the built-in dataset will be saved must exist."),
                     Optional('download', default=True): bool
                 }, error="Invalid params"),
-                Optional('preprocessed', default=False): Schema(bool, error="preprocessed must be a boolean value"),
-                Optional('preprocessed_temp_dir', default='datasets/preprocessed_dataset'): Schema(str, error="preprocessed_temp_dir must be a valid path"),
+                Optional('preprocessed', default=False): Schema(
+                    bool,
+                    error="preprocessed must be a boolean value"),
+                Optional('preprocessed_temp_dir', default='datasets/preprocessed_dataset'):
+                    Schema(str, error="preprocessed_temp_dir must be a valid path"),
                 'preprocessed_stack': schema_params[
                     'preprocessing_stack_schema'
                 ],
