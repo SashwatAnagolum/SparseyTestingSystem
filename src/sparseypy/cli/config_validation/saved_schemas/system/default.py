@@ -134,7 +134,8 @@ class DefaultSystemSchema(AbstractSchema):
                         'read_database': Schema(lambda x : x in schema_params['selected_dbs'], error="The read_database must also be configured as a write_database"),
                         'write_databases': [Or(*schema_params['database_schemas'], error="Invalid database configuration schema")]
                     },
-                    error="Error in database configuration")
+                    error="Error in database configuration"),
+                    Optional('print_error_stacktrace', default=False): Schema(bool, error="print_error_stacktrace must be a boolean value")
                 },
                 error="Error in system.yaml"
         )

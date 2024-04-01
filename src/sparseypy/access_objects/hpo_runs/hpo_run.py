@@ -36,7 +36,7 @@ class HPORun():
             candidates to try out during the HPO process
     """
     def __init__(self, hpo_config: dict,
-        dataset_config: dict, preprocessing_config: dict):
+        dataset_config: dict, preprocessing_config: dict, system_config: dict):
         """
         Initializes the HPORun object.
 
@@ -61,7 +61,7 @@ class HPORun():
         self.preprocessing_config = preprocessing_config
         self.dataset_config = dataset_config
         self.training_recipe_config = trainer_config
-
+        self.system_config = system_config
         
         # BUG does this approach log things in an incorrect order for multithreaded runs?
         logged_configs = {
@@ -215,7 +215,7 @@ class HPORun():
 
         validated_config = validate_config(
             model_config, 'model', self.config_info['model_family'],
-            survive_with_exception=True
+            survive_with_exception=True, print_error_stacktrace=self.system_config['print_error_stacktrace']
         )
 
         try:

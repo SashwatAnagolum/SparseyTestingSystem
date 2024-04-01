@@ -63,4 +63,7 @@ database:
     # - name: mongo
     #   connection_string: $MONGO_CONNECTION_STRING
 
+# whether to print error stack traces when they occur for schema validation errors
+# print_error_stacktrace: True
+print_error_stacktrace: False
 ...

@@ -59,7 +59,10 @@ def main():
     system_config_info = get_config_info(
         args.system_config
     )
-
+    try:
+        print_error_stacktrace = system_config_info['print_error_stacktrace']
+    except Exception as e:
+        print_error_stacktrace = False
     preprocessing_config_info = get_config_info(
         args.preprocessing_config
     )
@@ -76,15 +79,15 @@ def main():
     # preprocessing config validation
 
     validated_system_config = validate_config(
-        system_config_info, 'system', 'default'
+        system_config_info, 'system', 'default', print_error_stacktrace=print_error_stacktrace
     )
 
     validated_dataset_config = validate_config(
-        dataset_config_info, 'dataset', dataset_config_info['dataset_type']
+        dataset_config_info, 'dataset', dataset_config_info['dataset_type'], print_error_stacktrace=print_error_stacktrace
     )
 
     validated_hpo_config = validate_config(
-        hpo_config_info, 'hpo', 'default'
+        hpo_config_info, 'hpo', 'default', print_error_stacktrace=print_error_stacktrace
     )
 
 

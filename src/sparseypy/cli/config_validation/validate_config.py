@@ -9,6 +9,7 @@ Validate Config: functions to validate a config file
 import os
 import argparse
 import sys
+import traceback
 from typing import Tuple, Optional
 
 from schema import SchemaError, SchemaMissingKeyError
@@ -71,7 +72,7 @@ def get_schema(schema_type, schema_name) -> AbstractSchema:
 
 
 def validate_config(config_info: dict, schema_type: str,
-    schema_name: str, survive_with_exception=False) -> dict:
+    schema_name: str, survive_with_exception=False, print_error_stacktrace=False) -> dict:
     """
     Validates the given config file against the given schema. If
     the config is valid, then (the valid config, True) is returned,
@@ -93,6 +94,9 @@ def validate_config(config_info: dict, schema_type: str,
         config_schema = get_schema(schema_type, schema_name)
         valid_config = config_schema.validate(config_info)
     except ValueError as ve:
+        if print_error_stacktrace:
+            traceback.print_exc()
+            print("\n(see above for stack trace)\n=========\nCONFIG VALIDATION FAILED\n=========\n")
         # attempting to create a schema class that does not exist
         print("INVALID SCHEMA TYPE")
         print(f"{schema_name} is not a valid {schema_type} schema")
@@ -106,6 +110,9 @@ def validate_config(config_info: dict, schema_type: str,
 
     except (SchemaError, SchemaMissingKeyError) as se:
         # schema validation error for a schema that exists
+        if print_error_stacktrace:
+            traceback.print_exc()
+            print("\n(see above for stack trace)\n")
         print("\n=========\nCONFIG VALIDATION FAILED\n=========")
         print(f"Error in {schema_type} config!")
         
