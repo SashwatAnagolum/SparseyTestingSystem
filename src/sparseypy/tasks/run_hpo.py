@@ -39,7 +39,7 @@ def run_hpo(hpo_config: dict,
 
     hpo_run = HPORun(
         hpo_config,
-        dataset_config, preprocessing_config
+        dataset_config, preprocessing_config, system_config
     )
 
     # if we are in production mode (verbosity 0), suppress the W&B output
