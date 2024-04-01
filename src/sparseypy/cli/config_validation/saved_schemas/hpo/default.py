@@ -158,8 +158,8 @@ class DefaultHpoSchema(AbstractSchema):
         hyperparam_schema = Schema(
             Or(
                 {
-                    'min': Or(int, Use(float), error="min must be an int or float"),
-                    'max': Or(int, Use(float), error="max must be an int or float"),
+                    'min': Or(Use(float), error="min must be an int or float"),
+                    'max': Or(Use(float), error="max must be an int or float"),
                     'distribution': Or(
                         'int_uniform', 'uniform', 'categorical',
                         'q_uniform', 'log_uniform', 'log_uniform_values',
@@ -177,7 +177,7 @@ class DefaultHpoSchema(AbstractSchema):
                     )
                 },
                 {
-                    'value': Or(str, int, float, bool, error="value must be of type str, int, float, or bool")
+                    'value': Or(str, bool, Use(float), int, error="value must be of type str, int, float, or bool")
                 }
             ),
             error="Invalid hyperparameter configuration"
