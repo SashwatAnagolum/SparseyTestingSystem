@@ -7,7 +7,7 @@ Default HPO Schema: the schema for HPO runs.
 
 import typing
 
-from schema import Schema, And, Or
+from schema import Schema, And, Or, Use
 
 from sparseypy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparseypy.cli.config_validation import schema_factory
@@ -158,8 +158,8 @@ class DefaultHpoSchema(AbstractSchema):
         hyperparam_schema = Schema(
             Or(
                 {
-                    'min': Or(int, float, error="min must be an int or float"),
-                    'max': Or(int, float, error="max must be an int or float"),
+                    'min': Or(int, Use(float), error="min must be an int or float"),
+                    'max': Or(int, Use(float), error="max must be an int or float"),
                     'distribution': Or(
                         'int_uniform', 'uniform', 'categorical',
                         'q_uniform', 'log_uniform', 'log_uniform_values',
