@@ -22,7 +22,10 @@ class FeatureCoverageMetricSchema(AbstractSchema):
             {
                 'name': Schema('feature_coverage', error="name must be 'feature_coverage'"),
                 Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
-                Optional('reduction', default=None): Schema(Or('none', 'sum', 'mean', error="reduction must be 'none', 'sum', or 'mean'"), error="Invalid reduction value"),
+                Optional('reduction', default=None): Or(
+                    'none', 'sum', 'mean', 'highest_layer',
+                    error="reduction must be 'none', 'sum', 'highest_layer', or 'mean'"
+                ),
                 Optional('best_value', default='max_by_layerwise_mean'): Schema(
                         And(
                             Use(MetricFactory.is_valid_comparision), True

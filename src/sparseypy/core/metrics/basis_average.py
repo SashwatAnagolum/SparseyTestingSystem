@@ -173,6 +173,19 @@ class BasisAverageMetric(Metric):
                     ) for j in range(len(layers[i]))
                 ] for i in range(len(layers))
             ]
+        elif self.reduction == 'highest_layer':
+            return [
+                torch.zeros(
+                    self.expected_input_shape,
+                    dtype=torch.float32
+                ).scatter_(
+                    0, torch.argwhere(self.projected_rfs[-1][j]).squeeze(),
+                    torch.nan_to_num(
+                        self.summed_inputs[-1][j] /
+                        self.num_inputs_seen[-1][j]
+                    )
+                ) for j in range(len(layers[-1]))
+            ]
         else:
             return [
                 [

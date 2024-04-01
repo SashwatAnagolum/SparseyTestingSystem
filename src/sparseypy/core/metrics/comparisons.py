@@ -7,7 +7,8 @@ import numpy as np
 #### SUPPORT FUNCTIONS ####
 def average_nested_data(data):
     """
-    Averages an arbitrarily deep data structure and returns the result as a single value.
+    Averages an arbitrarily deep data structure
+    and returns the result as a single value.
     """
     if isinstance(data, list):
         if len(data) == 0:
