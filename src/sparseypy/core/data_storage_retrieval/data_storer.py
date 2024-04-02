@@ -1,8 +1,12 @@
-import firebase_admin
-from firebase_admin import firestore, firestore_async
+"""
+DataStorer: Saves data to Weights & Biases and the system database (Firestore)
+"""
 import json
-import numpy as np
 import pickle
+
+import firebase_admin
+from firebase_admin import firestore # firestore_async for async client
+import numpy as np
 import wandb
 
 from sparseypy.core.results.training_result import TrainingResult
@@ -11,11 +15,11 @@ from sparseypy.core.results.hpo_result import HPOResult
 from sparseypy.core.results.hpo_step_result import HPOStepResult
 from sparseypy.access_objects.models.model import Model
 
-"""
-DataStorer: Stores data to weights and biases
-"""
-class DataStorer:
 
+class DataStorer:
+    """
+    DataStorer: Stores data to Weights & Biases
+    """
     # static variables
     is_initialized = False
     wandb_config = {}
@@ -30,14 +34,17 @@ class DataStorer:
 
         # connect to Firestore
         self.db = firestore.client()
-        
+
         self.wandb_resolution = DataStorer.wandb_config["data_resolution"]
         self.firestore_resolution = DataStorer.firestore_config["data_resolution"]
-        
+
     @staticmethod
     def configure(ds_config: dict):
         """
         Configures the DataStorer and initializes its database connection.
+
+        Args:
+            ds_config (dict): the validated system.yaml configuration
         """
         if not DataStorer.is_initialized:
 
@@ -45,7 +52,9 @@ class DataStorer:
             wandb.login(key=ds_config['wandb']['api_key'], verify=True)
 
             # initialize Firestore
-            cred_obj = firebase_admin.credentials.Certificate(ds_config['database']['write_databases'][0]['firebase_service_key_path'])
+            cred_obj = firebase_admin.credentials.Certificate(
+                ds_config['database']['write_databases'][0]['firebase_service_key_path']
+                )
             firebase_admin.initialize_app(cred_obj)
 
             DataStorer.wandb_config = ds_config['wandb']
@@ -53,15 +62,28 @@ class DataStorer:
 
             DataStorer.is_initialized = True
 
-    def save_model(self, m: Model):
+    def save_model(self, experiment: str, m: Model):
+        """
+        Saves a model to Weights & Biases.
+
+        Args:
+            experiment (str): the experiment ID to which the model should be saved
+            m (Model): the model object to be saved
+        """
         # Implementation to save the model
         pass
-    
-    def save_training_step(self, parent: str, result: TrainingStepResult):
 
+    def save_training_step(self, parent: str, result: TrainingStepResult):
+        """
+        Saves a single training step to Weights & Biases and Firestore.
+
+        Args:
+            parent (str): the experiment ID to which to log this step
+            result (TrainingStepResult): the step results to save
+        """
         summary_dict = {}
         full_dict = {}
-        
+
         # gather the saved metrics for summary in W&B and full storage in the DB
         for metric_name, metric_val in result.get_metrics().items():
             if metric_name in self.saved_metrics:
@@ -77,11 +99,14 @@ class DataStorer:
                 if metric_name in self.saved_metrics and isinstance(metric_val, list):
                     # then break out each layer as a separate metric for W&B using prefix grouping
                     for idx, layer_data in enumerate(metric_val):
-                        layerwise_dict[f"{metric_name}/layer_{idx}"] = self.average_nested_data(layer_data)
-                        # if the resolution is 2 (MAC-level), also log the MAC-level data with prefix grouping
+                        layer_name = f"{metric_name}/layer_{idx}"
+                        layerwise_dict[layer_name] = self.average_nested_data(layer_data)
+                        # if the resolution is 2 (MAC-level)
+                        # also log the MAC-level data with prefix grouping
                         if self.wandb_resolution == 2 and isinstance(layer_data, list):
                             for idy, mac_data in enumerate(layer_data):
-                                layerwise_dict[f"{metric_name}/layer_{idx}/mac_{idy}"] = self.average_nested_data(mac_data)
+                                mac_name = f"{metric_name}/layer_{idx}/mac_{idy}"
+                                layerwise_dict[mac_name] = self.average_nested_data(mac_data)
             # then log without updating the step (done when the summary is logged below)
             wandb.log(layerwise_dict, commit=False)
 
@@ -105,8 +130,15 @@ class DataStorer:
                 )
             #else:
             # raise exception
-    
+
     def save_evaluation_step(self, parent: str, result: TrainingStepResult):
+        """
+        Saves a single evaluation step to Weights & Biases and Firestore.
+
+        Args:
+            parent (str): the experiment ID to which to log this step
+            result (TrainingStepResult): the step results to save
+        """
         # gather the saved metrics for storage in the DB
         full_dict = {}
         for metric_name, metric_val in result.get_metrics().items():
@@ -130,7 +162,13 @@ class DataStorer:
             # raise exception
 
     def create_experiment(self, experiment: TrainingResult):
+        """
+        Creates a new entry for the current experiment in Firestore.
         
+        Args:
+            experiment (TrainingResult): the TrainingResult for the new experiment
+            for which to create a database entry
+        """
         # save on "summary" or better
         if self.firestore_resolution > 0:
             # create the DB entry for this experiment in Firestore
@@ -151,6 +189,17 @@ class DataStorer:
             )
 
     def save_training_result(self, result: TrainingResult):
+        """
+        Saves the summary-level training results for the current run
+        to Firestore. 
+
+        Only saves the training summary--you still need to save the individual 
+        training steps by calling save_training_step().
+
+        Args:
+            result (TrainingResult): the completed training results
+            to save
+        """
         # Implementation to save the training result
 
         # do we even need to set anything in W&B here? time finished? but W&B should track that
@@ -182,14 +231,25 @@ class DataStorer:
         #run.config = result.
 
     def save_evaluation_result(self, result: TrainingResult):
-        # Implementation to save the evaluation result
+        """
+        Saves the summary-level evaluation results for the current run
+        to Firestore. 
+
+        Only saves the evaluation summary--you still need to save the individual 
+        evaluation steps by calling save_evaluation_step().
+
+        Args:
+            result (TrainingResult): the completed evaluation results
+            to save
+        """
+        # WEIGHTS & BIASES
 
         # access the current run's summary-level data with the API
         run = self.api.run(wandb.run.path)
-        
+
         if self.firestore_resolution > 0:
-        
-            # gather the saved metrics for summary in W&B      
+
+            # gather the saved metrics for summary in W&B
             eval_dict = {
                 # create a key for each saved metric containing the nested average
                 # of the results of the metric for each step in the evaluation
@@ -223,8 +283,20 @@ class DataStorer:
                 )
 
     def save_hpo_step(self, parent: str, result: HPOStepResult):
-        # Implementation to save the HPO step result
+        """
+        Saves a single HPO step to Weights & Biases and Firestore.
 
+        Saves objective data and HPO configuration to the run in
+        both Weights & Biases and Firestore.
+
+        Also marks this experiment in Firestore as belonging to the
+        parent sweep and updates its best runs.
+        
+        Args:
+            parent (str): the ID of the parent sweep in the HPO table
+            that should be updated with this run's results
+            result (HPOStepResult): the results of the HPO step to save
+        """
         # WEIGHTS & BIASES
         # save the objective and HPO config to this experiment
 
@@ -242,7 +314,7 @@ class DataStorer:
         run.summary["hpo_configs"] = result.configs
 
         run.summary.update()
-    
+
         # FIRESTORE
         if self.firestore_resolution > 0:
             # save the objective data into the experiment
@@ -264,11 +336,19 @@ class DataStorer:
                 }
             )
 
-        
-
     def create_hpo_sweep(self, sweep: HPOResult):
+        """
+        Creates an entry in Firestore for the given HPO sweep.
+
+        Stores basic metadata that Weights & Biases tracks automatically
+        but needs to be manually created in Firestore for other
+        storage functions (such as save_hpo_step()) to work correctly.
+
+        Args:
+            sweep (HPOResult): the sweep for which to create an entry
+        """
         if self.firestore_resolution > 0:
-        
+
             # create the DB entry for this experiment in Firestore
             sweep_ref = self.db.collection("hpo_runs").document(sweep.id)
 
@@ -280,22 +360,35 @@ class DataStorer:
                     "runs": [],
                     "completed": False,
                     "configs": {
-                        conf_name:json.dumps(conf_json) for conf_name, conf_json in sweep.configs.items()
+                        conf_name:json.dumps(conf_json)
+                        for conf_name, conf_json in sweep.configs.items()
                     }
                 }
             )
 
 
     def save_hpo_result(self, result: HPOResult):
-        # Implementation to save the HPO result
+        """
+        Saves the final results of an HPO run to Firestore and
+        marks it as completed.
+
+        Includes end times, best run ID, and an ordered list of runs
+        by objective value.
+
+        Does not save the individual steps--you need to use
+        save_hpo_step() for that.
+
+        Args:
+            result (HPOResult): the results of the completed HPO sweep to
+            summarize and save
+        """
 
         # WEIGHTS & BIASES automatically tracks this already
 
         # FIRESTORE
         # set the end time and best run ID and mark as completed
-
         if self.firestore_resolution > 0:
-        
+
             sweep_ref = self.db.collection("hpo_runs").document(result.id)
 
             sweep_ref.update(
@@ -303,21 +396,44 @@ class DataStorer:
                     "end_time": result.end_time,
                     "best_run_id": result.best_run.id,
                     "completed": True,
-                    "runs_by_objective": [step.id for step in result.get_top_k_steps(len(result.runs))]
+                    "runs_by_objective": [
+                        step.id for step in result.get_top_k_steps(len(result.runs))
+                        ]
                 }
             )
-    
+
     def create_artifact(self, content: dict) -> wandb.Artifact:
+        """
+        Creates a W&B artifact for saving in the database.
+
+        Currently unused.
+
+        Args:
+            content (dict): the data to encapsulate in the Artifact
+        Returns:
+            wandb.Artifact: the encapsulated data
+        """
         # Implementation to create and save a wandb.Artifact
         pass
 
     def average_nested_data(self, data):
+        """
+        Averages an arbitrarily deep data structure
+        and returns the result as a single value.
+
+        Used here to reduce the granularity of data in order
+        to store a single value for each step in W&B.
+
+        Args:
+            data: the value(s) to reduce
+
+        """
         if isinstance(data, list):
-            if data.__len__() == 0:
+            if len(data) == 0:
                 data=[0]
             ret = np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
         elif hasattr(data, 'tolist'):  # numpy array
-            if data.__len__() == 0:
+            if len(data) == 0:
                 data=[0]
             ret = np.mean(np.nan_to_num(data))
         else:
