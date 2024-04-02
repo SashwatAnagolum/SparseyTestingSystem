@@ -22,7 +22,10 @@ class MatchAccuracyMetricSchema(AbstractSchema):
             {
                 'name': Schema('match_accuracy', error="name must be 'match_accuracy'"),
                 Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
-                Optional('reduction', default=None): Schema(Or('none', 'mean', 'sum', error="reduction must be 'none', 'mean', or 'sum'"), error="Invalid reduction value"),
+                Optional('reduction', default=None): Or(
+                    'none', 'mean', 'sum', 'highest_layer',
+                    error="reduction must be 'none', 'mean', 'highest_layer', or 'sum'"
+                ),
                 Optional('best_value', default='max_by_layerwise_mean'): Schema(
                         And(
                             Use(MetricFactory.is_valid_comparision), True

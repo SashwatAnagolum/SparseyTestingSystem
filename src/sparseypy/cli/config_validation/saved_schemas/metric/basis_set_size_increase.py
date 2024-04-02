@@ -28,7 +28,10 @@ class BasisSetSizeIncreaseMetricSchema(AbstractSchema):
             {
                 'name': Schema('basis_set_size_increase', error="name must be 'basis_set_size_increase'"),
                 Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
-                Optional('reduction', default=None): Schema(Or('mean', 'none', 'sum', error="reduction must be 'mean', 'none', or 'sum'"), error="Invalid reduction value"),
+                Optional('reduction', default=None): Or(
+                    'mean', 'none', 'sum', 'highest_layer',
+                    error="reduction must be 'mean', 'none', 'highest_layer', or 'sum'"
+                ),
                 Optional('best_value', default='min_by_layerwise_mean'): Schema(
                         And(
                             Use(MetricFactory.is_valid_comparision), True

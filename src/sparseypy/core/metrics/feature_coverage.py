@@ -122,5 +122,7 @@ class FeatureCoverageMetric(Metric):
             return torch.sum(torch.mean(feature_coverage_values, 1))
         elif self.reduction == "mean":
             return torch.mean(feature_coverage_values)
+        elif self.reduction == 'highest_layer':
+            return feature_coverage_values[-1]
         else:
             return None
