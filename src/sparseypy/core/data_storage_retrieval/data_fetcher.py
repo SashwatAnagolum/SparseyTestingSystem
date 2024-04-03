@@ -129,7 +129,15 @@ class DataFetcher:
         experiment_data = self._get_experiment_data(experiment_id)
 
         metrics = []
-        tr = TrainingResult(id=experiment_id, result_type=result_type, resolution=experiment_data["saved_metrics"]["resolution"], metrics=metrics)
+        tr = TrainingResult(id=experiment_id,
+                            result_type=result_type,
+                            resolution=experiment_data["saved_metrics"]["resolution"],
+                            metrics=metrics,
+                            configs={
+                                    conf_name:json.loads(conf_data)
+                                    for conf_name, conf_data in experiment_data["configs"]
+                                }
+                            )
 
         for step_index in range(len(experiment_data.get("saved_metrics", {}).get(result_type, []))):
             step_result = self.get_training_step_result(experiment_id, step_index)
@@ -187,8 +195,19 @@ class DataFetcher:
         hpo_run_data = self._get_hpo_run_data(hpo_run_id)
         # TODO Populate model configs
         # TODO Check if the configs will be stored in experiments
-        hpo_step_result = HPOStepResult(parent_run=hpo_run_id, id=experiment_id, configs={conf_name:json.loads(conf_json) for conf_name, conf_json in hpo_run_data["configs"].items()})
-        hpo_step_result.populate(objective=experiment_data["hpo_objective"], training_results=training_result, eval_results=evaluation_result)
+        hpo_step_result = HPOStepResult(
+            parent_run=hpo_run_id,
+            id=experiment_id,
+            configs={
+                conf_name:json.loads(conf_json)
+                for conf_name, conf_json in hpo_run_data["configs"].items()
+                }
+            )
+        hpo_step_result.populate(
+                objective=experiment_data["hpo_objective"],
+                training_results=training_result,
+                eval_results=evaluation_result
+            )
         return hpo_step_result
 
     def get_hpo_result(self, hpo_run_id: str) -> HPOResult:
