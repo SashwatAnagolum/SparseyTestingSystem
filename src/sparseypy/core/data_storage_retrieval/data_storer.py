@@ -104,13 +104,14 @@ class DataStorer:
             # get the data for each metric
             for metric_name, metric_val in result.get_metrics().items():
                 # if that metric is requested for saving and is at least 1D in layers (is a list)
-                if metric_name in self.saved_metrics and isinstance(metric_val, list):
+                if metric_name in self.saved_metrics and (isinstance(metric_val, list) or torch.is_tensor(metric_val)):
                     # then break out each layer as a separate metric for W&B using prefix grouping
                     for idx, layer_data in enumerate(metric_val):
                         layer_name = f"{metric_name}/layer_{idx}"
                         layerwise_dict[layer_name] = self.average_nested_data(layer_data)
                         # if the resolution is 2 (MAC-level)
                         # also log the MAC-level data with prefix grouping
+                        # FIXME tensors are not currently logged here pending adjustment of feature_coverage
                         if self.wandb_resolution == 2 and isinstance(layer_data, list):
                             for idy, mac_data in enumerate(layer_data):
                                 mac_name = f"{metric_name}/layer_{idx}/mac_{idy}"
