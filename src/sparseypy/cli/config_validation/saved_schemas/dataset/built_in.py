@@ -10,7 +10,7 @@ Does NOT correspond to a NamedDataset class.
 import typing
 import os
 
-from schema import Schema, Optional, And, Use, Const
+from schema import Schema, Optional, And, Use
 from torchvision import datasets as torchvision_datasets
 from torchvision.transforms import v2
 
