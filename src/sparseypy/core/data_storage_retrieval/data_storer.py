@@ -223,7 +223,11 @@ class DataStorer:
                                     'best_value': pickle.dumps(metric_vals["best_value"]),
                                     'best_function': metric_vals["best_function"].__name__} 
                                 for metric_name, metric_vals in result.best_steps.items()
-                            }
+                            },
+                        "configs": {
+                            conf_name: json.dumps(conf_data)
+                            for conf_name, conf_data in result.configs.items()
+                        }
                     }
                 )
 
