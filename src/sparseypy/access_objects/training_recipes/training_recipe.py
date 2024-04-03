@@ -45,10 +45,20 @@ class TrainingRecipe:
 
         self.ds = DataStorer(metric_config)
 
-        # BUG need to have logged in to W&B by the time this is executed
-        # BUG reporting fake value currently
-        self.training_results = TrainingResult(wandb.run.id, "training", self.step_resolution, self.metrics_list)
-        self.eval_results = TrainingResult(wandb.run.id, "evaluation", self.step_resolution, self.metrics_list)
+        self.training_results = TrainingResult(
+                id=wandb.run.id,
+                result_type="training",
+                resolution=self.step_resolution,
+                metrics=self.metrics_list,
+                configs=setup_configs
+            )
+        self.eval_results = TrainingResult(
+                id=wandb.run.id,
+                result_type="evaluation",
+                resolution=self.step_resolution,
+                metrics=self.metrics_list,
+                configs=setup_configs
+            )
         self.first_eval = True
 
         self.ds.create_experiment(self.training_results)
