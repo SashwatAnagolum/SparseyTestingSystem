@@ -95,11 +95,19 @@ class TrainingRecipeBuilder:
              loss_func = None
 
         #loss_func = None
+             
+        # store the configs inside the finished TrainingRecipe for later saving
+        setup_configs = {
+            'dataset_config': dataset_config,
+            'model_config': model_config,
+            'preprocessing_config': preprocessing_config,
+            'training_recipe_config': train_config
+        }
 
         return TrainingRecipe(
             model, optimizer, dataloader,
             preprocessing_stack, metrics_list,
-            train_config['metrics'], model_config,
+            train_config['metrics'], setup_configs,
             loss_func,
             train_config['training']['step_resolution']
         )
