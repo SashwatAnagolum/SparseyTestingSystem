@@ -6,7 +6,7 @@ Named dataset schema: the schema for named dataset config files.
 Does NOT correspond to a NamedDataset class.
 """
 
-
+import inspect
 import typing
 import os
 
@@ -46,18 +46,24 @@ class BuiltInDatasetSchema(AbstractSchema):
 
     def check_if_transform_exists(self, transform_name) -> bool:
         """
-        Checks if a model family with the name model_family exists.
+        Checks if a (Torchvision v2) transform with the name transform_name exists.
 
         Args:
             transform_name (str): the name of the transform to check.
 
         Returns:
-            (bool): whether the model famly exists or not
+            (bool): whether the transform exists or not
         """
-        if not hasattr(v2, transform_name):
-            return False
+        if transform_name in [
+            cls[0] for cls in inspect.getmembers(v2, inspect.isclass)
+        ]:
+            return True
 
-        return True
+        return False
+        #if not hasattr(v2, transform_name):
+        #    return False
+        #
+        #return True
 
 
     def check_if_dataset_exists(self, dataset_name: str) -> bool:
