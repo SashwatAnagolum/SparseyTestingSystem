@@ -50,8 +50,6 @@ class TransformFactory:
         """
         transform_name = TransformFactory.get_transform_name(transform_name)
 
-        print(transform_name)
-
         transform_class = TransformFactory.get_transform_class(transform_name)
 
         if (transform_name in dir(v2)) and ('dtype' in kwargs):
