@@ -99,7 +99,7 @@ class DefaultSystemSchema(AbstractSchema):
         the name of an environment variable (with $ prefix) or a value.
 
         Args:
-            env_name (string): the value or environment variable name
+            env_name (str): the value or environment variable name
 
         Returns:
             the value or a Use that can be used to validate the value
