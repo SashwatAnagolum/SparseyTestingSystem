@@ -130,6 +130,7 @@ class BuiltInDatasetSchema(AbstractSchema):
                 'dataset_type': Schema(
                     'built_in', error="dataset_type must be 'built_in'"
                 ),
+                Optional('description', default=None): str,
                 'params': Schema(
                     {
                         'name': Schema(

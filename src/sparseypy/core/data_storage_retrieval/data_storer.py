@@ -211,8 +211,12 @@ class DataStorer:
         """
         # Implementation to save the training result
 
-        # do we even need to set anything in W&B here? time finished? but W&B should track that
-        # is there something we need to do here to mark end of run?
+        # save the dataset name to W&B
+        dataset_description = result.configs["dataset_config"]["description"]
+        if dataset_description:
+            #run = self.api.run(wandb.run.path)
+            wandb.run.summary["dataset_description"] = dataset_description
+            #run.summary.update()
 
         # save on "summary" or better
         if self.firestore_resolution > 0:
@@ -226,6 +230,7 @@ class DataStorer:
                         "start_times.training": result.start_time,
                         "end_times.training": result.end_time,
                         "completed": True,
+                        "dataset_description": dataset_description,
                         "best_steps.training": {
                                 metric_name:{
                                     'best_index': metric_vals["best_index"],

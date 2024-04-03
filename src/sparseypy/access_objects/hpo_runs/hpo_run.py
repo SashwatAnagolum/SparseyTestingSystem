@@ -216,7 +216,7 @@ class HPORun():
         model, and computing the user-specified objective function
         using the trained model.
         """
-        wandb.init()
+        wandb.init(allow_val_change=True)
 
         model_config = self.generate_model_config(
             dict(wandb.config)

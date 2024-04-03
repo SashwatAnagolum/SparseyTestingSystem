@@ -69,6 +69,7 @@ class SparseyDatasetSchema(AbstractSchema):
         config_schema = Schema(
             {
                 'dataset_type': Schema('sparsey', error="dataset_type must be 'sparsey'"),
+                Optional('description', default=None): str,
                 'params': Schema({
                     'data_dir': Schema(And(str, os.path.exists), error="Invalid data_dir path. The directory must exist."),
                     'width': And(int, lambda x : x > 0, error="Width must be a positive integer"),

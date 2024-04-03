@@ -69,6 +69,7 @@ class ImageDatasetSchema(AbstractSchema):
         config_schema = Schema(
             {
                 'dataset_type': Schema('image', error="dataset_type must be 'image'"),
+                Optional('description', default=None): str,
                 'params': Schema({
                     'data_dir': Schema(And(str, os.path.exists), error=f"Invalid data_dir path. The directory must exist."),
                     'image_format': Schema(And(str, lambda x: x[0] == '.'), error=f"Invalid image_format. The format must start with '.'")

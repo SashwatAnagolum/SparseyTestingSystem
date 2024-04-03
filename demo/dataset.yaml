@@ -4,6 +4,11 @@
 # dataset_type: string
 #    the dataset class to use to load the dataset
 dataset_type: image
+# description: string (optional, no default)
+#     a friendly name/description for the dataset that will be listed on the W&B summary page
+#     and in the database to more easily identify its contents
+#     (only included if you provide it here; there is no "default" description)
+description: "50-item test MNIST dataset"
 
 # params: additional information about the dataset required to load or transform its items
 params:
