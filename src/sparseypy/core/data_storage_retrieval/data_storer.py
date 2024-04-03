@@ -257,24 +257,19 @@ class DataStorer:
         """
         # WEIGHTS & BIASES
 
-        # access the current run's summary-level data with the API
-        run = self.api.run(wandb.run.path)
+        # gather the saved metrics for summary in W&B
+        eval_dict = {
+            # create a key for each saved metric containing the nested average
+            # of the results of the metric for each step in the evaluation
+            saved_metric:self.average_nested_data(
+                [step.get_metric(saved_metric) for step in result.get_steps()]
+                                                    ) for saved_metric in self.saved_metrics
+        }
+        # then add those as "evaluation_" results to the W&B summary level
+        for metric_name, metric_val in eval_dict.items():
+            wandb.run.summary["evaluation_" + metric_name] = metric_val
 
         if self.firestore_resolution > 0:
-
-            # gather the saved metrics for summary in W&B
-            eval_dict = {
-                # create a key for each saved metric containing the nested average
-                # of the results of the metric for each step in the evaluation
-                saved_metric:self.average_nested_data(
-                    [step.get_metric(saved_metric) for step in result.get_steps()]
-                                                      ) for saved_metric in self.saved_metrics
-            }
-            # then add those as "evaluation_" results to the W&B summary level
-            for metric_name, metric_val in eval_dict.items():
-                run.summary["evaluation_" + metric_name] = metric_val
-            # save summary to W&B
-            run.summary.update()
             # save the full results to Firestore
             experiment_ref = self.db.collection("experiments").document(result.id)
             if experiment_ref.get().exists:
