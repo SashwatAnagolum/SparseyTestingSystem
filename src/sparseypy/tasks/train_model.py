@@ -6,19 +6,22 @@ Train Model: script to train models.
 
 
 import pprint
-
-import torch
-import wandb
 from tqdm import tqdm
 import warnings
 
-# Ignore specific UserWarnings from wandb reading console output that doessn't effect our functionality
-# Wandb when using tqdm tries to read the last update after the last run which is not needed
-warnings.filterwarnings("ignore", message="Run (.*) is finished. The call to `_console_raw_callback` will be ignored.")
-from sparseypy.access_objects.training_recipes.training_recipe_builder import (
-    TrainingRecipeBuilder
-) 
+import wandb
+
+from sparseypy.access_objects.training_recipes.training_recipe_builder import TrainingRecipeBuilder
 from sparseypy.core.data_storage_retrieval import DataStorer
+
+# Weights & Biases attempts to read tqdm updates from the console even after the last run
+# in an HPO sweep finishes, causing an unnecessary UserWarning when it attempts to log data
+# to a nonexistent run; this is a Weights & Biases issue that does not affect system
+# functionality so we ignore this warning
+warnings.filterwarnings(
+    "ignore",
+    message="Run (.*) is finished. The call to `_console_raw_callback` will be ignored."
+    )
 
 
 def train_model(model_config: dict, trainer_config: dict,
@@ -104,9 +107,6 @@ Selected metrics:
 
         # print summary here in model script
         # if not printing you still need to call this to finalize the results
-        # FIXME confirm this is the correct location
-        # FIXME we are not correctly updating eval results in the DB if we do this
-        # 
         eval_summary = trainer.get_summary("evaluation")
 
         tqdm.write("\n\nEVALUATION - SUMMARY\n")
