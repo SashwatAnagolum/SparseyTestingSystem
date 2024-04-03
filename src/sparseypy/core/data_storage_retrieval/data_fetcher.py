@@ -2,29 +2,27 @@
 """
 DataFetcher: Fetches data from weights and biases and the database (firestore)
 """
-
+from datetime import datetime
+from functools import lru_cache
 import json
 import pickle
-from datetime import datetime
+
 from firebase_admin import firestore
-import numpy as np
-import wandb
-from sparseypy.core.metrics import comparisons
-from functools import lru_cache
-from datetime import datetime
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 
-from sparseypy.core.results.training_result import TrainingResult
-from sparseypy.core.results.training_step_result import TrainingStepResult
+from sparseypy.core.metrics import comparisons
 from sparseypy.core.results.hpo_result import HPOResult
 from sparseypy.core.results.hpo_step_result import HPOStepResult
+from sparseypy.core.results.training_result import TrainingResult
+from sparseypy.core.results.training_step_result import TrainingStepResult
 
 class DataFetcher:
     """
-    A class for fetching data from a Firestore database, including experiment data, HPO run data, and model weights.
+    A class for fetching data from a Firestore database, including experiment data, 
+    HPO run data, and model weights.
 
-    This class provides methods to access and deserialize data related to sparsey experiments stored in Firestore.
-    It supports caching for efficient data retrieval.
+    This class provides methods to access and deserialize data related to Sparsey 
+    experiments stored in Firestore. It supports caching for efficient data retrieval.
     """
     def __init__(self):
         """
@@ -32,7 +30,7 @@ class DataFetcher:
         (credentials need to have been set before using this)
         """
         self.db = firestore.client()
-    
+
     def _deserialize_metric(self, serialized_metric):
         """
         Deserializes a metric value stored as a pickled string.
@@ -83,6 +81,11 @@ class DataFetcher:
         Returns:
             dict: A dictionary of model weights.
         """
+        # fetch model config back from Firestore
+        # create Model object using model config
+        # fetch model state dict from W&B model registry
+        # reload state dict into model
+        # return Model object
         pass
 
     def get_training_step_result(self, experiment_id, step_index):
@@ -106,7 +109,7 @@ class DataFetcher:
 
         step_data = training_steps[step_index]
         step_result = TrainingStepResult(resolution=experiment_data["saved_metrics"]["resolution"])
-        
+
         for metric_name, metric_data in step_data.items():
             step_result.add_metric(name=metric_name, values=self._deserialize_metric(metric_data))
 
@@ -116,15 +119,17 @@ class DataFetcher:
         """
         Retrieves the training result for a given experiment.
 
-        This method compiles the results of individual training steps within an experiment into a single TrainingResult object.
-        It includes overall metrics, step-by-step results, and information about the start and end times of the experiment,
-        as well as the best performing steps.
+        This method compiles the results of individual training steps within an experiment 
+        into a single TrainingResult object. It includes overall metrics, step-by-step results, 
+        and information about the start and end times of the experiment, as well as the 
+        best performing steps.
 
         Args:
             experiment_id (str): The unique identifier for the experiment.
 
         Returns:
-            TrainingResult: An instance of TrainingResult containing aggregated metrics and outcomes from the experiment's training steps.
+            TrainingResult: An instance of TrainingResult containing aggregated 
+            metrics and outcomes from the experiment's training steps.
         """
         experiment_data = self._get_experiment_data(experiment_id)
 
@@ -146,7 +151,7 @@ class DataFetcher:
         tr.start_time = self.convert_firestore_timestamp(experiment_data.get("start_times", {}).get(result_type))
         tr.end_time = self.convert_firestore_timestamp(experiment_data.get("end_times", {}).get(result_type))
         best_steps = {}
-        
+
         phase_data = experiment_data.get("best_steps", {}).get(result_type, {})
         best_steps = {}
         for metric, metric_data in phase_data.items():
@@ -161,7 +166,7 @@ class DataFetcher:
             }
         tr.best_steps = best_steps
         return tr
-    
+
     def get_evaluation_result(self, experiment_id: str) -> TrainingResult:
         """
         Get the evaluation result for a given experiment.
@@ -186,9 +191,11 @@ class DataFetcher:
             experiment_id (str): The unique identifier for the experiment within the HPO run.
 
         Returns:
-            HPOStepResult: An instance of HPOStepResult representing the experiment step within the HPO run.
+            HPOStepResult: An instance of HPOStepResult representing the experiment step 
+            within the HPO run.
         """
-        # Assuming this method will utilize get_training_result to fetch associated training and evaluation results
+        # Assuming this method will utilize get_training_result to fetch
+        # associated training and evaluation results
         experiment_data = self._get_experiment_data(experiment_id)
         training_result = self.get_training_result(experiment_id)
         evaluation_result = self.get_evaluation_result(experiment_id)
@@ -214,29 +221,34 @@ class DataFetcher:
         """
         Retrieves the overall result of a specific hyperparameter optimization (HPO) run.
 
-        This method aggregates the results of individual experiments within an HPO run, and provides a comprehensive 
-        view of the HPO run, including start and end times, configuration settings, and the best-performing experiment.
+        This method aggregates the results of individual experiments within an HPO run, 
+        and provides a comprehensive view of the HPO run, including start and end times, 
+        configuration settings, and the best-performing experiment.
 
         Args:
             hpo_run_id (str): The unique identifier for the HPO run.
 
         Returns:
-            HPOResult: An instance of HPOResult containing aggregated results and configuration info from the HPO run.
+            HPOResult: An instance of HPOResult containing aggregated results 
+            and configuration info from the HPO run.
         """
         hpo_run_data = self._get_hpo_run_data(hpo_run_id)
 
-        configs = {conf_name: json.loads(conf_json) for conf_name, conf_json in hpo_run_data["configs"].items()}
+        configs = {
+            conf_name: json.loads(conf_json)
+            for conf_name, conf_json in hpo_run_data["configs"].items()
+            }
         hpo_result = HPOResult(configs=configs, id=hpo_run_id, name=hpo_run_data["name"])
 
         for experiment_id in hpo_run_data["runs"]:
             step_result = self.get_hpo_step_result(hpo_run_id, experiment_id)
             hpo_result.add_step(step_result)
-            
+
         hpo_result.best_run = self.get_hpo_step_result(hpo_run_id, hpo_run_data["best_run_id"])
         hpo_result.start_time = self.convert_firestore_timestamp(hpo_run_data["start_time"])
         hpo_result.end_time = self.convert_firestore_timestamp(hpo_run_data["end_time"])
         return hpo_result
-    
+
     def convert_firestore_timestamp(self, firestore_timestamp: DatetimeWithNanoseconds) -> datetime:
         """
         Converts a Firestore DatetimeWithNanoseconds object to a standard Python datetime object.

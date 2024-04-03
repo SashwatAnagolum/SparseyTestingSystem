@@ -1,12 +1,16 @@
+# -*- coding: utf-8 -*-
 """
 DataStorer: Saves data to Weights & Biases and the system database (Firestore)
 """
 import json
+import os
 import pickle
+import tempfile
 
 import firebase_admin
 from firebase_admin import firestore # firestore_async for async client
 import numpy as np
+import torch
 import wandb
 
 from sparseypy.core.results.training_result import TrainingResult
@@ -41,7 +45,11 @@ class DataStorer:
     @staticmethod
     def configure(ds_config: dict):
         """
-        Configures the DataStorer and initializes its database connection.
+        Configures the DataStorer by logging into Weights & Biases and
+        initializing its database connection.
+
+        Because all configuration is tracked inside firebase_admin and 
+        wandb, calling this method also configures the DataFetcher.
 
         Args:
             ds_config (dict): the validated system.yaml configuration
@@ -430,7 +438,8 @@ class DataStorer:
 
         Args:
             data: the value(s) to reduce
-
+        Returns:
+            a single value representing the averaged data
         """
         if isinstance(data, list):
             if len(data) == 0:
