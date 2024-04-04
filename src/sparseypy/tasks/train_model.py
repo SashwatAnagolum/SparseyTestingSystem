@@ -12,7 +12,7 @@ import warnings
 import wandb
 
 from sparseypy.access_objects.training_recipes.training_recipe_builder import TrainingRecipeBuilder
-from sparseypy.core.data_storage_retrieval import DataStorer
+from sparseypy.core.data_storage_retrieval import DataFetcher, DataStorer
 
 # Weights & Biases attempts to read tqdm updates from the console even after the last run
 # in an HPO sweep finishes, causing an unnecessary UserWarning when it attempts to log data
@@ -51,10 +51,19 @@ def train_model(model_config: dict, trainer_config: dict,
         allow_val_change=True
     )
 
+    reload_model = False
+
+    if isinstance(model_config, str):
+        model_config, model_weights = DataFetcher().get_model_data(model_config)
+        reload_model = True
+
     trainer = TrainingRecipeBuilder.build_training_recipe(
         model_config, dataset_config, preprocessing_config,
         trainer_config
     )
+
+    if reload_model:
+        trainer.model.load_state_dict(model_weights)
 
     # print training run summary
     met_separator = "\n* "

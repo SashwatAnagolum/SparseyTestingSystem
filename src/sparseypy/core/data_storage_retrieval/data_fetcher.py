@@ -74,7 +74,7 @@ class DataFetcher:
         hpo_run_ref = self.db.collection("hpo_runs").document(hpo_run_id)
         return hpo_run_ref.get().to_dict()
 
-    def get_model_weights(self, model_name: str) -> tuple[dict, dict]:
+    def get_model_data(self, model_name: str) -> tuple[dict, dict]:
         """
         Fetches configuration and model weights for a given model.
 
@@ -89,26 +89,24 @@ class DataFetcher:
         # model files larger than 1MB in Firestore
 
         # attempt to fetch the model directly from the registry
-        m_path = wandb.run.use_model(model_name)
+        # the model must be fetched as an artifact rather than using
+        # use_model() because use_model() does not support fetching
+        # from the model registry!
 
-        model_config = json.load(os.path.join(m_path, "network.yaml"))
-
+        # construct the artifact name by adding ":latest" if the user has not
+        # specified a version
+        artifact_name = model_name + ('' if ':' in model_name else ':latest')
+        # artifact path form: "<entity>/<project>/<artifact>"
+        artifact_path = f"{wandb.run.entity}/model-registry/{artifact_name}"
+        # fetch the artifact from W&B
+        m_path = wandb.run.use_artifact(artifact_path, type="model").download()
+        # read the model config from the downloaded artifact
+        with open(os.path.join(m_path, "network.yaml"), "r") as f:
+            model_config = json.load(f)
+        # also load the state dict
         state_dict = torch.load(os.path.join(m_path, "model.pt"))
 
         return model_config, state_dict
-
-        # fetch Firestore model registry entry
-        #registry_ref = self.db.collection("model_registry").document(model_name).get().to_dict()
-
-        # get the wandb_location for the correct model version
-
-        # use the wandb_location to retrieve the artifact
-
-        # fetch model config back from Firestore
-        # create Model object using model config
-        # fetch model state dict from W&B model registry
-        # reload state dict into model
-        # return Model object
 
     def get_training_step_result(self, experiment_id, step_index):
         """
