@@ -5,6 +5,7 @@ HPO Run: file holding the HPORun class.
 """
 
 from copy import deepcopy
+import json
 import traceback
 import warnings
 
@@ -58,11 +59,11 @@ class HPORun():
         self.num_trials = hpo_config['num_candidates']
         self.config_info = hpo_config
 
-        trainer_config = hpo_config['trainer']
+        #trainer_config = hpo_config['trainer']
 
         self.preprocessing_config = preprocessing_config
         self.dataset_config = dataset_config
-        self.training_recipe_config = trainer_config
+        #self.training_recipe_config = trainer_config
         self.system_config = system_config
 
         # BUG does this approach log things in an incorrect order for multithreaded runs?
@@ -70,12 +71,12 @@ class HPORun():
             'hpo_config': hpo_config,
             'sweep_config': self.sweep_config, # do we need to log this?
             'dataset_config': dataset_config,
-            'training_recipe_config': trainer_config,
+            #'training_recipe_config': trainer_config,
             'preprocessing_config': preprocessing_config
         }
 
         # create the DataStorer
-        self.data_storer = DataStorer(trainer_config['metrics'])
+        self.data_storer = DataStorer(hpo_config['metrics'])
 
         # create the HPOResult (also sets start time)
         self.hpo_results = HPOResult(logged_configs, self.sweep_id, hpo_config['hpo_run_name'])
@@ -198,7 +199,7 @@ class HPORun():
         for key, value in wandb_config.items():
             if 'layers_' in key:
                 layer_keys[key] = value
-            elif key != 'num_layers':
+            elif key != 'num_layers' and key != 'trainer':
                 model_config[key] = value
 
         for i in range(wandb_config['num_layers']):
@@ -207,6 +208,24 @@ class HPORun():
         model_config['layers'] = layers
 
         return model_config
+
+
+    def generate_trainer_config(self, wandb_config: dict) -> dict:
+        """
+        Generate the trainer configuration for the next run to be performed as part of the sweep.
+
+        Args:
+            wandb_config (dict): the Weights & Biases configuration for the current run in the sweep
+
+        Returns:
+            dict: the trainer configuration in the system format
+        """
+        # get the trainer hyperparameters from the W&B config
+        train_config = wandb_config["trainer"]
+        # inject the metric list from the HPO config to complete the trainer config
+        train_config["metrics"] = self.config_info["metrics"]
+
+        return train_config
 
 
     def step(self) -> None:
@@ -222,17 +241,28 @@ class HPORun():
             dict(wandb.config)
         )
 
-        validated_config = validate_config(
+        trainer_config = self.generate_trainer_config(
+            dict(wandb.config)
+        )
+
+        validated_model_config = validate_config(
             model_config, 'model', self.config_info['model_family'],
+            survive_with_exception=True,
+            print_error_stacktrace=self.system_config['print_error_stacktrace']
+        )
+
+        validated_trainer_config = validate_config(
+            trainer_config, 'training_recipe', 'sparsey',
             survive_with_exception=True,
             print_error_stacktrace=self.system_config['print_error_stacktrace']
         )
 
         try:
             training_recipe = TrainingRecipeBuilder.build_training_recipe(
-                validated_config, deepcopy(self.dataset_config),
-                deepcopy(self.preprocessing_config),
-                deepcopy(self.training_recipe_config)
+                model_config=validated_model_config,
+                dataset_config=deepcopy(self.dataset_config),
+                preprocessing_config=deepcopy(self.preprocessing_config),
+                train_config=validated_trainer_config
             )
 
             done = False
@@ -244,8 +274,8 @@ class HPORun():
                 configs={
                     'dataset_config': self.dataset_config,
                     'preprocessing_config': self.preprocessing_config,
-                    'training_recipe_config': self.training_recipe_config,
-                    'model_config': validated_config
+                    'training_recipe_config': validated_trainer_config,
+                    'model_config': validated_model_config
                 }
             )
 

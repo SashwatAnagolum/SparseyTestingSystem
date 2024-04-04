@@ -55,13 +55,13 @@ class TrainingRecipeBuilder:
             dataset_config['dataset_type'],
             **dataset_config['params']
         )
-        
+
         # if a preprocessed dataset then wrap the dataset
         if dataset_config['preprocessed'] is True:
             preprocessed_dataset_stack = PreprocessingStack(
                 dataset_config['preprocessed_stack']
             )
-           
+
             dataset = PreprocessedDataset(
                 dataset, preprocessed_dataset_stack,
                 dataset_config['preprocessed_temp_dir']
@@ -111,4 +111,3 @@ class TrainingRecipeBuilder:
             loss_func,
             train_config['training']['step_resolution']
         )
-

@@ -7,7 +7,7 @@ Sparsey Trainer Schema: the schema for Sparsey trainer config files.
 
 import typing
 
-from schema import Schema, Optional, And, Or
+from schema import Schema, Optional, And, Use
 
 from sparseypy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparseypy.cli.config_validation import schema_factory
@@ -45,14 +45,34 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
         return schema_factory.schema_exists_by_name(
             metric, 'metric', metric_name
         )
-        #try:
-        #    schema_factory.get_schema_by_name(
-        #        metric, 'metric', metric_name
-        #    )
-        #except ValueError:
-        #    return False
-        #
-        #return True
+
+
+    def validate_metrics_in_order(self, metrics: list, metric_schemas: list[Schema]) -> list:
+        """
+        Validates the metrics in the provided list in order to prevent
+        emitting exceptions.
+
+        Currently a bit hacky--if the validation fails then an exception
+        will be raised and this method will not return. Otherwise if you
+        reach the return statement all metrics validated successfully.
+
+        Returns:
+            (list): validated metric configuration.
+        """
+        Schema(
+            And(
+                list,
+                lambda x : len(x) > 0,
+                error="Metric list must exist and contain at least one entry."
+                )
+            ).validate(metrics)
+
+        validated = [
+            metric_schemas[i].validate(metrics[i])
+            for i in range(len(metrics))
+        ]
+
+        return validated
 
 
     def build_precheck_schema(self) -> Schema:
@@ -128,7 +148,7 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
             (dict): the transformed config info
         """
         config_info['optimizer']['params'] = dict()
-        
+
         return config_info
 
 
@@ -146,10 +166,9 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
         """
         config_schema = Schema({
             'optimizer': schema_params['optimizer_schema'],
-            'metrics': And(
-                list,
-                Schema(lambda x: len(x) > 0, error="At least one metric must be specified."),
-                [Or(*schema_params['metric_schemas'], error="Specified metric is not valid.")]
+            'metrics': Use(
+                lambda x: self.validate_metrics_in_order(x, schema_params['metric_schemas']),
+                error="Specified metric is not valid."
             ),
             'dataloader': {
                 'batch_size': And(int, schema_utils.is_positive, error="Batch size must be a positive integer."),
