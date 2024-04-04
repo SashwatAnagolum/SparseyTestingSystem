@@ -32,11 +32,9 @@ class DefaultPreprocessingStackSchema(AbstractSchema):
         Returns:
             (bool): whether the model famly exists or not
         """
-        if schema_factory.schema_exists_by_name(
+        if not schema_factory.schema_exists_by_name(
                 transform, 'transform', transform_name
             ):
-            return True
-        else:
             converted_transform_name = ''.join(
                 [word[:1].upper() + word[1:] for word in transform_name.split('_')]
             )
@@ -44,7 +42,7 @@ class DefaultPreprocessingStackSchema(AbstractSchema):
             if not hasattr(v2, converted_transform_name):
                 return False
 
-            return True
+        return True
 
 
     def build_precheck_schema(self) -> Schema:
