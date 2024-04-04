@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sparseypy.core.results package &#8212; Sparsey Testing System 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=61cf8be8"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="sparseypy-core-results-package">
+<h1>sparseypy.core.results package<a class="headerlink" href="#sparseypy-core-results-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-sparseypy.core.results.hpo_result">
+<span id="sparseypy-core-results-hpo-result-module"></span><h2>sparseypy.core.results.hpo_result module<a class="headerlink" href="#module-sparseypy.core.results.hpo_result" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.results.hpo_result.HPOResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.results.hpo_result.</span></span><span class="sig-name descname"><span class="pre">HPOResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.results.hpo_result.HPOResult" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.results.result.Result" title="sparseypy.core.results.result.Result"><code class="xref py py-class docutils literal notranslate"><span class="pre">Result</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.hpo_result.HPOResult.add_step">
+<span class="sig-name descname"><span class="pre">add_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sparseypy.core.results.hpo_step_result.HPOStepResult" title="sparseypy.core.results.hpo_step_result.HPOStepResult"><span class="pre">HPOStepResult</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.results.hpo_result.HPOResult.add_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.hpo_result.HPOResult.get_steps">
+<span class="sig-name descname"><span class="pre">get_steps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sparseypy.core.results.hpo_step_result.HPOStepResult" title="sparseypy.core.results.hpo_step_result.HPOStepResult"><span class="pre">HPOStepResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sparseypy.core.results.hpo_result.HPOResult.get_steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.hpo_result.HPOResult.get_top_k_steps">
+<span class="sig-name descname"><span class="pre">get_top_k_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sparseypy.core.results.hpo_step_result.HPOStepResult" title="sparseypy.core.results.hpo_step_result.HPOStepResult"><span class="pre">HPOStepResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sparseypy.core.results.hpo_result.HPOResult.get_top_k_steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.results.hpo_step_result">
+<span id="sparseypy-core-results-hpo-step-result-module"></span><h2>sparseypy.core.results.hpo_step_result module<a class="headerlink" href="#module-sparseypy.core.results.hpo_step_result" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.results.hpo_step_result.HPOStepResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.results.hpo_step_result.</span></span><span class="sig-name descname"><span class="pre">HPOStepResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_run</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.results.hpo_step_result.HPOStepResult" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.results.result.Result" title="sparseypy.core.results.result.Result"><code class="xref py py-class docutils literal notranslate"><span class="pre">Result</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.hpo_step_result.HPOStepResult.get_eval_results">
+<span class="sig-name descname"><span class="pre">get_eval_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sparseypy.core.results.training_result.TrainingResult" title="sparseypy.core.results.training_result.TrainingResult"><span class="pre">TrainingResult</span></a></span></span><a class="headerlink" href="#sparseypy.core.results.hpo_step_result.HPOStepResult.get_eval_results" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.hpo_step_result.HPOStepResult.get_objective">
+<span class="sig-name descname"><span class="pre">get_objective</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#sparseypy.core.results.hpo_step_result.HPOStepResult.get_objective" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.hpo_step_result.HPOStepResult.get_training_results">
+<span class="sig-name descname"><span class="pre">get_training_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sparseypy.core.results.training_result.TrainingResult" title="sparseypy.core.results.training_result.TrainingResult"><span class="pre">TrainingResult</span></a></span></span><a class="headerlink" href="#sparseypy.core.results.hpo_step_result.HPOStepResult.get_training_results" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.hpo_step_result.HPOStepResult.populate">
+<span class="sig-name descname"><span class="pre">populate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objective</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sparseypy.core.results.training_result.TrainingResult" title="sparseypy.core.results.training_result.TrainingResult"><span class="pre">TrainingResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sparseypy.core.results.training_result.TrainingResult" title="sparseypy.core.results.training_result.TrainingResult"><span class="pre">TrainingResult</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.results.hpo_step_result.HPOStepResult.populate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.results.result">
+<span id="sparseypy-core-results-result-module"></span><h2>sparseypy.core.results.result module<a class="headerlink" href="#module-sparseypy.core.results.result" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.results.result.Result">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.results.result.</span></span><span class="sig-name descname"><span class="pre">Result</span></span><a class="headerlink" href="#sparseypy.core.results.result.Result" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.result.Result.mark_finished">
+<span class="sig-name descname"><span class="pre">mark_finished</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.results.result.Result.mark_finished" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.results.training_result">
+<span id="sparseypy-core-results-training-result-module"></span><h2>sparseypy.core.results.training_result module<a class="headerlink" href="#module-sparseypy.core.results.training_result" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_result.TrainingResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.results.training_result.</span></span><span class="sig-name descname"><span class="pre">TrainingResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sparseypy.core.metrics.html#sparseypy.core.metrics.metrics.Metric" title="sparseypy.core.metrics.metrics.Metric"><span class="pre">Metric</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">configs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.results.training_result.TrainingResult" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.results.result.Result" title="sparseypy.core.results.result.Result"><code class="xref py py-class docutils literal notranslate"><span class="pre">Result</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_result.TrainingResult.add_config">
+<span class="sig-name descname"><span class="pre">add_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.results.training_result.TrainingResult.add_config" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_result.TrainingResult.add_step">
+<span class="sig-name descname"><span class="pre">add_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#sparseypy.core.results.training_step_result.TrainingStepResult" title="sparseypy.core.results.training_step_result.TrainingStepResult"><span class="pre">TrainingStepResult</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.results.training_result.TrainingResult.add_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_result.TrainingResult.get_best_step">
+<span class="sig-name descname"><span class="pre">get_best_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sparseypy.core.results.training_step_result.TrainingStepResult" title="sparseypy.core.results.training_step_result.TrainingStepResult"><span class="pre">TrainingStepResult</span></a></span></span><a class="headerlink" href="#sparseypy.core.results.training_result.TrainingResult.get_best_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_result.TrainingResult.get_configs">
+<span class="sig-name descname"><span class="pre">get_configs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#sparseypy.core.results.training_result.TrainingResult.get_configs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_result.TrainingResult.get_step">
+<span class="sig-name descname"><span class="pre">get_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sparseypy.core.results.training_step_result.TrainingStepResult" title="sparseypy.core.results.training_step_result.TrainingStepResult"><span class="pre">TrainingStepResult</span></a></span></span><a class="headerlink" href="#sparseypy.core.results.training_result.TrainingResult.get_step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_result.TrainingResult.get_steps">
+<span class="sig-name descname"><span class="pre">get_steps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sparseypy.core.results.training_step_result.TrainingStepResult" title="sparseypy.core.results.training_step_result.TrainingStepResult"><span class="pre">TrainingStepResult</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sparseypy.core.results.training_result.TrainingResult.get_steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.results.training_step_result">
+<span id="sparseypy-core-results-training-step-result-module"></span><h2>sparseypy.core.results.training_step_result module<a class="headerlink" href="#module-sparseypy.core.results.training_step_result" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_step_result.TrainingStepResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.results.training_step_result.</span></span><span class="sig-name descname"><span class="pre">TrainingStepResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.results.training_step_result.TrainingStepResult" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.results.result.Result" title="sparseypy.core.results.result.Result"><code class="xref py py-class docutils literal notranslate"><span class="pre">Result</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_step_result.TrainingStepResult.add_metric">
+<span class="sig-name descname"><span class="pre">add_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.results.training_step_result.TrainingStepResult.add_metric" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_step_result.TrainingStepResult.get_metric">
+<span class="sig-name descname"><span class="pre">get_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#sparseypy.core.results.training_step_result.TrainingStepResult.get_metric" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.results.training_step_result.TrainingStepResult.get_metrics">
+<span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#sparseypy.core.results.training_step_result.TrainingStepResult.get_metrics" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.results">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sparseypy.core.results" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Sparsey Testing System</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Sashwat Anagolum, JD Padrnos, Andrew Klawa, Christopher Pereira.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/sparseypy.core.results.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
