@@ -78,7 +78,8 @@ class TestSparseyModelConfigs:
 
         with pytest.raises(SchemaError):
              validate_config(
-                sparsey_model_schema, 'model', 'sparsey'
+                sparsey_model_schema, 'model', 'sparsey',
+                survive_with_exception=True
             )
 
 
@@ -100,7 +101,8 @@ class TestSparseyModelConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_model_schema, 'model', 'sparsey'
+                sparsey_model_schema, 'model', 'sparsey',
+                survive_with_exception=True
             )
 
 
@@ -124,7 +126,8 @@ class TestSparseyModelConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_model_schema, 'model', 'sparsey'
+                sparsey_model_schema, 'model', 'sparsey',
+                survive_with_exception=True
             )
 
 
@@ -172,7 +175,8 @@ class TestSparseyModelConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_model_schema, 'model', 'sparsey'
+                sparsey_model_schema, 'model', 'sparsey',
+                survive_with_exception=True
             )
 
 
@@ -195,5 +199,6 @@ class TestSparseyModelConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_model_schema, 'model', 'sparsey'
+                sparsey_model_schema, 'model', 'sparsey',
+                survive_with_exception=True
             )

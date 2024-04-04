@@ -78,7 +78,8 @@ class TestDefaultHPOConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                default_hpo_schema, 'hpo', 'default'
+                default_hpo_schema, 'hpo', 'default',
+                survive_with_exception=True
             )
 
 
@@ -100,7 +101,8 @@ class TestDefaultHPOConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                default_hpo_schema, 'hpo', 'default'
+                default_hpo_schema, 'hpo', 'default',
+                survive_with_exception=True
             )
 
 
@@ -122,7 +124,8 @@ class TestDefaultHPOConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                default_hpo_schema, 'hpo', 'default'
+                default_hpo_schema, 'hpo', 'default',
+                survive_with_exception=True
             )
 
 
@@ -144,5 +147,6 @@ class TestDefaultHPOConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                default_hpo_schema, 'hpo', 'default'
+                default_hpo_schema, 'hpo', 'default',
+                survive_with_exception=True
             )
