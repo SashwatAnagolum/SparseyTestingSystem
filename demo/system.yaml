@@ -60,7 +60,14 @@ database:
       # data_resolution: int - the level of data to log back to Firestore, default 0 ("nothing")
       # 0 = nothing, 1 = only summary data, 2 = every step
       # to log data back to Firestore you need to raise this value
-      data_resolution: 0
+      data_resolution: 2
+      # save_models: bool, default False - whether to save model weights to Firestore
+      #     Firestore is limited to 1 MiB per document so if you turn this on you
+      #     may encounter issues! this setting comes with absolutely no warranty,
+      #     express or implied
+      #     (note that models are still saved to W&B and model *summary* data is still
+      #     saved regardless of this setting)
+      save_models: False
     # - name: dynamodb
     #   sso_profile: $AWS_SSO_PROFILE
     # - name: mongo

@@ -115,41 +115,45 @@ class DataStorer:
             wandb.run.link_artifact(model_artifact, f"model-registry/{model_name}")
 
             # FIRESTORE
+            if self.firestore_resolution > 0:
+                # update "model registry" table (named versions of models)
+                registry_ref = self.db.collection("model_registry").document(model_name)
 
-            # update "model registry" table (named versions of models)
-            registry_ref = self.db.collection("model_registry").document(model_name)
+                if registry_ref.get().exists:
+                    registry_ref.update(
+                        {
+                            "last_updated": datetime.now(),
+                            "versions": firestore.ArrayUnion([instance_name])
+                        }
+                    )
+                else:
+                    registry_ref.set(
+                        {
+                            "last_updated": datetime.now(),
+                            "versions": [
+                                    {
+                                        "id": instance_name,
+                                        "wandb_location": model_artifact.source_qualified_name
+                                    }
+                                ]
+                        }
+                    )
 
-            if registry_ref.get().exists:
-                registry_ref.update(
-                    {
-                        "last_updated": datetime.now(),
-                        "versions": firestore.ArrayUnion([instance_name])
+                # update "models" table (individual model instances/versions)
+                model_ref = self.db.collection("models").document(instance_name)
+
+                model_entry = {
+                        'registry_name': model_name,
+                        'config': model_config,
+                        'wandb_location': model_artifact.source_qualified_name
                     }
-                )
-            else:
-                registry_ref.set(
-                    {
-                        "last_updated": datetime.now(),
-                        "versions": [
-                                {
-                                    "id": instance_name,
-                                    "wandb_location": model_artifact.source_qualified_name
-                                }
-                            ]
-                    }
-                )
 
-            # update "models" table (individual model instances/versions)
-            model_ref = self.db.collection("models").document(instance_name)
+                if DataStorer.firestore_config["save_models"]:
+                    model_entry['trained_weights'] = pickle.dumps(m.state_dict()),
 
-            model_ref.set(
-                {
-                    'registry_name': model_name,
-                    'config': model_config,
-                    'trained_weights': pickle.dumps(m.state_dict()),
-                    'wandb_location': model_artifact.source_qualified_name
-                }
-            )
+                model_ref.set(
+                    model_entry
+                )
 
     def save_training_step(self, parent: str, result: TrainingStepResult):
         """
