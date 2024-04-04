@@ -193,6 +193,8 @@ class SparseyModelSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
+                Optional('model_name', default=None): And(str, error="Model name must be a string"),
+                Optional('model_description', default=None): And(str, error="Model description must be a string"),
                 'input_dimensions': {
                     'width': And(int, schema_utils.is_positive, error="Width must be a positive integer"),
                     'height': And(int, schema_utils.is_positive, error="Height must be a positive integer")

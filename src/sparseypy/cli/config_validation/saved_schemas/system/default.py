@@ -52,14 +52,9 @@ class DefaultSystemSchema(AbstractSchema):
         Returns:
             (bool): whether the database adapter exists or not.
         """
-        try:
-            schema_factory.get_schema_by_name(
+        return schema_factory.schema_exists_by_name(
                 db_adapter, 'db_adapter', db_adapter_name
             )
-        except ValueError:
-            return False
-
-        return True
 
 
     def extract_schema_params(self, config_info: dict) -> dict:
@@ -99,7 +94,7 @@ class DefaultSystemSchema(AbstractSchema):
         the name of an environment variable (with $ prefix) or a value.
 
         Args:
-            env_name (string): the value or environment variable name
+            env_name (str): the value or environment variable name
 
         Returns:
             the value or a Use that can be used to validate the value

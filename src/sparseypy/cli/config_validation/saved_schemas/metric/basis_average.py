@@ -7,7 +7,7 @@ Basis Average: file holding the BasisAverageMetricSchema class.
 
 import typing
 
-from schema import Schema, And, Optional, Or, Use
+from schema import Schema, And, Optional, Or, Use, Const
 
 from sparseypy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparseypy.core.metrics.metric_factory import MetricFactory
@@ -30,14 +30,14 @@ class BasisAverageMetricSchema(AbstractSchema):
             {
                 'name': And(str, lambda n: n == 'basis_average', error="name must be 'basis_average'"),
                 Optional('save', default=False): And(bool, error="save must be a boolean value"),
-                Optional('reduction', default=None): Or(
+                Optional('reduction', default='none'): Or(
                     'sparse', None, 'none', 'highest_layer',
                     error="Reduction must be one of 'sparse'"
                         ", 'none', or 'highest_layer'"
                 ),
                 Optional('best_value', default='max_by_layerwise_mean'): Schema(
                     And(
-                        Use(MetricFactory.is_valid_comparision), True
+                        Const(Use(MetricFactory.is_valid_comparision), True)
                     ), error="best_value must be the name of a valid comparison function from comparisons.py"
                 )
             },

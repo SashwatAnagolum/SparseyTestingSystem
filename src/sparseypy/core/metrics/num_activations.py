@@ -97,7 +97,7 @@ class NumActivationsMetric(Metric):
         elif self.reduction == 'layerwise_mean':
             return [
                 sum(layer_activations) / len(layer_activations)
-                for layer_activations in self.num_activations    
+                for layer_activations in self.num_activations
             ]
         elif self.reduction == 'sum':
             return sum(
@@ -106,6 +106,8 @@ class NumActivationsMetric(Metric):
                     in self.num_activations
                 ]
             )
+        elif self.reduction == 'highest_layer':
+            return list(self.num_activations[-1])
         else:
             return sum(
                 [

@@ -30,14 +30,9 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
         Returns:
             (bool): whether the optimizer exists or not.
         """
-        try:
-            schema_factory.get_schema_by_name(
-                optimizer, 'optimizer', optimizer_name
-            )
-        except ValueError:
-            return False
-
-        return True
+        return schema_factory.schema_exists_by_name(
+                    optimizer, 'optimizer', optimizer_name
+                )
 
 
     def check_if_metric_exists(self, metric_name) -> bool:

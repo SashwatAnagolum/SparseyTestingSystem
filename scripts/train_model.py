@@ -59,48 +59,57 @@ def main():
 
     load_dotenv()
 
-    system_config_info = get_config_info(args.system_config)
-    try:
-        print_error_stacktrace = system_config_info['print_error_stacktrace']
-    except Exception as e:
-        print_error_stacktrace = False
-    validated_system_config = validate_config(
-        system_config_info, 'system', 'default', print_error_stacktrace=print_error_stacktrace
+    system_config_info = get_config_info(
+        args.system_config
     )
 
-    model_config_info = get_config_info(args.model_config)
-    validated_config = validate_config(
-        model_config_info, 'model', 'sparsey', print_error_stacktrace=print_error_stacktrace
+    model_config_info = get_config_info(
+        args.model_config
     )
 
     training_recipe_config_info = get_config_info(
         args.training_recipe_config
     )
 
-    validated_trainer_config = validate_config(
-        training_recipe_config_info, 'training_recipe', 'sparsey', print_error_stacktrace=print_error_stacktrace
-    )
-
     preprocessing_config_info = get_config_info(
         args.preprocessing_config
     )
 
-    validated_preprocessing_config = validate_config(
-        preprocessing_config_info, 'preprocessing_stack', 'default', print_error_stacktrace=print_error_stacktrace
-    )
-    
     dataset_config_info = get_config_info(
         args.dataset_config
     )
 
-    validated_dataset_config = validate_config( # needs updating to support different dataset types
-        dataset_config_info, 'dataset', dataset_config_info['dataset_type'], print_error_stacktrace=print_error_stacktrace
+    print_error_stacktrace = system_config_info.get("print_error_stacktrace", False)
+
+    validated_system_config = validate_config(
+        system_config_info, 'system', 'default',
+        print_error_stacktrace=print_error_stacktrace
+    )
+
+    validated_model_config = validate_config(
+        model_config_info, 'model', 'sparsey',
+        print_error_stacktrace=print_error_stacktrace
+    )
+
+    validated_trainer_config = validate_config(
+        training_recipe_config_info, 'training_recipe', 'sparsey',
+        print_error_stacktrace=print_error_stacktrace
+    )
+
+    validated_preprocessing_config = validate_config(
+        preprocessing_config_info, 'preprocessing_stack', 'default',
+        print_error_stacktrace=print_error_stacktrace
+    )
+
+    validated_dataset_config = validate_config(
+        dataset_config_info, 'dataset', dataset_config_info['dataset_type'],
+        print_error_stacktrace=print_error_stacktrace
     )
 
     train_model(
-        model_config=validated_config,
+        model_config=validated_model_config,
         trainer_config=validated_trainer_config,
-        preprocessing_config=preprocessing_config_info,
+        preprocessing_config=validated_preprocessing_config,
         dataset_config=validated_dataset_config,
         system_config=validated_system_config
     )

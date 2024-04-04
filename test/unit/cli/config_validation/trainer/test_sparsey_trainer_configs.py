@@ -54,7 +54,8 @@ class TestSparseyTrainerConfigs:
         Test case ID: TC-01-03
         """
         validated_config = validate_config(
-            sparsey_trainer_schema, 'training_recipe', 'sparsey'
+            sparsey_trainer_schema, 'training_recipe', 'sparsey',
+            survive_with_exception=True
         )
 
         assert isinstance(validated_config, dict)
@@ -77,7 +78,8 @@ class TestSparseyTrainerConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+                sparsey_trainer_schema, 'training_recipe', 'sparsey',
+                survive_with_exception=True
             )
 
 
@@ -98,7 +100,8 @@ class TestSparseyTrainerConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+                sparsey_trainer_schema, 'training_recipe', 'sparsey',
+                survive_with_exception=True
             )
 
 
@@ -117,7 +120,8 @@ class TestSparseyTrainerConfigs:
         sparsey_trainer_schema['dataloader']['batch_size'] = 1
 
         validated_config = validate_config(
-            sparsey_trainer_schema, 'training_recipe', 'sparsey'
+            sparsey_trainer_schema, 'training_recipe', 'sparsey',
+            survive_with_exception=True
         )
 
         assert isinstance(validated_config, dict)
@@ -139,7 +143,8 @@ class TestSparseyTrainerConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+                sparsey_trainer_schema, 'training_recipe', 'sparsey',
+                survive_with_exception=True
             )
 
 
@@ -158,7 +163,8 @@ class TestSparseyTrainerConfigs:
         sparsey_trainer_schema['training']['num_epochs'] = 1
 
         validated_config = validate_config(
-            sparsey_trainer_schema, 'training_recipe', 'sparsey'
+            sparsey_trainer_schema, 'training_recipe', 'sparsey',
+            survive_with_exception=True
         )
 
         assert isinstance(validated_config, dict)
@@ -180,7 +186,8 @@ class TestSparseyTrainerConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+                sparsey_trainer_schema, 'training_recipe', 'sparsey',
+                survive_with_exception=True
             )
 
 
@@ -199,7 +206,8 @@ class TestSparseyTrainerConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+                sparsey_trainer_schema, 'training_recipe', 'sparsey',
+                survive_with_exception=True
             )
 
 
@@ -220,5 +228,6 @@ class TestSparseyTrainerConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_trainer_schema, 'training_recipe', 'sparsey'
+                sparsey_trainer_schema, 'training_recipe', 'sparsey',
+                survive_with_exception=True
             )
