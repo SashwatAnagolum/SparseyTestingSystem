@@ -25,8 +25,13 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--model_config', type=str,
-        help='The location of the model config file.'
+        '--model_config', type=str, required=False,
+        help='The location of the model config file. Mutually exclusive with --model_name.'
+    )
+
+    parser.add_argument(
+        '--model_name', type=str, required=False,
+        help='The name of the online model to use. Mutually exclusive with --model_config.'
     )
 
     parser.add_argument(
@@ -57,14 +62,15 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
 
+    if args.model_config and args.model_name:
+        raise ValueError("You can only provide one of --model_config and --model_name.")
+    elif not args.model_config and not args.model_name:
+        raise ValueError("You must provide either --model_name or --model_config.")
+
     load_dotenv()
 
     system_config_info = get_config_info(
         args.system_config
-    )
-
-    model_config_info = get_config_info(
-        args.model_config
     )
 
     training_recipe_config_info = get_config_info(
@@ -86,11 +92,6 @@ def main():
         print_error_stacktrace=print_error_stacktrace
     )
 
-    validated_model_config = validate_config(
-        model_config_info, 'model', 'sparsey',
-        print_error_stacktrace=print_error_stacktrace
-    )
-
     validated_trainer_config = validate_config(
         training_recipe_config_info, 'training_recipe', 'sparsey',
         print_error_stacktrace=print_error_stacktrace
@@ -106,8 +107,20 @@ def main():
         print_error_stacktrace=print_error_stacktrace
     )
 
+    if args.model_config:
+        model_config_info = get_config_info(
+            args.model_config
+        )
+
+        model_data = validate_config(
+            model_config_info, 'model', 'sparsey',
+            print_error_stacktrace=print_error_stacktrace
+        )
+    else:
+        model_data = args.model_name
+
     train_model(
-        model_config=validated_model_config,
+        model_config=model_data,
         trainer_config=validated_trainer_config,
         preprocessing_config=validated_preprocessing_config,
         dataset_config=validated_dataset_config,
