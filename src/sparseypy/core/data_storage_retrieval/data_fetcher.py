@@ -5,10 +5,13 @@ DataFetcher: Fetches data from weights and biases and the database (firestore)
 from datetime import datetime
 from functools import lru_cache
 import json
+import os
 import pickle
+import torch
 
 from firebase_admin import firestore
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
+import wandb
 
 from sparseypy.core.metrics import comparisons
 from sparseypy.core.results.hpo_result import HPOResult
@@ -71,22 +74,41 @@ class DataFetcher:
         hpo_run_ref = self.db.collection("hpo_runs").document(hpo_run_id)
         return hpo_run_ref.get().to_dict()
 
-    def get_model_weights(self, model_id: str) -> dict:
+    def get_model_weights(self, model_name: str) -> tuple[dict, dict]:
         """
-        Fetches model weights for a given model ID.
+        Fetches configuration and model weights for a given model.
 
         Args:
-            model_id (str): A unique identifier for the model.
+            model_name (str): A unique identifier for the model.
 
         Returns:
-            dict: A dictionary of model weights.
+            dict: The contents of network.yaml for the model.
+            dict: The state_dict containing the model weights.
         """
+        # this uses WEIGHTS & BIASES to avoid problems with
+        # model files larger than 1MB in Firestore
+
+        # attempt to fetch the model directly from the registry
+        m_path = wandb.run.use_model(model_name)
+
+        model_config = json.load(os.path.join(m_path, "network.yaml"))
+
+        state_dict = torch.load(os.path.join(m_path, "model.pt"))
+
+        return model_config, state_dict
+
+        # fetch Firestore model registry entry
+        #registry_ref = self.db.collection("model_registry").document(model_name).get().to_dict()
+
+        # get the wandb_location for the correct model version
+
+        # use the wandb_location to retrieve the artifact
+
         # fetch model config back from Firestore
         # create Model object using model config
         # fetch model state dict from W&B model registry
         # reload state dict into model
         # return Model object
-        pass
 
     def get_training_step_result(self, experiment_id, step_index):
         """
@@ -200,8 +222,6 @@ class DataFetcher:
         training_result = self.get_training_result(experiment_id)
         evaluation_result = self.get_evaluation_result(experiment_id)
         hpo_run_data = self._get_hpo_run_data(hpo_run_id)
-        # TODO Populate model configs
-        # TODO Check if the configs will be stored in experiments
         hpo_step_result = HPOStepResult(
             parent_run=hpo_run_id,
             id=experiment_id,
