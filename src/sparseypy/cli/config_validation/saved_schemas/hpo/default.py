@@ -120,14 +120,9 @@ class DefaultHpoSchema(AbstractSchema):
         Returns:
             (bool): whether the model family exists or not
         """
-        try:
-            schema_factory.get_schema_by_name(
+        return schema_factory.schema_exists_by_name(
                 model, 'model', model_family
             )
-        except ValueError:
-            return False
-
-        return True
 
 
     def check_if_metric_exists(self, metric_name) -> bool:
@@ -137,14 +132,9 @@ class DefaultHpoSchema(AbstractSchema):
         Returns:
             (bool): whether the metric exists or not.
         """
-        try:
-            schema_factory.get_schema_by_name(
+        return schema_factory.schema_exists_by_name(
                 metric, 'metric', metric_name
             )
-        except ValueError:
-            return False
-
-        return True
 
 
     def check_optimized_hyperparams_validity(self, config_info):
