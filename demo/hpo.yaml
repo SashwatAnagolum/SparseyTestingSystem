@@ -48,6 +48,35 @@ hyperparameters:
   num_layers:
     value: 4
 
+  # the trainer section defines the training-related hyperparameters of the Sparsey model
+  trainer:
+  # optimizer settings
+    optimizer:
+      # name: string - the optimizer class to load and use
+      #    for Sparsey models you should always use "hebbian"
+      name: 
+        value: hebbian
+
+    # dataloader: controls the dataloader parameters to use
+    dataloader:
+      # batch_size: int > 0
+      #    number of input items per batch
+      batch_size: 
+        value: 1
+      # shuffle: bool
+      #    whether to randomize the inputs as they are drawn from the dataloader
+      shuffle: 
+        value: True
+
+    # training: directly training-related hyperparameters
+    training:
+      # num_epochs: int > 0
+      #     number of epochs to train for
+      #     for Sparsey single-shot learning this will always be 1
+      #     but the setting exists for potential future compatibility
+      num_epochs: 
+        value: 1
+
   # the layers section defines the properties of individual layers in the Sparey model
   #     each entry in its list is a new layer, in order from the bottom of the model to the top
   #     each layer has a name and a list of parameters
@@ -136,7 +165,7 @@ hyperparameters:
         autosize_grid:
           value: True
         num_neurons_per_cm:
-          value: 2
+          value: 5
         num_macs:
           values: [4, 9]
         num_cms_per_mac:
@@ -172,7 +201,7 @@ hyperparameters:
         autosize_grid:
           value: True
         num_neurons_per_cm:
-          value: 2
+          value: 5
         num_macs:
           values: [4, 9]
         num_cms_per_mac:
@@ -210,7 +239,7 @@ hyperparameters:
         num_cms_per_mac:
           value: 2
         num_neurons_per_cm:
-          value: 2
+          value: 5
         num_macs:
           values: [4, 9]
         mac_receptive_field_radius:
@@ -246,7 +275,7 @@ hyperparameters:
         num_cms_per_mac:
           value: 2
         num_neurons_per_cm:
-          value: 2
+          value: 5
         num_macs:
           value: 4
         mac_receptive_field_radius:
@@ -303,43 +332,32 @@ optimization_objective:
 # the number of candidate models to try/steps of HPO to perform 
 num_candidates: 10
 
+# metrics: the list of metrics to compute for HPO
+#     this is equivalent to the "metrics" key in the training_recipe
+#     one list entry for each metric:
+#     * name: the name of the metric (can be any metric supported by the system)
+#     * save: whether to save the values of the metric to Weights & Biases for later review
+#     * reduction (optional, must be supported by the metric): the method to use to reduce the granularity of the metric
+#     * params (if supported by metric): additional parameters related to the metric, as defined in its schema
+metrics:
+  - name: feature_coverage
+    reduction: none
+    save: True
 
+  - name: match_accuracy
+    save: True
 
-trainer:
-  # metrics: the list of metrics to compute for HPO
-  # this is equivalent to the "metrics" key in the training_recipe
-  # one list entry for each metric:
-  # * name: the name of the metric (can be any metric supported by the system)
-  # * save: whether to save the values of the metric to Weights & Biases for later review
-  # * reduction (optional, must be supported by the metric): the method to use to reduce the granularity of the metric
-  # * params (if supported by metric): additional parameters related to the metric, as defined in its schema
-  metrics:
-    - name: feature_coverage
-      save: True
+  - name: basis_set_size
+    save: True
 
-    - name: match_accuracy
-      save: True
+  - name: basis_set_size_increase
+    save: True
 
-  # optimizer settings
-  optimizer:
-    # name: string - the optimizer class to load and use
-    #    for Sparsey models you should always use "hebbian"
-    name: hebbian
+  #- name: basis_average
+  #  save: True
 
-  # dataloader: controls the dataloader parameters to use
-  dataloader:
-    # batch_size: int > 0
-    #    number of input items per batch
-    batch_size: 1
-    # shuffle: bool
-    #    whether to randomize the inputs as they are drawn from the dataloader
-    shuffle: True
+  - name: num_activations
+    reduction: none
+    save: True
 
-  # training: training-related hyperparameters
-  training:
-    # num_epochs: int > 0
-    #     number of epochs to train for
-    #     for Sparsey single-shot learning this will always be 1
-    #     but the setting exists for potential future compatibility
-    num_epochs: 1
 ...

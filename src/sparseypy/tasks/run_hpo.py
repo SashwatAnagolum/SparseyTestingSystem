@@ -62,7 +62,7 @@ Optimization strategy: {hpo_config['hpo_strategy']}
 Number of runs: {hpo_config['num_candidates']}
 
 Selected metrics: 
-* {met_separator.join([x["name"] for x in hpo_config["trainer"]["metrics"]])}
+* {met_separator.join([x["name"] for x in hpo_config["metrics"]])}
 
 Objective calculation: {hpo_config['optimization_objective']['combination_method']} of
 * {met_separator.join(obj_vals)}

@@ -122,6 +122,7 @@ class DefaultSystemSchema(AbstractSchema):
                         Optional('api_key', default="WANDB_API_KEY"): And(Use(os.getenv), str, error="Invalid Weights and Biases API key"),
                         'project_name': Schema(str, error="Project name must be a string"),
                         Optional('save_locally', default=True): Schema(bool, error="save_locally must be a boolean value"),
+                        Optional('save_models', default=True): Schema(bool, error="save_models must be a Boolean value"),
                         Optional('data_resolution', default=2): And(int, lambda x : 0 <= x <= 2, error="data_resolution must be 0, 1, or 2")
                     },
                     error="Error in wandb configuration"),

@@ -151,6 +151,11 @@ class TrainingRecipe:
         if phase == "training":
             self.training_results.mark_finished()
             self.ds.save_training_result(self.training_results)
+            self.ds.save_model(
+                experiment=wandb.run.id,
+                m=self.model,
+                model_config=self.setup_configs["model_config"]
+            )
             return self.training_results
         else:
             self.eval_results.mark_finished()

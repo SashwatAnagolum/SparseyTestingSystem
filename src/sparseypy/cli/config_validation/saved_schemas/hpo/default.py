@@ -5,8 +5,6 @@ Default HPO Schema: the schema for HPO runs.
 """
 
 
-import typing
-
 from schema import Schema, And, Or, Use
 
 from sparseypy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
@@ -36,7 +34,7 @@ class DefaultHpoSchema(AbstractSchema):
         return Schema(
             {
                 'hyperparameters': {
-                    'num_layers': self.check_optimized_hyperparams_validity
+                    'num_layers': self.check_optimized_hyperparams_validity,
                 },
                 'optimization_objective': {
                     'objective_terms': [
@@ -47,13 +45,11 @@ class DefaultHpoSchema(AbstractSchema):
                         }
                     ]
                 },
-                'trainer': {
-                    'metrics': [
+                'metrics': [
                         {
                             'name': self.check_if_metric_exists
                         }
                     ]
-                }
             }, ignore_extra_keys=True
         )
 
@@ -72,6 +68,26 @@ class DefaultHpoSchema(AbstractSchema):
             return num_layers_info['max']
         else:
             return max(num_layers_info['values'])
+
+
+    def validate_metrics_in_order(self, metrics: list, metric_schemas: list[Schema]) -> list:
+        """
+        Validates the metrics in the provided list in order to prevent
+        emitting exceptions.
+
+        Currently a bit hacky--if the validation fails then an exception
+        will be raised and this method will not return. Otherwise if you
+        reach the return statement all metrics validated successfully.
+
+        Returns:
+            (list): validated metric configuration.
+        """
+        validated = [
+            metric_schemas[i].validate(metrics[i])
+            for i in range(len(metrics))
+        ]
+
+        return validated
 
 
     def extract_schema_params(self, config_info: dict) -> dict:
@@ -95,7 +111,7 @@ class DefaultHpoSchema(AbstractSchema):
             config_info['hyperparameters']['num_layers']
         )
 
-        for metric_info in config_info['trainer']['metrics']:
+        for metric_info in config_info['metrics']:
             schema_params['metric_schemas'].append(
                 schema_factory.get_schema_by_name(
                     metric, 'metric', metric_info['name']
@@ -105,10 +121,6 @@ class DefaultHpoSchema(AbstractSchema):
             schema_params['computed_metrics'].append(
                 metric_info['name']
             )
-
-        schema_params['trainer'] = schema_factory.get_schema_by_name(
-            training_recipe, 'training_recipe', 'sparsey'
-        )
 
         return schema_params
 
@@ -269,11 +281,10 @@ class DefaultHpoSchema(AbstractSchema):
                     ],
                     'combination_method': Or('sum', error="Invalid combination method")
                 },
-                #'metrics': [Or(*schema_params['metric_schemas'], error="Invalid metric schema")],
+                'metrics': Use(lambda x: self.validate_metrics_in_order(x, schema_params['metric_schemas'],),
+                                    error="Specified metric is not valid."),
                 'num_candidates': And(int, schema_utils.is_positive, error="Number of candidates must be a positive integer"),
                 'verbosity': And(int, error="Verbosity must be an integer"),
-                #**sparsey_config_schema.schema
-                'trainer': schema_params['trainer']
             },
             error="Invalid HPO configuration"
         )
