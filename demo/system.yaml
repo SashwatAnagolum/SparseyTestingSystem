@@ -20,6 +20,9 @@ wandb:
   #     implementing this requires deleting folders on the host machine because W&B doesn't do it for you
   #     https://github.com/wandb/wandb/issues/3564 so I want more testing first
   save_locally: True
+  # save_models: bool, default True - whether to save trained models to Weights & Biases
+  #     THIS FEATURE IS A WORK IN PROGRESS and you should disable it if you have issues
+  save_models: True
   # data_resolution: int 0 "model" (one value per training input), 1 "layer", or 2 "mac", default 2 "mac" 
   #     the granularity of data to log to W&B
   #     each level includes the previous one (e.g. "mac" will log both data for individual MACs 
@@ -57,10 +60,20 @@ database:
       # data_resolution: int - the level of data to log back to Firestore, default 0 ("nothing")
       # 0 = nothing, 1 = only summary data, 2 = every step
       # to log data back to Firestore you need to raise this value
-      data_resolution: 0
+      data_resolution: 2
+      # save_models: bool, default False - whether to save model weights to Firestore
+      #     Firestore is limited to 1 MiB per document so if you turn this on you
+      #     may encounter issues! this setting comes with absolutely no warranty,
+      #     express or implied
+      #     (note that models are still saved to W&B and model *summary* data is still
+      #     saved regardless of this setting)
+      save_models: False
     # - name: dynamodb
     #   sso_profile: $AWS_SSO_PROFILE
     # - name: mongo
     #   connection_string: $MONGO_CONNECTION_STRING
 
+# whether to print error stack traces when they occur for schema validation errors
+# print_error_stacktrace: True
+print_error_stacktrace: False
 ...

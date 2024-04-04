@@ -5,9 +5,9 @@ Model Builder: code for the Model Builder class.
 """
 
 
-from sparseypy.core.model_layers.layer_factory import LayerFactory
 from sparseypy.access_objects.models.model import Model
 from sparseypy.core.hooks.hook_factory import HookFactory
+from sparseypy.core.model_layers.layer_factory import LayerFactory
 
 
 class ModelBuilder:
@@ -30,7 +30,7 @@ class ModelBuilder:
 
         for (layer_index, layer_config) in enumerate(model_config['layers']):
             layer_config['params']['layer_index'] = layer_index
-            
+
             new_layer = LayerFactory.create_layer(
                 layer_config['name'], **layer_config['params']
             )
@@ -40,5 +40,21 @@ class ModelBuilder:
         if 'hooks' in model_config:
             for hook_config in model_config['hooks']:
                 hook = HookFactory.create_hook(hook_config['name'], model)
+
+        return model
+
+    @staticmethod
+    def rehydrate_model(model_config: dict, state_dict: str):
+        """
+        Builds a model layer by layer and then reloads its state
+        from an existing state dictionary at the provided path.
+
+        Args:
+            model_config (str): information about the structure
+                of the model and its layers.
+            state_dict (str): the model state dictionary to reload.
+        """
+        model = ModelBuilder.build_model(model_config)
+        model.load_state_dict(state_dict)
 
         return model

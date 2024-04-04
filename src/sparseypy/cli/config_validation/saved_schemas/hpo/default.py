@@ -5,15 +5,15 @@ Default HPO Schema: the schema for HPO runs.
 """
 
 
-import typing
-
-from schema import Schema, And, Or
+from schema import Schema, And, Or, Use
 
 from sparseypy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparseypy.cli.config_validation import schema_factory
 from sparseypy.cli.config_validation.saved_schemas import (
     model, schema_utils, metric
 )
+
+from sparseypy.cli.config_validation.saved_schemas import training_recipe
 
 
 class DefaultHpoSchema(AbstractSchema):
@@ -34,7 +34,7 @@ class DefaultHpoSchema(AbstractSchema):
         return Schema(
             {
                 'hyperparameters': {
-                    'num_layers': self.check_optimized_hyperparams_validity
+                    'num_layers': self.check_optimized_hyperparams_validity,
                 },
                 'optimization_objective': {
                     'objective_terms': [
@@ -46,10 +46,10 @@ class DefaultHpoSchema(AbstractSchema):
                     ]
                 },
                 'metrics': [
-                    {
-                        'name': self.check_if_metric_exists
-                    }
-                ]
+                        {
+                            'name': self.check_if_metric_exists
+                        }
+                    ]
             }, ignore_extra_keys=True
         )
 
@@ -68,6 +68,26 @@ class DefaultHpoSchema(AbstractSchema):
             return num_layers_info['max']
         else:
             return max(num_layers_info['values'])
+
+
+    def validate_metrics_in_order(self, metrics: list, metric_schemas: list[Schema]) -> list:
+        """
+        Validates the metrics in the provided list in order to prevent
+        emitting exceptions.
+
+        Currently a bit hacky--if the validation fails then an exception
+        will be raised and this method will not return. Otherwise if you
+        reach the return statement all metrics validated successfully.
+
+        Returns:
+            (list): validated metric configuration.
+        """
+        validated = [
+            metric_schemas[i].validate(metrics[i])
+            for i in range(len(metrics))
+        ]
+
+        return validated
 
 
     def extract_schema_params(self, config_info: dict) -> dict:
@@ -112,14 +132,9 @@ class DefaultHpoSchema(AbstractSchema):
         Returns:
             (bool): whether the model family exists or not
         """
-        try:
-            schema_factory.get_schema_by_name(
+        return schema_factory.schema_exists_by_name(
                 model, 'model', model_family
             )
-        except ValueError:
-            return False
-
-        return True
 
 
     def check_if_metric_exists(self, metric_name) -> bool:
@@ -129,14 +144,9 @@ class DefaultHpoSchema(AbstractSchema):
         Returns:
             (bool): whether the metric exists or not.
         """
-        try:
-            schema_factory.get_schema_by_name(
+        return schema_factory.schema_exists_by_name(
                 metric, 'metric', metric_name
             )
-        except ValueError:
-            return False
-
-        return True
 
 
     def check_optimized_hyperparams_validity(self, config_info):
@@ -150,8 +160,8 @@ class DefaultHpoSchema(AbstractSchema):
         hyperparam_schema = Schema(
             Or(
                 {
-                    'min': Or(int, float, error="min must be an int or float"),
-                    'max': Or(int, float, error="max must be an int or float"),
+                    'min': Or(Use(float), error="min must be an int or float"),
+                    'max': Or(Use(float), error="max must be an int or float"),
                     'distribution': Or(
                         'int_uniform', 'uniform', 'categorical',
                         'q_uniform', 'log_uniform', 'log_uniform_values',
@@ -169,7 +179,7 @@ class DefaultHpoSchema(AbstractSchema):
                     )
                 },
                 {
-                    'value': Or(str, int, float, bool, error="value must be of type str, int, float, or bool")
+                    'value': Or(str, bool, Use(float), int, error="value must be of type str, int, float, or bool")
                 }
             ),
             error="Invalid hyperparameter configuration"
@@ -245,6 +255,7 @@ class DefaultHpoSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
+
         config_schema = Schema(
             {
                 'model_family': And(str, self.check_if_model_family_exists, error="Model family does not exist"),
@@ -270,9 +281,10 @@ class DefaultHpoSchema(AbstractSchema):
                     ],
                     'combination_method': Or('sum', error="Invalid combination method")
                 },
-                'metrics': [Or(*schema_params['metric_schemas'], error="Invalid metric schema")],
+                'metrics': Use(lambda x: self.validate_metrics_in_order(x, schema_params['metric_schemas'],),
+                                    error="Specified metric is not valid."),
                 'num_candidates': And(int, schema_utils.is_positive, error="Number of candidates must be a positive integer"),
-                'verbosity': And(int, error="Verbosity must be an integer")
+                'verbosity': And(int, error="Verbosity must be an integer"),
             },
             error="Invalid HPO configuration"
         )

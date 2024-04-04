@@ -4,8 +4,7 @@ import torch
 from typing import Optional, Callable
 
 from sparseypy.access_objects.models.model import Model
-from sparseypy.core.model_layers.sparsey_layer import MAC, SparseyLayer
-from sparseypy.core.hooks import LayerIOHook
+from sparseypy.core.model_layers.sparsey_layer import SparseyLayer
 from sparseypy.core.metrics.metrics import Metric
 from sparseypy.core.metrics.comparisons import min_by_layerwise_mean
 
@@ -58,6 +57,8 @@ class BasisSetSizeIncreaseMetric(Metric):
             return [
                 sum(layer_deltas) for layer_deltas in deltas
             ]
+        elif self.reduction == 'highest_layer':
+            return deltas[-1]
         else:
             return None
     

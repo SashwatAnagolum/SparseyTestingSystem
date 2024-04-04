@@ -6,15 +6,22 @@ Train Model: script to train models.
 
 
 import pprint
+from tqdm import tqdm
+import warnings
 
-import torch
 import wandb
 
-from sparseypy.access_objects.models.model_builder import ModelBuilder
-from sparseypy.access_objects.training_recipes.training_recipe_builder import (
-    TrainingRecipeBuilder
-) 
-from sparseypy.core.data_storage_retrieval import DataStorer
+from sparseypy.access_objects.training_recipes.training_recipe_builder import TrainingRecipeBuilder
+from sparseypy.core.data_storage_retrieval import DataFetcher, DataStorer
+
+# Weights & Biases attempts to read tqdm updates from the console even after the last run
+# in an HPO sweep finishes, causing an unnecessary UserWarning when it attempts to log data
+# to a nonexistent run; this is a Weights & Biases issue that does not affect system
+# functionality so we ignore this warning
+warnings.filterwarnings(
+    "ignore",
+    message="Run (.*) is finished. The call to `_console_raw_callback` will be ignored."
+    )
 
 
 def train_model(model_config: dict, trainer_config: dict,
@@ -40,19 +47,27 @@ def train_model(model_config: dict, trainer_config: dict,
     DataStorer.configure(system_config)
 
     wandb.init(
-        project=system_config["wandb"]["project_name"]
+        project=system_config["wandb"]["project_name"],
+        allow_val_change=True
     )
 
-    model = ModelBuilder.build_model(model_config)
+    reload_model = False
+
+    if isinstance(model_config, str):
+        model_config, model_weights = DataFetcher().get_model_data(model_config)
+        reload_model = True
 
     trainer = TrainingRecipeBuilder.build_training_recipe(
-        model, dataset_config, preprocessing_config,
+        model_config, dataset_config, preprocessing_config,
         trainer_config
     )
 
+    if reload_model:
+        trainer.model.load_state_dict(model_weights)
+
     # print training run summary
     met_separator = "\n* "
-    print(f"""
+    tqdm.write(f"""
 TRAINING RUN SUMMARY
 Dataset type: {dataset_config['dataset_type']}
 Batch size: {trainer_config['dataloader']['batch_size']}
@@ -61,49 +76,51 @@ Selected metrics:
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
 """)
 
-    for epoch in range(trainer_config['training']['num_epochs']):
+    for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs", position=0):
         is_epoch_done = False
-        model.train()
+        trainer.model.train()
         batch_number = 1
 
         # perform training
-        while not is_epoch_done:
-            output, is_epoch_done = trainer.step(training=True)
-            print(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
-            pprint.pprint(output.get_metrics())
-            batch_number+=1
-
+        with tqdm(total=trainer.num_batches, desc="Training", leave=False, position=1) as pbar:
+            while not is_epoch_done:
+                output, is_epoch_done = trainer.step(training=True)
+                tqdm.write(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
+                metric_str = pprint.pformat(output.get_metrics())
+                tqdm.write(metric_str)
+                batch_number+=1
+                pbar.update(1)
         # summarize the best training steps
         train_summary = trainer.get_summary("training")
-        print("\n\nTRAINING - SUMMARY\n")
-        print("Best metric steps:")
+        tqdm.write("\n\nTRAINING - SUMMARY\n")
+        tqdm.write("Best metric steps:")
         for metric, val in train_summary.best_steps.items():
-            print(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
+            tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
 
-        model.eval()
+        trainer.model.eval()
         is_epoch_done = False
         batch_number = 1
 
         # perform evaluation
-        while not is_epoch_done:
-            # validate this logic VS the design of our EvaluationResult
-            # this looks like old-style logic for which we should remove the "while"
-            output, is_epoch_done = trainer.step(training=False)
-            print(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
-            pprint.pprint(output.get_metrics())
-            batch_number+=1
+        with tqdm(total=trainer.num_batches, desc="Evaluation", leave=False, position=1) as pbar:
+            while not is_epoch_done:
+                # validate this logic VS the design of our EvaluationResult
+                # this looks like old-style logic for which we should remove the "while"
+                output, is_epoch_done = trainer.step(training=False)
+                tqdm.write(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
+                metric_str = pprint.pformat(output.get_metrics())
+                tqdm.write(metric_str)
+                batch_number+=1
+                pbar.update(1)
 
         # print summary here in model script
         # if not printing you still need to call this to finalize the results
-        # FIXME confirm this is the correct location
-        # FIXME we are not correctly updating eval results in the DB if we do this
-        # 
         eval_summary = trainer.get_summary("evaluation")
 
-        print("\n\nEVALUATION - SUMMARY\n")
-        print("Best metric steps:")
+        tqdm.write("\n\nEVALUATION - SUMMARY\n")
+        tqdm.write("Best metric steps:")
         for metric, val in eval_summary.best_steps.items():
-            print(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
+            tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
         wandb.finish()

@@ -8,6 +8,7 @@ Dataset Factory: file holding the Dataset Factory class.
 import torch
 
 from torch.utils.data import Dataset
+from torchvision import datasets as torchvision_datasets
 
 from sparseypy.access_objects import datasets
 
@@ -32,7 +33,7 @@ class DatasetFactory:
             return getattr(datasets, class_name)
         else:
             raise ValueError('Invalid dataset type!')
-    
+
 
     @staticmethod
     def create_dataset(dataset_type: str, **kwargs) -> Dataset:

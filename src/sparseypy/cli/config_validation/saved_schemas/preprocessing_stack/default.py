@@ -32,13 +32,11 @@ class DefaultPreprocessingStackSchema(AbstractSchema):
         Returns:
             (bool): whether the model famly exists or not
         """
-        try:
-            schema_factory.get_schema_by_name(
+        if not schema_factory.schema_exists_by_name(
                 transform, 'transform', transform_name
-            )
-        except ValueError:
+            ):
             converted_transform_name = ''.join(
-                [word.capitalize() for word in transform_name.split('_')]
+                [word[:1].upper() + word[1:] for word in transform_name.split('_')]
             )
 
             if not hasattr(v2, converted_transform_name):
@@ -91,11 +89,13 @@ class DefaultPreprocessingStackSchema(AbstractSchema):
         schema_params['transform_schemas'] = []
 
         for transform_info in config_info['transform_list']:
-            try:
+            if schema_factory.schema_exists_by_name(
+                transform, 'transform', transform_info['name']
+            ):
                 transform_schema = schema_factory.get_schema_by_name(
                     transform, 'transform', transform_info['name']
                 )
-            except ValueError:
+            else:
                 transform_schema = Schema(object)
 
             schema_params['transform_schemas'].append(

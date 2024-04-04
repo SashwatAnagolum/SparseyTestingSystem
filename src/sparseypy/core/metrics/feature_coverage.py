@@ -60,7 +60,7 @@ class FeatureCoverageMetric(Metric):
         rf_cache = [[] for i in range(len(layers))]
         layer_masks = [
             torch.zeros(last_batch.shape, dtype=torch.bool)
-            for i in range(len(layers))    
+            for i in range(len(layers))
         ]
 
         for mac in layers[0]:
@@ -122,5 +122,7 @@ class FeatureCoverageMetric(Metric):
             return torch.sum(torch.mean(feature_coverage_values, 1))
         elif self.reduction == "mean":
             return torch.mean(feature_coverage_values)
+        elif self.reduction == 'highest_layer':
+            return feature_coverage_values[-1]
         else:
             return None

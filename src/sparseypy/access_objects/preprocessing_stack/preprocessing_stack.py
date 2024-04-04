@@ -19,7 +19,7 @@ class PreprocessingStack(torch.nn.Module):
         for transform_config in transform_configs['transform_list']:
             transform = TransformFactory.create_transform(
                 transform_config['name'],
-                **transform_config['params']
+                **(transform_config['params'] if 'params' in transform_config else {})
             )
 
             self.transform_list.append(transform)

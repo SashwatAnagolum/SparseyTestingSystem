@@ -9,10 +9,13 @@ from sparseypy.access_objects.models.model import Model
 
 
 class BasisSetSizeMetric(Metric):
-    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None, best_value: Optional[Callable] = min_by_layerwise_mean):
+    def __init__(self, model: torch.nn.Module,
+                 reduction: Optional[str] = None,
+                 best_value: Optional[Callable] = min_by_layerwise_mean):
         super().__init__(model, "basis_set_size", best_value)
 
         self.reduction = reduction
+
 
     def compute(self, m: Model, last_batch: torch.Tensor,
                 labels: torch.Tensor, training: bool = True):
@@ -25,11 +28,15 @@ class BasisSetSizeMetric(Metric):
             return basis_set_sizes
         elif self.reduction == 'mean':
             return [
-                sum(layer_basis) / len(layer_basis) if len(layer_basis) > 0 else None for layer_basis in basis_set_sizes
+                sum(layer_basis) / len(layer_basis)
+                if len(layer_basis) > 0 else None
+                for layer_basis in basis_set_sizes
             ]
         elif self.reduction == 'sum':
             return [
                 sum(layer_basis) for layer_basis in basis_set_sizes
             ]
+        elif self.reduction == 'highest_layer':
+            return basis_set_sizes[-1]
         else:
             return None
