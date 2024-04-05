@@ -312,6 +312,13 @@ class DataStorer:
             experiment (TrainingResult): the TrainingResult for the new experiment
             for which to create a database entry
         """
+
+        # log dataset description to W&B
+        if experiment.configs:
+            dataset_description = experiment.configs["dataset_config"]["description"]
+            if dataset_description:
+                wandb.run.summary["dataset_description"] = dataset_description
+
         # save on "summary" or better
         if self.firestore_resolution > 0:
             # create the DB entry for this experiment in Firestore
@@ -328,7 +335,8 @@ class DataStorer:
                     },
                     "end_times": {},
                     "completed": False,
-                    "batch_size": self.batch_size
+                    "batch_size": self.batch_size,
+                    "dataset_description": dataset_description
                 }
             )
 
@@ -346,11 +354,7 @@ class DataStorer:
         """
         # Implementation to save the training result
 
-        # save the dataset name to W&B
-        # probably move this to create_experiment
-        dataset_description = result.configs["dataset_config"]["description"]
-        if dataset_description:
-            wandb.run.summary["dataset_description"] = dataset_description
+        # all data is already tracked in W&B so we don't need to save anything special here
 
         # save on "summary" or better
         if self.firestore_resolution > 0:
@@ -367,7 +371,6 @@ class DataStorer:
                         "start_times.training": result.start_time,
                         "end_times.training": result.end_time,
                         "completed": True,
-                        "dataset_description": dataset_description,
                         "best_steps.training": {
                                 metric_name:{
                                     'best_index': metric_vals["best_index"],
