@@ -32,6 +32,10 @@ class DataStorer:
 
 
     def __init__(self, metric_config: dict):
+        # ensure the config has been initialized
+        if not DataStorer.is_initialized:
+            raise ValueError("You must call DataStorer.configure() before intializing DataStorer objects.")
+
         # configure saved metrics?
         self.saved_metrics = [metric["name"] for metric in metric_config if metric["save"] is True]
         # create API client
@@ -42,6 +46,8 @@ class DataStorer:
 
         self.wandb_resolution = DataStorer.wandb_config["data_resolution"]
         self.firestore_resolution = DataStorer.firestore_config["data_resolution"]
+
+        self.tables = DataStorer.firestore_config["table_names"]
 
     @staticmethod
     def configure(ds_config: dict):
@@ -117,17 +123,17 @@ class DataStorer:
             # FIRESTORE
             if self.firestore_resolution > 0:
                 # update "model registry" table (named versions of models)
-                registry_ref = self.db.collection("model_registry").document(model_name)
+                reg_ref = self.db.collection(self.tables["model_registry"]).document(model_name)
 
-                if registry_ref.get().exists:
-                    registry_ref.update(
+                if reg_ref.get().exists:
+                    reg_ref.update(
                         {
                             "last_updated": datetime.now(),
                             "versions": firestore.ArrayUnion([instance_name])
                         }
                     )
                 else:
-                    registry_ref.set(
+                    reg_ref.set(
                         {
                             "last_updated": datetime.now(),
                             "versions": [
@@ -140,7 +146,7 @@ class DataStorer:
                     )
 
                 # update "models" table (individual model instances/versions)
-                model_ref = self.db.collection("models").document(instance_name)
+                model_ref = self.db.collection(self.tables["models"]).document(instance_name)
 
                 model_entry = {
                         'registry_name': model_name,
@@ -255,7 +261,7 @@ class DataStorer:
         # save on "summary" or better
         if self.firestore_resolution > 0:
             # create the DB entry for this experiment in Firestore
-            experiment_ref = self.db.collection("experiments").document(experiment.id)
+            experiment_ref = self.db.collection(self.tables["experiments"]).document(experiment.id)
 
             experiment_ref.set(
                 {
@@ -295,7 +301,7 @@ class DataStorer:
         # save on "summary" or better
         if self.firestore_resolution > 0:
 
-            experiment_ref = self.db.collection("experiments").document(result.id)
+            experiment_ref = self.db.collection(self.tables["experiments"]).document(result.id)
 
             # every invocation of this costs 1 read call; consider removing
             if experiment_ref.get().exists:
@@ -350,7 +356,7 @@ class DataStorer:
 
         if self.firestore_resolution > 0:
             # save the full results to Firestore
-            experiment_ref = self.db.collection("experiments").document(result.id)
+            experiment_ref = self.db.collection(self.tables["experiments"]).document(result.id)
             if experiment_ref.get().exists:
                 # add step to existing experiment
                 experiment_ref.update(
@@ -405,9 +411,9 @@ class DataStorer:
         # FIRESTORE
         if self.firestore_resolution > 0:
             # save the objective data into the experiment
-            hpo_step_experiment_ref = self.db.collection("experiments").document(result.id)
+            hpo_step_exp_ref = self.db.collection(self.tables["experiments"]).document(result.id)
 
-            hpo_step_experiment_ref.update(
+            hpo_step_exp_ref.update(
                 {
                     "hpo_objective": result.get_objective(),
                     "parent_sweep": parent
@@ -415,7 +421,7 @@ class DataStorer:
             )
 
             # mark this HPO step's experiment as belonging to the parent sweep
-            parent_sweep_ref = self.db.collection("hpo_runs").document(parent)
+            parent_sweep_ref = self.db.collection(self.tables["hpo_runs"]).document(parent)
 
             parent_sweep_ref.update(
                 {
@@ -437,7 +443,7 @@ class DataStorer:
         if self.firestore_resolution > 0:
 
             # create the DB entry for this experiment in Firestore
-            sweep_ref = self.db.collection("hpo_runs").document(sweep.id)
+            sweep_ref = self.db.collection(self.tables["hpo_runs"]).document(sweep.id)
 
             sweep_ref.set(
                 {
@@ -476,7 +482,7 @@ class DataStorer:
         # set the end time and best run ID and mark as completed
         if self.firestore_resolution > 0:
 
-            sweep_ref = self.db.collection("hpo_runs").document(result.id)
+            sweep_ref = self.db.collection(self.tables["hpo_runs"]).document(result.id)
 
             sweep_ref.update(
                 {

@@ -13,6 +13,7 @@ from firebase_admin import firestore
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 import wandb
 
+from sparseypy.core.data_storage_retrieval.data_storer import DataStorer
 from sparseypy.core.metrics import comparisons
 from sparseypy.core.results.hpo_result import HPOResult
 from sparseypy.core.results.hpo_step_result import HPOStepResult
@@ -32,6 +33,11 @@ class DataFetcher:
         Initializes the DataFetcher instance by setting up a connection to the Firestore database.
         (credentials need to have been set before using this)
         """
+        if not DataStorer.is_initialized:
+            raise ValueError("You must call DataStorer.configure() before intializing DataFetcher objects.")
+
+        self.tables = DataStorer.firestore_config["table_names"]
+
         self.db = firestore.client()
 
     def _deserialize_metric(self, serialized_metric):
@@ -57,7 +63,7 @@ class DataFetcher:
         Returns:
             dict: A dictionary containing the experiment data.
         """
-        experiment_ref = self.db.collection("experiments").document(experiment_id)
+        experiment_ref = self.db.collection(self.tables["experiments"]).document(experiment_id)
         return experiment_ref.get().to_dict()
 
     @lru_cache(maxsize=None)
@@ -71,7 +77,7 @@ class DataFetcher:
         Returns:
             dict: A dictionary containing the HPO run data.
         """
-        hpo_run_ref = self.db.collection("hpo_runs").document(hpo_run_id)
+        hpo_run_ref = self.db.collection(self.tables["hpo_runs"]).document(hpo_run_id)
         return hpo_run_ref.get().to_dict()
 
     def get_model_data(self, model_name: str) -> tuple[dict, dict]:
