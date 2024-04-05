@@ -197,13 +197,13 @@ class DataStorer:
 
         batch_ref = self.db.collection(self.tables["batches"]).document(batch_id)
 
-        batch_size = len(self.step_cache[phase])
+        this_batch_size = len(self.step_cache[phase])
 
         batch_ref.set(
             {
                 "batch_type": phase,
                 "steps": self.step_cache[phase],
-                "size": batch_size,
+                "size": this_batch_size,
                 "parent": experiment
             }
         )
@@ -213,19 +213,10 @@ class DataStorer:
         experiment_ref.update(
             {
                 f"saved_metrics.{phase}": firestore.ArrayUnion(
-                        [
-                            {
-                                "batch": batch_id,
-                                "index": i
-                            }
-                            for i in range(batch_size)
-                        ]
-                    ),
-                f"batches.{phase}": firestore.ArrayUnion(
                     [
                         {
-                            "id": batch_id,
-                            "size": batch_size
+                            "batch": batch_id,
+                            "size": this_batch_size
                         }
                     ]
                 )
@@ -337,10 +328,7 @@ class DataStorer:
                     },
                     "end_times": {},
                     "completed": False,
-                    "batches": {
-                        "training": [],
-                        "evaluation": []
-                    }
+                    "batch_size": self.batch_size
                 }
             )
 
@@ -359,11 +347,10 @@ class DataStorer:
         # Implementation to save the training result
 
         # save the dataset name to W&B
+        # probably move this to create_experiment
         dataset_description = result.configs["dataset_config"]["description"]
         if dataset_description:
-            #run = self.api.run(wandb.run.path)
             wandb.run.summary["dataset_description"] = dataset_description
-            #run.summary.update()
 
         # save on "summary" or better
         if self.firestore_resolution > 0:
@@ -394,9 +381,6 @@ class DataStorer:
                         }
                     }
                 )
-
-        # COMMENT THIS IN to test updated config saving
-        #run.config = result.
 
     def save_evaluation_result(self, result: TrainingResult):
         """

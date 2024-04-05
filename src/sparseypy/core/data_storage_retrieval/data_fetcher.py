@@ -154,11 +154,13 @@ class DataFetcher:
             raise ValueError("Step index is out of bounds for the given experiment.")
 
         # fetch the step metadata (batch containing the step data and its index within the batch)
-        step_reference = training_steps[step_index]
+        batch_index = step_index // experiment_data["batch_size"] # integer division
+        step_offset = step_index % experiment_data["batch_size"]
+
         # fetch the batch
-        batch_data = self._get_batch_data(step_reference["batch"])
+        batch_data = self._get_batch_data(training_steps[batch_index]["batch"])
         # retrieve the step data from the batch using the index
-        step_data = batch_data["steps"][step_reference["index"]]
+        step_data = batch_data["steps"][step_offset]
 
         step_result = TrainingStepResult(resolution=experiment_data["saved_metrics"]["resolution"])
 
