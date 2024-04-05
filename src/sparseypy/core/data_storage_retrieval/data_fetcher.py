@@ -53,7 +53,7 @@ class DataFetcher:
         return pickle.loads(serialized_metric)
 
     @lru_cache(maxsize=None)
-    def _get_experiment_data(self, experiment_id):
+    def _get_experiment_data(self, experiment_id) -> dict:
         """
         Retrieves and caches the data for a specific experiment from Firestore.
 
@@ -67,7 +67,21 @@ class DataFetcher:
         return experiment_ref.get().to_dict()
 
     @lru_cache(maxsize=None)
-    def _get_hpo_run_data(self, hpo_run_id):
+    def _get_batch_data(self, batch_id) -> dict:
+        """
+        Retrieves and caches the data for a specific batch of steps from Firestore.
+
+        Args:
+            batch_id (str): The unique identifier for the batch.
+
+        Returns:
+            dict: A dictionary containing the batch data.
+        """
+        batch_ref = self.db.collection(self.tables["batches"]).document(batch_id)
+        return batch_ref.get().to_dict()
+
+    @lru_cache(maxsize=None)
+    def _get_hpo_run_data(self, hpo_run_id) -> dict:
         """
         Retrieves and caches the data for a specific HPO run from Firestore.
 
@@ -107,20 +121,26 @@ class DataFetcher:
         # fetch the artifact from W&B
         m_path = wandb.run.use_artifact(artifact_path, type="model").download()
         # read the model config from the downloaded artifact
-        with open(os.path.join(m_path, "network.yaml"), "r") as f:
+        with open(os.path.join(m_path, "network.yaml"), "r", encoding="utf-8") as f:
             model_config = json.load(f)
         # also load the state dict
         state_dict = torch.load(os.path.join(m_path, "model.pt"))
 
         return model_config, state_dict
 
-    def get_training_step_result(self, experiment_id, step_index):
+    def get_training_step_result(
+            self,
+            experiment_id: str,
+            step_index: int,
+            result_type: str ="training"
+        ) -> TrainingStepResult:
         """
         Retrieves the result of a specific training step within an experiment.
 
         Args:
             experiment_id (str): The unique identifier for the experiment.
             step_index (int): The index of the training step to retrieve.
+            result_type (str): The type of result to retrieve. Defaults to "training".
 
         Returns:
             TrainingStepResult: An instance of TrainingStepResult containing the step's metrics.
@@ -129,11 +149,17 @@ class DataFetcher:
             ValueError: If the step index is out of bounds for the given experiment.
         """
         experiment_data = self._get_experiment_data(experiment_id)
-        training_steps = experiment_data.get("saved_metrics", {}).get("training", [])
+        training_steps = experiment_data.get("saved_metrics", {}).get(result_type, [])
         if step_index < 0 or step_index >= len(training_steps):
             raise ValueError("Step index is out of bounds for the given experiment.")
 
-        step_data = training_steps[step_index]
+        # fetch the step metadata (batch containing the step data and its index within the batch)
+        step_reference = training_steps[step_index]
+        # fetch the batch
+        batch_data = self._get_batch_data(step_reference["batch"])
+        # retrieve the step data from the batch using the index
+        step_data = batch_data["steps"][step_reference["index"]]
+
         step_result = TrainingStepResult(resolution=experiment_data["saved_metrics"]["resolution"])
 
         for metric_name, metric_data in step_data.items():
@@ -141,7 +167,11 @@ class DataFetcher:
 
         return step_result
 
-    def get_training_result(self, experiment_id: str, result_type: str = "training") -> TrainingResult:
+    def get_training_result(
+            self,
+            experiment_id: str,
+            result_type: str = "training"
+        ) -> TrainingResult:
         """
         Retrieves the training result for a given experiment.
 
@@ -171,11 +201,15 @@ class DataFetcher:
                             )
 
         for step_index in range(len(experiment_data.get("saved_metrics", {}).get(result_type, []))):
-            step_result = self.get_training_step_result(experiment_id, step_index)
+            step_result = self.get_training_step_result(experiment_id, step_index, result_type)
             tr.add_step(step_result)
 
-        tr.start_time = self.convert_firestore_timestamp(experiment_data.get("start_times", {}).get(result_type))
-        tr.end_time = self.convert_firestore_timestamp(experiment_data.get("end_times", {}).get(result_type))
+        tr.start_time = self.convert_firestore_timestamp(
+                experiment_data.get("start_times", {}).get(result_type)
+            )
+        tr.end_time = self.convert_firestore_timestamp(
+                experiment_data.get("end_times", {}).get(result_type)
+            )
         best_steps = {}
 
         phase_data = experiment_data.get("best_steps", {}).get(result_type, {})

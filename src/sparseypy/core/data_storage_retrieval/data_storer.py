@@ -2,11 +2,9 @@
 """
 DataStorer: Saves data to Weights & Biases and the system database (Firestore)
 """
-from datetime import datetime
+from datetime import datetime, timezone
 import json
-import os
 import pickle
-import tempfile
 
 import firebase_admin
 from firebase_admin import firestore # firestore_async for async client
@@ -47,7 +45,14 @@ class DataStorer:
         self.wandb_resolution = DataStorer.wandb_config["data_resolution"]
         self.firestore_resolution = DataStorer.firestore_config["data_resolution"]
 
+        self.step_cache = {
+            "training": [],
+            "evaluation": []
+        }
+
         self.tables = DataStorer.firestore_config["table_names"]
+
+        self.batch_size = DataStorer.firestore_config["batch_size"]
 
     @staticmethod
     def configure(ds_config: dict):
@@ -158,6 +163,87 @@ class DataStorer:
                     model_entry
                 )
 
+    def _flush_cache(self, experiment: str, phase=None):
+        """
+        Flushes the step cache to the database to ensure read consistency.
+
+        You need to call this method under two circumstances:
+        1) as part of saving the final results for a phase to ensure all steps are written 
+            to the database
+        2) if you are reading step data back from the database before a phase is completed
+
+        Args:
+            experiment (str): the experiment to which the cache items should be saved.
+            phase (str): the phase to flush the cache for. If this is not provided, all
+                phases will be flushed.
+        """
+        if phase is not None:
+            if len(self.step_cache[phase]) > 0:
+                self._save_batch(experiment, phase)
+        else:
+            for phase, phase_data in self.step_cache.items():
+                if len(phase_data) > 0:
+                    self._save_batch(experiment, phase)
+
+    def _save_batch(self, experiment: str, phase: str):
+        """
+        Saves a batch of training/evaluation steps to the database.
+
+        Args:
+            experiment (str): the experiment ID to save the batch to
+            phase (str): the phase (training/evaluation) to save the batch for.
+        """
+        batch_id = str(datetime.now(timezone.utc).timestamp())
+
+        batch_ref = self.db.collection(self.tables["batches"]).document(batch_id)
+
+        batch_size = len(self.step_cache[phase])
+
+        batch_ref.set(
+            {
+                "batch_type": phase,
+                "steps": self.step_cache[phase],
+                "size": batch_size,
+                "parent": experiment
+            }
+        )
+
+        experiment_ref = self.db.collection(self.tables["experiments"]).document(experiment)
+
+        experiment_ref.update(
+            {
+                f"saved_metrics.{phase}": firestore.ArrayUnion(
+                        [
+                            {
+                                "batch": batch_id,
+                                "index": i
+                            }
+                            for i in range(batch_size)
+                        ]
+                    ),
+                f"batches.{phase}": {
+                    "id": batch_id,
+                    "size": batch_size
+                }
+            }
+        )
+
+        # clear the cache
+        self.step_cache[phase] = []
+
+    def _save_firestore_step(self, experiment: str, phase: str, metric_data: dict):
+        """
+        Save a single training/evaluation step to Firestore.
+
+        Args:
+            phase (str): the phase of training (training/evaluation) this step is for.
+            parent (str): the experiment to which the step belongs.
+        """
+        if len(self.step_cache[phase]) >= self.batch_size:
+            self._save_batch(experiment, phase)
+
+        self.step_cache[phase].append(metric_data)
+
     def save_training_step(self, parent: str, result: TrainingStepResult):
         """
         Saves a single training step to Weights & Biases and Firestore.
@@ -203,19 +289,7 @@ class DataStorer:
 
         # save to Firestore on "step" resolution only
         if self.firestore_resolution == 2:
-
-            # save the full results to Firestore
-            experiment_ref = self.db.collection("experiments").document(parent)
-
-            if experiment_ref.get().exists:
-                # add step to existing experiment
-                experiment_ref.update(
-                    {
-                        "saved_metrics.training": firestore.ArrayUnion([full_dict])
-                    }
-                )
-            #else:
-            # raise exception
+            self._save_firestore_step(parent, "training", full_dict)
 
     def save_evaluation_step(self, parent: str, result: TrainingStepResult):
         """
@@ -233,19 +307,7 @@ class DataStorer:
 
         # save to Firestore on "step" resolution only
         if self.firestore_resolution == 2:
-
-            # save the full results to Firestore
-            experiment_ref = self.db.collection("experiments").document(parent)
-
-            if experiment_ref.get().exists:
-                # add step to existing experiment
-                experiment_ref.update(
-                    {
-                        "saved_metrics.evaluation": firestore.ArrayUnion([full_dict])
-                    }
-                )
-            #else:
-            # raise exception
+            self._save_firestore_step(parent, "evaluation", full_dict)
 
     def create_experiment(self, experiment: TrainingResult):
         """
@@ -270,7 +332,8 @@ class DataStorer:
                         "resolution": experiment.resolution
                     },
                     "end_times": {},
-                    "completed": False
+                    "completed": False,
+                    "batches": {}
                 }
             )
 
@@ -297,6 +360,9 @@ class DataStorer:
 
         # save on "summary" or better
         if self.firestore_resolution > 0:
+
+            # flush the training result cache to the database
+            self._flush_cache(experiment=result.id, phase="training")
 
             experiment_ref = self.db.collection(self.tables["experiments"]).document(result.id)
 
@@ -352,6 +418,8 @@ class DataStorer:
             wandb.run.summary["evaluation_" + metric_name] = metric_val
 
         if self.firestore_resolution > 0:
+            # flush the evaluation cache
+            self._flush_cache(experiment=result.id, phase="evaluation")
             # save the full results to Firestore
             experiment_ref = self.db.collection(self.tables["experiments"]).document(result.id)
             if experiment_ref.get().exists:
@@ -491,20 +559,6 @@ class DataStorer:
                         ]
                 }
             )
-
-    def create_artifact(self, content: dict) -> wandb.Artifact:
-        """
-        Creates a W&B artifact for saving in the database.
-
-        Currently unused.
-
-        Args:
-            content (dict): the data to encapsulate in the Artifact
-        Returns:
-            wandb.Artifact: the encapsulated data
-        """
-        # Implementation to create and save a wandb.Artifact
-        pass
 
     def average_nested_data(self, data):
         """
