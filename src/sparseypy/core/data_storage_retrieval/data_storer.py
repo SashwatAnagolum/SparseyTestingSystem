@@ -221,10 +221,14 @@ class DataStorer:
                             for i in range(batch_size)
                         ]
                     ),
-                f"batches.{phase}": {
-                    "id": batch_id,
-                    "size": batch_size
-                }
+                f"batches.{phase}": firestore.ArrayUnion(
+                    [
+                        {
+                            "id": batch_id,
+                            "size": batch_size
+                        }
+                    ]
+                )
             }
         )
 
@@ -333,7 +337,10 @@ class DataStorer:
                     },
                     "end_times": {},
                     "completed": False,
-                    "batches": {}
+                    "batches": {
+                        "training": [],
+                        "evaluation": []
+                    }
                 }
             )
 
