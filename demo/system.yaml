@@ -75,6 +75,11 @@ database:
       #     (note that models are still saved to W&B and model *summary* data is still
       #     saved regardless of this setting)
       save_models: False
+      # batch_size: int, default 64
+      #     the size of each batch to save to the database
+      #     Firestore has a 1 MiB limit for each document in the database; each batch is one document
+      #     if you encounter issues with saving data, reducing the batch size can help
+      batch_size: 64
     # - name: dynamodb
     #   sso_profile: $AWS_SSO_PROFILE
     # - name: mongo

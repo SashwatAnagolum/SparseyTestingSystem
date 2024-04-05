@@ -49,6 +49,11 @@ class FirestoreDbAdapterSchema(AbstractSchema):
                     bool,
                     error="save_models must be a Boolean value"
                 ),
+                Optional('batch_size', default=64): And(
+                    int,
+                    lambda x : x > 0,
+                    error="batch_size must be a positive integer"
+                ),
                 Optional('table_names',
                         default={
                             v:v
