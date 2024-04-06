@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sparseypy.core.model_layers package &#8212; Sparsey Testing System 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=61cf8be8"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="sparseypy-core-model-layers-package">
+<h1>sparseypy.core.model_layers package<a class="headerlink" href="#sparseypy-core-model-layers-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-sparseypy.core.model_layers.layer_factory">
+<span id="sparseypy-core-model-layers-layer-factory-module"></span><h2>sparseypy.core.model_layers.layer_factory module<a class="headerlink" href="#module-sparseypy.core.model_layers.layer_factory" title="Link to this heading">¶</a></h2>
+<p>Layer Factory: file holding the Layer Factory class.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.layer_factory.LayerFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.model_layers.layer_factory.</span></span><span class="sig-name descname"><span class="pre">LayerFactory</span></span><a class="headerlink" href="#sparseypy.core.model_layers.layer_factory.LayerFactory" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.layer_factory.LayerFactory.allowed_modules">
+<span class="sig-name descname"><span class="pre">allowed_modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'SparseyLayer',</span> <span class="pre">'sparsey_layer'}</span></em><a class="headerlink" href="#sparseypy.core.model_layers.layer_factory.LayerFactory.allowed_modules" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.layer_factory.LayerFactory.create_layer">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Module</span></span></span><a class="headerlink" href="#sparseypy.core.model_layers.layer_factory.LayerFactory.create_layer" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a layer passed in based on the layer name and kwargs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.layer_factory.LayerFactory.get_layer_class">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_layer_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.model_layers.layer_factory.LayerFactory.get_layer_class" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the class corresponding to the name passed in.
+Throws an error if the name is not valid.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.model_layers.sparsey_layer">
+<span id="sparseypy-core-model-layers-sparsey-layer-module"></span><h2>sparseypy.core.model_layers.sparsey_layer module<a class="headerlink" href="#module-sparseypy.core.model_layers.sparsey_layer" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>Sparsey Layer: code for building and using individual layers</dt><dd><p>in a Sparsey model.</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.MAC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.model_layers.sparsey_layer.</span></span><span class="sig-name descname"><span class="pre">MAC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_cms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_neurons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cms_per_mac_in_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_neurons_per_cm_in_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmoid_lambda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmoid_phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permanence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_threshold_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_threshold_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmoid_chi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_familiarity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.MAC" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>MAC: class to represent macrocolumns in the Sparsey model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.MAC.weights">
+<span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.MAC.weights" title="Link to this definition">¶</a></dt>
+<dd><p>torch.Tensor containing the weights for the MAC.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.MAC.input_filter">
+<span class="sig-name descname"><span class="pre">input_filter</span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.MAC.input_filter" title="Link to this definition">¶</a></dt>
+<dd><p>torch.Tensor containing the indices of the
+MACs in the previous layer that are in the receptive field
+of the current MAC.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.MAC.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.MAC.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Passes data through a MAC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> -- torch.Tensor of size (
+batch_size,
+num_macs_in_prev_layer,
+prev_layer_num_cms_per_mac,
+prev_layer_num_neurons_per_cm</p></li>
+<li><p><strong>) with dtype torch.float32</strong></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>torch.Tensor of size (</dt><dd><p>batch_size,
+num_cms_per_mac,
+num_neurons_per_cm</p>
+</dd>
+</dl>
+<p>) with dtype torch.float32</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.MAC.get_input_filter">
+<span class="sig-name descname"><span class="pre">get_input_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.MAC.get_input_filter" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the input filter for the MAC.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.MAC.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.MAC.train" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the module in training mode.</p>
+<p>This has any effect only on certain modules. See documentations of
+particular modules for details of their behaviors in training/evaluation
+mode, if they are affected, e.g. <code class="xref py py-class docutils literal notranslate"><span class="pre">Dropout</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">BatchNorm</span></code>,
+etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>bool</em>) -- whether to set training mode (<code class="docutils literal notranslate"><span class="pre">True</span></code>) or evaluation
+mode (<code class="docutils literal notranslate"><span class="pre">False</span></code>). Default: <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Module</em> -- self</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.model_layers.sparsey_layer.</span></span><span class="sig-name descname"><span class="pre">SparseyLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">autosize_grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_layout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_macs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_cms_per_mac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_neurons_per_cm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac_grid_num_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac_grid_num_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac_receptive_field_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_layer_num_cms_per_mac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_layer_num_neurons_per_cm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_layer_mac_grid_num_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_layer_mac_grid_num_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_layer_num_macs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_layer_grid_layout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmoid_phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmoid_lambda</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saturation_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permanence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_threshold_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_threshold_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_familiarity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmoid_chi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>SparseyLayer: class representing layers in the Sparsey model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.num_macs">
+<span class="sig-name descname"><span class="pre">num_macs</span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.num_macs" title="Link to this definition">¶</a></dt>
+<dd><p>int containing the number of macs in the layer.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.receptive_field_radius">
+<span class="sig-name descname"><span class="pre">receptive_field_radius</span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.receptive_field_radius" title="Link to this definition">¶</a></dt>
+<dd><p>float containing the radius of the
+receptive field for the MAC.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.mac_positions">
+<span class="sig-name descname"><span class="pre">mac_positions</span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.mac_positions" title="Link to this definition">¶</a></dt>
+<dd><p>list[Tuple[int, int]] containing the positions
+of each MAC in the layer on the grid.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.input_list">
+<span class="sig-name descname"><span class="pre">input_list</span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.input_list" title="Link to this definition">¶</a></dt>
+<dd><p>list[list[int]] cotaining the indices of the
+MACs in the previous layer within the receptive field of
+each MAC in this layer.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.mac_list">
+<span class="sig-name descname"><span class="pre">mac_list</span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.mac_list" title="Link to this definition">¶</a></dt>
+<dd><p>list[MAC] containing all the MACs in this layer.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.sigmoid_lambda">
+<span class="sig-name descname"><span class="pre">sigmoid_lambda</span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.sigmoid_lambda" title="Link to this definition">¶</a></dt>
+<dd><p>parameter for the familiarity computation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.sigmoid_phi">
+<span class="sig-name descname"><span class="pre">sigmoid_phi</span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.sigmoid_phi" title="Link to this definition">¶</a></dt>
+<dd><p>parameter for the familiarity computation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.activation_thresholds">
+<span class="sig-name descname"><span class="pre">activation_thresholds</span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.activation_thresholds" title="Link to this definition">¶</a></dt>
+<dd><p>a list
+of lists containing activation thresholds for each MAC in
+the Sparsey layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[list[Or[int, float]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.compute_mac_positions">
+<span class="sig-name descname"><span class="pre">compute_mac_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_macs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac_grid_num_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mac_grid_num_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_layout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.compute_mac_positions" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the positions of each MAC in this layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_macs</strong> -- int representing the number of macs in the layer.</p></li>
+<li><p><strong>mac_grid_num_rows</strong> -- int representing the number of rows
+in the grid for this layer.</p></li>
+<li><p><strong>mac_grid_num_cols</strong> -- int representing the number of columns
+in the grid for this layer.</p></li>
+<li><p><strong>grid_layout</strong> -- the type of grid layout (rectangular or hexagonal)
+for the layer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>(list[Tuple(int, int)])</em> -- the positions of all MACs in the layer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.find_connected_macs_in_prev_layer">
+<span class="sig-name descname"><span class="pre">find_connected_macs_in_prev_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mac_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_layer_mac_positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.find_connected_macs_in_prev_layer" title="Link to this definition">¶</a></dt>
+<dd><p>Finds the list of connected MACs in the previous layer
+for each MAC in the current layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mac_positions</strong> (<em>list[Tuple[int, int]]</em>) -- list
+of positions of MACs in the current layer.</p></li>
+<li><p><strong>prev_layer_mac_positions</strong> (<em>list[Tuple[int, int]]</em>) -- list of positions of MACs in the previous layer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><em>(list[torch.Tesnor])</em> --</p>
+<dl class="simple">
+<dt>list of tensors containing the indices</dt><dd><p>of connected MACs from the previous layer for each
+MAC in the current layer.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Passes data through a Sparsey layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> -- torch.Tensor of size (
+batch_size,
+prev_layer_mac_grid_num_rows,
+prev_layer_mac_grid_num_cols,
+prev_layer_num_cms_per_mac,
+prev_layer_num_neurons_per_cm</p></li>
+<li><p><strong>) of dtype torch.float32</strong></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>torch.Tensor of size (</dt><dd><p>batch_size,
+mac_grid_num_rows,
+mac_grid_num_cols,
+num_cms_per_mac,
+num_neurons_per_cm</p>
+</dd>
+</dl>
+<p>) of dtype torch.float32</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.model_layers.sparsey_layer.SparseyLayer.get_macs">
+<span class="sig-name descname"><span class="pre">get_macs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sparseypy.core.model_layers.sparsey_layer.MAC" title="sparseypy.core.model_layers.sparsey_layer.MAC"><span class="pre">MAC</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sparseypy.core.model_layers.sparsey_layer.SparseyLayer.get_macs" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the MACs making up the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>(list[MAC])</em> -- the MACs making up the layer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.model_layers">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sparseypy.core.model_layers" title="Link to this heading">¶</a></h2>
+<p>Init: initialization for the model_layers subpackage.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Sparsey Testing System</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Sashwat Anagolum, JD Padrnos, Andrew Klawa, Christopher Pereira.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/sparseypy.core.model_layers.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

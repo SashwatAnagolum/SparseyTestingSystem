@@ -42,3 +42,5 @@ torchvision==0.16.1
 tqdm==4.66.2
 typing_extensions==4.8.0
 urllib3==2.2.1
+sphinx==7.2.6
+sphinx_rtd_theme==2.0.0

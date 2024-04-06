@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sparseypy.core.metrics package &#8212; Sparsey Testing System 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=61cf8be8"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="sparseypy-core-metrics-package">
+<h1>sparseypy.core.metrics package<a class="headerlink" href="#sparseypy-core-metrics-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-sparseypy.core.metrics.basis_average">
+<span id="sparseypy-core-metrics-basis-average-module"></span><h2>sparseypy.core.metrics.basis_average module<a class="headerlink" href="#module-sparseypy.core.metrics.basis_average" title="Link to this heading">¶</a></h2>
+<p>Basis Average: file holding the BasisAverageMetric class.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.basis_average.BasisAverageMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.basis_average.</span></span><span class="sig-name descname"><span class="pre">BasisAverageMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model:</span> <span class="pre">~torch.nn.modules.module.Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_value:</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">max_by_layerwise_mean&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.basis_average.BasisAverageMetric" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.metrics.metrics.Metric" title="sparseypy.core.metrics.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<dl class="simple">
+<dt>BasisAverageMetric: metric computing the feature</dt><dd><p>coverage of MACs and layers in a Sparsey model.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.basis_average.BasisAverageMetric.reduction">
+<span class="sig-name descname"><span class="pre">reduction</span></span><a class="headerlink" href="#sparseypy.core.metrics.basis_average.BasisAverageMetric.reduction" title="Link to this definition">¶</a></dt>
+<dd><p>the type of reduction to apply
+onto the raw per-layer, per-sample feature coverage
+results. Valid options are None and 'sparse'. Choosing
+'sparse' will return the raw averaged inputs to each MAC.
+Choosing None will return the inputs inserted into
+their positions in a tensor of the same size as the
+input samples to the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.basis_average.BasisAverageMetric.hook">
+<span class="sig-name descname"><span class="pre">hook</span></span><a class="headerlink" href="#sparseypy.core.metrics.basis_average.BasisAverageMetric.hook" title="Link to this definition">¶</a></dt>
+<dd><p>the hook registered with the model
+being evaluated to obtain references to each layer,
+and layerwise inputs and outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="sparseypy.core.hooks.html#sparseypy.core.hooks.layer_io.LayerIOHook" title="sparseypy.core.hooks.layer_io.LayerIOHook">LayerIOHook</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.basis_average.BasisAverageMetric.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#sparseypy.core.metrics.basis_average.BasisAverageMetric.compute" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the basis average of a model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<em>Model</em>) -- Model to evaluate.</p></li>
+<li><p><strong>last_batch</strong> (<em>torch.Tensor</em>) -- the model input for the current step</p></li>
+<li><p><strong>labels</strong> (<em>torch.Tensor</em>) -- the model output for the current step</p></li>
+<li><p><strong>training</strong> (<em>bool</em>) -- whether the model is training or evaluating</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><em>(list[torch.Tensor])</em> --</p>
+<dl class="simple">
+<dt>a list of Tensors containing the average</dt><dd><p>feature that each MAC has seen.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.basis_average.BasisAverageMetric.get_projected_receptive_fields">
+<span class="sig-name descname"><span class="pre">get_projected_receptive_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sparseypy.core.metrics.basis_average.BasisAverageMetric.get_projected_receptive_fields" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the projected receptive fields of each MAC in the model,
+i.e. what input elements in each sample can be seen by each MAC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layers</strong> (<em>list[list[MAC]]</em>) -- collection of MACS in the model.</p></li>
+<li><p><strong>input_shape</strong> (<em>int</em>) -- shape of each input sample.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.basis_average.BasisAverageMetric.initialize_shapes">
+<span class="sig-name descname"><span class="pre">initialize_shapes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sparseypy.core.metrics.basis_average.BasisAverageMetric.initialize_shapes" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize the shapes of different storage objects in the model
+based on the shape of the inputs and the model structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layers</strong> (<em>list[list[MAC]]</em>) -- collection of MACs making up
+the model.</p></li>
+<li><p><strong>last_batch</strong> (<em>torch.Tensor</em>) -- the last set of inputs shown
+to the model.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.metrics.basis_set_size">
+<span id="sparseypy-core-metrics-basis-set-size-module"></span><h2>sparseypy.core.metrics.basis_set_size module<a class="headerlink" href="#module-sparseypy.core.metrics.basis_set_size" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.basis_set_size.BasisSetSizeMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.basis_set_size.</span></span><span class="sig-name descname"><span class="pre">BasisSetSizeMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model:</span> <span class="pre">~torch.nn.modules.module.Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_value:</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">min_by_layerwise_mean&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.basis_set_size.BasisSetSizeMetric" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.metrics.metrics.Metric" title="sparseypy.core.metrics.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.basis_set_size.BasisSetSizeMetric.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.basis_set_size.BasisSetSizeMetric.compute" title="Link to this definition">¶</a></dt>
+<dd><p>Computes a metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> -- the model currently being trained.</p></li>
+<li><p><strong>last_batch</strong> -- the inputs to the current batch being evaluated</p></li>
+<li><p><strong>labels</strong> -- the output from the current batch being evaluated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the Metric's results as a dict.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.metrics.basis_set_size_increase">
+<span id="sparseypy-core-metrics-basis-set-size-increase-module"></span><h2>sparseypy.core.metrics.basis_set_size_increase module<a class="headerlink" href="#module-sparseypy.core.metrics.basis_set_size_increase" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.basis_set_size_increase.BasisSetSizeIncreaseMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.basis_set_size_increase.</span></span><span class="sig-name descname"><span class="pre">BasisSetSizeIncreaseMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model:</span> <span class="pre">~torch.nn.modules.module.Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_value:</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">min_by_layerwise_mean&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.basis_set_size_increase.BasisSetSizeIncreaseMetric" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.metrics.metrics.Metric" title="sparseypy.core.metrics.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<dl class="simple">
+<dt>BasisSetSizeIncreaseMetric: metric to keep track</dt><dd><p>of basis set sizes across a Sparsey model.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.basis_set_size_increase.BasisSetSizeIncreaseMetric.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.basis_set_size_increase.BasisSetSizeIncreaseMetric.compute" title="Link to this definition">¶</a></dt>
+<dd><p>Computes a metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> -- the model currently being trained.</p></li>
+<li><p><strong>last_batch</strong> -- the inputs to the current batch being evaluated</p></li>
+<li><p><strong>labels</strong> -- the output from the current batch being evaluated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the Metric's results as a dict.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.metrics.comparisons">
+<span id="sparseypy-core-metrics-comparisons-module"></span><h2>sparseypy.core.metrics.comparisons module<a class="headerlink" href="#module-sparseypy.core.metrics.comparisons" title="Link to this heading">¶</a></h2>
+<p>comparsions.py - contains comparison functions for determining the &quot;best&quot; value of a metric</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.comparisons.average_nested_data">
+<span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.comparisons.</span></span><span class="sig-name descname"><span class="pre">average_nested_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.comparisons.average_nested_data" title="Link to this definition">¶</a></dt>
+<dd><p>Averages an arbitrarily deep data structure
+and returns the result as a single value.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.comparisons.max_by_layerwise_mean">
+<span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.comparisons.</span></span><span class="sig-name descname"><span class="pre">max_by_layerwise_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.comparisons.max_by_layerwise_mean" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the maximum value by layerwise average of x and y.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.comparisons.min_by_layerwise_mean">
+<span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.comparisons.</span></span><span class="sig-name descname"><span class="pre">min_by_layerwise_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.comparisons.min_by_layerwise_mean" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the minimum value by layerwise average of x and y.</p>
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.metrics.feature_coverage">
+<span id="sparseypy-core-metrics-feature-coverage-module"></span><h2>sparseypy.core.metrics.feature_coverage module<a class="headerlink" href="#module-sparseypy.core.metrics.feature_coverage" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.feature_coverage.FeatureCoverageMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.feature_coverage.</span></span><span class="sig-name descname"><span class="pre">FeatureCoverageMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model:</span> <span class="pre">~torch.nn.modules.module.Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_value:</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">max_by_layerwise_mean&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.feature_coverage.FeatureCoverageMetric" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.metrics.metrics.Metric" title="sparseypy.core.metrics.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<dl class="simple">
+<dt>FeatureCoverageMetric: metric computing the feature</dt><dd><p>coverage of MACs and layers in a Sparsey model.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.feature_coverage.FeatureCoverageMetric.reduction">
+<span class="sig-name descname"><span class="pre">reduction</span></span><a class="headerlink" href="#sparseypy.core.metrics.feature_coverage.FeatureCoverageMetric.reduction" title="Link to this definition">¶</a></dt>
+<dd><p>the type of reduction to apply
+onto the raw per-layer, per-sample feature coverage
+results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.feature_coverage.FeatureCoverageMetric.hook">
+<span class="sig-name descname"><span class="pre">hook</span></span><a class="headerlink" href="#sparseypy.core.metrics.feature_coverage.FeatureCoverageMetric.hook" title="Link to this definition">¶</a></dt>
+<dd><p>the hook registered with the model
+being evaluated to obtain references to each layer,
+and layerwise inputs and outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="sparseypy.core.hooks.html#sparseypy.core.hooks.layer_io.LayerIOHook" title="sparseypy.core.hooks.layer_io.LayerIOHook">LayerIOHook</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.feature_coverage.FeatureCoverageMetric.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#sparseypy.core.metrics.feature_coverage.FeatureCoverageMetric.compute" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the feature coverage of a model for a given batch of inputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<em>Model</em>) -- Model to evaluate.</p></li>
+<li><p><strong>last_batch</strong> (<em>torch.Tensor</em>) -- the model input for the current step</p></li>
+<li><p><strong>labels</strong> (<em>torch.Tensor</em>) -- the model output for the current step</p></li>
+<li><p><strong>training</strong> (<em>bool</em>) -- whether the model is training or evaluating</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Output:</dt><dd><p>(float): feature coverage as a fraction.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.metrics.match_accuracy">
+<span id="sparseypy-core-metrics-match-accuracy-module"></span><h2>sparseypy.core.metrics.match_accuracy module<a class="headerlink" href="#module-sparseypy.core.metrics.match_accuracy" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.match_accuracy.MatchAccuracyMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.match_accuracy.</span></span><span class="sig-name descname"><span class="pre">MatchAccuracyMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model:</span> <span class="pre">~torch.nn.modules.module.Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_value:</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">max_by_layerwise_mean&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.match_accuracy.MatchAccuracyMetric" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.metrics.metrics.Metric" title="sparseypy.core.metrics.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.match_accuracy.MatchAccuracyMetric.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.match_accuracy.MatchAccuracyMetric.compute" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the approximate match accuracy of a model for a given batch of inputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> -- Model to evaluate.</p></li>
+<li><p><strong>last_batch</strong> -- the model input for the current step (as a Tensor)</p></li>
+<li><p><strong>labels</strong> -- the model output for the current step (as a Tensor)</p></li>
+<li><p><strong>training</strong> -- boolean - whether the model is training (store codes)
+or evaluating (determine approximate match
+accuracy using stored codes)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Output:</dt><dd><p>approximate match accuracy as a list of accuracies:
+one pertaining to each layer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.match_accuracy.MatchAccuracyMetric.get_normalized_hamming_distance">
+<span class="sig-name descname"><span class="pre">get_normalized_hamming_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stored_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#sparseypy.core.metrics.match_accuracy.MatchAccuracyMetric.get_normalized_hamming_distance" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the normalized hamming distance between two codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stored_code</strong> (<em>list[torch.Tensor]</em>) -- the code generated for a
+particular input during training</p></li>
+<li><p><strong>selected_code</strong> (<em>list[torch.Tensor]</em>) -- the code generated for
+the same input during evaluation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.metrics.metric_factory">
+<span id="sparseypy-core-metrics-metric-factory-module"></span><h2>sparseypy.core.metrics.metric_factory module<a class="headerlink" href="#module-sparseypy.core.metrics.metric_factory" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metric_factory.MetricFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.metric_factory.</span></span><span class="sig-name descname"><span class="pre">MetricFactory</span></span><a class="headerlink" href="#sparseypy.core.metrics.metric_factory.MetricFactory" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metric_factory.MetricFactory.allowed_comparisons">
+<span class="sig-name descname"><span class="pre">allowed_comparisons</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'average_nested_data',</span> <span class="pre">'max_by_layerwise_mean',</span> <span class="pre">'min_by_layerwise_mean'}</span></em><a class="headerlink" href="#sparseypy.core.metrics.metric_factory.MetricFactory.allowed_comparisons" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metric_factory.MetricFactory.allowed_modules">
+<span class="sig-name descname"><span class="pre">allowed_modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'BasisAverageMetric',</span> <span class="pre">'BasisSetSizeIncreaseMetric',</span> <span class="pre">'BasisSetSizeMetric',</span> <span class="pre">'FeatureCoverageMetric',</span> <span class="pre">'MatchAccuracyMetric',</span> <span class="pre">'NumActivationsMetric',</span> <span class="pre">'basis_average',</span> <span class="pre">'basis_set_size',</span> <span class="pre">'basis_set_size_increase',</span> <span class="pre">'comparisons',</span> <span class="pre">'feature_coverage',</span> <span class="pre">'match_accuracy',</span> <span class="pre">'metrics',</span> <span class="pre">'num_activations'}</span></em><a class="headerlink" href="#sparseypy.core.metrics.metric_factory.MetricFactory.allowed_modules" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metric_factory.MetricFactory.create_metric">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sparseypy.core.metrics.metrics.Metric" title="sparseypy.core.metrics.metrics.Metric"><span class="pre">Metric</span></a></span></span><a class="headerlink" href="#sparseypy.core.metrics.metric_factory.MetricFactory.create_metric" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a layer passed in based on the layer name and kwargs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metric_factory.MetricFactory.get_comparison_function">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_comparison_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comparison_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="headerlink" href="#sparseypy.core.metrics.metric_factory.MetricFactory.get_comparison_function" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metric_factory.MetricFactory.get_metric_class">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_metric_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.metric_factory.MetricFactory.get_metric_class" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the class corresponding to the name passed in.
+Throws an error if the name is not valid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metric_factory.MetricFactory.is_valid_comparision">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_valid_comparision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comparison_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#sparseypy.core.metrics.metric_factory.MetricFactory.is_valid_comparision" title="Link to this definition">¶</a></dt>
+<dd><p>Checks whether a given comparison function exists.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metric_factory.MetricFactory.is_valid_metric_class">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_valid_metric_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#sparseypy.core.metrics.metric_factory.MetricFactory.is_valid_metric_class" title="Link to this definition">¶</a></dt>
+<dd><p>Checks whether a metric class exists corresponding to the passed-in name.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.metrics.metrics">
+<span id="sparseypy-core-metrics-metrics-module"></span><h2>sparseypy.core.metrics.metrics module<a class="headerlink" href="#module-sparseypy.core.metrics.metrics" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metrics.Metric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.metrics.</span></span><span class="sig-name descname"><span class="pre">Metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_comparison</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.metrics.Metric" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="simple">
+<dt>Metric: a base class for metrics.</dt><dd><p>Metrics are used to compute different measurements requested by the user
+to provide estimations of model progress and information
+required for Dr. Rinkus' experiments.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metrics.Metric.compute">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.metrics.Metric.compute" title="Link to this definition">¶</a></dt>
+<dd><p>Computes a metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> -- the model currently being trained.</p></li>
+<li><p><strong>last_batch</strong> -- the inputs to the current batch being evaluated</p></li>
+<li><p><strong>labels</strong> -- the output from the current batch being evaluated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the Metric's results as a dict.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metrics.Metric.get_best_comparison_function">
+<span class="sig-name descname"><span class="pre">get_best_comparison_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.metrics.Metric.get_best_comparison_function" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the function to use to obtain the &quot;best&quot; instance of this metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.metrics.Metric.get_name">
+<span class="sig-name descname"><span class="pre">get_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.metrics.Metric.get_name" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the name of this metric.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.metrics.num_activations">
+<span id="sparseypy-core-metrics-num-activations-module"></span><h2>sparseypy.core.metrics.num_activations module<a class="headerlink" href="#module-sparseypy.core.metrics.num_activations" title="Link to this heading">¶</a></h2>
+<p>Num Activations: file holding the NumActivationsMetric class.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.num_activations.NumActivationsMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.metrics.num_activations.</span></span><span class="sig-name descname"><span class="pre">NumActivationsMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model:</span> <span class="pre">~torch.nn.modules.module.Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_value:</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">min_by_layerwise_mean&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.num_activations.NumActivationsMetric" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.metrics.metrics.Metric" title="sparseypy.core.metrics.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<dl class="simple">
+<dt>NumActivationsMetric: metric computing the number of activations</dt><dd><p>across MACs in a Sparsey model.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.num_activations.NumActivationsMetric.reduction">
+<span class="sig-name descname"><span class="pre">reduction</span></span><a class="headerlink" href="#sparseypy.core.metrics.num_activations.NumActivationsMetric.reduction" title="Link to this definition">¶</a></dt>
+<dd><p>the type of reduction to apply
+onto the raw per-layer, per-sample feature coverage
+results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.num_activations.NumActivationsMetric.hook">
+<span class="sig-name descname"><span class="pre">hook</span></span><a class="headerlink" href="#sparseypy.core.metrics.num_activations.NumActivationsMetric.hook" title="Link to this definition">¶</a></dt>
+<dd><p>the hook registered with the model
+being evaluated to obtain references to each layer,
+and layerwise inputs and outputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="sparseypy.core.hooks.html#sparseypy.core.hooks.layer_io.LayerIOHook" title="sparseypy.core.hooks.layer_io.LayerIOHook">LayerIOHook</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.num_activations.NumActivationsMetric.num_activations">
+<span class="sig-name descname"><span class="pre">num_activations</span></span><a class="headerlink" href="#sparseypy.core.metrics.num_activations.NumActivationsMetric.num_activations" title="Link to this definition">¶</a></dt>
+<dd><p>the number of activations
+fr each MAC in each layer of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[list[int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.num_activations.NumActivationsMetric.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#sparseypy.core.metrics.num_activations.NumActivationsMetric.compute" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the number of activations of a model for a given batch of inputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<em>Model</em>) -- Model to evaluate.</p></li>
+<li><p><strong>last_batch</strong> (<em>torch.Tensor</em>) -- the model input for the current step</p></li>
+<li><p><strong>labels</strong> (<em>torch.Tensor</em>) -- the labels for the current step</p></li>
+<li><p><strong>training</strong> (<em>bool</em>) -- whether the model is training or evaluating</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Output:</dt><dd><dl class="simple">
+<dt>Union[float | list[float] | list[list[float]]]:</dt><dd><p>the number of activations across MACs in the model</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.metrics.num_activations.NumActivationsMetric.initialize_activation_counts">
+<span class="sig-name descname"><span class="pre">initialize_activation_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.metrics.num_activations.NumActivationsMetric.initialize_activation_counts" title="Link to this definition">¶</a></dt>
+<dd><p>Initializes the activation counts of the NumActivations object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>layers</strong> (<em>list[list[MAC]]</em>) -- a list of MACs in the model.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.metrics">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sparseypy.core.metrics" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Sparsey Testing System</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Sashwat Anagolum, JD Padrnos, Andrew Klawa, Christopher Pereira.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/sparseypy.core.metrics.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
