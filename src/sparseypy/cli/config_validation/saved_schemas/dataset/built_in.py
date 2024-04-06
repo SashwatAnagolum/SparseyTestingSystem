@@ -116,6 +116,19 @@ class BuiltInDatasetSchema(AbstractSchema):
 
 
     def transform_schema(self, config_info: dict) -> dict:
+        """
+        Transforms the config info passed in by the user to 
+        construct the config information required by the model builder.
+
+        Args:
+            config_info: dict containing the config information
+
+        Returns:
+            (dict): the transformed config info
+        """
+        if config_info['preprocessed']:
+            config_info['in_memory'] = False
+
         return config_info
 
 
@@ -171,6 +184,12 @@ class BuiltInDatasetSchema(AbstractSchema):
                     'preprocessed_stack',
                     default={'transform_list': []}
                 ): schema_params['preprocessing_stack_schema'],
+                Optional('in_memory', default=False): Schema(
+                    bool, "in_memory must be a boolean value"
+                ),
+                Optional('load_lazily', default=True): Schema(
+                    bool, "load_lazily must be a boolean value"
+                )
             }, error="Error in built-in dataset configuration"
         )
 

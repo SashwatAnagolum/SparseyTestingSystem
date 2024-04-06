@@ -13,7 +13,7 @@ from sparseypy.core.optimizers.optimizer_factory import OptimizerFactory
 from sparseypy.access_objects.datasets.dataset_factory import DatasetFactory
 from sparseypy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
 from sparseypy.core.metrics.metric_factory import MetricFactory
-from sparseypy.access_objects.datasets.preprocessed_dataset import PreprocessedDataset
+from sparseypy.access_objects.datasets import PreprocessedDataset, InMemoryDataset
 from sparseypy.access_objects.models.model_builder import ModelBuilder
 
 class TrainingRecipeBuilder:
@@ -66,6 +66,10 @@ class TrainingRecipeBuilder:
                 dataset, preprocessed_dataset_stack,
                 dataset_config['preprocessed_temp_dir']
             )
+        elif dataset_config['in_memory']:
+            dataset = InMemoryDataset(
+                dataset, dataset_config['load_lazily']
+            )
 
         dataloader = DataLoader(
             dataset=dataset, **train_config['dataloader']
@@ -88,11 +92,11 @@ class TrainingRecipeBuilder:
 
         if 'loss' in train_config:
             loss_func = MetricFactory.create_metric(
-                train_config['loss']['name'],
-                train_config['loss']['params']
+                metric_name=train_config['loss']['name'],
+                **train_config['loss']['params']
             )
         else:
-             loss_func = None
+            loss_func = None
 
         #loss_func = None
              
