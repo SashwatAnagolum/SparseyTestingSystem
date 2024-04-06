@@ -20,7 +20,6 @@ def run_command(command):
 # Change directory to the docs directory
 os.chdir("..")
 
-print(os.getcwd())
 # Generating .rst files from your docstrings
 if is_windows:
     run_command(f'sphinx-apidoc -o docs\\source\\ {project_directory}')
