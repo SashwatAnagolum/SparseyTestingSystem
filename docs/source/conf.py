@@ -16,15 +16,10 @@ release = '1.0'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'recommonmark',
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
 ]
-source_suffix = {
-    '.rst': 'restructuredtext',
-    '.txt': 'markdown',
-    '.md': 'markdown',
-}
+
 napoleon_google_docstring = True
 napoleon_use_param = False
 napoleon_use_rtype = False

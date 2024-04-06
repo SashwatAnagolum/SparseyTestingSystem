@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sparseypy.core.hooks package &#8212; Sparsey Testing System 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=61cf8be8"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="sparseypy-core-hooks-package">
+<h1>sparseypy.core.hooks package<a class="headerlink" href="#sparseypy-core-hooks-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-sparseypy.core.hooks.hook">
+<span id="sparseypy-core-hooks-hook-module"></span><h2>sparseypy.core.hooks.hook module<a class="headerlink" href="#module-sparseypy.core.hooks.hook" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>Hook: file hlding the abstract Hook class represeting</dt><dd><p>a PyTorch hook.</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.hooks.hook.Hook">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.hooks.hook.</span></span><span class="sig-name descname"><span class="pre">Hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.hooks.hook.Hook" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Hook: abstract base class for all Hooks in the system.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.hooks.hook.Hook.hook">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hook</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sparseypy.core.hooks.hook.Hook.hook" title="Link to this definition">¶</a></dt>
+<dd><p>Register this hook with the model pased in during initialization.</p>
+<p>Concrete hooks need to implement this method to register
+the required hooks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.hooks.hook.Hook.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sparseypy.core.hooks.hook.Hook.remove" title="Link to this definition">¶</a></dt>
+<dd><p>Remove the hooks set by the class.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.hooks.hook_factory">
+<span id="sparseypy-core-hooks-hook-factory-module"></span><h2>sparseypy.core.hooks.hook_factory module<a class="headerlink" href="#module-sparseypy.core.hooks.hook_factory" title="Link to this heading">¶</a></h2>
+<p>Hook Factory: factory for creating model hooks.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.hooks.hook_factory.HookFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.hooks.hook_factory.</span></span><span class="sig-name descname"><span class="pre">HookFactory</span></span><a class="headerlink" href="#sparseypy.core.hooks.hook_factory.HookFactory" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Hook Factory: Factory for generating hooks.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.hooks.hook_factory.HookFactory.create_hook">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hook_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sparseypy.core.hooks.hook.Hook" title="sparseypy.core.hooks.hook.Hook"><span class="pre">Hook</span></a></span></span><a class="headerlink" href="#sparseypy.core.hooks.hook_factory.HookFactory.create_hook" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a new hook based on the name passed in, and initializes
+the hook with the model passed in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hook_name</strong> (<em>str</em>) -- name of the hook to create</p></li>
+<li><p><strong>model</strong> (<em>torch.nn.Module</em>) -- model to initialize the hook with.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.hooks.layer_io">
+<span id="sparseypy-core-hooks-layer-io-module"></span><h2>sparseypy.core.hooks.layer_io module<a class="headerlink" href="#module-sparseypy.core.hooks.layer_io" title="Link to this heading">¶</a></h2>
+<p>Layer IO: file hlding the LayerIOHook class.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.hooks.layer_io.LayerIOHook">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.hooks.layer_io.</span></span><span class="sig-name descname"><span class="pre">LayerIOHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flatten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.hooks.layer_io.LayerIOHook" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.hooks.hook.Hook" title="sparseypy.core.hooks.hook.Hook"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hook</span></code></a></p>
+<dl class="simple">
+<dt>Layer IO Hook: simple hook to get the output</dt><dd><p>and input of a layer.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.hooks.layer_io.LayerIOHook.forward_hook">
+<span class="sig-name descname"><span class="pre">forward_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sparseypy.core.hooks.layer_io.LayerIOHook.forward_hook" title="Link to this definition">¶</a></dt>
+<dd><p>Call the hook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>module</strong> (<em>torch.nn.Module</em>) -- the module that the hook was
+registered to.</p></li>
+<li><p><strong>input</strong> (<em>torch.Tensor</em>) -- module input</p></li>
+<li><p><strong>output</strong> (<em>torch.Tensor</em>) -- module output</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.hooks.layer_io.LayerIOHook.get_layer_io">
+<span class="sig-name descname"><span class="pre">get_layer_io</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.hooks.layer_io.LayerIOHook.get_layer_io" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.hooks.layer_io.LayerIOHook.hook">
+<span class="sig-name descname"><span class="pre">hook</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sparseypy.core.hooks.layer_io.LayerIOHook.hook" title="Link to this definition">¶</a></dt>
+<dd><p>Register this hook with the model pased in during initialization.</p>
+<p>Concrete hooks need to implement this method to register
+the required hooks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.hooks.layer_io.LayerIOHook.pre_hook">
+<span class="sig-name descname"><span class="pre">pre_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sparseypy.core.hooks.layer_io.LayerIOHook.pre_hook" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.hooks">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sparseypy.core.hooks" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Sparsey Testing System</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Sashwat Anagolum, JD Padrnos, Andrew Klawa, Christopher Pereira.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/sparseypy.core.hooks.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
