@@ -9,7 +9,6 @@ from typing import Optional
 
 import torch
 from torch.utils.data import DataLoader
-from torchvision.transforms.v2 import Transform
 
 from sparseypy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
 from sparseypy.core.data_storage_retrieval import DataStorer
@@ -23,7 +22,7 @@ class TrainingRecipe:
                  dataloader: DataLoader,
                  preprocessing_stack: PreprocessingStack,
                  metrics_list: list[torch.nn.Module],
-                 metric_config: dict, model_config: dict,
+                 metric_config: dict, setup_configs: dict,
                  loss_func: Optional[torch.nn.Module],
                  step_resolution: Optional[int] = None) -> None:
         self.optimizer = optimizer
@@ -32,7 +31,7 @@ class TrainingRecipe:
         self.preprocessing_stack = preprocessing_stack
         self.metrics_list = metrics_list
         self.loss_func = loss_func
-        self.model_config = model_config
+        self.setup_configs = setup_configs
 
         if step_resolution is None:
             self.step_resolution = 1 #len(self.dataloader)
@@ -45,32 +44,46 @@ class TrainingRecipe:
 
         self.ds = DataStorer(metric_config)
 
-        # BUG need to have logged in to W&B by the time this is executed
-        # BUG reporting fake value currently
-        self.training_results = TrainingResult(wandb.run.id, "training", self.step_resolution, self.metrics_list)
-        self.eval_results = TrainingResult(wandb.run.id, "evaluation", self.step_resolution, self.metrics_list)
+        self.training_results = TrainingResult(
+                id=wandb.run.id,
+                result_type="training",
+                resolution=self.step_resolution,
+                metrics=self.metrics_list,
+                configs=setup_configs
+            )
+        self.eval_results = TrainingResult(
+                id=wandb.run.id,
+                result_type="evaluation",
+                resolution=self.step_resolution,
+                metrics=self.metrics_list,
+                configs=setup_configs
+            )
         self.first_eval = True
 
         self.ds.create_experiment(self.training_results)
 
 
     def step(self, training: bool = True):
+        """
+        Performs a single step of training or evaluation.
+
+        Args:
+            training (bool): whether to perform training (True) or evaluation (False)
+
+        Returns:
+            results (TrainingStepResult): the results of this training/evaluation step
+            epoch_ended: whether this step has completed the current epoch (in which case
+            the full training/evaluation results will be available from get_summary())
+        """
         if self.batch_index + self.step_resolution >= self.num_batches:
             num_batches_in_step = self.num_batches - self.batch_index
         else:
             num_batches_in_step = self.step_resolution
 
         if not training and self.first_eval:
-                self.first_eval = False
-                self.eval_results.start_time = datetime.now()
+            self.first_eval = False
+            self.eval_results.start_time = datetime.now()
 
-        #results = []
-        #if training:
-        #    results = TrainingStepResult(self.step_resolution)
-        #else:
-        #    # need to be able to access dataset name from TR
-        #    # BUG incorrect dataset name saved
-        #    results = ProcessStepResult(self.step_resolution)
         results = TrainingStepResult(self.step_resolution)
 
         for _ in range(num_batches_in_step):
@@ -101,9 +114,6 @@ class TrainingRecipe:
 
                 self.optimizer.step()
 
-            #print("\n" + "\n" + "\n")
-            #results.append(result)
-
         self.batch_index += num_batches_in_step
 
         if self.batch_index == self.num_batches:
@@ -113,11 +123,6 @@ class TrainingRecipe:
         else:
             epoch_ended = False
 
-        # stored_codes = [
-        #    [mac.stored_codes for mac in layer.mac_list]
-        #    for layer in self.model.layers
-        # ]
-            
         # at this point the step is finished
         results.mark_finished()
 
@@ -126,16 +131,31 @@ class TrainingRecipe:
             self.ds.save_training_step(self.training_results.id, results)
             self.training_results.add_step(results)
         else:
-            #self.ds.save_evaluation_step(self.evaluation_results.id, results)
             self.ds.save_evaluation_step(self.training_results.id, results)
             self.eval_results.add_step(results)
 
         return results, epoch_ended
 
     def get_summary(self, phase: str = "training") -> TrainingResult:
+        """
+        Returns the completed results for training or evaluation.
+
+        Args:
+            phase (str): the phase from which to get results; either
+            "training" (default) or "evaluation"
+
+        Returns:
+            TrainingResult: the complete results for every step of
+            training/evaluation
+        """
         if phase == "training":
             self.training_results.mark_finished()
             self.ds.save_training_result(self.training_results)
+            self.ds.save_model(
+                experiment=wandb.run.id,
+                m=self.model,
+                model_config=self.setup_configs["model_config"]
+            )
             return self.training_results
         else:
             self.eval_results.mark_finished()

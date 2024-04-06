@@ -8,7 +8,7 @@ Sparsey Model Schema: the schema for Sparsey model config files.
 import typing
 import math
 
-from schema import Schema, And, Optional, Or
+from schema import Schema, And, Optional, Or, Use
 
 from sparseypy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparseypy.cli.config_validation.saved_schemas import schema_utils
@@ -193,6 +193,8 @@ class SparseyModelSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
+                Optional('model_name', default=None): And(str, error="Model name must be a string"),
+                Optional('model_description', default=None): And(str, error="Model description must be a string"),
                 'input_dimensions': {
                     'width': And(int, schema_utils.is_positive, error="Width must be a positive integer"),
                     'height': And(int, schema_utils.is_positive, error="Height must be a positive integer")
@@ -208,14 +210,14 @@ class SparseyModelSchema(AbstractSchema):
                         Optional('mac_grid_num_cols', default=1): And(int, schema_utils.is_positive, error="MAC grid number of columns must be a positive integer"),
                         'num_cms_per_mac': And(int, schema_utils.is_positive, error="Number of CMs per MAC must be a positive integer"),
                         'num_neurons_per_cm': And(int, schema_utils.is_positive, error="Number of neurons per CM must be a positive integer"),
-                        'mac_receptive_field_radius': And(Or(int, float), schema_utils.is_positive, error="MAC receptive field radius must be a positive number"),
-                        'sigmoid_lambda': And(Or(float, int), schema_utils.is_positive, error="Sigmoid lambda must be a positive number"),
-                        'sigmoid_phi': Or(int, float, error="Sigmoid phi must be an integer or float"),
+                        'mac_receptive_field_radius': And(Or(Use(float)), schema_utils.is_positive, error="MAC receptive field radius must be a positive number"),
+                        'sigmoid_lambda': And(Or(Use(float), int), schema_utils.is_positive, error="Sigmoid lambda must be a positive number"),
+                        'sigmoid_phi': Or(Use(float), error="Sigmoid phi must be an integer or float"),
                         'saturation_threshold': And(float, lambda n: 0 <= n <= 1, error="Saturation threshold must be between 0 and 1"),
-                        'permanence': And(Or(int, float), lambda n: 0 < n <= 1, error="Permanence must be between 0 (exclusive) and 1 (inclusive)"),
-                        'activation_threshold_min': And(Or(int, float), lambda x: schema_utils.is_between(x, 0.0, 1.0), error="Activation threshold min must be between 0 and 1"),
-                        'activation_threshold_max': And(Or(int, float), lambda x: schema_utils.is_between(x, 0.0, 1.0), error="Activation threshold max must be between 0 and 1"),
-                        'sigmoid_chi': Or(int, float, error="Sigmoid chi must be an integer or float"),
+                        'permanence': And(Or(Use(float)), lambda n: 0 < n <= 1, error="Permanence must be between 0 (exclusive) and 1 (inclusive)"),
+                        'activation_threshold_min': And(Or(Use(float)), lambda x: schema_utils.is_between(x, 0.0, 1.0), error="Activation threshold min must be between 0 and 1"),
+                        'activation_threshold_max': And(Or(Use(float)), lambda x: schema_utils.is_between(x, 0.0, 1.0), error="Activation threshold max must be between 0 and 1"),
+                        'sigmoid_chi': Or(Use(float), error="Sigmoid chi must be an integer or float"),
                         'min_familiarity': And(float, lambda x: schema_utils.is_between(x, 0, 1), error="Min familiarity must be between 0 and 1")
                     }
                 }

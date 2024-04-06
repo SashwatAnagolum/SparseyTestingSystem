@@ -45,7 +45,7 @@ class ImageDatasetSchema(AbstractSchema):
         else:
             schema_params[
                 'preprocessing_stack_schema'
-            ] = Schema(object)          
+            ] = Schema(object)
 
         return schema_params
 
@@ -69,12 +69,21 @@ class ImageDatasetSchema(AbstractSchema):
         config_schema = Schema(
             {
                 'dataset_type': Schema('image', error="dataset_type must be 'image'"),
+                Optional('description', default=None): str,
                 'params': Schema({
-                    'data_dir': Schema(And(str, os.path.exists), error=f"Invalid data_dir path. The directory must exist."),
-                    'image_format': Schema(And(str, lambda x: x[0] == '.'), error=f"Invalid image_format. The format must start with '.'")
+                    'data_dir': Schema(
+                                        And(str, os.path.exists),
+                                        error="Invalid data_dir path. The directory must exist."
+                                        ),
+                    'image_format': Schema(
+                                        And(str, lambda x: x[0] == '.'),
+                                        error="Invalid image_format. The format must start with '.'"
+                                        )
                 }, error="Invalid params"),
-                Optional('preprocessed', default=False): Schema(bool, error="preprocessed must be a boolean value"),
-                Optional('preprocessed_temp_dir', default='datasets/preprocessed_dataset'): Schema(str, error="preprocessed_temp_dir must be a valid path"),
+                Optional('preprocessed', default=False):
+                    Schema(bool, error="preprocessed must be a boolean value"),
+                Optional('preprocessed_temp_dir', default='datasets/preprocessed_dataset'):
+                    Schema(str, error="preprocessed_temp_dir must be a valid path"),
                 'preprocessed_stack': schema_params[
                     'preprocessing_stack_schema'
                 ],

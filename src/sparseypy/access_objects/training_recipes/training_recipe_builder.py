@@ -55,13 +55,13 @@ class TrainingRecipeBuilder:
             dataset_config['dataset_type'],
             **dataset_config['params']
         )
-        
+
         # if a preprocessed dataset then wrap the dataset
         if dataset_config['preprocessed'] is True:
             preprocessed_dataset_stack = PreprocessingStack(
                 dataset_config['preprocessed_stack']
             )
-           
+
             dataset = PreprocessedDataset(
                 dataset, preprocessed_dataset_stack,
                 dataset_config['preprocessed_temp_dir']
@@ -95,12 +95,19 @@ class TrainingRecipeBuilder:
              loss_func = None
 
         #loss_func = None
+             
+        # store the configs inside the finished TrainingRecipe for later saving
+        setup_configs = {
+            'dataset_config': dataset_config,
+            'model_config': model_config,
+            'preprocessing_config': preprocessing_config,
+            'training_recipe_config': train_config
+        }
 
         return TrainingRecipe(
             model, optimizer, dataloader,
             preprocessing_stack, metrics_list,
-            train_config['metrics'], model_config,
+            train_config['metrics'], setup_configs,
             loss_func,
             train_config['training']['step_resolution']
         )
-

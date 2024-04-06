@@ -52,14 +52,9 @@ class DefaultSystemSchema(AbstractSchema):
         Returns:
             (bool): whether the database adapter exists or not.
         """
-        try:
-            schema_factory.get_schema_by_name(
+        return schema_factory.schema_exists_by_name(
                 db_adapter, 'db_adapter', db_adapter_name
             )
-        except ValueError:
-            return False
-
-        return True
 
 
     def extract_schema_params(self, config_info: dict) -> dict:
@@ -99,7 +94,7 @@ class DefaultSystemSchema(AbstractSchema):
         the name of an environment variable (with $ prefix) or a value.
 
         Args:
-            env_name (string): the value or environment variable name
+            env_name (str): the value or environment variable name
 
         Returns:
             the value or a Use that can be used to validate the value
@@ -127,6 +122,7 @@ class DefaultSystemSchema(AbstractSchema):
                         Optional('api_key', default="WANDB_API_KEY"): And(Use(os.getenv), str, error="Invalid Weights and Biases API key"),
                         'project_name': Schema(str, error="Project name must be a string"),
                         Optional('save_locally', default=True): Schema(bool, error="save_locally must be a boolean value"),
+                        Optional('save_models', default=True): Schema(bool, error="save_models must be a Boolean value"),
                         Optional('data_resolution', default=2): And(int, lambda x : 0 <= x <= 2, error="data_resolution must be 0, 1, or 2")
                     },
                     error="Error in wandb configuration"),
@@ -134,7 +130,8 @@ class DefaultSystemSchema(AbstractSchema):
                         'read_database': Schema(lambda x : x in schema_params['selected_dbs'], error="The read_database must also be configured as a write_database"),
                         'write_databases': [Or(*schema_params['database_schemas'], error="Invalid database configuration schema")]
                     },
-                    error="Error in database configuration")
+                    error="Error in database configuration"),
+                    Optional('print_error_stacktrace', default=False): Schema(bool, error="print_error_stacktrace must be a boolean value")
                 },
                 error="Error in system.yaml"
         )

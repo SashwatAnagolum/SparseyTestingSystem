@@ -25,8 +25,13 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--model_config', type=str,
-        help='The location of the model config file.'
+        '--model_config', type=str, required=False,
+        help='The location of the model config file. Mutually exclusive with --model_name.'
+    )
+
+    parser.add_argument(
+        '--model_name', type=str, required=False,
+        help='The name of the online model to use. Mutually exclusive with --model_config.'
     )
 
     parser.add_argument(
@@ -57,46 +62,67 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
 
+    if args.model_config and args.model_name:
+        raise ValueError("You can only provide one of --model_config and --model_name.")
+    elif not args.model_config and not args.model_name:
+        raise ValueError("You must provide either --model_name or --model_config.")
+
     load_dotenv()
 
-    system_config_info = get_config_info(args.system_config)
-    validated_system_config = validate_config(
-        system_config_info, 'system', 'default'
-    )
-
-    model_config_info = get_config_info(args.model_config)
-    validated_config = validate_config(
-        model_config_info, 'model', 'sparsey'
+    system_config_info = get_config_info(
+        args.system_config
     )
 
     training_recipe_config_info = get_config_info(
         args.training_recipe_config
     )
 
-    validated_trainer_config = validate_config(
-        training_recipe_config_info, 'training_recipe', 'sparsey'
-    )
-
     preprocessing_config_info = get_config_info(
         args.preprocessing_config
     )
 
-    validated_preprocessing_config = validate_config(
-        preprocessing_config_info, 'preprocessing_stack', 'default'
-    )
-    
     dataset_config_info = get_config_info(
         args.dataset_config
     )
 
-    validated_dataset_config = validate_config( # needs updating to support different dataset types
-        dataset_config_info, 'dataset', dataset_config_info['dataset_type']
+    print_error_stacktrace = system_config_info.get("print_error_stacktrace", False)
+
+    validated_system_config = validate_config(
+        system_config_info, 'system', 'default',
+        print_error_stacktrace=print_error_stacktrace
     )
 
+    validated_trainer_config = validate_config(
+        training_recipe_config_info, 'training_recipe', 'sparsey',
+        print_error_stacktrace=print_error_stacktrace
+    )
+
+    validated_preprocessing_config = validate_config(
+        preprocessing_config_info, 'preprocessing_stack', 'default',
+        print_error_stacktrace=print_error_stacktrace
+    )
+
+    validated_dataset_config = validate_config(
+        dataset_config_info, 'dataset', dataset_config_info['dataset_type'],
+        print_error_stacktrace=print_error_stacktrace
+    )
+
+    if args.model_config:
+        model_config_info = get_config_info(
+            args.model_config
+        )
+
+        model_data = validate_config(
+            model_config_info, 'model', 'sparsey',
+            print_error_stacktrace=print_error_stacktrace
+        )
+    else:
+        model_data = args.model_name
+
     train_model(
-        model_config=validated_config,
+        model_config=model_data,
         trainer_config=validated_trainer_config,
-        preprocessing_config=preprocessing_config_info,
+        preprocessing_config=validated_preprocessing_config,
         dataset_config=validated_dataset_config,
         system_config=validated_system_config
     )

@@ -75,7 +75,10 @@ class TestSparseyDatasetConfigs:
         del sparsey_dataset_config['params']['data_dir']
 
         with pytest.raises(SchemaError):
-            validate_config(sparsey_dataset_config, 'dataset', 'image')
+            validate_config(
+                sparsey_dataset_config, 'dataset', 'image',
+                survive_with_exception=True
+                )
 
 
     def test_missing_preprocessing_stack(
@@ -94,7 +97,8 @@ class TestSparseyDatasetConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_dataset_config, 'dataset', 'image'
+                sparsey_dataset_config, 'dataset', 'image',
+                survive_with_exception=True
             )
 
 
@@ -116,5 +120,6 @@ class TestSparseyDatasetConfigs:
 
         with pytest.raises(SchemaError):
             validate_config(
-                sparsey_dataset_config, 'dataset', 'image'
+                sparsey_dataset_config, 'dataset', 'image',
+                survive_with_exception=True
             )

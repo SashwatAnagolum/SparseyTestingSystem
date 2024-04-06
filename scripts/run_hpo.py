@@ -4,9 +4,7 @@
 Run HPO: script to run HPO
 """
 
-
 import argparse
-import os
 
 from dotenv import load_dotenv
 
@@ -73,26 +71,33 @@ def main():
         args.hpo_config
     )
 
-    # preprocessing config validation
+    print_error_stacktrace = system_config_info.get('print_error_stacktrace', False)
+
+    validated_preprocessing_config = validate_config(
+        preprocessing_config_info, 'preprocessing_stack', 'default',
+        print_error_stacktrace=print_error_stacktrace
+    )
 
     validated_system_config = validate_config(
-        system_config_info, 'system', 'default'
+        system_config_info, 'system', 'default',
+        print_error_stacktrace=print_error_stacktrace
     )
 
     validated_dataset_config = validate_config(
-        dataset_config_info, 'dataset', dataset_config_info['dataset_type']
+        dataset_config_info, 'dataset', dataset_config_info['dataset_type'],
+        print_error_stacktrace=print_error_stacktrace
     )
 
     validated_hpo_config = validate_config(
-        hpo_config_info, 'hpo', 'default'
+        hpo_config_info, 'hpo', 'default',
+        print_error_stacktrace=print_error_stacktrace
     )
 
-
-
     run_hpo(
-        validated_hpo_config,
-        validated_dataset_config, preprocessing_config_info,
-        validated_system_config
+        hpo_config=validated_hpo_config,
+        dataset_config=validated_dataset_config,
+        preprocessing_config=validated_preprocessing_config,
+        system_config=validated_system_config
     )
 
 if __name__ == "__main__":
