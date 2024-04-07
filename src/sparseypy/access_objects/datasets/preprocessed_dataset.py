@@ -54,8 +54,6 @@ class PreprocessedDataset(Dataset):
             label (torch.Tensor): the label to save.
             idx (int): Index of the data in the dataset.
         """
-        print('saving', idx)
-
         # Path where the preprocessed data will be saved
         preprocessed_path = os.path.join(
             self.preprocessed_dir, f'{idx}.pkl'

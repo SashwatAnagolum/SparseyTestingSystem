@@ -37,8 +37,6 @@ class InMemoryDataset(Dataset):
 
     @functools.lru_cache(maxsize=None)
     def __getitem__(self, idx):
-        print('getting inmem', idx)
-
         """
         Get item by index from disk if not sampled before,
         otherwise return from the cache.
