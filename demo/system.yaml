@@ -47,12 +47,19 @@ database:
   write_databases:
     # firestore adapter
     - name: firestore
-      # hpo_table_name: string - the name of the table in Firestore in which to store HPO run data
-      #     (this is things like which runs are best--data for each experiment in an HPO run is still
-      #     stored in the experiment table)
-      hpo_table_name: hpo_runs
-      # experiment_table_name: string - the name of the table in Firestore in which to store experiments
-      experiment_table_name: experiments
+      # table_names: the names to use for the system database tables in Firestore
+      #     (optional; see config schema for the defaults)
+      table_names:
+        # hpo_runs: name of the table containing HPO run data
+        hpo_runs: "hpo_runs"
+        # experiments: name of the data containing experiment metadata
+        experiments: "experiments"
+        # batches: name of the table containing the (batched) experiment step data
+        batches: "batches"
+        # models: name of the table containing data on individual model instances
+        models: "models"
+        # model_registry: name of the table containing overall metadata for named models
+        model_registry: "model_registry"
       # firebase_service_key_path: the name of the environment variable from which the system
       #     should read the path to the service account key required to access the Firestore database
       #     (this key also contains the path to the DB and all other required information)
@@ -68,6 +75,11 @@ database:
       #     (note that models are still saved to W&B and model *summary* data is still
       #     saved regardless of this setting)
       save_models: False
+      # batch_size: int, default 64
+      #     the size of each batch to save to the database
+      #     Firestore has a 1 MiB limit for each document in the database; each batch is one document
+      #     if you encounter issues with saving data, reducing the batch size can help
+      batch_size: 64
     # - name: dynamodb
     #   sso_profile: $AWS_SSO_PROFILE
     # - name: mongo

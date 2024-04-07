@@ -45,18 +45,34 @@ class FirestoreDbAdapterSchema(AbstractSchema):
                     lambda x : 0 <= x <= 2,
                     error="data_resolution must be 0 (nothing), 1 (summary), or 2 (every step)"
                 ),
-                Optional('hpo_table_name', default="hpo_runs"): And(
-                    str,
-                    error="Invalid hpo_table_name in firestore configuration"
-                ),
-                Optional('experiment_table_name', default="experiments"): And(
-                    str,
-                    error="Invalid experiment_table_name in firestore configuration"
-                ),
                 Optional('save_models', default=False): Schema(
                     bool,
                     error="save_models must be a Boolean value"
-                )
+                ),
+                Optional('batch_size', default=64): And(
+                    int,
+                    lambda x : x > 0,
+                    error="batch_size must be a positive integer"
+                ),
+                Optional('table_names',
+                        default={
+                            v:v
+                            for v in ["batches", "experiments", "hpo_runs",
+                                    "model_registry", "models"]
+                        }
+                    ):
+                        {
+                            Optional("batches", default="batches"):
+                                Schema(str, error="batches table name must be a string"),
+                            Optional("experiments", default="experiments"):
+                                Schema(str, error="experiments table name must be a string"),
+                            Optional("hpo_runs", default="hpo_runs"):
+                                Schema(str, error="hpo_runs table name must be a string"),
+                            Optional("model_registry", default="model_registry"):
+                                Schema(str, error="model_registry table name must be a string"),
+                            Optional("models", default="models"):
+                                Schema(str, error="models table name must be a string"),
+                        }
             },
             error="Invalid configuration for firestore database adapter"
         )
