@@ -54,4 +54,8 @@ preprocessed_stack:
     - name: skeletonize
       params:
         sigma: 3
+
+in_memory: True
+load_lazily: False
+save_to_disk: True
 ...
