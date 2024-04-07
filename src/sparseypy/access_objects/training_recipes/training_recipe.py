@@ -92,8 +92,10 @@ class TrainingRecipe:
 
             transformed_data = self.preprocessing_stack(
                 data
-            ).reshape(
-                data.shape[0], *data.shape[2:]
+            )
+
+            transformed_data = transformed_data.reshape(
+                transformed_data.shape[0], *transformed_data.shape[2:]
             ).unsqueeze(-1).unsqueeze(-1)
 
             model_output = self.model(transformed_data)

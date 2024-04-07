@@ -126,9 +126,6 @@ class BuiltInDatasetSchema(AbstractSchema):
         Returns:
             (dict): the transformed config info
         """
-        if config_info['preprocessed']:
-            config_info['in_memory'] = False
-
         return config_info
 
 
@@ -184,6 +181,9 @@ class BuiltInDatasetSchema(AbstractSchema):
                     'preprocessed_stack',
                     default={'transform_list': []}
                 ): schema_params['preprocessing_stack_schema'],
+                Optional('save_to_disk', default=False): Schema(
+                    bool, error='save_to_disk must be a boolean value'
+                ),
                 Optional('in_memory', default=False): Schema(
                     bool, "in_memory must be a boolean value"
                 ),

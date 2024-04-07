@@ -64,9 +64,11 @@ class TrainingRecipeBuilder:
 
             dataset = PreprocessedDataset(
                 dataset, preprocessed_dataset_stack,
-                dataset_config['preprocessed_temp_dir']
+                dataset_config['preprocessed_temp_dir'],
+                dataset_config['save_to_disk']
             )
-        elif dataset_config['in_memory']:
+        
+        if dataset_config['in_memory']:
             dataset = InMemoryDataset(
                 dataset, dataset_config['load_lazily']
             )

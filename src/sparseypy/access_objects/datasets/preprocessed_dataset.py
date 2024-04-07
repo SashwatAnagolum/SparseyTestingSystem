@@ -39,7 +39,7 @@ class PreprocessedDataset(Dataset):
 
         # Create the directory for preprocessed data if it does not exist
         if self.save_to_disk:
-            self.saved_to_disk_flags = [False for i in len(dataset)]
+            self.saved_to_disk_flags = [False for i in range(len(self.dataset))]
             
             if not os.path.exists(self.preprocessed_dir):
                 os.makedirs(self.preprocessed_dir)
@@ -54,6 +54,8 @@ class PreprocessedDataset(Dataset):
             label (torch.Tensor): the label to save.
             idx (int): Index of the data in the dataset.
         """
+        print('saving', idx)
+
         # Path where the preprocessed data will be saved
         preprocessed_path = os.path.join(
             self.preprocessed_dir, f'{idx}.pkl'
@@ -90,15 +92,15 @@ class PreprocessedDataset(Dataset):
                     # Handle file reading errors
                     raise Exception(
                         f"Error reading file {preprocessed_path}: {e}"
-                    )
+                    ) from e
             else:
                 # If not preprocessed, preprocess and save the data
-                data, label = self.dataset.__get__(idx)
+                data, label = self.dataset.__getitem__(idx)
                 data = self.preprocessing_stack(data)
 
                 self.save_data_to_disk(data, label, idx)
         else:
-            data, label = self.dataset.__get__(idx)
+            data, label = self.dataset.__getitem__(idx)
             data = self.preprocessing_stack(data)
 
         return data, label
