@@ -28,7 +28,8 @@ class MAC(torch.nn.Module):
         num_neurons_per_cm_in_input: int,
         layer_index: int, mac_index: int,
         sigmoid_lambda: float, sigmoid_phi: float,
-        permanence: float, activation_threshold_min: float,
+        permanence_steps: float, permanence_convexity: float,
+        activation_threshold_min: float,
         activation_threshold_max: float,
         sigmoid_chi: float, min_familiarity: float
     ) -> None:
@@ -93,7 +94,8 @@ class MAC(torch.nn.Module):
         self.sigmoid_chi = sigmoid_chi
         self.min_familiarity = min_familiarity
 
-        self.permanence = permanence
+        self.permanence_steps = permanence_steps
+        self.permanence_convexity = permanence_convexity
 
         self.weights = torch.nn.Parameter(
             torch.zeros(
@@ -103,7 +105,6 @@ class MAC(torch.nn.Module):
         )
 
         self.stored_codes = set()
-
         self.input_filter = input_filter
         self.training = True
 
@@ -262,7 +263,8 @@ class SparseyLayer(torch.nn.Module):
         layer_index: int,
         sigmoid_phi: float, sigmoid_lambda: float,
         saturation_threshold: float,
-        permanence: float, activation_threshold_min: float,
+        permanence_steps: float, permanence_convexity: float,
+        activation_threshold_min: float,
         activation_threshold_max: float,
         min_familiarity: float, sigmoid_chi: float):
         """
@@ -295,7 +297,8 @@ class SparseyLayer(torch.nn.Module):
 
         # save layer-level permanence value;
         # check if we actually need to do this
-        self.permanence = permanence
+        self.permanence_steps = permanence_steps
+        self.permanence_convexity = permanence_convexity
         self.activation_threshold_min = activation_threshold_min
         self.activation_threshold_max = activation_threshold_max
 
@@ -324,7 +327,8 @@ class SparseyLayer(torch.nn.Module):
                 # pass layer permanence value to individual MACs
                 # this might need adjusting so it can be set
                 # on a per-MAC basis
-                permanence, activation_threshold_min,
+                permanence_steps, permanence_convexity, 
+                activation_threshold_min,
                 activation_threshold_max,
                 sigmoid_chi, min_familiarity
             ) for i in range(num_macs)
@@ -333,7 +337,6 @@ class SparseyLayer(torch.nn.Module):
         self.mac_list = torch.nn.ModuleList(self.mac_list)
 
         self.saturation_threshold = saturation_threshold
-
 
         ####Edit out when we have a better mechanism for tracking layers
         self.layer_index = layer_index

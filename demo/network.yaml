@@ -66,7 +66,8 @@ layers:
       #     parameter for the familiarity computation
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
-      permanence: 1.0
+      permanence_steps: 5
+      permanence_convexity: 0.5
       # activation thresholds: float, 0 < min <= max <= 1
         #     the upper and lower bounds for the number of MACs that need to be 
         #     active in the receptive field of the MAC for it to become active
@@ -95,13 +96,10 @@ layers:
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
-      permanence: 0.95
+      permanence_steps: 100
+      permanence_convexity: 0.5
       min_familiarity: 0.2
       sigmoid_chi: 1.5
       activation_threshold_min: 0.2
       activation_threshold_max: 1.0
-
-  # permanence -> talk to Dr. Rinkus
-  # weight freezing thresholds -> talk to Dr. Rinkus
-  # activation thresholds -> talk to Dr. Rinkus
 ...
