@@ -87,8 +87,6 @@ class SparseyModelSchema(AbstractSchema):
             factor_1, factor_2 = self.compute_factor_pair(num_macs)
             num_macs += 1
 
-        print(factor_1, factor_2)
-
         return factor_1, factor_2
 
 
@@ -143,13 +141,13 @@ class SparseyModelSchema(AbstractSchema):
             config_info['layers'][index]['params']['mac_grid_num_rows'] = num_rows
             config_info['layers'][index]['params']['mac_grid_num_cols'] = num_cols
 
-            config_info['layers'][index]['params'][
-                'permanence'
-            ] = float(
-                config_info['layers'][index]['params'][
-                    'permanence'
-                ]
-            )
+            # config_info['layers'][index]['params'][
+            #     'permanence'
+            # ] = float(
+            #     config_info['layers'][index]['params'][
+            #         'permanence'
+            #     ]
+            # )
 
             config_info['layers'][index]['params'][
                 'activation_threshold_min'
@@ -214,11 +212,16 @@ class SparseyModelSchema(AbstractSchema):
                         'sigmoid_lambda': And(Or(Use(float), int), schema_utils.is_positive, error="Sigmoid lambda must be a positive number"),
                         'sigmoid_phi': Or(Use(float), error="Sigmoid phi must be an integer or float"),
                         'saturation_threshold': And(float, lambda n: 0 <= n <= 1, error="Saturation threshold must be between 0 and 1"),
-                        'permanence': And(Or(Use(float)), lambda n: 0 < n <= 1, error="Permanence must be between 0 (exclusive) and 1 (inclusive)"),
                         'activation_threshold_min': And(Or(Use(float)), lambda x: schema_utils.is_between(x, 0.0, 1.0), error="Activation threshold min must be between 0 and 1"),
                         'activation_threshold_max': And(Or(Use(float)), lambda x: schema_utils.is_between(x, 0.0, 1.0), error="Activation threshold max must be between 0 and 1"),
                         'sigmoid_chi': Or(Use(float), error="Sigmoid chi must be an integer or float"),
-                        'min_familiarity': And(float, lambda x: schema_utils.is_between(x, 0, 1), error="Min familiarity must be between 0 and 1")
+                        'min_familiarity': And(float, lambda x: schema_utils.is_between(x, 0, 1), error="Min familiarity must be between 0 and 1"),
+                        'permanence_steps': And(int, Use(float), error='num_steps_to_zero'),
+                        'permanence_convexity': And(
+                            Use(float),
+                            lambda n: 0 < n,
+                            error='convexity must be a float > 0'
+                        )
                     }
                 }
             ],
