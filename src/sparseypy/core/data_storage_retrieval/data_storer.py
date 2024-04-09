@@ -98,7 +98,11 @@ class DataStorer:
             model_artifact = wandb.Artifact(
                 name=instance_name,
                 type="model",
-                description=model_description
+                description=model_description,
+                metadata={
+                    'source_run': experiment,
+                    'source_path': wandb.run.path
+                }
             )
 
             # add the state dict
