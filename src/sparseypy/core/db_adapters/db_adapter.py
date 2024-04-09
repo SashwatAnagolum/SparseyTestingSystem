@@ -1,3 +1,7 @@
+"""
+firestore_db_adapter.py - file containing the Firestore database adapter
+"""
+
 import abc
 
 import numpy as np
@@ -142,6 +146,127 @@ class DbAdapter:
             result (HPOResult): the results of the completed HPO sweep to
             summarize and save
         """
+
+
+    @abc.abstractmethod
+    def get_training_result(
+            self,
+            experiment_id: str,
+            result_type: str = "training"
+        ) -> TrainingResult:
+        """
+        Retrieves the training result for a given experiment.
+
+        This method compiles the results of individual training steps within an experiment 
+        into a single TrainingResult object. It includes overall metrics, step-by-step results, 
+        and information about the start and end times of the experiment, as well as the 
+        best performing steps.
+
+        Args:
+            experiment_id (str): The unique identifier for the experiment.
+
+        Returns:
+            TrainingResult: An instance of TrainingResult containing aggregated 
+            metrics and outcomes from the experiment's training steps.
+        """
+
+
+    @abc.abstractmethod
+    def get_training_step_result(
+            self,
+            experiment_id: str,
+            step_index: int,
+            result_type: str ="training"
+        ) -> TrainingStepResult:
+        """
+        Retrieves the result of a specific training step within an experiment.
+
+        Args:
+            experiment_id (str): The unique identifier for the experiment.
+            step_index (int): The index of the training step to retrieve.
+            result_type (str): The type of result to retrieve. Defaults to "training".
+
+        Returns:
+            TrainingStepResult: An instance of TrainingStepResult containing the step's metrics.
+
+        Raises:
+            ValueError: If the step index is out of bounds for the given experiment.
+        """
+
+
+    @abc.abstractmethod
+    def get_hpo_step_result(self, hpo_run_id, experiment_id):
+        """
+        Retrieves the result of a specific experiment step within an HPO run.
+
+        This method combines experiment data and HPO configuration to create a comprehensive
+        step result for hpo.
+
+        Args:
+            hpo_run_id (str): The unique identifier for the HPO run.
+            experiment_id (str): The unique identifier for the experiment within the HPO run.
+
+        Returns:
+            HPOStepResult: An instance of HPOStepResult representing the experiment step 
+            within the HPO run.
+        """
+
+
+    @abc.abstractmethod
+    def get_hpo_result(self, hpo_run_id: str) -> HPOResult:
+        """
+        Retrieves the overall result of a specific hyperparameter optimization (HPO) run.
+
+        This method aggregates the results of individual experiments within an HPO run, 
+        and provides a comprehensive view of the HPO run, including start and end times, 
+        configuration settings, and the best-performing experiment.
+
+        Args:
+            hpo_run_id (str): The unique identifier for the HPO run.
+
+        Returns:
+            HPOResult: An instance of HPOResult containing aggregated results 
+            and configuration info from the HPO run.
+        """
+
+
+    def get_evaluation_result(self, experiment_id: str) -> TrainingResult:
+        """
+        Get the evaluation result for a given experiment.
+
+        Args:
+            experiment_id (str): The ID of the experiment.
+
+        Returns:
+            EvaluationResult: the EvaluationResult for the experiment of this id in w&b
+        """
+        return self.get_training_result(experiment_id=experiment_id, result_type="evaluation")
+
+
+    def get_evaluation_step_result(
+            self,
+            experiment_id: str,
+            step_index: int
+        ) -> TrainingStepResult:
+        """
+        Retrieves the result of a specific evaluation step within an experiment.
+
+        Args:
+            experiment_id (str): The unique identifier for the experiment.
+            step_index (int): The index of the training step to retrieve.
+
+        Returns:
+            TrainingStepResult: An instance of TrainingStepResult containing the 
+                evaluation step's metrics.
+
+        Raises:
+            ValueError: If the step index is out of bounds for the given experiment.
+        """
+        return self.get_training_step_result(
+            experiment_id=experiment_id,
+            step_index=step_index,
+            result_type="evaluation"
+        )
 
 
     def get_config(self):
