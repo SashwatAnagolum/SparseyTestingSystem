@@ -99,6 +99,7 @@ class FirestoreDbAdapter(DbAdapter):
                 reg_ref.update(
                     {
                         "last_updated": datetime.now(),
+                        "source_run": experiment,
                         "versions": firestore.ArrayUnion([instance_name])
                     }
                 )
@@ -106,6 +107,7 @@ class FirestoreDbAdapter(DbAdapter):
                 reg_ref.set(
                     {
                         "last_updated": datetime.now(),
+                        "source_run": experiment,
                         "versions": [
                                 {
                                     "id": instance_name,
