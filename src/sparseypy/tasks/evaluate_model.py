@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Train Model: script to train models.
+Evaluate Model: script to reload and evaluate models.
 """
 
 
@@ -24,7 +24,7 @@ warnings.filterwarnings(
     )
 
 
-def train_model(model_config: dict, trainer_config: dict,
+def evaluate_model(model_name: str, trainer_config: dict,
                 preprocessing_config: dict, dataset_config: dict,
                 system_config: dict):
     """
@@ -32,7 +32,6 @@ def train_model(model_config: dict, trainer_config: dict,
     it using the trainer built using trainer_config on 
     the dataset built using dataset_config, with preprocessing
     defined in preprocessing_config.
-
     Args:
         model_config (dict): config info to build the model.
         trainer_config (dict): config info to build the trainer.
@@ -46,30 +45,33 @@ def train_model(model_config: dict, trainer_config: dict,
     # initialize the DataStorer (logs into W&B and Firestore)
     DataStorer.configure(system_config)
 
+    df = DataFetcher(system_config)
+
+    source_path = df.get_model_source_path(model_name)
+
+    source_group = get_update_group(source_path)
+
     wandb.init(
         project=system_config["wandb"]["project_name"],
         allow_val_change=True,
-        job_type="train"
+        job_type="eval",
+        group=source_group
     )
 
-    reload_model = False
-
-    if isinstance(model_config, str):
-        model_config, model_weights = DataFetcher().get_model_data(model_config)
-        reload_model = True
+    model_config, model_weights = df.get_model_data(model_name)
 
     trainer = TrainingRecipeBuilder.build_training_recipe(
         model_config, dataset_config, preprocessing_config,
         trainer_config
     )
 
-    if reload_model:
-        trainer.model.load_state_dict(model_weights)
+    trainer.model.load_state_dict(model_weights)
 
     # print training run summary
     met_separator = "\n* "
     tqdm.write(f"""
-TRAINING RUN SUMMARY
+EVALUATION RUN SUMMARY
+Using model: {model_name}
 Dataset type: {dataset_config['dataset_type']}
 Batch size: {trainer_config['dataloader']['batch_size']}
 Number of batches: {trainer.num_batches}
@@ -78,27 +80,6 @@ Selected metrics:
 """)
 
     for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs", position=0):
-        is_epoch_done = False
-        trainer.model.train()
-        batch_number = 1
-
-        # perform training
-        with tqdm(total=trainer.num_batches, desc="Training", leave=False, position=1) as pbar:
-            while not is_epoch_done:
-                output, is_epoch_done = trainer.step(training=True)
-                tqdm.write(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
-                metric_str = pprint.pformat(output.get_metrics())
-                tqdm.write(metric_str)
-                batch_number+=1
-                pbar.update(1)
-        # summarize the best training steps
-        train_summary = trainer.get_summary("training")
-        tqdm.write("\n\nTRAINING - SUMMARY\n")
-        tqdm.write("Best metric steps:")
-        for metric, val in train_summary.best_steps.items():
-            tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
-
-
         trainer.model.eval()
         is_epoch_done = False
         batch_number = 1
@@ -125,3 +106,25 @@ Selected metrics:
             tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
         wandb.finish()
+
+
+def get_update_group(source_run_path: str) -> str:
+    """
+    Fetches the existing group of the indicated run, if any. If
+    there is no existing group, creates a new one using the name
+    of the source run and returns that.
+    Args:
+        source_run_path (str): the full path to the source run.
+    Returns:
+        str: the name of the group
+    """
+    api = wandb.Api()
+
+    source_run = api.run(source_run_path)
+
+    if source_run.group is None:
+        source_run.group = source_run.name
+        source_run.update()
+        return source_run.group
+    else:
+        return source_run.group

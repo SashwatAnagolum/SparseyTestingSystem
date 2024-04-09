@@ -60,6 +60,24 @@ class DataFetcher:
         #self.db = firestore.client()
 
 
+    def get_model_source_path(self, model_name: str) -> str:
+        """
+        Retrieves the source experiment for a given model name and version.
+        Args:
+            model_name (str): A unique identifier for the model.
+        Returns:
+            str: the path to the run that trained this model version.
+        """
+        # construct the artifact name by adding ":latest" if the user has not
+        # specified a version
+        artifact_name = model_name + ('' if ':' in model_name else ':latest')
+        # artifact path form: "<entity>/<project>/<artifact>"
+        artifact_path = f"{wandb.api.default_entity}/model-registry/{artifact_name}"
+        # fetch the artifact from W&B
+        artifact = wandb.Api().artifact(artifact_path)
+        return artifact.metadata["source_path"]
+
+
     def get_model_data(self, model_name: str) -> tuple[dict, dict]:
         """
         Fetches configuration and model weights for a given model.
@@ -83,9 +101,10 @@ class DataFetcher:
         # specified a version
         artifact_name = model_name + ('' if ':' in model_name else ':latest')
         # artifact path form: "<entity>/<project>/<artifact>"
-        artifact_path = f"{wandb.run.entity}/model-registry/{artifact_name}"
+        artifact_path = f"{wandb.api.default_entity}/model-registry/{artifact_name}"
         # fetch the artifact from W&B
-        m_path = wandb.run.use_artifact(artifact_path, type="model").download()
+        m_ref = wandb.run.use_artifact(artifact_path, type="model")
+        m_path = m_ref.download()
         # read the model config from the downloaded artifact
         with open(os.path.join(m_path, "network.yaml"), "r", encoding="utf-8") as f:
             model_config = json.load(f)
