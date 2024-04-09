@@ -40,13 +40,13 @@ class DataFetcher:
         if not DataStorer.is_initialized:
             raise ValueError("You must call DataStorer.configure() before intializing DataFetcher objects.")
 
-        read_db_name = config["databases"]["read_database"]
+        read_db_name = config["database"]["read_database"]
 
         read_config = next(
-            [
-                db for db in config["databases"]["write_databases"]
+            (
+                db for db in config["database"]["write_databases"]
                 if db["name"] == read_db_name
-            ]
+            )
         )
 
         self.db_adapter = DbAdapterFactory.create_db_adapter(
