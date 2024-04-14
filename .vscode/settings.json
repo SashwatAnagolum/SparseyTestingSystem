@@ -1,0 +1,17 @@
+{
+    "python.testing.pytestArgs": [
+        "test"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "terminal.integrated.profiles.windows": {
+        "SparseyPowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell",
+            "args": [
+                "-ExecutionPolicy", "Bypass"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "SparseyPowerShell"
+}
