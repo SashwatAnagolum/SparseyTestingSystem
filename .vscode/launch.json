@@ -112,7 +112,7 @@
             "id": "getModelNameString",
             "type": "promptString",
             "description": "enter the name of the online model to use",
-            "default": "example_model"
+            "default": "example_model_v2"
         },
         {
             "id": "getSparseyConfigDirectoryString",
