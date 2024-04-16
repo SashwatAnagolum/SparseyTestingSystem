@@ -139,8 +139,8 @@ class SparseyModelSchema(AbstractSchema):
                     config_info['layers'][index]['params']['num_macs']
                 )
 
-            config_info['layers'][index]['params']['mac_grid_num_rows'] = num_rows
-            config_info['layers'][index]['params']['mac_grid_num_cols'] = num_cols
+                config_info['layers'][index]['params']['mac_grid_num_rows'] = num_rows
+                config_info['layers'][index]['params']['mac_grid_num_cols'] = num_cols
 
             config_info['layers'][index]['params'][
                 'activation_threshold_min'
