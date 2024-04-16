@@ -134,20 +134,13 @@ class SparseyModelSchema(AbstractSchema):
                 'prev_layer_grid_layout'
             ] = prev_layer_dims[5]
 
-            num_rows, num_cols = self.compute_factor_pair(
-                config_info['layers'][index]['params']['num_macs']
-            )
+            if config_info['layers'][index]['params']['autosize_grid']:
+                num_rows, num_cols = self.compute_factor_pair(
+                    config_info['layers'][index]['params']['num_macs']
+                )
 
             config_info['layers'][index]['params']['mac_grid_num_rows'] = num_rows
             config_info['layers'][index]['params']['mac_grid_num_cols'] = num_cols
-
-            # config_info['layers'][index]['params'][
-            #     'permanence'
-            # ] = float(
-            #     config_info['layers'][index]['params'][
-            #         'permanence'
-            #     ]
-            # )
 
             config_info['layers'][index]['params'][
                 'activation_threshold_min'
