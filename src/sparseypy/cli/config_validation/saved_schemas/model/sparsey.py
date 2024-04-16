@@ -139,8 +139,8 @@ class SparseyModelSchema(AbstractSchema):
                     config_info['layers'][index]['params']['num_macs']
                 )
 
-            config_info['layers'][index]['params']['mac_grid_num_rows'] = num_rows
-            config_info['layers'][index]['params']['mac_grid_num_cols'] = num_cols
+                config_info['layers'][index]['params']['mac_grid_num_rows'] = num_rows
+                config_info['layers'][index]['params']['mac_grid_num_cols'] = num_cols
 
             config_info['layers'][index]['params'][
                 'activation_threshold_min'
@@ -160,7 +160,7 @@ class SparseyModelSchema(AbstractSchema):
 
             prev_layer_dims = (
                 config_info['layers'][index]['params']['mac_grid_num_rows'],
-                config_info['layers'][index]['params']['mac_grid_num_rows'],
+                config_info['layers'][index]['params']['mac_grid_num_cols'],
                 config_info['layers'][index]['params']['num_macs'],
                 config_info['layers'][index]['params']['num_cms_per_mac'],
                 config_info['layers'][index]['params']['num_neurons_per_cm'],
