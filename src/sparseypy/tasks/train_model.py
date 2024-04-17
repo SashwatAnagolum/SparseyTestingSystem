@@ -127,6 +127,7 @@ Selected metrics:
     tqdm.write("\nFinalizing results...")
     run_url = wandb.run.get_url()
     model_name = model_config.get('model_name', wandb.run.id+'-model')
+    
     wandb.finish()
 
     tqdm.write("\nTRAIN MODEL COMPLETED")
