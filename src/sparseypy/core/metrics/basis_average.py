@@ -33,6 +33,7 @@ class BasisAverageMetric(Metric):
             and layerwise inputs and outputs.
     """
     def __init__(self, model: torch.nn.Module,
+                 device: torch.device,
                  reduction: Optional[str] = None,
                  best_value: Optional[Callable] = max_by_layerwise_mean) -> None:
         """
@@ -44,7 +45,7 @@ class BasisAverageMetric(Metric):
             reduction (Optional[str]): the type of reduction
                 to apply before returning the metric value.
         """
-        super().__init__(model, "basis_average", best_value)
+        super().__init__(model, "basis_average", best_value, device)
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)
@@ -65,8 +66,10 @@ class BasisAverageMetric(Metric):
         """
         projected_rfs = [
             [
-                torch.zeros(input_shape, dtype=torch.bool)
-                for j in range(len(layers[i]))
+                torch.zeros(
+                    input_shape, dtype=torch.bool,
+                    device=self.device
+                ) for j in range(len(layers[i]))
             ] for i in range(len(layers))
         ]
 
@@ -99,8 +102,6 @@ class BasisAverageMetric(Metric):
             last_batch.numel() / last_batch.shape[0]
         )
 
-        print(self.expected_input_shape)
-
         self.projected_rfs = self.get_projected_receptive_fields(
             layers, self.expected_input_shape
         )
@@ -109,7 +110,8 @@ class BasisAverageMetric(Metric):
             [
                 torch.zeros(
                     torch.sum(self.projected_rfs[i][j]),
-                    dtype=torch.float32
+                    dtype=torch.float32,
+                    device=self.device
                 ) for j in range(len(layers[i]))
             ] for i in range(len(layers))
         ]
@@ -163,28 +165,30 @@ class BasisAverageMetric(Metric):
                 [
                     torch.zeros(
                         self.expected_input_shape,
-                        dtype=torch.float32
+                        dtype=torch.float32,
+                        device=self.device
                     ).scatter_(
                         0, torch.argwhere(self.projected_rfs[i][j]).squeeze(),
                         torch.nan_to_num(
                             self.summed_inputs[i][j] /
                             self.num_inputs_seen[i][j]
                         )
-                    ) for j in range(len(layers[i]))
+                    ).cpu() for j in range(len(layers[i]))
                 ] for i in range(len(layers))
             ]
         elif self.reduction == 'highest_layer':
             return [
                 torch.zeros(
                     self.expected_input_shape,
-                    dtype=torch.float32
+                    dtype=torch.float32,
+                    device=self.device
                 ).scatter_(
                     0, torch.argwhere(self.projected_rfs[-1][j]).squeeze(),
                     torch.nan_to_num(
                         self.summed_inputs[-1][j] /
                         self.num_inputs_seen[-1][j]
                     )
-                ) for j in range(len(layers[-1]))
+                ).cpu() for j in range(len(layers[-1]))
             ]
         else:
             return [
@@ -192,6 +196,6 @@ class BasisAverageMetric(Metric):
                     torch.nan_to_num(
                         self.summed_inputs[i][j] /
                         self.num_inputs_seen[i][j]
-                    ) for j in range(len(layers[i]))
+                    ).cpu() for j in range(len(layers[i]))
                 ] for i in range(len(layers))
             ]

@@ -23,6 +23,7 @@ class FeatureCoverageMetric(Metric):
             and layerwise inputs and outputs.
     """
     def __init__(self, model: torch.nn.Module,
+                 device: torch.device,
                  reduction: Optional[str] = None,
                  best_value: Optional[Callable] = max_by_layerwise_mean) -> None:
         """
@@ -34,7 +35,7 @@ class FeatureCoverageMetric(Metric):
             reduction (Optional[str]): the type of reduction
                 to apply before returning the metric value.
         """
-        super().__init__(model, "feature_coverage", best_value)
+        super().__init__(model, "feature_coverage", best_value, device)
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)
@@ -59,13 +60,13 @@ class FeatureCoverageMetric(Metric):
         last_batch = last_batch.view(last_batch.shape[0], -1).bool()
         rf_cache = [[] for i in range(len(layers))]
         layer_masks = [
-            torch.zeros(last_batch.shape, dtype=torch.bool)
+            torch.zeros(last_batch.shape, dtype=torch.bool, device=self.device)
             for i in range(len(layers))
         ]
 
         for mac in layers[0]:
             rf_cache[0].append(
-                torch.zeros(last_batch.shape, dtype=torch.bool)
+                torch.zeros(last_batch.shape, dtype=torch.bool, device=self.device)
             )
 
             rf_cache[0][-1][:, mac.input_filter] = True
@@ -80,7 +81,10 @@ class FeatureCoverageMetric(Metric):
         for layer_index, layer in zip(range(1, len(layers)), layers[1:]):
             for mac in layer:
                 rf_cache[layer_index].append(
-                    torch.zeros(last_batch.shape, dtype=torch.bool)
+                    torch.zeros(
+                        last_batch.shape, dtype=torch.bool,
+                        device=self.device
+                    )
                 )
 
                 for source_mac_index in mac.input_filter:
@@ -117,12 +121,12 @@ class FeatureCoverageMetric(Metric):
         )
 
         if self.reduction is None or self.reduction == "none":
-            return feature_coverage_values
+            return feature_coverage_values.cpu()
         elif self.reduction == "sum":
-            return torch.sum(torch.mean(feature_coverage_values, 1))
+            return torch.sum(torch.mean(feature_coverage_values, 1)).cpu()
         elif self.reduction == "mean":
-            return torch.mean(feature_coverage_values)
+            return torch.mean(feature_coverage_values).cpu()
         elif self.reduction == 'highest_layer':
-            return feature_coverage_values[-1]
+            return feature_coverage_values[-1].cpu()
         else:
             return None

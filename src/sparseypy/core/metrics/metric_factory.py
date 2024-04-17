@@ -29,6 +29,7 @@ class MetricFactory:
         else:
             raise ValueError('Invalid metric name!')
 
+
     @staticmethod
     def create_metric(metric_name, **kwargs) -> Metric:
         """

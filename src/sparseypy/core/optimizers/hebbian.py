@@ -15,13 +15,15 @@ from sparseypy.core.hooks import LayerIOHook
 
 
 class HebbianOptimizer(torch.optim.Optimizer):
-    def __init__(self, model: torch.nn.Module, epsilon: float = 1e-7):
+    def __init__(self, model: torch.nn.Module, device: torch.device, 
+                 epsilon: float = 1e-7):
         super().__init__(model.parameters(), dict())
 
         self.model = model
         self.saturation_thresholds = []
         self.timesteps = []
         self.epsilon = epsilon
+        self.device = device
 
         # BUG this will not operate correctly in certain kinds of model
         for layer in model.children():
@@ -95,7 +97,10 @@ class HebbianOptimizer(torch.optim.Optimizer):
             ):
                 if len(self.timesteps[layer_index]) == mac_index:
                     self.timesteps[layer_index].append(
-                        torch.zeros(mac.weights.shape, dtype=torch.int32)
+                        torch.zeros(
+                            mac.weights.shape, dtype=torch.int32,
+                            device=self.device
+                        )
                     )
 
                 # iterate over the parameters of the current MAC
@@ -134,7 +139,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     # updates for weights that are not updateable (frozen).
                     # BUG: probably does not update weights that are both active on this step *and* frozen
                     weight_updates *= updateable_mask
-
+                    
                     # apply permanence/weight decay to all weights 
                     # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
                     permanence_numerator = torch.pow(
@@ -156,7 +161,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     torch.nan_to_num(params, 0.0, out=params)
                     params += torch.ge(weight_updates, 1)
                     torch.clamp(params, 0, 1, out=params)
-
+                    
                     self.timesteps[layer_index][mac_index] += 1
                     self.timesteps[layer_index][mac_index] = torch.mul(
                         torch.lt(weight_updates, 1),
