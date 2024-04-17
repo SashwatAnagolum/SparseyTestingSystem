@@ -14,13 +14,35 @@ from sparseypy.cli.config_validation.validate_config import (
 
 from sparseypy.tasks.evaluate_model import evaluate_model
 
+sts_description = '''
+sparseypy: The Sparsey Testing System
+
+evaluate_model: command-line script to rleoad and evaluate previously trained models on additional datasets.
+
+To use this script, specify the name of an existing model in Weights & Biases and provide a dataset,
+a preprocessing stack, and a training configuration. 
+
+The system will automatically retrieve the model and perform evaluation on the indicated dataset, 
+logging all results to Weights & Biases.
+
+For the details of every YAML configuration file, please see the commented example configuration files 
+at https://github.com/Neurithmic-Systems/SparseyTestingSystem/tree/main/demo
+'''
+
+sts_epilogue = '''
+Sparsey (c) Dr. Rod Rinkus and Neurithmic Systems. All rights reserved.
+'''
+
 def parse_args() -> argparse.Namespace:
     """
     Parses the command line arguments passed in during execution.
     Returns:
         Namespace containing the parsed arguments.
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description=sts_description,
+        epilog=sts_epilogue
+    )
 
     parser.add_argument(
         '--model_name', type=str,
