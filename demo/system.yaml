@@ -30,6 +30,10 @@ wandb:
   #     NOTE that using "mac" level can substantially increase W&B data usage
   #     expansion factor is (# of layers * # of macs) in the amount of metric data stored
   data_resolution: 2
+  # silent: bool, default True - whether to suppress all Weights & Biases system messages
+  #     Unset this if you need to diagnose problems with Weights & Biases or you are willing to
+  #     put up with the console spam for the mini-metric graphs it creates during training.
+  silent: True
 
 # database: configuration settings for one or more backend databases
 database:
