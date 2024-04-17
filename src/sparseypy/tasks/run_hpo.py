@@ -31,6 +31,10 @@ def run_hpo(hpo_config: dict,
         system_config (dict): config info for the overall system
     """
 
+    # silence WandB if requested by the user
+    if system_config["wandb"]["silent"]:
+        os.environ["WANDB_SILENT"] = "true"
+
     # initialize the DataStorer (logs into W&B and Firestore)
     DataStorer.configure(system_config)
 
