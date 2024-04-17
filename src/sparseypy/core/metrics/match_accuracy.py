@@ -15,9 +15,10 @@ class MatchAccuracyMetric(Metric):
 
     def __init__(self, 
                  model: torch.nn.Module, 
+                 device: torch.device,
                  reduction: Optional[str] = None,
                  best_value: Optional[Callable] = max_by_layerwise_mean):
-        super().__init__(model, "match_accuracy", best_value)
+        super().__init__(model, "match_accuracy", best_value, device)
         # attaches the hook anew for this Metric to gain access to the hook data
         # consider hook managerlater if we need to use many metrics with hooks
         self.hook = LayerIOHook(self.model)

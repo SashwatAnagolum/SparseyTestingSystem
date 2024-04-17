@@ -16,12 +16,16 @@ from sparseypy.core.metrics.metric_factory import MetricFactory
 from sparseypy.access_objects.datasets import PreprocessedDataset, InMemoryDataset
 from sparseypy.access_objects.models.model_builder import ModelBuilder
 
+
 class TrainingRecipeBuilder:
+    """
+    TrainingRecipeBuilder: builder class for TrainingRecipe
+    objects.
+    """
     @staticmethod
     def build_training_recipe(model_config: dict, 
-                      dataset_config: dict,
-                      preprocessing_config: dict,
-                      train_config: dict) -> TrainingRecipe:
+        dataset_config: dict, preprocessing_config: dict,
+        train_config: dict) -> TrainingRecipe:
         """
         Builds the training recipe object using the
         passed in config information.
@@ -42,13 +46,17 @@ class TrainingRecipeBuilder:
             (TrainingRecipe): the constructed
                 TrainingRecipe object.
         """
-        model = ModelBuilder.build_model(model_config)
+        device = torch.device('cuda' if train_config['use_gpu'] else 'cpu')
+
+        model = ModelBuilder.build_model(model_config, device)
+        model.to(device)
+
         preprocessing_stack = PreprocessingStack(preprocessing_config)
 
         optimizer = OptimizerFactory.create_optimizer(
             train_config['optimizer']['name'],
             **train_config['optimizer']['params'],
-            model=model
+            device=device, model=model
         )
 
         dataset = DatasetFactory.create_dataset(
@@ -67,7 +75,7 @@ class TrainingRecipeBuilder:
                 dataset_config['preprocessed_temp_dir'],
                 dataset_config['save_to_disk']
             )
-        
+
         if dataset_config['in_memory']:
             dataset = InMemoryDataset(
                 dataset, dataset_config['load_lazily']
@@ -87,7 +95,8 @@ class TrainingRecipeBuilder:
                 #**metric_config['params'],
                 model=model,
                 reduction=metric_config['reduction'], # WARNING this formulation assumes all Metrics support a reduction constructor parameter
-                best_value=metric_config['best_value']
+                best_value=metric_config['best_value'],
+                device=device
             )
 
             metrics_list.append(metric)
@@ -99,8 +108,6 @@ class TrainingRecipeBuilder:
             )
         else:
             loss_func = None
-
-        #loss_func = None
              
         # store the configs inside the finished TrainingRecipe for later saving
         setup_configs = {
@@ -111,7 +118,7 @@ class TrainingRecipeBuilder:
         }
 
         return TrainingRecipe(
-            model, optimizer, dataloader,
+            device, model, optimizer, dataloader,
             preprocessing_stack, metrics_list,
             train_config['metrics'], setup_configs,
             loss_func,

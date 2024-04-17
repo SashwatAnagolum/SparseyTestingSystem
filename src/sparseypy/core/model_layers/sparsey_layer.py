@@ -31,7 +31,8 @@ class MAC(torch.nn.Module):
         permanence_steps: float, permanence_convexity: float,
         activation_threshold_min: float,
         activation_threshold_max: float,
-        sigmoid_chi: float, min_familiarity: float
+        sigmoid_chi: float, min_familiarity: float,
+        device: torch.device
     ) -> None:
         """
         Initializes the MAC object.
@@ -74,6 +75,7 @@ class MAC(torch.nn.Module):
                 'mac_grid_num_cols properties.'
             )
 
+        self.device = device
         self.input_num_cms = num_cms_per_mac_in_input
         self.input_num_neurons = num_neurons_per_cm_in_input
         self.input_num_macs = input_filter.shape[0]
@@ -105,7 +107,7 @@ class MAC(torch.nn.Module):
         )
 
         self.stored_codes = set()
-        self.input_filter = input_filter
+        self.input_filter = input_filter.to(self.device)
         self.training = True
 
         self.is_active = True
@@ -208,10 +210,10 @@ class MAC(torch.nn.Module):
             else:
                 active_neurons = torch.argmax(x, 2, keepdim=True)
 
-            output = torch.zeros(x.shape, dtype=torch.float32)
+            output = torch.zeros(x.shape, dtype=torch.float32, device=self.device)
             output.scatter_(
                 2, active_neurons,
-                torch.ones(x.shape, dtype=torch.float32)
+                torch.ones(x.shape, dtype=torch.float32, device=self.device)
             )
 
             output = torch.mul(
@@ -220,11 +222,11 @@ class MAC(torch.nn.Module):
 
             if self.training:
                 if tuple(
-                    [i for i in active_neurons.flatten().numpy()]
+                    [i for i in active_neurons.flatten().cpu().numpy()]
                 ) not in self.stored_codes:
                     self.stored_codes.add(
                         tuple(
-                            [i for i in active_neurons.flatten().numpy()]
+                            [i for i in active_neurons.flatten().cpu().numpy()]
                         )
                     )
 
@@ -266,7 +268,8 @@ class SparseyLayer(torch.nn.Module):
         permanence_steps: float, permanence_convexity: float,
         activation_threshold_min: float,
         activation_threshold_max: float,
-        min_familiarity: float, sigmoid_chi: float):
+        min_familiarity: float, sigmoid_chi: float,
+        device: torch.device):
         """
         Initializes the SparseyLayer object.
 
@@ -275,6 +278,7 @@ class SparseyLayer(torch.nn.Module):
         """
         super().__init__()
 
+        self.device = device
         self.is_grid_autosized = autosize_grid
         self.num_macs = num_macs
         self.receptive_field_radius = mac_receptive_field_radius
@@ -316,6 +320,11 @@ class SparseyLayer(torch.nn.Module):
             self.mac_positions, prev_layer_mac_positions
         )
 
+        self.input_connections = [
+            input_connection.to(device) for input_connection
+            in self.input_connections
+        ]
+
         self.mac_list = [
             MAC(
                 num_cms_per_mac, num_neurons_per_cm,
@@ -330,7 +339,8 @@ class SparseyLayer(torch.nn.Module):
                 permanence_steps, permanence_convexity, 
                 activation_threshold_min,
                 activation_threshold_max,
-                sigmoid_chi, min_familiarity
+                sigmoid_chi, min_familiarity,
+                self.device
             ) for i in range(num_macs)
         ]
 
