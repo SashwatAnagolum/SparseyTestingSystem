@@ -15,16 +15,13 @@ from sparseypy.cli.config_validation.validate_config import (
 
 from sparseypy.tasks.evaluate_model import evaluate_model
 
-sts_description = '''
+description = '''
 =====================================
 sparseypy: The Sparsey Testing System
 =====================================
 \n
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
+evaluate_model: evaluate previously-trained models on additional datasets
 \n
---------------------------------------------------------------------------------
-evaluate_model: command-line script to reload and evaluate previously trained
-models on additional datasets
 --------------------------------------------------------------------------------
 \n\n
 To use this script, specify the name of an existing model in Weights & Biases 
@@ -44,7 +41,7 @@ project's GitHub repository.
 --------------------------------------------------------------------------------
 '''
 
-sts_epilogue = '''
+epilogue = '''
 --------------------------------------------------------------------------------
 Sparsey (c) Dr. Rod Rinkus and Neurithmic Systems. All rights reserved.
 --------------------------------------------------------------------------------
@@ -57,8 +54,8 @@ def parse_args() -> argparse.Namespace:
         Namespace containing the parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        description=sts_description,
-        epilog=sts_epilogue,
+        description=description,
+        epilog=epilogue,
         formatter_class=RawDescriptionHelpFormatter
     )
 

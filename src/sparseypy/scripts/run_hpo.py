@@ -5,6 +5,7 @@ Run HPO: script to run HPO
 """
 
 import argparse
+from argparse import RawDescriptionHelpFormatter
 
 from dotenv import load_dotenv
 
@@ -14,6 +15,41 @@ from sparseypy.cli.config_validation.validate_config import (
 
 from sparseypy.tasks.run_hpo import run_hpo
 
+description = '''
+=====================================
+sparseypy: The Sparsey Testing System
+=====================================
+\n
+run_hpo: automated hyperparameter optimization for Sparsey models
+\n
+--------------------------------------------------------------------------------
+\n\n
+Performs hyperparameter optimization using a user-selected set of
+hyperparameters. 
+
+Allows customization of all model- and training-related hyperparameters using a
+flexible set of value options and multiple HPO strategies with intelligent
+config file validation and automatic logging of data to Weights & Biases and
+Firestore.
+\n\n
+Due to the extensive variety of options available, this system uses YAML files
+rather than command-line arguments for its configuration.
+\n\n
+To use it, you must provide the paths to HPO, dataset, preprocessing, 
+and system configuration files in the corresponding command-line arguments.
+\n\n
+For the details of every YAML configuration file and option therein, please see
+the commented example configuration files in the "demo" folder in this
+project's GitHub repository.
+\n
+--------------------------------------------------------------------------------
+'''
+
+epilogue = '''
+--------------------------------------------------------------------------------
+Sparsey (c) Dr. Rod Rinkus and Neurithmic Systems. All rights reserved.
+--------------------------------------------------------------------------------
+'''
 
 def parse_args() -> argparse.Namespace:
     """
@@ -22,7 +58,11 @@ def parse_args() -> argparse.Namespace:
     Returns:
         Namespace containing the parsed arguments.
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description=description,
+        epilog=epilogue,
+        formatter_class=RawDescriptionHelpFormatter
+    )
 
     parser.add_argument(
         '--preprocessing_config', type=str,
