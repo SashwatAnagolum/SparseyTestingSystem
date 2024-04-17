@@ -11,3 +11,4 @@ firebase_service_account_key.json
 datasets/preprocessed_dataset
 datasets/MNIST-1K
 artifacts/
+datasets/MNIST_5K
