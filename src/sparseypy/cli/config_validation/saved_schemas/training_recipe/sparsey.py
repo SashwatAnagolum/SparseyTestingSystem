@@ -7,7 +7,9 @@ Sparsey Trainer Schema: the schema for Sparsey trainer config files.
 
 import typing
 
-from schema import Schema, Optional, And, Use
+from schema import Schema, Optional, And, Use, Or
+
+import torch
 
 from sparseypy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparseypy.cli.config_validation import schema_factory
@@ -164,22 +166,38 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
         Returns:
             a Schema that can be used to validate the config info.
         """
-        config_schema = Schema({
-            'optimizer': schema_params['optimizer_schema'],
-            'metrics': Use(
-                lambda x: self.validate_metrics_in_order(x, schema_params['metric_schemas']),
-                error="Specified metric is not valid."
-            ),
-            'dataloader': {
-                'batch_size': And(int, schema_utils.is_positive, error="Batch size must be a positive integer."),
-                'shuffle': And(bool, error="Shuffle must be a boolean value.")
-            },
-            'training': {
-                'num_epochs': And(int, schema_utils.is_positive, error="Num_epochs must be a positive integer."),
-                Optional('step_resolution', default=None): And(
-                    int, schema_utils.is_positive, error="Step_resolution must be a positive integer if specified."
+        config_schema = Schema(
+            {
+                'optimizer': schema_params['optimizer_schema'],
+                'metrics': Use(
+                    lambda x: self.validate_metrics_in_order(x, schema_params['metric_schemas']),
+                    error="Specified metric is not valid."
+                ),
+                'dataloader': {
+                    'batch_size': And(
+                        int, schema_utils.is_positive,
+                        error="Batch size must be a positive integer."
+                    ),
+                    'shuffle': And(
+                        bool,
+                        error="Shuffle must be a boolean value."
+                    )
+                },
+                'training': {
+                    'num_epochs': And(
+                        int, schema_utils.is_positive,
+                        error="Num_epochs must be a positive integer."
+                    ),
+                    Optional('step_resolution', default=None): And(
+                        int, schema_utils.is_positive,
+                        error="Step_resolution must be a positive integer if specified."
+                    )
+                },
+                Optional('use_gpu', default=False): Or(
+                    False, torch.cuda.is_available,
+                    error='Cannot set use_gpu to True when no GPU is available.'
                 )
             }
-        })
+        )
 
         return config_schema

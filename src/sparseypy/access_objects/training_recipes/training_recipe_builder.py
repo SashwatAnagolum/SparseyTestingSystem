@@ -16,12 +16,16 @@ from sparseypy.core.metrics.metric_factory import MetricFactory
 from sparseypy.access_objects.datasets import PreprocessedDataset, InMemoryDataset
 from sparseypy.access_objects.models.model_builder import ModelBuilder
 
+
 class TrainingRecipeBuilder:
+    """
+    TrainingRecipeBuilder: builder class for TrainingRecipe
+    objects.
+    """
     @staticmethod
     def build_training_recipe(model_config: dict, 
-                      dataset_config: dict,
-                      preprocessing_config: dict,
-                      train_config: dict) -> TrainingRecipe:
+        dataset_config: dict, preprocessing_config: dict,
+        train_config: dict) -> TrainingRecipe:
         """
         Builds the training recipe object using the
         passed in config information.
@@ -42,7 +46,11 @@ class TrainingRecipeBuilder:
             (TrainingRecipe): the constructed
                 TrainingRecipe object.
         """
+        device = torch.device('cuda' if train_config['use_gpu'] else 'cpu')
+
         model = ModelBuilder.build_model(model_config)
+        model.to(device)
+
         preprocessing_stack = PreprocessingStack(preprocessing_config)
 
         optimizer = OptimizerFactory.create_optimizer(
@@ -111,7 +119,7 @@ class TrainingRecipeBuilder:
         }
 
         return TrainingRecipe(
-            model, optimizer, dataloader,
+            device, model, optimizer, dataloader,
             preprocessing_stack, metrics_list,
             train_config['metrics'], setup_configs,
             loss_func,

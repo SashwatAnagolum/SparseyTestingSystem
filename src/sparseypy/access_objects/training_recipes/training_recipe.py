@@ -17,7 +17,12 @@ from sparseypy.core.results import TrainingStepResult, TrainingResult
 import wandb
 
 class TrainingRecipe:
-    def __init__(self, model: torch.nn.Module,
+    """
+    TrainingRecipe: class that trains a given model on a 
+    particular dataset, using configurations passed in by
+    the user.
+    """
+    def __init__(self, device: torch.device, model: torch.nn.Module,
                  optimizer: torch.optim.Optimizer,
                  dataloader: DataLoader,
                  preprocessing_stack: PreprocessingStack,
@@ -32,9 +37,10 @@ class TrainingRecipe:
         self.metrics_list = metrics_list
         self.loss_func = loss_func
         self.setup_configs = setup_configs
+        self.device = device
 
         if step_resolution is None:
-            self.step_resolution = 1 #len(self.dataloader)
+            self.step_resolution = 1
         else:
             self.step_resolution = step_resolution
 
@@ -45,21 +51,22 @@ class TrainingRecipe:
         self.ds = DataStorer(metric_config)
 
         self.training_results = TrainingResult(
-                id=wandb.run.id,
-                result_type="training",
-                resolution=self.step_resolution,
-                metrics=self.metrics_list,
-                configs=setup_configs
-            )
-        self.eval_results = TrainingResult(
-                id=wandb.run.id,
-                result_type="evaluation",
-                resolution=self.step_resolution,
-                metrics=self.metrics_list,
-                configs=setup_configs
-            )
-        self.first_eval = True
+            id=wandb.run.id,
+            result_type="training",
+            resolution=self.step_resolution,
+            metrics=self.metrics_list,
+            configs=setup_configs
+        )
 
+        self.eval_results = TrainingResult(
+            id=wandb.run.id,
+            result_type="evaluation",
+            resolution=self.step_resolution,
+            metrics=self.metrics_list,
+            configs=setup_configs
+        )
+
+        self.first_eval = True
         self.ds.create_experiment(self.training_results)
 
 
@@ -88,12 +95,15 @@ class TrainingRecipe:
 
         for _ in range(num_batches_in_step):
             data, labels = next(self.iterator)
+            labels = labels.to(self.device)
+
             self.optimizer.zero_grad()
 
             transformed_data = self.preprocessing_stack(
                 data
             )
 
+            transformed_data = transformed_data.to(self.device)
             transformed_data = transformed_data.reshape(
                 transformed_data.shape[0], *transformed_data.shape[2:]
             ).unsqueeze(-1).unsqueeze(-1)
@@ -101,10 +111,12 @@ class TrainingRecipe:
             model_output = self.model(transformed_data)
 
             for metric in self.metrics_list:
-                output = metric.compute(
-                    self.model, transformed_data,
-                    model_output, training
-                )
+                # output = metric.compute(
+                #     self.model, transformed_data,
+                #     model_output, training
+                # )
+
+                output = 1
 
                 # need to add logic for "save only during training/eval" metrics
                 results.add_metric(metric.get_name(), output)
@@ -138,6 +150,7 @@ class TrainingRecipe:
 
         return results, epoch_ended
 
+
     def get_summary(self, phase: str = "training") -> TrainingResult:
         """
         Returns the completed results for training or evaluation.
@@ -155,7 +168,7 @@ class TrainingRecipe:
             self.ds.save_training_result(self.training_results)
             self.ds.save_model(
                 experiment=wandb.run.id,
-                m=self.model,
+                m=self.model.to('cpu'),
                 model_config=self.setup_configs["model_config"]
             )
             return self.training_results
