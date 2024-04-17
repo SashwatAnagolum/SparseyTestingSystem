@@ -69,6 +69,11 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        '--dataset_config', type=str,
+        help='The location of the dataset config file.'
+    )
+
+    parser.add_argument(
         '--model_config', type=str, required=False,
         help='The location of the model config file. Mutually exclusive with --model_name.'
     )
@@ -79,23 +84,19 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        '--training_recipe_config', type=str,
-        help='The location of the trainer config file.'
-    )
-
-    parser.add_argument(
         '--preprocessing_config', type=str,
         help='The location of the preprocessing config file.'
     )
 
     parser.add_argument(
-        '--dataset_config', type=str,
-        help='The location of the dataset config file.'
-    )
-
-    parser.add_argument(
         '--system_config', type=str,
         help='The location of the system config file.'
+    )
+
+
+    parser.add_argument(
+        '--training_recipe_config', type=str,
+        help='The location of the trainer config file.'
     )
 
     args = parser.parse_args()

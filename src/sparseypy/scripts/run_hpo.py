@@ -65,11 +65,6 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        '--preprocessing_config', type=str,
-        help='The location of the preprocessing config file.'
-    )
-
-    parser.add_argument(
         '--dataset_config', type=str,
         help='The location of the dataset config file.'
     )
@@ -79,6 +74,10 @@ def parse_args() -> argparse.Namespace:
         help='The location of the hyperparameter optimization (HPO) config file.'
     )
 
+    parser.add_argument(
+        '--preprocessing_config', type=str,
+        help='The location of the preprocessing config file.'
+    )
 
     parser.add_argument(
         '--system_config', type=str,

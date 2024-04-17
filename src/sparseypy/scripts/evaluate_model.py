@@ -60,13 +60,13 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        '--model_name', type=str,
-        help='The name of the online model to evaluate.'
+        '--dataset_config', type=str,
+        help='The location of the dataset config file.'
     )
 
     parser.add_argument(
-        '--training_recipe_config', type=str,
-        help='The location of the trainer config file.'
+        '--model_name', type=str,
+        help='The name of the online model to evaluate.'
     )
 
     parser.add_argument(
@@ -75,13 +75,13 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        '--dataset_config', type=str,
-        help='The location of the dataset config file.'
+        '--system_config', type=str,
+        help='The location of the system config file.'
     )
 
     parser.add_argument(
-        '--system_config', type=str,
-        help='The location of the system config file.'
+        '--training_recipe_config', type=str,
+        help='The location of the trainer config file.'
     )
 
     args = parser.parse_args()
