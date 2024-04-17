@@ -15,12 +15,12 @@ from sparseypy.cli.config_validation.validate_config import (
 
 from sparseypy.tasks.run_hpo import run_hpo
 
-description = '''
+DESCRIPTION = '''
 =====================================
 sparseypy: The Sparsey Testing System
 =====================================
 \n
-run_hpo: automated hyperparameter optimization for Sparsey models
+run_hpo: automatic hyperparameter optimization for Sparsey models
 \n
 --------------------------------------------------------------------------------
 \n
@@ -45,7 +45,7 @@ project's GitHub repository.
 --------------------------------------------------------------------------------
 '''
 
-epilogue = '''
+EPILOG = '''
 --------------------------------------------------------------------------------
 Sparsey (c) Dr. Rod Rinkus and Neurithmic Systems. All rights reserved.
 --------------------------------------------------------------------------------
@@ -59,8 +59,8 @@ def parse_args() -> argparse.Namespace:
         Namespace containing the parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        description=description,
-        epilog=epilogue,
+        description=DESCRIPTION,
+        epilog=EPILOG,
         formatter_class=RawDescriptionHelpFormatter
     )
 
@@ -89,6 +89,10 @@ def parse_args() -> argparse.Namespace:
     return args
 
 def main():
+    """
+    Main function for the run_hpo script. Accepts and parses the command line arguments, 
+    validates the configuration files with the config schemas, and starts the run_hpo task.
+    """
     args = parse_args()
 
     load_dotenv() # load environment variables from .env

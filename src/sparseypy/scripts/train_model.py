@@ -15,7 +15,7 @@ from sparseypy.cli.config_validation.validate_config import (
 
 from sparseypy.tasks.train_model import train_model
 
-description = '''
+DESCRIPTION = '''
 =====================================
 sparseypy: The Sparsey Testing System
 =====================================
@@ -52,7 +52,7 @@ dataset, preprocessing stack, and training recipe.
 --------------------------------------------------------------------------------
 '''
 
-epilogue = '''
+EPILOG = '''
 --------------------------------------------------------------------------------
 Sparsey (c) Dr. Rod Rinkus and Neurithmic Systems. All rights reserved.
 --------------------------------------------------------------------------------
@@ -66,8 +66,8 @@ def parse_args() -> argparse.Namespace:
         Namespace containing the parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        description=description,
-        epilog=epilogue,
+        description=DESCRIPTION,
+        epilog=EPILOG,
         formatter_class=RawDescriptionHelpFormatter
     )
 
@@ -108,6 +108,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def main():
+    """
+    Main function for the train_model script. Accepts and parses the command line arguments, 
+    validates the configuration files with the config schemas, and starts the train_model task.
+    """
     args = parse_args()
 
     if args.model_config and args.model_name:

@@ -15,7 +15,7 @@ from sparseypy.cli.config_validation.validate_config import (
 
 from sparseypy.tasks.evaluate_model import evaluate_model
 
-description = '''
+DESCRIPTION = '''
 =====================================
 sparseypy: The Sparsey Testing System
 =====================================
@@ -45,7 +45,7 @@ project's GitHub repository.
 --------------------------------------------------------------------------------
 '''
 
-epilogue = '''
+EPILOG = '''
 --------------------------------------------------------------------------------
 Sparsey (c) Dr. Rod Rinkus and Neurithmic Systems. All rights reserved.
 --------------------------------------------------------------------------------
@@ -58,8 +58,8 @@ def parse_args() -> argparse.Namespace:
         Namespace containing the parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        description=description,
-        epilog=epilogue,
+        description=DESCRIPTION,
+        epilog=EPILOG,
         formatter_class=RawDescriptionHelpFormatter
     )
 
@@ -94,6 +94,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def main():
+    """
+    Main function for the evaluate_model script. Accepts and parses the command line arguments, 
+    validates the configuration files with the config schemas, and starts the evaluate_model task.
+    """
     args = parse_args()
 
     load_dotenv()
