@@ -124,4 +124,12 @@ Selected metrics:
         for metric, val in eval_summary.best_steps.items():
             tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
-        wandb.finish()
+    tqdm.write("\nFinalizing results...")
+    run_url = wandb.run.get_url()
+    model_name = model_config.get('model_name', wandb.run.id+'-model')
+    wandb.finish()
+
+    tqdm.write("\nTRAIN MODEL COMPLETED")
+    tqdm.write("Review results in Weights & Biases:")
+    tqdm.write(f"Model name: {model_name}")
+    tqdm.write(f"Run URL: {run_url}")
