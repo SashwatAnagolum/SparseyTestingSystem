@@ -194,7 +194,7 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
                     )
                 },
                 Optional('use_gpu', default=False): Or(
-                    False, torch.cuda.is_available,
+                    False, lambda x: torch.cuda.is_available(),
                     error='Cannot set use_gpu to True when no GPU is available.'
                 )
             }

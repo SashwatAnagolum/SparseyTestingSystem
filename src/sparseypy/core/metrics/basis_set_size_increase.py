@@ -14,8 +14,11 @@ class BasisSetSizeIncreaseMetric(Metric):
     BasisSetSizeIncreaseMetric: metric to keep track
         of basis set sizes across a Sparsey model.
     """
-    def __init__(self, model: torch.nn.Module, reduction: Optional[str] = None, best_value: Optional[Callable] = min_by_layerwise_mean):
-        super().__init__(model, "basis_set_size_increase", best_value)
+    def __init__(self, model: torch.nn.Module,
+                 device: torch.device,
+                 reduction: Optional[str] = None,
+                 best_value: Optional[Callable] = min_by_layerwise_mean):
+        super().__init__(model, "basis_set_size_increase", best_value, device)
         self.old_sizes = self._get_set_sizes(model)
 
         self.reduction = reduction

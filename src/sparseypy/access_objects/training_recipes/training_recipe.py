@@ -6,6 +6,7 @@ Training Recipe: class representing training recipes, which are used to train mo
 
 from datetime import datetime
 from typing import Optional
+import copy
 
 import torch
 from torch.utils.data import DataLoader
@@ -111,12 +112,10 @@ class TrainingRecipe:
             model_output = self.model(transformed_data)
 
             for metric in self.metrics_list:
-                # output = metric.compute(
-                #     self.model, transformed_data,
-                #     model_output, training
-                # )
-
-                output = 1
+                output = metric.compute(
+                    self.model, transformed_data,
+                    model_output, training
+                )
 
                 # need to add logic for "save only during training/eval" metrics
                 results.add_metric(metric.get_name(), output)
@@ -168,7 +167,7 @@ class TrainingRecipe:
             self.ds.save_training_result(self.training_results)
             self.ds.save_model(
                 experiment=wandb.run.id,
-                m=self.model.to('cpu'),
+                m=copy.deepcopy(self.model).to('cpu'),
                 model_config=self.setup_configs["model_config"]
             )
             return self.training_results

@@ -14,11 +14,7 @@ optimizer:
 #     metric schema in cli/config_validation/saved_schemas/metric
 #     in order for it to be detected here and pass validation
 metrics:
-  # name: string
-  #     metric name must be written in snake case
   - name: basis_set_size
-    # save: bool
-    #     whether the results of this metric should be stored to Weights & Biases
     save: True
     best_value: max_by_layerwise_mean
   - name: basis_set_size_increase
@@ -27,14 +23,13 @@ metrics:
     save: True
   - name: num_activations
     save: True
-    # some metrics also support "reductions" to provide less granular data
-    # reduction: string
-    #     common options include {none, layerwise_mean, sum, mean} but exact types
-    #     (and whether they are supported at all) varies by metric class
-    #     "none" provides full-resolution per-MAC per-level data
-    #     other reductions will average/sum/etc. this to provide per-level or per-step data only
-    #     check the returns of the metric compute() functions to see which reductions are applicable to which metrics
     reduction: layerwise_mean
+  - name: feature_coverage
+    save: True
+  - name: match_accuracy
+    save: True
+  - name: num_activations
+    save: True
 
 # dataloader settings for loading items from the dataset
 dataloader:
@@ -52,4 +47,6 @@ training:
   #     for Sparsey single-shot learning this will always be 1
   #     but the setting exists for potential future compatibility
   num_epochs: 1
+
+use_gpu: True
 ...

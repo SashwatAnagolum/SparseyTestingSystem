@@ -4,6 +4,7 @@ from typing import Callable
 import torch
 from sparseypy.access_objects.models.model import Model
 
+
 class Metric:
     """
     Metric: a base class for metrics.
@@ -12,10 +13,12 @@ class Metric:
         required for Dr. Rinkus' experiments.
     """
 
-    def __init__(self, model: torch.nn.Module, name: str, best_comparison: Callable):
+    def __init__(self, model: torch.nn.Module, name: str,
+                 best_comparison: Callable, device: torch.device):
         self.model = model
         self.name = name
         self.best_comparison = best_comparison
+        self.device = device
 
 
     @abc.abstractmethod

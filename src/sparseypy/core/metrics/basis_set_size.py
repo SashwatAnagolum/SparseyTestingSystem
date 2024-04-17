@@ -10,9 +10,10 @@ from sparseypy.access_objects.models.model import Model
 
 class BasisSetSizeMetric(Metric):
     def __init__(self, model: torch.nn.Module,
+                 device: torch.device,
                  reduction: Optional[str] = None,
                  best_value: Optional[Callable] = min_by_layerwise_mean):
-        super().__init__(model, "basis_set_size", best_value)
+        super().__init__(model, "basis_set_size", best_value, device)
 
         self.reduction = reduction
 

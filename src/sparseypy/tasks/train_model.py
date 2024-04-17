@@ -90,18 +90,18 @@ Selected metrics:
                 tqdm.write(metric_str)
                 batch_number+=1
                 pbar.update(1)
+
         # summarize the best training steps
         train_summary = trainer.get_summary("training")
         tqdm.write("\n\nTRAINING - SUMMARY\n")
         tqdm.write("Best metric steps:")
         for metric, val in train_summary.best_steps.items():
             tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
-
-
+        
         trainer.model.eval()
         is_epoch_done = False
         batch_number = 1
-
+        
         # perform evaluation
         with tqdm(total=trainer.num_batches, desc="Evaluation", leave=False, position=1) as pbar:
             while not is_epoch_done:
