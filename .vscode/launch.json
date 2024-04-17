@@ -14,7 +14,7 @@
             "name": "Evaluate Model",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\evaluate_model.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\evaluate_model.py",
             "args": [
                 "--dataset_config", ".\\demo\\dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
@@ -30,7 +30,7 @@
             "name": "Run HPO",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\run_hpo.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\run_hpo.py",
             "args": [
                 "--dataset_config", ".\\demo\\dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
@@ -45,7 +45,7 @@
             "name": "Run HPO (custom configs, piped output)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\run_hpo.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\run_hpo.py",
             "args": [
                 "--dataset_config", "${input:getSparseyConfigDirectoryString}\\dataset.yaml",
                 "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
@@ -61,7 +61,7 @@
             "name": "Train Model",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\train_model.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
             "args": [
                 "--dataset_config", ".\\demo\\dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
@@ -77,7 +77,7 @@
             "name": "Train Model by Name",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\train_model.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
             "args": [
                 "--dataset_config", ".\\demo\\dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
@@ -93,7 +93,7 @@
             "name": "Train Model (custom configs, piped output)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\train_model.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
             "args": [
                 "--dataset_config", "${input:getSparseyConfigDirectoryString}\\dataset.yaml",
                 "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
