@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sparseypy"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
   { name="Sashwat Anagolum", email="ssa5517@psu.edu" },
   { name="JD Padrnos", email="jdp5888@psu.edu" },
@@ -29,7 +29,7 @@ dependencies = [
     "typing_extensions==4.8.0"
 ]
 
-description = "A Python implementation and of the Sparsey algorithm."
+description = "A Python implementation of the Sparsey algorithm."
 readme = "README.md"
 requires-python = ">=3.11.6"
 classifiers = [
@@ -38,6 +38,12 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[project.scripts]
+evaluate_model = "sparseypy.scripts.evaluate_model:main"
+run_hpo = "sparseypy.scripts.run_hpo:main"
+train_model = "sparseypy.scripts.train_model:main"
+
 [project.urls]
-Homepage = "https://github.com/Neurithmic-Systems/SparseyTestingSystem"
+Homepage = "https://sparsey.com"
+Repository = "https://github.com/Neurithmic-Systems/SparseyTestingSystem"
 Issues = "https://github.com/Neurithmic-Systems/SparseyTestingSystem/issues"
