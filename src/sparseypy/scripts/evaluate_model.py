@@ -20,20 +20,24 @@ description = '''
 sparseypy: The Sparsey Testing System
 =====================================
 \n
-evaluate_model: evaluate previously-trained models on additional datasets
+evaluate_model: evaluate existing Sparsey models on additional datasets
 \n
 --------------------------------------------------------------------------------
-\n\n
-To use this script, specify the name of an existing model in Weights & Biases 
-and provide a dataset, a preprocessing stack, and a training configuration. 
-\n\n
-The system will automatically retrieve the model and perform evaluation on the 
-indicated dataset, logging all results to Weights & Biases.
-\n\n
-Due to the extensive variety of parameters available, the Sparsey Testing 
-System uses YAML configuration files to provide the bulk of its configuration
-and the 
-\n\n
+\n
+Reloads an existing model from Weights & Biases and uses it to perform 
+additional evaluations on the selected dataset with customizable preprocessing
+options.
+\n
+Supports customizable preprocessing and a variety of datasets for maximum 
+flexibility.
+\n
+Due to the extensive variety of options available, this system uses YAML files
+rather than command-line arguments for its configuration.
+\n
+To use it, you must provide the paths to model, dataset, preprocessing, system,
+and training recipe configuration files in the corresponding command-line 
+arguments.
+\n
 For the details of every YAML configuration file and option therein, please see
 the commented example configuration files in the "demo" folder in this
 project's GitHub repository.

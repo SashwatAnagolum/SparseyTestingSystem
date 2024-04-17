@@ -20,29 +20,32 @@ description = '''
 sparseypy: The Sparsey Testing System
 =====================================
 \n
-train_model: train and evaluate Sparsey models
+train_model: train and evaluate custom Sparsey models
 \n
 --------------------------------------------------------------------------------
-\n\n
-To use this script, provide a model configuration, dataset, preprocessint stack,
-training recipe, and system configuration. 
-\n\n
-The system will train and evaluate the model according to the provided 
-configuration, logging all results to Weights & Biases and any configured
-databases.
-\n\n
-Due to the extensive variety of parameters available, the Sparsey Testing 
-System uses YAML configuration files to provide configuration for all its 
-functions.
-\n\n
+\n
+Trains and evaluates Sparsey models with user-selected parameters on
+user-selected datasets with customizable preprocessing. Automatically logs all
+training data to Weights & Biases for later review.
+\n
+Makes training easy with automatic config file validation and extensible with
+custom metrics, datasets, transforms, and more.
+\n
+Due to the extensive variety of options available, this system uses YAML files
+rather than command-line arguments for its configuration.
+\n
+To use it, you must provide the paths to model, dataset, preprocessing, system,
+and training recipe configuration files in the corresponding command-line 
+arguments.
+\n
 For the details of every YAML configuration file and option therein, please see
 the commented example configuration files in the "demo" folder in this
 project's GitHub repository.
 \n
 --------------------------------------------------------------------------------
-Specifying a model: As an alternative to providing a network configuration YAML
-file as model_config, you can instead specify the name of a previously trained
-model in Weights & Biases as the model_name. 
+Specifying an existing model: Rather than training a network from scratch
+using a path to a model_config file, you can instead specify the name of a 
+previously trained model in Weights & Biases as the model_name. 
 
 The system will then download and re-train the chosen model using the provided 
 dataset, preprocessing stack, and training recipe.
