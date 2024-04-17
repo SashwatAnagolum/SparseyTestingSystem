@@ -20,14 +20,11 @@ sparseypy: The Sparsey Testing System
 
 evaluate_model: command-line script to reload and evaluate previously trained models on additional datasets.
 \n\n
-To use this script, specify the name of an existing model in Weights & Biases and provide a dataset,
-a preprocessing stack, and a training configuration. 
+To use this script, specify the name of an existing model in Weights & Biases and provide a dataset, a preprocessing stack, and a training configuration. 
 \n\n
-The system will automatically retrieve the model and perform evaluation on the indicated dataset, 
-logging all results to Weights & Biases.
+The system will automatically retrieve the model and perform evaluation on the indicated dataset, logging all results to Weights & Biases.
 \n\n
-For the details of every YAML configuration file, please see the commented example configuration files 
-at https://github.com/Neurithmic-Systems/SparseyTestingSystem/tree/main/demo
+For the details of every YAML configuration file, please see the commented example configuration files at https://github.com/Neurithmic-Systems/SparseyTestingSystem/tree/main/demo
 '''
 
 sts_epilogue = '''
