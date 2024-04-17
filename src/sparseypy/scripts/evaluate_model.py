@@ -40,10 +40,14 @@ and the
 For the details of every YAML configuration file and option therein, please see
 the commented example configuration files in the "demo" folder in this
 project's GitHub repository.
+\n
+--------------------------------------------------------------------------------
 '''
 
 sts_epilogue = '''
+--------------------------------------------------------------------------------
 Sparsey (c) Dr. Rod Rinkus and Neurithmic Systems. All rights reserved.
+--------------------------------------------------------------------------------
 '''
 
 def parse_args() -> argparse.Namespace:
