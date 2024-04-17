@@ -16,7 +16,8 @@ layers:
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
-      permanence: 1.0
+      permanence_steps: 100
+      permanence_convexity: 0.5
       activation_threshold_min: 0.2
       activation_threshold_max: 1
       min_familiarity: 0.2
@@ -33,7 +34,8 @@ layers:
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
       saturation_threshold: 0.5
-      permanence: 0.95
+      permanence_steps: 100
+      permanence_convexity: 0.5
       min_familiarity: 0.2
       sigmoid_chi: 1.5
       activation_threshold_min: 0.2

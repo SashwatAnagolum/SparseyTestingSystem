@@ -1,0 +1,15 @@
+---
+
+# the name by which to refer to the dataset
+dataset_type: image
+
+# information about the dataset
+params:
+  # the folder which the directory is stored in
+  data_dir: '.\demo\sample_mnist_dataset'
+
+  # what file format the images are in
+  image_format: '.png'
+
+preprocessed: True
+...

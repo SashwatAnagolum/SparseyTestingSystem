@@ -1,0 +1,40 @@
+# preprocessing.yaml - system preprocessing configuration
+
+transform_list:
+# In this list, you can include custom transforms (located in core/transforms) 
+# as well as the transforms PyTorch provides in torchvision.transforms.v2
+# Transforms are applied in the order shown in the list from top (first) to bottom (last).
+
+# Examples of custom transforms
+# - name: binarize
+#   params:
+#     binarize_threshold: 0.5 # float, 0 < x < 1 
+#
+
+# all of the transforms below are examples of using the transform classes available in torchvision.transforms.v2
+# for both PyTorch and system transforms, the class name should be typed in snake case
+# name: string
+  - name: resize
+  # params: dict containing the parameters listed in the torchvision.transforms.v2 documentation for the given transform
+    params:
+      size: [8, 8]
+      antialias: True
+
+# convert images to float from uint8, and scale them to [0, 1]
+  - name: to_dtype
+    params:
+      dtype: float32
+      scale: True
+      #probability: 0.5 # optional random application
+
+# binarize
+  - name: grayscale
+    params:
+      num_output_channels: 1
+  - name: random_posterize
+    params:
+      p: 1.0
+      bits: 1
+  - name: random_autocontrast
+    params:
+      p: 1.0
