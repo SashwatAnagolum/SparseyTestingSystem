@@ -16,10 +16,16 @@ from sparseypy.cli.config_validation.validate_config import (
 from sparseypy.tasks.evaluate_model import evaluate_model
 
 sts_description = '''
+=====================================
 sparseypy: The Sparsey Testing System
+=====================================
+\n
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
+\n
+--------------------------------------------------------------------------------
 evaluate_model: command-line script to reload and evaluate previously trained
-models on additional datasets.
+models on additional datasets
+--------------------------------------------------------------------------------
 \n\n
 To use this script, specify the name of an existing model in Weights & Biases 
 and provide a dataset, a preprocessing stack, and a training configuration. 
