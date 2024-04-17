@@ -17,14 +17,23 @@ from sparseypy.tasks.evaluate_model import evaluate_model
 
 sts_description = '''
 sparseypy: The Sparsey Testing System
-
-evaluate_model: command-line script to reload and evaluate previously trained models on additional datasets.
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
+evaluate_model: command-line script to reload and evaluate previously trained
+models on additional datasets.
 \n\n
-To use this script, specify the name of an existing model in Weights & Biases and provide a dataset, a preprocessing stack, and a training configuration. 
+To use this script, specify the name of an existing model in Weights & Biases 
+and provide a dataset, a preprocessing stack, and a training configuration. 
 \n\n
-The system will automatically retrieve the model and perform evaluation on the indicated dataset, logging all results to Weights & Biases.
+The system will automatically retrieve the model and perform evaluation on the 
+indicated dataset, logging all results to Weights & Biases.
 \n\n
-For the details of every YAML configuration file, please see the commented example configuration files at https://github.com/Neurithmic-Systems/SparseyTestingSystem/tree/main/demo
+Due to the extensive variety of parameters available, the Sparsey Testing 
+System uses YAML configuration files to provide the bulk of its configuration
+and the 
+\n\n
+For the details of every YAML configuration file and option therein, please see
+the commented example configuration files in the "demo" folder in this
+project's GitHub repository.
 '''
 
 sts_epilogue = '''
