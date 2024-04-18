@@ -20,7 +20,8 @@ metrics:
     # save: bool
     #     whether the results of this metric should be stored to Weights & Biases
     save: True
-    best_value: max_by_layerwise_mean
+  - name: num_activations
+    save: True
   - name: feature_coverage
     save: True
   - name: sisc_adherence
