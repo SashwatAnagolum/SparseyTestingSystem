@@ -85,19 +85,20 @@ class HebbianOptimizer(torch.optim.Optimizer):
             layer_index (int): the layer the MAC is in.
             mac_index (int): the index of the MAC.
         """
-        permanence_numerator = torch.pow(
-            torch.sub(
-                mac.permanence_steps,
-                self.timesteps[layer_index][mac_index]
-            ).float(), mac.permanence_convexity
+        permanence_numerator = torch.div(
+            1.0 + (mac.permanence_convexity / mac.permanence_steps),
+            1.0 + torch.div(
+                mac.permanence_convexity,
+                torch.sub(
+                    mac.permanence_steps,
+                    self.timesteps[layer_index][mac_index]
+                )
+            )
         )
 
         torch.mul(
-            params > self.epsilon,
-            torch.div(
-                permanence_numerator,
-                mac.permanence_steps ** mac.permanence_convexity
-            ),
+            self.timesteps[layer_index][mac_index] <= mac.permanence_steps,
+            permanence_numerator,
             out=params
         )
 
@@ -168,8 +169,6 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     # updates for weights that are not updateable (frozen).
                     # BUG: probably does not update weights that are both active on this step *and* frozen
                     weight_updates *= updateable_mask
-                    
-                    print(params)
 
                     # apply permanence/weight decay to all weights 
                     # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
