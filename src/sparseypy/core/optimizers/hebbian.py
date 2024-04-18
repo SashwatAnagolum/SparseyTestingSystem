@@ -12,6 +12,7 @@ from typing import Iterator, Callable, Optional
 import torch
 
 from sparseypy.core.hooks import LayerIOHook
+from sparseypy.core.model_layers.sparsey_layer import MAC
 
 
 class HebbianOptimizer(torch.optim.Optimizer):
@@ -71,6 +72,34 @@ class HebbianOptimizer(torch.optim.Optimizer):
 
         #Return the mask indicating which weights are updateable (not frozen).
         return updateable_mask
+
+
+    def apply_permanence_update(self, mac: MAC, params: torch.Tensor,
+                                layer_index: int, mac_index: int) -> None:
+        """
+        Applies the permanence weight updates.
+
+        Args:
+            mac (MAC): the mac to apply updates to.
+            params (torch.Tensor): the weight tensor to update.
+            layer_index (int): the layer the MAC is in.
+            mac_index (int): the index of the MAC.
+        """
+        permanence_numerator = torch.pow(
+            torch.sub(
+                mac.permanence_steps,
+                self.timesteps[layer_index][mac_index]
+            ).float(), mac.permanence_convexity
+        )
+
+        torch.mul(
+            params > self.epsilon,
+            torch.div(
+                permanence_numerator,
+                mac.permanence_steps ** mac.permanence_convexity
+            ),
+            out=params
+        )
 
 
     def step(self, closure=None) -> None:
@@ -140,22 +169,12 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     # BUG: probably does not update weights that are both active on this step *and* frozen
                     weight_updates *= updateable_mask
                     
+                    print(params)
+
                     # apply permanence/weight decay to all weights 
                     # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
-                    permanence_numerator = torch.pow(
-                        torch.sub(
-                            mac.permanence_steps,
-                            self.timesteps[layer_index][mac_index]
-                        ).float(), mac.permanence_convexity
-                    )
-
-                    torch.mul(
-                        params > self.epsilon,
-                        torch.div(
-                            permanence_numerator,
-                            mac.permanence_steps ** mac.permanence_convexity
-                        ),
-                        out=params
+                    self.apply_permanence_update(
+                        mac, params, layer_index, mac_index
                     )
 
                     torch.nan_to_num(params, 0.0, out=params)
