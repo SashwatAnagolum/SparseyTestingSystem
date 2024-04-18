@@ -53,7 +53,13 @@ def train_model(model_config: dict, trainer_config: dict,
     wandb.init(
         project=system_config["wandb"]["project_name"],
         allow_val_change=True,
-        job_type="train"
+        job_type="train",
+        config={
+            'dataset': dataset_config,
+            'model': model_config,
+            'training_recipe': trainer_config,
+            'preprocessing': preprocessing_config
+        }
     )
 
     reload_model = False
