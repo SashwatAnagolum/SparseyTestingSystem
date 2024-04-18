@@ -26,7 +26,7 @@ class SiscAdherenceMetricSchema(AbstractSchema):
         """
         config_schema = Schema(
             {
-                'name': And(str, lambda n: n == 'code_similarity', error="name must be 'code_similarity'"),
+                'name': And(str, lambda n: n == 'sisc_adherence', error="name must be 'sisc_adherence'"),
                 Optional('save', default=False): And(bool, error="save must be a boolean value"),
                 Optional('reduction', default='none'): Or(
                     'none', None, 'layerwise_mean', 'sum', 'mean', 'highest_layer',
