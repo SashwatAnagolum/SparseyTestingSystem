@@ -127,7 +127,7 @@ class DefaultSystemSchema(AbstractSchema):
                         'project_name': 
                             Schema(str, error="Project name must be a string"),
                         Optional('save_locally', default=True):
-                            Schema(bool, error="save_locally must be a boolean value"),
+                            Schema(bool, error="save_locally must be a Boolean value"),
                         Optional('save_models', default=True):
                             Schema(bool, error="save_models must be a Boolean value"),
                         Optional('data_resolution', default=2):
@@ -135,7 +135,9 @@ class DefaultSystemSchema(AbstractSchema):
                                 int,
                                 lambda x : 0 <= x <= 2,
                                 error="data_resolution must be 0, 1, or 2"
-                            )
+                            ),
+                        Optional('silent', default=True):
+                            Schema(bool, error="silent must be a Boolean value")
                     },
                     error="Error in wandb configuration"),
                     'database': Schema({

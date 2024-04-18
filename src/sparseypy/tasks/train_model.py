@@ -4,7 +4,7 @@
 Train Model: script to train models.
 """
 
-
+import os
 import pprint
 from tqdm import tqdm
 import warnings
@@ -42,6 +42,10 @@ def train_model(model_config: dict, trainer_config: dict,
             to train on.
         system_config (dict): config info for the overall system
     """
+
+    # silence WandB if requested by the user
+    if system_config["wandb"]["silent"]:
+        os.environ["WANDB_SILENT"] = "true"
 
     # initialize the DataStorer (logs into W&B and Firestore)
     DataStorer.configure(system_config)

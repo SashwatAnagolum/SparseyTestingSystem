@@ -5,6 +5,7 @@ Train model: script to train models.
 """
 
 import argparse
+from argparse import RawDescriptionHelpFormatter
 
 from dotenv import load_dotenv
 
@@ -14,6 +15,48 @@ from sparseypy.cli.config_validation.validate_config import (
 
 from sparseypy.tasks.train_model import train_model
 
+DESCRIPTION = '''
+=====================================
+sparseypy: The Sparsey Testing System
+=====================================
+\n
+train_model: train and evaluate custom Sparsey models
+\n
+--------------------------------------------------------------------------------
+\n
+Trains and evaluates Sparsey models with user-selected parameters on
+user-selected datasets with customizable preprocessing. Automatically logs all
+training data to Weights & Biases for later review.
+\n
+Makes training easy with automatic config file validation and extensible with
+custom metrics, datasets, transforms, and more.
+\n
+Due to the extensive variety of options available, this system uses YAML files
+rather than command-line arguments for its configuration.
+\n
+To use it, you must provide the paths to model, dataset, preprocessing, system,
+and training recipe configuration files in the corresponding command-line 
+arguments.
+\n
+For the details of every YAML configuration file and option therein, please see
+the commented example configuration files in the "demo" folder in this
+project's GitHub repository.
+\n
+--------------------------------------------------------------------------------
+Specifying an existing model: Rather than training a network from scratch
+using a path to a model_config file, you can instead specify the name of a 
+previously trained model in Weights & Biases as the model_name. 
+
+The system will then download and re-train the chosen model using the provided 
+dataset, preprocessing stack, and training recipe.
+--------------------------------------------------------------------------------
+'''
+
+EPILOG = '''
+--------------------------------------------------------------------------------
+Sparsey (c) Dr. Rod Rinkus and Neurithmic Systems. All rights reserved.
+--------------------------------------------------------------------------------
+'''
 
 def parse_args() -> argparse.Namespace:
     """
@@ -22,7 +65,16 @@ def parse_args() -> argparse.Namespace:
     Returns:
         Namespace containing the parsed arguments.
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description=DESCRIPTION,
+        epilog=EPILOG,
+        formatter_class=RawDescriptionHelpFormatter
+    )
+
+    parser.add_argument(
+        '--dataset_config', type=str,
+        help='The location of the dataset config file.'
+    )
 
     parser.add_argument(
         '--model_config', type=str, required=False,
@@ -35,23 +87,19 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        '--training_recipe_config', type=str,
-        help='The location of the trainer config file.'
-    )
-
-    parser.add_argument(
         '--preprocessing_config', type=str,
         help='The location of the preprocessing config file.'
     )
 
     parser.add_argument(
-        '--dataset_config', type=str,
-        help='The location of the dataset config file.'
-    )
-
-    parser.add_argument(
         '--system_config', type=str,
         help='The location of the system config file.'
+    )
+
+
+    parser.add_argument(
+        '--training_recipe_config', type=str,
+        help='The location of the trainer config file.'
     )
 
     args = parser.parse_args()
@@ -60,6 +108,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def main():
+    """
+    Main function for the train_model script. Accepts and parses the command line arguments, 
+    validates the configuration files with the config schemas, and starts the train_model task.
+    """
     args = parse_args()
 
     if args.model_config and args.model_name:

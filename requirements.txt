@@ -35,6 +35,8 @@ schema==0.7.5
 scikit-image==0.22.0
 scipy==1.12.0
 six==1.16.0
+sphinx==7.2.6
+sphinx_rtd_theme==2.0.0
 sympy==1.12
 tifffile==2024.2.12
 torch==2.1.1
@@ -42,5 +44,4 @@ torchvision==0.16.1
 tqdm==4.66.2
 typing_extensions==4.8.0
 urllib3==2.2.1
-sphinx==7.2.6
-sphinx_rtd_theme==2.0.0
+wandb==0.16.5
