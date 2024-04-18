@@ -11,6 +11,22 @@
             "justMyCode": true
         },
         {
+            "name": "Evaluate Model",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\scripts\\evaluate_model.py",
+            "args": [
+                "--dataset_config", ".\\demo\\dataset.yaml",
+                "--preprocessing_config", ".\\demo\\preprocessing.yaml",
+                "--model_name", "${input:getModelNameString}",
+                "--training_recipe_config", ".\\demo\\trainer.yaml",
+                "--system_config", ".\\demo\\system.yaml"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
             "name": "Run HPO",
             "type": "debugpy",
             "request": "launch",
@@ -96,7 +112,7 @@
             "id": "getModelNameString",
             "type": "promptString",
             "description": "enter the name of the online model to use",
-            "default": "example_model"
+            "default": "example_model_v2"
         },
         {
             "id": "getSparseyConfigDirectoryString",

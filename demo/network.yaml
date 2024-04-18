@@ -7,10 +7,10 @@
 #     WARNING: IF THERE IS AN EXISTING REGISTRY ENTRY WITH THIS NAME IT WILL 
 #     BE UPDATED WITH THE RESULTS OF TRAINING RUNS USING THIS NETWORK.YAML
 #     AS NEW VERSIONS.
-model_name: example_model
+model_name: example_model_v2
 # model_description: string, optional (no default)
 #     friendly description for this model to be displayed in the database and model registry
-model_description: "The example model from network.yaml!"
+model_description: "The example model from network.yaml, but better!"
 
 # input_dimensions: the dimensions to which to resize the input during HPO
 #     width and height can be any positive integer values and do not need to be the same;

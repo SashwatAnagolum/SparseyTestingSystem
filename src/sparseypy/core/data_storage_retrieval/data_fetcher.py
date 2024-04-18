@@ -14,6 +14,7 @@ from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 import wandb
 
 from sparseypy.core.data_storage_retrieval.data_storer import DataStorer
+from sparseypy.core.db_adapters import DbAdapterFactory
 from sparseypy.core.metrics import comparisons
 from sparseypy.core.results.hpo_result import HPOResult
 from sparseypy.core.results.hpo_step_result import HPOStepResult
@@ -28,71 +29,54 @@ class DataFetcher:
     This class provides methods to access and deserialize data related to Sparsey 
     experiments stored in Firestore. It supports caching for efficient data retrieval.
     """
-    def __init__(self):
+    def __init__(self, config: dict):
         """
         Initializes the DataFetcher instance by setting up a connection to the Firestore database.
         (credentials need to have been set before using this)
+
+        Args:
+            config (dict): the system.yaml configuration.
         """
         if not DataStorer.is_initialized:
             raise ValueError("You must call DataStorer.configure() before intializing DataFetcher objects.")
 
-        self.tables = DataStorer.firestore_config["table_names"]
+        read_db_name = config["database"]["read_database"]
 
-        self.db = firestore.client()
+        read_config = next(
+            (
+                db for db in config["database"]["write_databases"]
+                if db["name"] == read_db_name
+            )
+        )
 
-    def _deserialize_metric(self, serialized_metric):
+        self.db_adapter = DbAdapterFactory.create_db_adapter(
+            read_db_name,
+            config=read_config,
+            metric_config=[]
+        )
+
+        #self.tables = DataStorer.firestore_config["table_names"]
+
+        #self.db = firestore.client()
+
+
+    def get_model_source_path(self, model_name: str) -> str:
         """
-        Deserializes a metric value stored as a pickled string.
-
+        Retrieves the source experiment for a given model name and version.
         Args:
-            serialized_metric (bytes): The pickled representation of a metric.
-
+            model_name (str): A unique identifier for the model.
         Returns:
-            object: The deserialized metric value.
+            str: the path to the run that trained this model version.
         """
-        return pickle.loads(serialized_metric)
+        # construct the artifact name by adding ":latest" if the user has not
+        # specified a version
+        artifact_name = model_name + ('' if ':' in model_name else ':latest')
+        # artifact path form: "<entity>/<project>/<artifact>"
+        artifact_path = f"{wandb.api.default_entity}/model-registry/{artifact_name}"
+        # fetch the artifact from W&B
+        artifact = wandb.Api().artifact(artifact_path)
+        return artifact.metadata["source_path"]
 
-    @lru_cache(maxsize=None)
-    def _get_experiment_data(self, experiment_id) -> dict:
-        """
-        Retrieves and caches the data for a specific experiment from Firestore.
-
-        Args:
-            experiment_id (str): The unique identifier for the experiment.
-
-        Returns:
-            dict: A dictionary containing the experiment data.
-        """
-        experiment_ref = self.db.collection(self.tables["experiments"]).document(experiment_id)
-        return experiment_ref.get().to_dict()
-
-    @lru_cache(maxsize=None)
-    def _get_batch_data(self, batch_id) -> dict:
-        """
-        Retrieves and caches the data for a specific batch of steps from Firestore.
-
-        Args:
-            batch_id (str): The unique identifier for the batch.
-
-        Returns:
-            dict: A dictionary containing the batch data.
-        """
-        batch_ref = self.db.collection(self.tables["batches"]).document(batch_id)
-        return batch_ref.get().to_dict()
-
-    @lru_cache(maxsize=None)
-    def _get_hpo_run_data(self, hpo_run_id) -> dict:
-        """
-        Retrieves and caches the data for a specific HPO run from Firestore.
-
-        Args:
-            hpo_run_id (str): The unique identifier for the HPO run.
-
-        Returns:
-            dict: A dictionary containing the HPO run data.
-        """
-        hpo_run_ref = self.db.collection(self.tables["hpo_runs"]).document(hpo_run_id)
-        return hpo_run_ref.get().to_dict()
 
     def get_model_data(self, model_name: str) -> tuple[dict, dict]:
         """
@@ -117,9 +101,10 @@ class DataFetcher:
         # specified a version
         artifact_name = model_name + ('' if ':' in model_name else ':latest')
         # artifact path form: "<entity>/<project>/<artifact>"
-        artifact_path = f"{wandb.run.entity}/model-registry/{artifact_name}"
+        artifact_path = f"{wandb.api.default_entity}/model-registry/{artifact_name}"
         # fetch the artifact from W&B
-        m_path = wandb.run.use_artifact(artifact_path, type="model").download()
+        m_ref = wandb.run.use_artifact(artifact_path, type="model")
+        m_path = m_ref.download()
         # read the model config from the downloaded artifact
         with open(os.path.join(m_path, "network.yaml"), "r", encoding="utf-8") as f:
             model_config = json.load(f)
@@ -148,26 +133,57 @@ class DataFetcher:
         Raises:
             ValueError: If the step index is out of bounds for the given experiment.
         """
-        experiment_data = self._get_experiment_data(experiment_id)
-        training_steps = experiment_data.get("saved_metrics", {}).get(result_type, [])
-        if step_index < 0 or step_index >= len(training_steps):
-            raise ValueError("Step index is out of bounds for the given experiment.")
+        return self.db_adapter.get_training_step_result(
+            experiment_id=experiment_id,
+            step_index=step_index,
+            result_type=result_type
+        )
+        # experiment_data = self._get_experiment_data(experiment_id)
+        # training_steps = experiment_data.get("saved_metrics", {}).get(result_type, [])
+        # if step_index < 0 or step_index >= len(training_steps):
+        #     raise ValueError("Step index is out of bounds for the given experiment.")
 
-        # fetch the step metadata (batch containing the step data and its index within the batch)
-        batch_index = step_index // experiment_data["batch_size"] # integer division
-        step_offset = step_index % experiment_data["batch_size"]
+        # # fetch the step metadata (batch containing the step data and its index within the batch)
+        # batch_index = step_index // experiment_data["batch_size"] # integer division
+        # step_offset = step_index % experiment_data["batch_size"]
 
-        # fetch the batch
-        batch_data = self._get_batch_data(training_steps[batch_index]["batch"])
-        # retrieve the step data from the batch using the index
-        step_data = batch_data["steps"][step_offset]
+        # # fetch the batch
+        # batch_data = self._get_batch_data(training_steps[batch_index]["batch"])
+        # # retrieve the step data from the batch using the index
+        # step_data = batch_data["steps"][step_offset]
 
-        step_result = TrainingStepResult(resolution=experiment_data["saved_metrics"]["resolution"])
+        # step_result = TrainingStepResult(resolution=experiment_data["saved_metrics"]["resolution"])
 
-        for metric_name, metric_data in step_data.items():
-            step_result.add_metric(name=metric_name, values=self._deserialize_metric(metric_data))
+        # for metric_name, metric_data in step_data.items():
+        #     step_result.add_metric(name=metric_name, values=self._deserialize_metric(metric_data))
 
-        return step_result
+        # return step_result
+
+
+    def get_evaluation_step_result(
+            self,
+            experiment_id: str,
+            step_index: int,
+        ) -> TrainingStepResult:
+        """
+        Retrieves the result of a specific evaluation step within an experiment.
+
+        Args:
+            experiment_id (str): The unique identifier for the experiment.
+            step_index (int): The index of the training step to retrieve.
+
+        Returns:
+            TrainingStepResult: An instance of TrainingStepResult containing the 
+                evaluation step's metrics.
+
+        Raises:
+            ValueError: If the step index is out of bounds for the given experiment.
+        """
+        return self.db_adapter.get_evaluation_step_result(
+                experiment_id=experiment_id,
+                step_index=step_index
+            )
+
 
     def get_training_result(
             self,
@@ -189,45 +205,46 @@ class DataFetcher:
             TrainingResult: An instance of TrainingResult containing aggregated 
             metrics and outcomes from the experiment's training steps.
         """
-        experiment_data = self._get_experiment_data(experiment_id)
+        return self.db_adapter.get_training_result(experiment_id, result_type)
+        # experiment_data = self._get_experiment_data(experiment_id)
 
-        metrics = []
-        tr = TrainingResult(id=experiment_id,
-                            result_type=result_type,
-                            resolution=experiment_data["saved_metrics"]["resolution"],
-                            metrics=metrics,
-                            configs={
-                                    conf_name:json.loads(conf_data)
-                                    for conf_name, conf_data in experiment_data["configs"]
-                                }
-                            )
+        # metrics = []
+        # tr = TrainingResult(id=experiment_id,
+        #                     result_type=result_type,
+        #                     resolution=experiment_data["saved_metrics"]["resolution"],
+        #                     metrics=metrics,
+        #                     configs={
+        #                             conf_name:json.loads(conf_data)
+        #                             for conf_name, conf_data in experiment_data["configs"]
+        #                         }
+        #                     )
 
-        for step_index in range(len(experiment_data.get("saved_metrics", {}).get(result_type, []))):
-            step_result = self.get_training_step_result(experiment_id, step_index, result_type)
-            tr.add_step(step_result)
+        # for step_index in range(len(experiment_data.get("saved_metrics", {}).get(result_type, []))):
+        #     step_result = self.get_training_step_result(experiment_id, step_index, result_type)
+        #     tr.add_step(step_result)
 
-        tr.start_time = self.convert_firestore_timestamp(
-                experiment_data.get("start_times", {}).get(result_type)
-            )
-        tr.end_time = self.convert_firestore_timestamp(
-                experiment_data.get("end_times", {}).get(result_type)
-            )
-        best_steps = {}
+        # tr.start_time = self.convert_firestore_timestamp(
+        #         experiment_data.get("start_times", {}).get(result_type)
+        #     )
+        # tr.end_time = self.convert_firestore_timestamp(
+        #         experiment_data.get("end_times", {}).get(result_type)
+        #     )
+        # best_steps = {}
 
-        phase_data = experiment_data.get("best_steps", {}).get(result_type, {})
-        best_steps = {}
-        for metric, metric_data in phase_data.items():
-            best_function = metric_data.get("best_function")
-            best_index = metric_data.get("best_index")
-            best_value_bytes = metric_data.get("best_value")
+        # phase_data = experiment_data.get("best_steps", {}).get(result_type, {})
+        # best_steps = {}
+        # for metric, metric_data in phase_data.items():
+        #     best_function = metric_data.get("best_function")
+        #     best_index = metric_data.get("best_index")
+        #     best_value_bytes = metric_data.get("best_value")
 
-            best_steps[metric] = {
-                "best_function": getattr(comparisons, best_function),
-                "best_index": best_index,
-                "best_value": self._deserialize_metric(best_value_bytes)
-            }
-        tr.best_steps = best_steps
-        return tr
+        #     best_steps[metric] = {
+        #         "best_function": getattr(comparisons, best_function),
+        #         "best_index": best_index,
+        #         "best_value": self._deserialize_metric(best_value_bytes)
+        #     }
+        # tr.best_steps = best_steps
+        # return tr
 
     def get_evaluation_result(self, experiment_id: str) -> TrainingResult:
         """
@@ -239,7 +256,7 @@ class DataFetcher:
         Returns:
             EvaluationResult: the EvaluationResult for the experiment of this id in w&b
         """
-        return self.get_training_result(experiment_id=experiment_id, result_type="evaluation")
+        return self.db_adapter.get_evaluation_result(experiment_id=experiment_id)
 
     def get_hpo_step_result(self, hpo_run_id, experiment_id):
         """
@@ -256,26 +273,7 @@ class DataFetcher:
             HPOStepResult: An instance of HPOStepResult representing the experiment step 
             within the HPO run.
         """
-        # Assuming this method will utilize get_training_result to fetch
-        # associated training and evaluation results
-        experiment_data = self._get_experiment_data(experiment_id)
-        training_result = self.get_training_result(experiment_id)
-        evaluation_result = self.get_evaluation_result(experiment_id)
-        hpo_run_data = self._get_hpo_run_data(hpo_run_id)
-        hpo_step_result = HPOStepResult(
-            parent_run=hpo_run_id,
-            id=experiment_id,
-            configs={
-                conf_name:json.loads(conf_json)
-                for conf_name, conf_json in hpo_run_data["configs"].items()
-                }
-            )
-        hpo_step_result.populate(
-                objective=experiment_data["hpo_objective"],
-                training_results=training_result,
-                eval_results=evaluation_result
-            )
-        return hpo_step_result
+        return self.db_adapter.get_hpo_step_result(hpo_run_id, experiment_id)
 
     def get_hpo_result(self, hpo_run_id: str) -> HPOResult:
         """
@@ -292,40 +290,41 @@ class DataFetcher:
             HPOResult: An instance of HPOResult containing aggregated results 
             and configuration info from the HPO run.
         """
-        hpo_run_data = self._get_hpo_run_data(hpo_run_id)
+        return self.db_adapter.get_hpo_result(hpo_run_id)
+        # hpo_run_data = self._get_hpo_run_data(hpo_run_id)
 
-        configs = {
-            conf_name: json.loads(conf_json)
-            for conf_name, conf_json in hpo_run_data["configs"].items()
-            }
-        hpo_result = HPOResult(configs=configs, id=hpo_run_id, name=hpo_run_data["name"])
+        # configs = {
+        #     conf_name: json.loads(conf_json)
+        #     for conf_name, conf_json in hpo_run_data["configs"].items()
+        #     }
+        # hpo_result = HPOResult(configs=configs, id=hpo_run_id, name=hpo_run_data["name"])
 
-        for experiment_id in hpo_run_data["runs"]:
-            step_result = self.get_hpo_step_result(hpo_run_id, experiment_id)
-            hpo_result.add_step(step_result)
+        # for experiment_id in hpo_run_data["runs"]:
+        #     step_result = self.get_hpo_step_result(hpo_run_id, experiment_id)
+        #     hpo_result.add_step(step_result)
 
-        hpo_result.best_run = self.get_hpo_step_result(hpo_run_id, hpo_run_data["best_run_id"])
-        hpo_result.start_time = self.convert_firestore_timestamp(hpo_run_data["start_time"])
-        hpo_result.end_time = self.convert_firestore_timestamp(hpo_run_data["end_time"])
-        return hpo_result
+        # hpo_result.best_run = self.get_hpo_step_result(hpo_run_id, hpo_run_data["best_run_id"])
+        # hpo_result.start_time = self.convert_firestore_timestamp(hpo_run_data["start_time"])
+        # hpo_result.end_time = self.convert_firestore_timestamp(hpo_run_data["end_time"])
+        # return hpo_result
 
-    def convert_firestore_timestamp(self, firestore_timestamp: DatetimeWithNanoseconds) -> datetime:
-        """
-        Converts a Firestore DatetimeWithNanoseconds object to a standard Python datetime object.
+    # def convert_firestore_timestamp(self, firestore_timestamp: DatetimeWithNanoseconds) -> datetime:
+    #     """
+    #     Converts a Firestore DatetimeWithNanoseconds object to a standard Python datetime object.
 
-        Args:
-            firestore_timestamp (DatetimeWithNanoseconds): The Firestore timestamp to convert.
+    #     Args:
+    #         firestore_timestamp (DatetimeWithNanoseconds): The Firestore timestamp to convert.
 
-        Returns:
-            datetime: A standard Python datetime object representing the same point in time.
-        """
-        converted_datetime = datetime(
-            year=firestore_timestamp.year,
-            month=firestore_timestamp.month,
-            day=firestore_timestamp.day,
-            hour=firestore_timestamp.hour,
-            minute=firestore_timestamp.minute,
-            second=firestore_timestamp.second,
-            microsecond=firestore_timestamp.microsecond,
-        )
-        return converted_datetime
+    #     Returns:
+    #         datetime: A standard Python datetime object representing the same point in time.
+    #     """
+    #     converted_datetime = datetime(
+    #         year=firestore_timestamp.year,
+    #         month=firestore_timestamp.month,
+    #         day=firestore_timestamp.day,
+    #         hour=firestore_timestamp.hour,
+    #         minute=firestore_timestamp.minute,
+    #         second=firestore_timestamp.second,
+    #         microsecond=firestore_timestamp.microsecond,
+    #     )
+    #     return converted_datetime

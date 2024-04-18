@@ -124,12 +124,17 @@ hyperparameters:
         #     parameter for the familiarity computation
         sigmoid_phi:
           values: [1.0, 1.5, 2.0, 2.5, 3.0]
-        # permanence: 0 < float <= 1
-        # 
-        permanence:
-          min: 0.2
-          max: 0.9
-          distribution: uniform
+        # permanence_convexity: 0 < float <= 1
+        #     controls the shape of the permanence decay curve
+        permanence_convexity:
+          value: 0.5
+        # permanence_steps: int > 0
+        #     the number of steps without a pre-post correlation that a weight takes to
+        #     decay completely to zero
+        permanence_steps:
+          min: 10
+          max: 30
+          distribution: int_uniform
         # saturation_threshold: float > 0
         #     the fraction of 
         saturation_threshold:
@@ -176,10 +181,12 @@ hyperparameters:
           values: [1.0, 5.0, 10.0, 25.0]
         sigmoid_phi:
           values: [1.0, 1.5, 2.0, 2.5, 3.0]
-        permanence:
-          min: 0.2
-          max: 0.9
-          distribution: uniform
+        permanence_convexity:
+          value: 0.5
+        permanence_steps:
+          min: 10
+          max: 30
+          distribution: int_uniform
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
@@ -212,10 +219,12 @@ hyperparameters:
           values: [1.0, 5.0, 10.0, 25.0]
         sigmoid_phi:
           values: [1.0, 1.5, 2.0, 2.5, 3.0]
-        permanence:
-          min: 0.2
-          max: 0.9
-          distribution: uniform
+        permanence_convexity:
+          value: 0.5
+        permanence_steps:
+          min: 10
+          max: 30
+          distribution: int_uniform
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
@@ -248,10 +257,12 @@ hyperparameters:
           values: [1.0, 5.0, 10.0, 25.0]
         sigmoid_phi:
           values: [1.0, 1.5, 2.0, 2.5, 3.0]
-        permanence:
-          min: 0.2
-          max: 0.9
-          distribution: uniform
+        permanence_convexity:
+          value: 0.5
+        permanence_steps:
+          min: 10
+          max: 30
+          distribution: int_uniform
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
@@ -284,10 +295,12 @@ hyperparameters:
           values: [1.0, 5.0, 10.0, 25.0]
         sigmoid_phi:
           values: [1.0, 1.5, 2.0, 2.5, 3.0]
-        permanence:
-          min: 0.2
-          max: 0.9
-          distribution: uniform
+        permanence_convexity:
+          value: 0.5
+        permanence_steps:
+          min: 10
+          max: 30
+          distribution: int_uniform
         saturation_threshold:
           value: 0.8
         activation_threshold_min:
