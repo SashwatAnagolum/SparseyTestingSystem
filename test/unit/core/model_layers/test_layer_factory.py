@@ -59,8 +59,8 @@ class TestLayerFactory:
             prev_layer_num_macs=24, prev_layer_grid_layout='rect',
             layer_index=6, sigmoid_phi=0.1, sigmoid_lambda=0.9,
             saturation_threshold=0.8,
-            permanence=0.6, activation_threshold_min=0.4,
-            activation_threshold_max=0.8,
+            permanence_steps=0.1, permanence_convexity=0.1, 
+            activation_threshold_min=0.4, activation_threshold_max=0.8,
             min_familiarity=0.5, sigmoid_chi=1.2
         )
 

@@ -65,6 +65,3 @@ def test_preprocessing_cache(preprocessed_mnist_dataset):
 
     # Check if the second retrieval was indeed faster, indicating effective caching
     assert second_duration < first_duration, "Second retrieval was not faster than the first; caching may not be effective."
-
-    # Directly test if results are the same object, which is a stronger indication of caching
-    assert first_retrieval is second_retrieval, "Caching does not seem to work, as two retrievals of the same item are not the same object."

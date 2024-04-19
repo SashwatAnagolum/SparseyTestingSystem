@@ -11,10 +11,60 @@ def test_permanence():
     model = Model()
 
     #add layer1 assuming 4x4 input tensor, 2x2 MAC Grid, 2CM/MAC, 2N/CM, Saturation thresh of 2.0 which theoretically should never saturate
-    model.add_layer(SparseyLayer(True, 4, 2, 2, 2, 2, 2.0, 1, 1, 4, 4, 16, 0, 28.0, 5.0, 2.0, 0.5))
+    model.add_layer(SparseyLayer(
+        autosize_grid=True,
+        grid_layout='rectangular',
+        num_macs=10,
+        num_cms_per_mac=5,
+        num_neurons_per_cm=100,
+        mac_grid_num_rows=2,
+        mac_grid_num_cols=5,
+        mac_receptive_field_radius=1.0,
+        prev_layer_num_cms_per_mac=5,
+        prev_layer_num_neurons_per_cm=20,
+        prev_layer_mac_grid_num_rows=2,
+        prev_layer_mac_grid_num_cols=5,
+        prev_layer_num_macs=10,
+        prev_layer_grid_layout='rectangular',
+        layer_index=1,
+        sigmoid_phi=0.5,
+        sigmoid_lambda=0.5,
+        saturation_threshold=0.1,
+        permanence_steps=0.1,
+        permanence_convexity=0.1,
+        activation_threshold_min=0.2,
+        activation_threshold_max=0.8,
+        min_familiarity=0.1,
+        sigmoid_chi=0.1
+    ))
 
     #add layer2 assuming, 1x1 MAC Grid 2CM/MAC, 2N/CM, Sat thresh of 2.0
-    model.add_layer(SparseyLayer(True, 1, 2, 2, 1, 1, 1.0, 2, 2, 2, 2, 4, 1, 28.0, 5.0, 2.0, 0.5)) 
+    model.add_layer(SparseyLayer(
+        autosize_grid=True,
+        grid_layout='rectangular',
+        num_macs=10,
+        num_cms_per_mac=5,
+        num_neurons_per_cm=100,
+        mac_grid_num_rows=2,
+        mac_grid_num_cols=5,
+        mac_receptive_field_radius=1.0,
+        prev_layer_num_cms_per_mac=5,
+        prev_layer_num_neurons_per_cm=20,
+        prev_layer_mac_grid_num_rows=2,
+        prev_layer_mac_grid_num_cols=5,
+        prev_layer_num_macs=10,
+        prev_layer_grid_layout='rectangular',
+        layer_index=1,
+        sigmoid_phi=0.5,
+        sigmoid_lambda=0.5,
+        saturation_threshold=0.1,
+        permanence_steps=0.1,
+        permanence_convexity=0.1,
+        activation_threshold_min=0.2,
+        activation_threshold_max=0.8,
+        min_familiarity=0.1,
+        sigmoid_chi=0.1
+    )) 
 
     #set up hook for assertion later
     hook = LayerIOHook(model)
@@ -24,7 +74,7 @@ def test_permanence():
 
     #generate random input of correct size and format and pass through model 100 times
     for _ in range(10):
-        input_values = torch.rand((1, 16, 1, 1)).round()
+        input_values = torch.rand(2, 5, 5, 20).round()
         input_tensor = torch.where(input_values > 0.5, torch.tensor(1.), torch.tensor(0.))
         model(input_tensor)
         layers_before, inputs, _ = hook.get_layer_io()
