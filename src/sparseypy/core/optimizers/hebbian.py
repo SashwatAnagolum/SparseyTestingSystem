@@ -85,7 +85,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
             layer_index (int): the layer the MAC is in.
             mac_index (int): the index of the MAC.
         """
-        permanence_numerator = torch.div(
+        torch.div(
             1.0 + (mac.permanence_convexity / mac.permanence_steps),
             1.0 + torch.div(
                 mac.permanence_convexity,
@@ -93,14 +93,13 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     mac.permanence_steps,
                     self.timesteps[layer_index][mac_index]
                 )
-            )
-        )
-
-        torch.mul(
-            self.timesteps[layer_index][mac_index] <= mac.permanence_steps,
-            permanence_numerator,
+            ),
             out=params
         )
+
+        params[
+            self.timesteps[layer_index][mac_index] >= mac.permanence_steps
+        ] = 0.0
 
 
     def step(self, closure=None) -> None:
@@ -171,16 +170,13 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     weight_updates *= updateable_mask
 
                     # apply permanence/weight decay to all weights 
-                    # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
+                    # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...                
+                    self.timesteps[layer_index][mac_index] += 1
                     self.apply_permanence_update(
                         mac, params, layer_index, mac_index
                     )
 
-                    torch.nan_to_num(params, 0.0, out=params)
-                    params += torch.ge(weight_updates, 1)
-                    torch.clamp(params, 0, 1, out=params)
-                    
-                    self.timesteps[layer_index][mac_index] += 1
+                    params[torch.ge(weight_updates, 1)] = 1.0
                     self.timesteps[layer_index][mac_index] = torch.mul(
                         torch.lt(weight_updates, 1),
                         self.timesteps[layer_index][mac_index]
