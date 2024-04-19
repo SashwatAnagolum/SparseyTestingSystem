@@ -89,6 +89,9 @@ class MatchAccuracyMetric(Metric):
                 min_diff_bits = float('inf')
                 similar_image_str = None
 
+                # push image to the CPU, only convert data type once
+                cpu_image = image.to(torch.int64).cpu()
+
                 # Convert stored inputs to binary tensors and perform XOR
                 # and sum operations
                 #May require we use a version that isnt condensed here
@@ -101,7 +104,7 @@ class MatchAccuracyMetric(Metric):
                     # Perform XOR operation between the binary image
                     # and stored binary images
                     diff = torch.bitwise_xor(
-                        image.to(torch.int64), stored_image_tensor
+                        cpu_image, stored_image_tensor
                     )
 
                     # Sum the bits - count of 1's will give
