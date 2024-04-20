@@ -24,8 +24,8 @@ metrics:
     save: True
   - name: feature_coverage
     save: True
-  - name: sisc_adherence
-    save: True
+  # - name: sisc_adherence
+  #   save: True
 
 # dataloader settings for loading items from the dataset
 dataloader:
