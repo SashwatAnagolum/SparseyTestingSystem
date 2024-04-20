@@ -65,7 +65,7 @@ def train_model(model_config: dict, trainer_config: dict,
     reload_model = False
 
     if isinstance(model_config, str):
-        model_config, model_weights = DataFetcher().get_model_data(model_config)
+        model_config, model_weights = DataFetcher(system_config).get_model_data(model_config)
         reload_model = True
 
     trainer = TrainingRecipeBuilder.build_training_recipe(
