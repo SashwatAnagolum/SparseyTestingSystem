@@ -101,6 +101,8 @@ class HebbianOptimizer(torch.optim.Optimizer):
             out=params
         )
 
+        torch.nan_to_num(params, 0.0, out=params)
+
 
     def step(self, closure=None) -> None:
         """
