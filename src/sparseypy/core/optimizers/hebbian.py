@@ -85,21 +85,21 @@ class HebbianOptimizer(torch.optim.Optimizer):
             layer_index (int): the layer the MAC is in.
             mac_index (int): the index of the MAC.
         """
-        torch.div(
-            1.0 + (mac.permanence_convexity / mac.permanence_steps),
-            1.0 + torch.div(
-                mac.permanence_convexity,
-                torch.sub(
-                    mac.permanence_steps,
-                    self.timesteps[layer_index][mac_index]
-                )
+        permanence_numerator = torch.pow(
+            torch.sub(
+                mac.permanence_steps,
+                self.timesteps[layer_index][mac_index]
+            ).float(), mac.permanence_convexity
+        )
+
+        torch.mul(
+            params > self.epsilon,
+            torch.div(
+                permanence_numerator,
+                mac.permanence_steps ** mac.permanence_convexity
             ),
             out=params
         )
-
-        params[
-            self.timesteps[layer_index][mac_index] >= mac.permanence_steps
-        ] = 0.0
 
 
     def step(self, closure=None) -> None:
