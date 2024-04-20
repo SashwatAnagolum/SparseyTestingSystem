@@ -8,7 +8,7 @@ params:
   #     this is NOT corrected or adjusted for capitalization so you 
   #     should use exactly the name from this page: 
   #     https://pytorch.org/vision/main/datasets.html
-  data_dir: .\datasets\MNIST_1K
+  data_dir: ./datasets/MNIST_1K
   # transform: str - the PyTorch transform required to convert the items 
   #     in this dataset from their native format to a PyTorch tensor 
   #     supported by the system. Unfortunately, this is required because
