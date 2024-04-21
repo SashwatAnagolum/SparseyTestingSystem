@@ -224,14 +224,10 @@ class MAC(torch.nn.Module):
             )
 
             if self.training:
-                if tuple(
-                    [i for i in active_neurons.flatten().cpu().numpy()]
-                ) not in self.stored_codes:
-                    self.stored_codes.add(
-                        tuple(
-                            [i for i in active_neurons.flatten().cpu().numpy()]
-                        )
-                    )
+                for code in active_neurons.flatten(start_dim=1).cpu().numpy():
+                    self.stored_codes.add(tuple(code))
+
+            print(self.stored_codes)
 
             return output
 
