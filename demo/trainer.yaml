@@ -48,5 +48,5 @@ training:
   #     but the setting exists for potential future compatibility
   num_epochs: 1
 
-use_gpu: True
+# use_gpu: True
 ...
