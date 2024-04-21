@@ -54,7 +54,7 @@ class HPORun():
                 use to login to WandB and log data.
         """
 
-        self.sweep_config = self.construct_sweep_config(hpo_config)
+        self.sweep_config = self.construct_sweep_config(hpo_config, system_config)
         self.sweep_id = wandb.sweep(sweep=self.sweep_config)
         self.num_trials = hpo_config['num_candidates']
         self.config_info = hpo_config
@@ -155,13 +155,14 @@ class HPORun():
         return sweep_parameters
 
 
-    def construct_sweep_config(self, hpo_config: dict) -> dict:
+    def construct_sweep_config(self, hpo_config: dict, system_config: dict) -> dict:
         """
         Construct the sweep configuration for the Weights and Biases
         sweep to be performed as part of the HPO run.
 
         Args:
             hpo_config (dict): configuration info for the HPO run.
+            system_config (dict): system configuration information.
 
         Returns:
             (dict): the WandB sweep configuration.
@@ -171,6 +172,7 @@ class HPORun():
         )
 
         sweep_config = {
+            'entity': system_config['wandb']['entity'],
             'method': hpo_config['hpo_strategy'],
             'name': hpo_config['hpo_run_name'],
             'metric': {'goal': 'minimize', 'name': 'hpo_objective'},

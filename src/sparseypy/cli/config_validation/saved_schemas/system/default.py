@@ -126,6 +126,8 @@ class DefaultSystemSchema(AbstractSchema):
                             ),
                         'project_name': 
                             Schema(str, error="Project name must be a string"),
+                        Optional('entity', default=None):
+                            Schema(str, error="Entity name must be a string"),
                         Optional('save_locally', default=True):
                             Schema(bool, error="save_locally must be a Boolean value"),
                         Optional('save_models', default=True):

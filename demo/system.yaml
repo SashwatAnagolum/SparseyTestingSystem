@@ -10,7 +10,12 @@ wandb:
   api_key: WANDB_API_KEY
   # project_name: string - the name of the project in Weights & Biases to log data into
   #     this is also the default project for individual training runs using Train Model
-  project_name: sparsey_testing_project
+  # entity: string, default None - the "entity" (organization) to log runs and sweeps to in Weights & Biases
+  #     if this is NOT specified, runs and sweeps will log to the default entity for the user whose API key
+  #     is used to run the system. This key would be used e.g. for users who are normally part of other
+  #     organizations but want to log their Sparsey runs to a shared Sparsey organization, or to enforce
+  #     a single default organization among all users of the configuration files
+  entity: sparsey-testing-system
   # save_models: bool, default True - whether to save model weights into Weights & Biases
   # NOTE: CURRENTLY A DUMMY OPTION because model saving is not implemented yet
   # save_models: True
