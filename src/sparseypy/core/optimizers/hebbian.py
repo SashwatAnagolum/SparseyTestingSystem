@@ -103,7 +103,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
             torch.ge(
                 self.timesteps[layer_index][mac_index],
                 mac.permanence_steps
-            ), 0.0, params, out=params
+            ), torch.zeros(1), params, out=params
         )
 
 
