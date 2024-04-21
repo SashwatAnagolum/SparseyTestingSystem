@@ -5,7 +5,7 @@ Default HPO Schema: the schema for HPO runs.
 """
 
 
-from schema import Schema, And, Or, Use
+from schema import Schema, And, Or, Use, Optional
 
 from sparseypy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparseypy.cli.config_validation import schema_factory
@@ -179,7 +179,13 @@ class DefaultHpoSchema(AbstractSchema):
                     )
                 },
                 {
-                    'value': Or(str, bool, Use(float), int, error="value must be of type str, int, float, or bool")
+                    'value': Or(
+                        str,
+                        bool,
+                        Use(float),
+                        int,
+                        error="value must be of type str, int, float, or bool"
+                    )
                 }
             ),
             error="Invalid hyperparameter configuration"
@@ -258,9 +264,16 @@ class DefaultHpoSchema(AbstractSchema):
 
         config_schema = Schema(
             {
-                'model_family': And(str, self.check_if_model_family_exists, error="Model family does not exist"),
+                'model_family': 
+                    And(
+                        str,
+                        self.check_if_model_family_exists,
+                        error="Model family does not exist"
+                    ),
                 'hpo_run_name': And(str, error="HPO run name must be a string"),
                 'project_name': And(str, error="Project name must be a string"),
+                Optional('description', default=None):
+                    And(str, error="description must be a string"),
                 'hyperparameters': And(
                     dict, self.check_optimized_hyperparams_validity,
                     lambda x: self.has_enough_layer_configs(
@@ -283,7 +296,12 @@ class DefaultHpoSchema(AbstractSchema):
                 },
                 'metrics': Use(lambda x: self.validate_metrics_in_order(x, schema_params['metric_schemas'],),
                                     error="Specified metric is not valid."),
-                'num_candidates': And(int, schema_utils.is_positive, error="Number of candidates must be a positive integer"),
+                'num_candidates':
+                    And(
+                        int,
+                        schema_utils.is_positive,
+                        error="Number of candidates must be a positive integer"
+                    ),
                 'verbosity': And(int, error="Verbosity must be an integer"),
             },
             error="Invalid HPO configuration"

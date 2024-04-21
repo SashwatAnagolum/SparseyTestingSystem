@@ -7,6 +7,11 @@ model_family: sparsey
 # hpo_run_name: string
 #     the name to use for this HPO run and its corresponding Sweep in Weights & Biases
 hpo_run_name: sample_hpo_run
+
+# description: string (optional, default None) - a written description of the purpose of this HPO run
+#     logged to the sweep summary in Weights & Biases
+description: "A testing sweep using the demo configuration files."
+
 # project_name: string
 #     the project in Weights & Biases to which to log this run's results (its Sweep, the constituent Runs, and all metrics)
 project_name: sparsey_hpo_presentation_3

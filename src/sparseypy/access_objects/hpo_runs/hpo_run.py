@@ -172,10 +172,11 @@ class HPORun():
         )
 
         sweep_config = {
+            'description': hpo_config['description'],
             'entity': system_config['wandb']['entity'],
             'method': hpo_config['hpo_strategy'],
-            'name': hpo_config['hpo_run_name'],
             'metric': {'goal': 'minimize', 'name': 'hpo_objective'},
+            'name': hpo_config['hpo_run_name'],
             'project': hpo_config['project_name'],
             'run_cap': hpo_config['num_candidates'],
             'parameters': sweep_hyperparams
