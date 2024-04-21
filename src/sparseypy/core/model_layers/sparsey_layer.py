@@ -227,8 +227,6 @@ class MAC(torch.nn.Module):
                 for code in active_neurons.flatten(start_dim=1).cpu().numpy():
                     self.stored_codes.add(tuple(code))
 
-            print(self.stored_codes)
-
             return output
 
 
