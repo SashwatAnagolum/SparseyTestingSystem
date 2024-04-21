@@ -99,12 +99,12 @@ class HebbianOptimizer(torch.optim.Optimizer):
             out=params
         )
 
-        params[
+        torch.where(
             torch.ge(
                 self.timesteps[layer_index][mac_index],
                 mac.permanence_steps
-            )
-        ] = 0.0
+            ), 0.0, params, out=params
+        )
 
 
     def step(self, closure=None) -> None:
