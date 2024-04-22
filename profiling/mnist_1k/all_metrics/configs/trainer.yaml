@@ -1,0 +1,52 @@
+---
+# trainer.yaml - training recipe configuration for a single experiment
+
+# optimizer settings
+optimizer:
+  # name: string - the optimizer class to load and use
+  #    for Sparsey models you should always use "hebbian"
+  name: hebbian
+  params: {}
+
+# metrics: list of metrics to compute during an experiment
+#     system Metric classes are defined in core/metrics
+#     if you add a Metric class to the system, you also need to add a corresponding
+#     metric schema in cli/config_validation/saved_schemas/metric
+#     in order for it to be detected here and pass validation
+metrics:
+  # name: string
+  #     metric name must be written in snake case
+  - name: basis_set_size
+    save: True
+  - name: num_activations
+    save: True
+  - name: feature_coverage
+    save: True
+  - name: sisc_adherence
+    save: True
+  - ame: basis_average
+    save: True
+  - name: basis_set_size_increase
+    save: True
+  - name: match_accuracy
+    save: True
+
+# dataloader settings for loading items from the dataset
+dataloader:
+  # batch_size: int > 0
+  #    number of input items per batch
+  batch_size: 1
+  # shuffle: bool
+  #    whether to randomize the inputs as they are drawn from the dataloader
+  shuffle: True
+
+# training-related hyperparameters
+training:
+  # num_epochs: int > 0
+  #     number of epochs to train for
+  #     for Sparsey single-shot learning this will always be 1
+  #     but the setting exists for potential future compatibility
+  num_epochs: 1
+
+use_gpu: False
+...

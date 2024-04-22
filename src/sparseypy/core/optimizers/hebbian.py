@@ -87,19 +87,24 @@ class HebbianOptimizer(torch.optim.Optimizer):
         """
         torch.div(
             1.0 + (mac.permanence_convexity / mac.permanence_steps),
-            1.0 + torch.div(
-                mac.permanence_convexity,
-                torch.sub(
-                    mac.permanence_steps,
-                    self.timesteps[layer_index][mac_index]
-                )
+            torch.add(
+                torch.div(
+                    mac.permanence_convexity,
+                    torch.sub(
+                        mac.permanence_steps,
+                        self.timesteps[layer_index][mac_index]
+                    )
+                ), 1.0
             ),
             out=params
         )
 
-        params[
-            self.timesteps[layer_index][mac_index] >= mac.permanence_steps
-        ] = 0.0
+        torch.where(
+            torch.ge(
+                self.timesteps[layer_index][mac_index],
+                mac.permanence_steps
+            ), torch.zeros(1), params, out=params
+        )
 
 
     def step(self, closure=None) -> None:
@@ -115,7 +120,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
         # enting inputs and outputs for those MACs.
         layers, inputs, outputs = self.hook.get_layer_io()
 
-        # Iterate over each layer 
+        # Iterate over each layer
         for layer_index, layer in enumerate(layers):
             if len(self.timesteps) == layer_index:
                 self.timesteps.append([])
@@ -167,16 +172,21 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     # Apply the updateable mask to the weight updates, effectively zeroing
                     # updates for weights that are not updateable (frozen).
                     # BUG: probably does not update weights that are both active on this step *and* frozen
-                    weight_updates *= updateable_mask
+                    torch.mul(
+                        weight_updates, updateable_mask,
+                        out=weight_updates
+                    )
 
                     # apply permanence/weight decay to all weights 
                     # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...                
-                    self.timesteps[layer_index][mac_index] += 1
+                    torch.add(self.timesteps[layer_index][mac_index], 1)
                     self.apply_permanence_update(
                         mac, params, layer_index, mac_index
                     )
 
-                    params[torch.ge(weight_updates, 1)] = 1.0
+                    torch.add(params, weight_updates, out=params)
+                    torch.clamp(params, 0, 1, out=params)
+
                     self.timesteps[layer_index][mac_index] = torch.mul(
                         torch.lt(weight_updates, 1),
                         self.timesteps[layer_index][mac_index]
