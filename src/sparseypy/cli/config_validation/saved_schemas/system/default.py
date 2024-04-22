@@ -119,6 +119,11 @@ class DefaultSystemSchema(AbstractSchema):
                 {
                     'console': Schema(
                         {
+                            Optional('hpo_progress_bars', default=True):
+                                Schema(
+                                    bool,
+                                    error="hpo_progress_bars must be a Boolean value"
+                                ),
                             Optional('print_error_stacktrace', default=False):
                                 Schema(
                                     bool,

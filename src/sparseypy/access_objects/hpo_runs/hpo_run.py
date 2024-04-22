@@ -88,6 +88,7 @@ class HPORun():
         self.objective = HPOObjective(hpo_config)
         self.best = None
         self.num_steps = 0
+        self.progress_bars = system_config['console']['hpo_progress_bars']
         if HPORun.tqdm_bar is None:
             HPORun.tqdm_bar = tqdm(total=self.num_trials, desc="HPO Trials", position=1)
 
@@ -251,13 +252,13 @@ class HPORun():
         validated_model_config = validate_config(
             model_config, 'model', self.config_info['model_family'],
             survive_with_exception=True,
-            print_error_stacktrace=self.system_config['print_error_stacktrace']
+            print_error_stacktrace=self.system_config['console']['print_error_stacktrace']
         )
 
         validated_trainer_config = validate_config(
             trainer_config, 'training_recipe', 'sparsey',
             survive_with_exception=True,
-            print_error_stacktrace=self.system_config['print_error_stacktrace']
+            print_error_stacktrace=self.system_config['console']['print_error_stacktrace']
         )
 
         try:
@@ -289,7 +290,8 @@ class HPORun():
             with tqdm(
                 total=training_recipe.num_batches,
                 desc=f"Training (Trial {self.num_steps})",
-                leave=False, position=0
+                leave=False, position=0,
+                disable=(not self.progress_bars)
             ) as pbar:
                 while not done:
                     results, done = training_recipe.step()
@@ -301,7 +303,8 @@ class HPORun():
             with tqdm(
                 total=training_recipe.num_batches,
                 desc=f"Evaluation (Trial {self.num_steps})",
-                leave=False, position=0
+                leave=False, position=0,
+                disable=(not self.progress_bars)
             ) as pbar:
                 while not done:
                     results, done = training_recipe.step(training=False)
