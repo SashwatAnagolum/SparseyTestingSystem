@@ -23,7 +23,7 @@ class TrainingRecipeBuilder:
     objects.
     """
     @staticmethod
-    def build_training_recipe(model_config: dict, 
+    def build_training_recipe(model_config: dict,
         dataset_config: dict, preprocessing_config: dict,
         train_config: dict) -> TrainingRecipe:
         """
@@ -46,7 +46,11 @@ class TrainingRecipeBuilder:
             (TrainingRecipe): the constructed
                 TrainingRecipe object.
         """
-        device = torch.device('cuda' if train_config['use_gpu'] else 'cpu')
+        device = torch.device(
+            TrainingRecipeBuilder.sense_gpu()
+            if train_config['use_gpu']
+            else 'cpu'
+        )
 
         model = ModelBuilder.build_model(model_config, device)
         model.to(device)
@@ -87,14 +91,18 @@ class TrainingRecipeBuilder:
 
         metrics_list = []
 
-        # BUG this is a bad way to do metric initialization and will break every time we add a Metric parameter
+        # BUG this is a bad way to do metric initialization and
+        # will break every time we add a Metric parameter
         # we should revisit it
         for metric_config in train_config['metrics']:
             metric = MetricFactory.create_metric(
                 metric_config['name'],
                 #**metric_config['params'],
                 model=model,
-                reduction=metric_config['reduction'], # WARNING this formulation assumes all Metrics support a reduction constructor parameter
+                # WARNING this formulation assumes all Metrics
+                # support a reduction constructor parameter
+                # doing a **kwargs would be better
+                reduction=metric_config['reduction'],
                 best_value=metric_config['best_value'],
                 device=device
             )
@@ -108,7 +116,7 @@ class TrainingRecipeBuilder:
             )
         else:
             loss_func = None
-             
+
         # store the configs inside the finished TrainingRecipe for later saving
         setup_configs = {
             'dataset_config': dataset_config,
@@ -124,3 +132,17 @@ class TrainingRecipeBuilder:
             loss_func,
             train_config['training']['step_resolution']
         )
+
+    @staticmethod
+    def sense_gpu():
+        """
+        Detects and returns the type of supported GPU in use in the system.
+        Returns:
+            (str) the identifier for the system's GPU, if any, otherwise "cpu"
+        """
+        if torch.cuda.is_available():
+            return "cuda"
+        elif torch.backends.mps.is_available():
+            return "mps"
+        else:
+            return "cpu"
