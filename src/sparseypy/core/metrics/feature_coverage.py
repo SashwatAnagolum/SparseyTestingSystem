@@ -70,12 +70,14 @@ class FeatureCoverageMetric(Metric):
             )
 
             rf_cache[0][-1][:, mac.input_filter] = True
-            rf_cache[0][-1] = torch.logical_and(
-                rf_cache[0][-1], mac.is_active.unsqueeze(1)
+            torch.logical_and(
+                rf_cache[0][-1], mac.is_active.unsqueeze(1),
+                out=rf_cache[0][-1]
             )
 
-            layer_masks[0] = torch.bitwise_or(
-                layer_masks[0], rf_cache[0][-1]
+            torch.logical_or(
+                layer_masks[0], rf_cache[0][-1],
+                out=layer_masks[0]
             )
 
         for layer_index, layer in zip(range(1, len(layers)), layers[1:]):
@@ -88,14 +90,16 @@ class FeatureCoverageMetric(Metric):
                 )
 
                 for source_mac_index in mac.input_filter:
-                    rf_cache[layer_index][-1] = torch.bitwise_or(
+                    torch.bitwise_or(
                         rf_cache[layer_index][-1],
-                        rf_cache[layer_index - 1][source_mac_index]
+                        rf_cache[layer_index - 1][source_mac_index],
+                        out=rf_cache[layer_index][-1]
                     )
 
-                rf_cache[layer_index][-1] = torch.logical_and(
+                torch.logical_and(
                     rf_cache[layer_index][-1],
-                    mac.is_active.unsqueeze(1)
+                    mac.is_active.unsqueeze(1),
+                    out=rf_cache[layer_index][-1]
                 )
 
                 layer_masks[layer_index] = torch.bitwise_or(
@@ -104,13 +108,16 @@ class FeatureCoverageMetric(Metric):
                 )
 
         feature_coverage_values = []
-        active_input_pixel_count = torch.count_nonzero(last_batch, 1)
+        active_input_pixel_count = torch.sum(last_batch, dim=1)
 
         for layer_mask in layer_masks:
             feature_coverage_values.append(
                 torch.nan_to_num(
-                    torch.count_nonzero(
-                        torch.bitwise_and(layer_mask, last_batch), 1
+                    torch.sum(
+                        torch.logical_and(
+                            layer_mask,
+                            last_batch
+                        ), dim=1
                     ) / active_input_pixel_count,
                     1.0
                 )

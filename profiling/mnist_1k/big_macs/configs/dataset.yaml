@@ -1,0 +1,39 @@
+---
+# dataset_type: "built_in" is required to use built-in PyTorch datasets
+dataset_type: image
+
+# params for built-in datasets
+params:
+  # name: str - the name of the built-in dataset class to use
+  #     this is NOT corrected or adjusted for capitalization so you 
+  #     should use exactly the name from this page: 
+  #     https://pytorch.org/vision/main/datasets.html
+  data_dir: ./datasets/MNIST_1K
+  # transform: str - the PyTorch transform required to convert the items 
+  #     in this dataset from their native format to a PyTorch tensor 
+  #     supported by the system. Unfortunately, this is required because
+  #     each PyTorch dataset just returns items of its type and those aren't
+  #     the same or predictable--MNIST returns PIL images, CIFAR-10 returns
+  #     binary data, etc., and it's not possible to handle that without
+  #     you telling us how to transform the data.
+  #     IN THE CASE OF MNIST, the required transform is PILToTensor in order
+  #     to convert the PIL images into tensors that we can use. OTHER DATASETS
+  #     WILL REQUIRE DIFFERENT TRANSFORMS.
+  # transform: PIL_to_tensor
+  image_format: '.png'
+
+preprocessed: True
+
+preprocessed_stack:
+  transform_list:
+    - name: resize
+      params:
+        size: [28, 28]
+        antialias: True
+    - name: binarize
+      params:
+        binarize_threshold: 0.5
+    - name: skeletonize
+      params:
+        sigma: 3
+...

@@ -14,3 +14,4 @@ artifacts/
 datasets/MNIST_5K
 profiling
 scratch
+.ipynb_checkpoints
