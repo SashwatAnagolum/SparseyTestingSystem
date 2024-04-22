@@ -114,7 +114,7 @@ def main():
         args.hpo_config
     )
 
-    print_error_stacktrace = system_config_info.get('print_error_stacktrace', False)
+    print_error_stacktrace = system_config_info['console'].get('print_error_stacktrace', False)
 
     validated_preprocessing_config = validate_config(
         preprocessing_config_info, 'preprocessing_stack', 'default',

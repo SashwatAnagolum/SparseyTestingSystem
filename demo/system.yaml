@@ -1,6 +1,12 @@
 # system.yaml - core system and database configuration
 ---
 
+# console: output settings for the console
+console:
+  # whether to print error stack traces when they occur for schema validation errors
+  # print_error_stacktrace: True
+  print_error_stacktrace: False
+
 # wandb: configuration settings for Weights & Biases
 wandb:
   # api_key: str (optional) - the API key to use to connect to Weights & Biases

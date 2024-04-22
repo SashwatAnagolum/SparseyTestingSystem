@@ -117,6 +117,15 @@ class DefaultSystemSchema(AbstractSchema):
         """
         config_schema = Schema(
                 {
+                    'console': Schema(
+                        {
+                            Optional('print_error_stacktrace', default=False):
+                                Schema(
+                                    bool,
+                                    error="print_error_stacktrace must be a Boolean value"
+                                )
+                        }
+                    ),
                     'wandb': Schema({
                         Optional('api_key', default="WANDB_API_KEY"):
                             And(
@@ -155,11 +164,6 @@ class DefaultSystemSchema(AbstractSchema):
                             ]
                     },
                     error="Error in database configuration"),
-                    Optional('print_error_stacktrace', default=False):
-                        Schema(
-                            bool,
-                            error="print_error_stacktrace must be a boolean value"
-                        )
                 },
                 error="Error in system.yaml"
         )
