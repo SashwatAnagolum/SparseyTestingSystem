@@ -49,6 +49,19 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
         )
 
 
+    def check_if_gpu_exists(self):
+        """
+        Checks if a supported GPU exists on the current system.
+        Returns:
+            (bool): whether or not a GPU is present
+        """
+        return (
+            torch.cuda.is_available()
+            or
+            torch.backends.mps.is_available()
+        )
+
+
     def validate_metrics_in_order(self, metrics: list, metric_schemas: list[Schema]) -> list:
         """
         Validates the metrics in the provided list in order to prevent
@@ -193,8 +206,8 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
                         error="Step_resolution must be a positive integer if specified."
                     )
                 },
-                Optional('use_gpu', default=False): Or(
-                    False, lambda x: torch.cuda.is_available(),
+                Optional('use_gpu', default=self.check_if_gpu_exists()): Or(
+                    False, lambda x: self.check_if_gpu_exists(),
                     error='Cannot set use_gpu to True when no GPU is available.'
                 )
             }
