@@ -48,5 +48,12 @@ training:
   #     but the setting exists for potential future compatibility
   num_epochs: 1
 
+# use_gpu: bool, default True if the system has a compatible GPU, otherwise False
+#     whether to use a GPU to accelerate system performance, if one is available
+#     (the system supports CUDA and MPS backends)
+#     in general, you are better off leaving this out and letting the system
+#     automatically use a GPU if it is available) unless you specifically want
+#     to refuse to start the run in the absence of a GPU (set True) or
+#     force the system to never use a GPU even if it is present (set False)
 # use_gpu: True
 ...
