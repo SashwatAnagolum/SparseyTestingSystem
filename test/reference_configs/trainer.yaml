@@ -52,4 +52,6 @@ training:
   #     for Sparsey single-shot learning this will always be 1
   #     but the setting exists for potential future compatibility
   num_epochs: 1
+
+use_gpu: False
 ...

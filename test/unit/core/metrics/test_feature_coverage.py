@@ -6,7 +6,7 @@ from sparseypy.access_objects.models.model import Model
 from sparseypy.core.model_layers.sparsey_layer import SparseyLayer
 
 def test_feature_coverage_compute():
-    model = Model()
+    model = Model(torch.device("cpu"))
     layer = SparseyLayer(
             autosize_grid=True,  
             grid_layout="rectangular",
@@ -31,11 +31,12 @@ def test_feature_coverage_compute():
             activation_threshold_min=0.2, 
             activation_threshold_max=1.0, 
             min_familiarity=0.2, 
-            sigmoid_chi=1.5 
+            sigmoid_chi=1.5,
+            device=torch.device("cpu")
         )
     
     model.add_layer(layer)
-    metric = FeatureCoverageMetric(model, reduction='mean')
+    metric = FeatureCoverageMetric(model, torch.device("cpu"), reduction='mean')
     last_batch = torch.rand((10, 10))
     labels = torch.rand((10, 5))
 

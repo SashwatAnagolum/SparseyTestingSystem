@@ -61,7 +61,7 @@ class TestLayerFactory:
             saturation_threshold=0.8,
             permanence_steps=0.1, permanence_convexity=0.1, 
             activation_threshold_min=0.4, activation_threshold_max=0.8,
-            min_familiarity=0.5, sigmoid_chi=1.2
+            min_familiarity=0.5, sigmoid_chi=1.2, device=torch.device("cpu")
         )
 
         assert isinstance(layer_obj, SparseyLayer)

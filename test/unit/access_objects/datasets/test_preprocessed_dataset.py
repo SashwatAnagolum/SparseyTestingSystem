@@ -8,6 +8,10 @@ from sparseypy.core.transforms.transform_factory import TransformFactory
 from sparseypy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
 
 class BasicTransformFactory:
+    """
+    TC-03-02: Tests the PreprocessedDataset class's ability to correctly and efficiently wrap an ImageDataset with preprocessing applied.
+    """
+
     @staticmethod
     def create_transform(name, **params):
         if name == 'ToTensor':

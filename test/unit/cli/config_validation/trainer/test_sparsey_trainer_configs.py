@@ -180,7 +180,7 @@ class TestSparseyTrainerConfigs:
             sparsey trainer schema to be used for testing, passed in 
             via pytest's fixture functionality.
 
-        Test case ID: TC-01-21
+        Test case ID: TC-01-22
         """
         sparsey_trainer_schema['training']['num_epochs'] = 0
 
