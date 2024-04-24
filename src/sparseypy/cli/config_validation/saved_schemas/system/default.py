@@ -124,6 +124,11 @@ class DefaultSystemSchema(AbstractSchema):
                                     bool,
                                     error="hpo_progress_bars must be a Boolean value"
                                 ),
+                            Optional('print_best_hpo_config', default=False):
+                                Schema(
+                                    bool,
+                                    error="print_best_hpo_config must be a Boolean value"
+                                ),
                             Optional('print_error_stacktrace', default=False):
                                 Schema(
                                     bool,
