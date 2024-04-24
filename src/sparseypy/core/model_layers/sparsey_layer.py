@@ -32,7 +32,8 @@ class MAC(torch.nn.Module):
         activation_threshold_min: float,
         activation_threshold_max: float,
         sigmoid_chi: float, min_familiarity: float,
-        device: torch.device
+        device: torch.device, prev_layer_num_cms_per_mac: int,
+        prev_layer_num_neurons_per_cm: int
     ) -> None:
         """
         Initializes the MAC object.
@@ -79,6 +80,7 @@ class MAC(torch.nn.Module):
         self.input_num_cms = num_cms_per_mac_in_input
         self.input_num_neurons = num_neurons_per_cm_in_input
         self.input_num_macs = input_filter.shape[0]
+        self.prev_layer_num_cms_per_mac = prev_layer_num_cms_per_mac
 
         self.layer_index = layer_index
         self.mac_index = mac_index
@@ -146,10 +148,11 @@ class MAC(torch.nn.Module):
         with torch.no_grad():
             # compute the number of incoming active MACs
             # for each sample in the batch
-            active_input_macs = torch.sum(
-                torch.gt(
-                    x.count_nonzero(dim=[2, 3]), 0
-                ), dim=1
+            active_input_macs = torch.div(
+                torch.sum(
+                    x, dim=(1, 2, 3)
+                ),
+                self.prev_layer_num_cms_per_mac
             )
 
             # find out if the MAC should be active or not
@@ -221,14 +224,8 @@ class MAC(torch.nn.Module):
             )
 
             if self.training:
-                if tuple(
-                    [i for i in active_neurons.flatten().cpu().numpy()]
-                ) not in self.stored_codes:
-                    self.stored_codes.add(
-                        tuple(
-                            [i for i in active_neurons.flatten().cpu().numpy()]
-                        )
-                    )
+                for code in active_neurons.flatten(start_dim=1).cpu().numpy():
+                    self.stored_codes.add(tuple(code))
 
             return output
 
@@ -340,7 +337,8 @@ class SparseyLayer(torch.nn.Module):
                 activation_threshold_min,
                 activation_threshold_max,
                 sigmoid_chi, min_familiarity,
-                self.device
+                self.device, prev_layer_num_cms_per_mac,
+                prev_layer_num_neurons_per_cm
             ) for i in range(num_macs)
         ]
 

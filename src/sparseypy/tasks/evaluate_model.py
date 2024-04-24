@@ -46,6 +46,13 @@ def evaluate_model(model_name: str, trainer_config: dict,
     if system_config["wandb"]["silent"]:
         os.environ["WANDB_SILENT"] = "true"
 
+    # check for match_accuracy
+    for i, m in enumerate(trainer_config["metrics"]):
+        if m["name"] == "match_accuracy":
+            tqdm.write("WARNING: match_accuracy is not supported for reloaded models. Removing.")
+            del trainer_config["metrics"][i]
+            break
+
     # initialize the DataStorer (logs into W&B and Firestore)
     DataStorer.configure(system_config)
 
@@ -94,14 +101,18 @@ Selected metrics:
                 # validate this logic VS the design of our EvaluationResult
                 # this looks like old-style logic for which we should remove the "while"
                 output, is_epoch_done = trainer.step(training=False)
-                tqdm.write(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
-                metric_str = pprint.pformat(output.get_metrics())
-                tqdm.write(metric_str)
+                # only print metric values to the console if explicitly requested by 
+                # the user (for performance reasons--metrics print a lot of data)
+                if system_config['console'].get('print_metric_values', False):
+                    tqdm.write(f"\n\nEvaluation results - INPUT {batch_number}\n------------------")
+                    metric_str = pprint.pformat(output.get_metrics())
+                    tqdm.write(metric_str)
                 batch_number+=1
                 pbar.update(1)
 
         # print summary here in model script
         # if not printing you still need to call this to finalize the results
+        tqdm.write("\nLogging evaluation results...")
         eval_summary = trainer.get_summary("evaluation")
 
         tqdm.write("\n\nEVALUATION - SUMMARY\n")

@@ -12,6 +12,7 @@ from typing import Iterator, Callable, Optional
 import torch
 
 from sparseypy.core.hooks import LayerIOHook
+from sparseypy.core.model_layers.sparsey_layer import MAC
 
 
 class HebbianOptimizer(torch.optim.Optimizer):
@@ -73,6 +74,39 @@ class HebbianOptimizer(torch.optim.Optimizer):
         return updateable_mask
 
 
+    def apply_permanence_update(self, mac: MAC, params: torch.Tensor,
+                                layer_index: int, mac_index: int) -> None:
+        """
+        Applies the permanence weight updates.
+
+        Args:
+            mac (MAC): the mac to apply updates to.
+            params (torch.Tensor): the weight tensor to update.
+            layer_index (int): the layer the MAC is in.
+            mac_index (int): the index of the MAC.
+        """
+        torch.div(
+            1.0 + (mac.permanence_convexity / mac.permanence_steps),
+            torch.add(
+                torch.div(
+                    mac.permanence_convexity,
+                    torch.sub(
+                        mac.permanence_steps,
+                        self.timesteps[layer_index][mac_index]
+                    )
+                ), 1.0
+            ),
+            out=params
+        )
+
+        torch.where(
+            torch.ge(
+                self.timesteps[layer_index][mac_index],
+                mac.permanence_steps
+            ).cpu(), torch.zeros(1), params, out=params
+        )
+
+
     def step(self, closure=None) -> None:
         """
         Performs a weight update.
@@ -86,7 +120,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
         # enting inputs and outputs for those MACs.
         layers, inputs, outputs = self.hook.get_layer_io()
 
-        # Iterate over each layer 
+        # Iterate over each layer
         for layer_index, layer in enumerate(layers):
             if len(self.timesteps) == layer_index:
                 self.timesteps.append([])
@@ -138,31 +172,21 @@ class HebbianOptimizer(torch.optim.Optimizer):
                     # Apply the updateable mask to the weight updates, effectively zeroing
                     # updates for weights that are not updateable (frozen).
                     # BUG: probably does not update weights that are both active on this step *and* frozen
-                    weight_updates *= updateable_mask
-                    
-                    # apply permanence/weight decay to all weights 
-                    # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
-                    permanence_numerator = torch.pow(
-                        torch.sub(
-                            mac.permanence_steps,
-                            self.timesteps[layer_index][mac_index]
-                        ).float(), mac.permanence_convexity
-                    )
-
                     torch.mul(
-                        params > self.epsilon,
-                        torch.div(
-                            permanence_numerator,
-                            mac.permanence_steps ** mac.permanence_convexity
-                        ),
-                        out=params
+                        weight_updates, updateable_mask,
+                        out=weight_updates
                     )
 
-                    torch.nan_to_num(params, 0.0, out=params)
-                    params += torch.ge(weight_updates, 1)
+                    # apply permanence/weight decay to all weights 
+                    # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...                
+                    torch.add(self.timesteps[layer_index][mac_index], 1)
+                    self.apply_permanence_update(
+                        mac, params, layer_index, mac_index
+                    )
+
+                    torch.add(params, weight_updates, out=params)
                     torch.clamp(params, 0, 1, out=params)
-                    
-                    self.timesteps[layer_index][mac_index] += 1
+
                     self.timesteps[layer_index][mac_index] = torch.mul(
                         torch.lt(weight_updates, 1),
                         self.timesteps[layer_index][mac_index]

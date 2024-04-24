@@ -117,6 +117,25 @@ class DefaultSystemSchema(AbstractSchema):
         """
         config_schema = Schema(
                 {
+                    'console': Schema(
+                        {
+                            Optional('hpo_progress_bars', default=True):
+                                Schema(
+                                    bool,
+                                    error="hpo_progress_bars must be a Boolean value"
+                                ),
+                            Optional('print_error_stacktrace', default=False):
+                                Schema(
+                                    bool,
+                                    error="print_error_stacktrace must be a Boolean value"
+                                ),
+                            Optional('print_metric_values', default=False):
+                                Schema(
+                                    bool,
+                                    error="print_metric_values must be a Boolean value"
+                                )
+                        }
+                    ),
                     'wandb': Schema({
                         Optional('api_key', default="WANDB_API_KEY"):
                             And(
@@ -155,11 +174,6 @@ class DefaultSystemSchema(AbstractSchema):
                             ]
                     },
                     error="Error in database configuration"),
-                    Optional('print_error_stacktrace', default=False):
-                        Schema(
-                            bool,
-                            error="print_error_stacktrace must be a boolean value"
-                        )
                 },
                 error="Error in system.yaml"
         )

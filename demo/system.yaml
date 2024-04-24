@@ -1,6 +1,20 @@
 # system.yaml - core system and database configuration
 ---
 
+# console: output settings for the console
+console:
+  # hpo_progress_bars: bool, default True - whether to show progress bars for training and evaluation
+  #     during HPO runs. Defaults to True for better feedback. Has a very small performance impact.
+  #     disable for batch jobs (e.g. on HPC)
+  hpo_progress_bars: False
+  # whether to print error stack traces when they occur for schema validation errors
+  # print_error_stacktrace: True
+  print_error_stacktrace: False
+  # print_metric_values: bool, default False - whether to print the values of the selected metrics
+  #     to the console at each step of training. More informative about model progress, but printing
+  #     this much data to the console has a significant performance impact so it is disabled by default.
+  print_metric_values: False
+
 # wandb: configuration settings for Weights & Biases
 wandb:
   # api_key: str (optional) - the API key to use to connect to Weights & Biases
@@ -95,7 +109,4 @@ database:
     # - name: mongo
     #   connection_string: $MONGO_CONNECTION_STRING
 
-# whether to print error stack traces when they occur for schema validation errors
-# print_error_stacktrace: True
-print_error_stacktrace: False
 ...
