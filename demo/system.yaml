@@ -10,7 +10,7 @@ wandb:
   api_key: WANDB_API_KEY
   # project_name: string - the name of the project in Weights & Biases to log data into
   #     this is also the default project for individual training runs using Train Model
-  project_name: Roar_v2
+  project_name: sparsey_testing_project
   # save_models: bool, default True - whether to save model weights into Weights & Biases
   # NOTE: CURRENTLY A DUMMY OPTION because model saving is not implemented yet
   # save_models: True
@@ -67,7 +67,7 @@ database:
       # data_resolution: int - the level of data to log back to Firestore, default 0 ("nothing")
       # 0 = nothing, 1 = only summary data, 2 = every step
       # to log data back to Firestore you need to raise this value
-      data_resolution: 0
+      data_resolution: 2
       # save_models: bool, default False - whether to save model weights to Firestore
       #     Firestore is limited to 1 MiB per document so if you turn this on you
       #     may encounter issues! this setting comes with absolutely no warranty,
