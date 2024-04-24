@@ -147,6 +147,7 @@ class FirestoreDbAdapter(DbAdapter):
             description = experiment.configs["training_recipe_config"]["description"]
         else:
             dataset_description = None
+            description = None
 
         # save on "summary" or better
         if self.resolution > 0:
