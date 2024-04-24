@@ -365,7 +365,8 @@ class HPORun():
                 wandb.finish()
 
                 # strip unused layers from W&B side config
-                # this must occur after .finish() due to a bug in W&B
+                # this must occur after .finish() due to a bug in W&B preventing
+                # config file changes during a run even with allow_val_changes
                 max_layers = len(model_config['layers'])
                 run = wandb.Api().run(run_path)
 
@@ -375,6 +376,8 @@ class HPORun():
 
                 run.update()
         except Exception as e:
+            tqdm.write(f"WARNING: EXCEPTION OCCURRED DURING HPO STEP {self.num_steps}")
+            tqdm.write("Exception traceback:")
             tqdm.write(traceback.format_exc())
         if HPORun.tqdm_bar is not None:
             HPORun.tqdm_bar.update(1)
