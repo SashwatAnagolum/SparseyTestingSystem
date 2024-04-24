@@ -93,7 +93,14 @@ Selected metrics:
         batch_number = 1
 
         # perform training
-        with tqdm(total=trainer.num_batches, desc="Training", leave=False, position=1) as pbar:
+        with tqdm(
+            total=trainer.num_batches,
+            desc="Training",
+            leave=False,
+            position=1,
+            unit="input",
+            miniters=int(trainer.num_batches/100)
+        ) as pbar:
             while not is_epoch_done:
                 output, is_epoch_done = trainer.step(training=True)
                 # only print metric values to the console if explicitly requested by 
@@ -106,6 +113,7 @@ Selected metrics:
                 pbar.update(1)
 
         # summarize the best training steps
+        tqdm.write("\nLogging training results...")
         train_summary = trainer.get_summary("training")
         tqdm.write("\n\nTRAINING - SUMMARY\n")
         tqdm.write("Best metric steps:")
@@ -117,7 +125,14 @@ Selected metrics:
         batch_number = 1
 
         # perform evaluation
-        with tqdm(total=trainer.num_batches, desc="Evaluation", leave=False, position=1) as pbar:
+        with tqdm(
+            total=trainer.num_batches,
+            desc="Evaluation",
+            leave=False,
+            position=1,
+            unit="input",
+            miniters=int(trainer.num_batches/100)
+        ) as pbar:
             while not is_epoch_done:
                 # validate this logic VS the design of our EvaluationResult
                 # this looks like old-style logic for which we should remove the "while"
@@ -133,6 +148,7 @@ Selected metrics:
 
         # print summary here in model script
         # if not printing you still need to call this to finalize the results
+        tqdm.write("\nLogging evaluation results...")
         eval_summary = trainer.get_summary("evaluation")
 
         tqdm.write("\n\nEVALUATION - SUMMARY\n")

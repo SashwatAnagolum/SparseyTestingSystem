@@ -90,7 +90,12 @@ class HPORun():
         self.num_steps = 0
         self.progress_bars = system_config['console']['hpo_progress_bars']
         if HPORun.tqdm_bar is None:
-            HPORun.tqdm_bar = tqdm(total=self.num_trials, desc="HPO Trials", position=1)
+            HPORun.tqdm_bar = tqdm(
+                total=self.num_trials,
+                desc="HPO Trials",
+                position=1,
+                unit="trial"
+            )
 
 
     def check_is_value_constraint(self, config):
@@ -291,7 +296,9 @@ class HPORun():
                 total=training_recipe.num_batches,
                 desc=f"Training (Trial {self.num_steps})",
                 leave=False, position=0,
-                disable=(not self.progress_bars)
+                disable=(not self.progress_bars),
+                unit="input",
+                miniters=int(training_recipe.num_batches/100)
             ) as pbar:
                 while not done:
                     results, done = training_recipe.step()
@@ -304,7 +311,9 @@ class HPORun():
                 total=training_recipe.num_batches,
                 desc=f"Evaluation (Trial {self.num_steps})",
                 leave=False, position=0,
-                disable=(not self.progress_bars)
+                disable=(not self.progress_bars),
+                unit="input",
+                miniters=int(training_recipe.num_batches/100)
             ) as pbar:
                 while not done:
                     results, done = training_recipe.step(training=False)

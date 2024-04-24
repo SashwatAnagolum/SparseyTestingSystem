@@ -46,6 +46,13 @@ def evaluate_model(model_name: str, trainer_config: dict,
     if system_config["wandb"]["silent"]:
         os.environ["WANDB_SILENT"] = "true"
 
+    # check for match_accuracy
+    for i, m in enumerate(trainer_config["metrics"]):
+        if m["name"] == "match_accuracy":
+            tqdm.write("WARNING: match_accuracy is not supported for reloaded models. Removing.")
+            del trainer_config["metrics"][i]
+            break
+
     # initialize the DataStorer (logs into W&B and Firestore)
     DataStorer.configure(system_config)
 
@@ -105,6 +112,7 @@ Selected metrics:
 
         # print summary here in model script
         # if not printing you still need to call this to finalize the results
+        tqdm.write("\nLogging evaluation results...")
         eval_summary = trainer.get_summary("evaluation")
 
         tqdm.write("\n\nEVALUATION - SUMMARY\n")
