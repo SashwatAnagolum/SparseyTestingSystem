@@ -4,11 +4,12 @@
 Evaluate Model: script to reload and evaluate models.
 """
 
+from copy import deepcopy
 import os
 import pprint
-from tqdm import tqdm
 import warnings
 
+from tqdm import tqdm
 import wandb
 
 from sparseypy.access_objects.training_recipes.training_recipe_builder import TrainingRecipeBuilder
@@ -58,8 +59,8 @@ def evaluate_model(model_name: str, trainer_config: dict,
 
     df = DataFetcher(system_config)
 
+    # fetch the required group to associate this evaluation with its parent training run
     source_path = df.get_model_source_path(model_name)
-
     source_group = get_update_group(source_path)
 
     wandb.init(

@@ -4,6 +4,7 @@
 Train Model: script to train models.
 """
 
+from copy import deepcopy
 import os
 import pprint
 from tqdm import tqdm
@@ -50,11 +51,20 @@ def train_model(model_config: dict, trainer_config: dict,
     # initialize the DataStorer (logs into W&B and Firestore)
     DataStorer.configure(system_config)
 
+    # break out the individual model config layers for better hyperparameter
+    # access on W&B (without this you can't use the layer HP in the visualizer)
+    wandb_model_config = deepcopy(model_config)
+    # convert from array of layers to dict of "layer_1", "layer_2", ...
+    wandb_model_config["layers"] = {
+        f"layer_{i+1}": layer
+        for i, layer in enumerate(wandb_model_config["layers"])
+    }
+
     wandb.init(
         allow_val_change=True,
         config={
             'dataset': dataset_config,
-            'model': model_config,
+            'model': wandb_model_config,
             'training_recipe': trainer_config,
             'preprocessing': preprocessing_config
         },
