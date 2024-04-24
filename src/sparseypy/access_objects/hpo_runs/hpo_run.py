@@ -5,7 +5,7 @@ HPO Run: file holding the HPORun class.
 """
 
 from copy import deepcopy
-import json
+from pprint import pprint, pformat
 import traceback
 import warnings
 
@@ -83,6 +83,11 @@ class HPORun():
 
         # create the sweep
         self.data_storer.create_hpo_sweep(self.hpo_results)
+
+        # save the sweep URL
+        locator = f"{system_config['wandb']['entity']}/{hpo_config['project_name']}/{self.sweep_id}"
+        self.sweep_url = wandb.Api().sweep(locator).url
+        self.best_run_url = None
 
         # only initialize the objective once, in the constructor
         self.objective = HPOObjective(hpo_config)
@@ -354,6 +359,7 @@ class HPORun():
                 if (not self.best or
                    (self.best and objective_results["total"] > self.best.get_objective()["total"])):
                     self.best = hpo_step_results
+                    self.best_run_url = wandb.run.url
                     tqdm.write("This is the new best value!")
 
                 self.data_storer.save_hpo_step(wandb.run.sweep_id, hpo_step_results)
@@ -391,14 +397,28 @@ class HPORun():
             cls.tqdm_bar.close()
             cls.tqdm_bar = None
 
-    def _print_breakdown(self, step_results: HPOStepResult):
+    def _print_breakdown(self, step_results: HPOStepResult, print_config=False):
         objective_results = step_results.get_objective()
         # enhance with summary of metrics
+        tqdm.write(f"Run ID: {step_results.id}")
         tqdm.write(f"Objective value: {objective_results['total']:.5f}")
         tqdm.write(f"Combination method: {objective_results['combination_method']}")
         tqdm.write("Objective term breakdown:")
         for name, values in objective_results["terms"].items():
             tqdm.write(f"* {name:>25}: {values['value']:.5f} with weight {values['weight']}")
+
+        if print_config:
+            tqdm.write("\n---------------------------------------------------------")
+            tqdm.write("Configuration:\n---------------------------------------------------------")
+            layer_number = 1
+            tqdm.write('INPUT DIMENSIONS ')
+            tqdm.write(pformat(step_results.configs["model_config"]["input_dimensions"]))
+            tqdm.write("\n---------------------------------------------------------")
+            for layer in step_results.configs["model_config"]["layers"]:
+                tqdm.write(f"LAYER {layer_number}")
+                tqdm.write("\n---------------------------------------------------------")
+                tqdm.write(pformat(layer))
+                layer_number+=1
 
 
     def run_sweep(self) -> HPOResult:
