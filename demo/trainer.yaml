@@ -1,6 +1,11 @@
 ---
 # trainer.yaml - training recipe configuration for a single experiment
 
+# run_name: str, no default - the name to give the run in Weights & Biases
+#     corresponding to this experiment; if this is not provided, a random 
+#     8-character name will be generated instead
+# run_name: "test_run"
+
 # optimizer settings
 optimizer:
   # name: string - the optimizer class to load and use

@@ -63,10 +63,11 @@ def evaluate_model(model_name: str, trainer_config: dict,
     source_group = get_update_group(source_path)
 
     wandb.init(
-        project=system_config["wandb"]["project_name"],
         allow_val_change=True,
         job_type="eval",
-        group=source_group
+        name=trainer_config["run_name"],
+        group=source_group,
+        project=system_config["wandb"]["project_name"]
     )
 
     model_config, model_weights = df.get_model_data(model_name)

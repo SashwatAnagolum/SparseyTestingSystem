@@ -51,15 +51,16 @@ def train_model(model_config: dict, trainer_config: dict,
     DataStorer.configure(system_config)
 
     wandb.init(
-        project=system_config["wandb"]["project_name"],
         allow_val_change=True,
-        job_type="train",
         config={
             'dataset': dataset_config,
             'model': model_config,
             'training_recipe': trainer_config,
             'preprocessing': preprocessing_config
-        }
+        },
+        job_type="train",
+        name=trainer_config["run_name"],
+        project=system_config["wandb"]["project_name"],
     )
 
     reload_model = False
