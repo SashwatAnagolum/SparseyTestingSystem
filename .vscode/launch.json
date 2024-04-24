@@ -42,6 +42,21 @@
             "justMyCode": true
         },
         {
+            "name": "Run HPO (custom configs)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\run_hpo.py",
+            "args": [
+                "--dataset_config", "${input:getSparseyConfigDirectoryString}\\dataset.yaml",
+                "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
+                "--hpo_config", "${input:getSparseyConfigDirectoryString}\\hpo.yaml",
+                "--system_config", "${input:getSparseyConfigDirectoryString}\\system.yaml",
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
             "name": "Run HPO (custom configs, piped output)",
             "type": "debugpy",
             "request": "launch",
