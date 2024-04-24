@@ -96,9 +96,12 @@ Selected metrics:
         with tqdm(total=trainer.num_batches, desc="Training", leave=False, position=1) as pbar:
             while not is_epoch_done:
                 output, is_epoch_done = trainer.step(training=True)
-                # tqdm.write(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
-                # metric_str = pprint.pformat(output.get_metrics())
-                # tqdm.write(metric_str)
+                # only print metric values to the console if explicitly requested by 
+                # the user (for performance reasons--metrics print a lot of data)
+                if system_config['console'].get('print_metric_values', False):
+                    tqdm.write(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
+                    metric_str = pprint.pformat(output.get_metrics())
+                    tqdm.write(metric_str)
                 batch_number+=1
                 pbar.update(1)
 
@@ -108,20 +111,23 @@ Selected metrics:
         tqdm.write("Best metric steps:")
         for metric, val in train_summary.best_steps.items():
             tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
-        
+
         trainer.model.eval()
         is_epoch_done = False
         batch_number = 1
-        
+
         # perform evaluation
         with tqdm(total=trainer.num_batches, desc="Evaluation", leave=False, position=1) as pbar:
             while not is_epoch_done:
                 # validate this logic VS the design of our EvaluationResult
                 # this looks like old-style logic for which we should remove the "while"
                 output, is_epoch_done = trainer.step(training=False)
-                # tqdm.write(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
-                # metric_str = pprint.pformat(output.get_metrics())
-                # tqdm.write(metric_str)
+                # only print metric values to the console if explicitly requested by 
+                # the user (for performance reasons--metrics print a lot of data)
+                if system_config['console'].get('print_metric_values', False):
+                    tqdm.write(f"\n\nEvaluation results - INPUT {batch_number}\n------------------")
+                    metric_str = pprint.pformat(output.get_metrics())
+                    tqdm.write(metric_str)
                 batch_number+=1
                 pbar.update(1)
 
@@ -137,7 +143,7 @@ Selected metrics:
     tqdm.write("\nFinalizing results...")
     run_url = wandb.run.get_url()
     model_name = model_config.get('model_name', wandb.run.id+'-model')
-    
+
     wandb.finish()
 
     tqdm.write("\nTRAIN MODEL COMPLETED")

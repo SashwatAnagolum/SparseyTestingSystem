@@ -128,6 +128,11 @@ class DefaultSystemSchema(AbstractSchema):
                                 Schema(
                                     bool,
                                     error="print_error_stacktrace must be a Boolean value"
+                                ),
+                            Optional('print_metric_values', default=False):
+                                Schema(
+                                    bool,
+                                    error="print_metric_values must be a Boolean value"
                                 )
                         }
                     ),
