@@ -48,13 +48,7 @@ def train_model(model_config: dict, trainer_config: dict,
 
     wandb.init(
         project=system_config["wandb"]["project_name"],
-        allow_val_change=True,
-        config={
-            'dataset': dataset_config,
-            'model': model_config,
-            'trainer': trainer_config,
-            'preprocessing': preprocessing_config
-        }
+        allow_val_change=True
     )
 
     reload_model = False
@@ -91,9 +85,9 @@ Selected metrics:
         with tqdm(total=trainer.num_batches, desc="Training", leave=False, position=1) as pbar:
             while not is_epoch_done:
                 output, is_epoch_done = trainer.step(training=True)
-                # tqdm.write(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
-                # metric_str = pprint.pformat(output.get_metrics())
-                # tqdm.write(metric_str)
+                tqdm.write(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
+                metric_str = pprint.pformat(output.get_metrics())
+                tqdm.write(metric_str)
                 batch_number+=1
                 pbar.update(1)
 
@@ -114,9 +108,9 @@ Selected metrics:
                 # validate this logic VS the design of our EvaluationResult
                 # this looks like old-style logic for which we should remove the "while"
                 output, is_epoch_done = trainer.step(training=False)
-                # tqdm.write(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
-                # metric_str = pprint.pformat(output.get_metrics())
-                # tqdm.write(metric_str)
+                tqdm.write(f"\n\nEvaluation results - INPUT {batch_number}\n--------------------")
+                metric_str = pprint.pformat(output.get_metrics())
+                tqdm.write(metric_str)
                 batch_number+=1
                 pbar.update(1)
 
