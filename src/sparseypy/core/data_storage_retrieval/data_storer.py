@@ -152,14 +152,14 @@ class DataStorer:
                 if met_name in self.saved_metrics and isinstance(met_val, (list, torch.Tensor)):
                     # then break out each layer as a separate metric for W&B using prefix grouping
                     for idx, layer_data in enumerate(met_val):
-                        layer_name = f"{met_name}/layer_{idx}"
+                        layer_name = f"{met_name}/layer_{idx+1}"
                         layerwise_dict[layer_name] = self.average_nested_data(layer_data)
                         # if the resolution is 2 (MAC-level)
                         # also log the MAC-level data with prefix grouping
                         # FIXME tensors are not logged here pending adjustment of feature_coverage
                         if self.wandb_resolution == 2 and isinstance(layer_data, list):
                             for idy, mac_data in enumerate(layer_data):
-                                mac_name = f"{met_name}/layer_{idx}/mac_{idy}"
+                                mac_name = f"{met_name}/layer_{idx+1}/mac_{idy+1}"
                                 layerwise_dict[mac_name] = self.average_nested_data(mac_data)
             # then log without updating the step (done when the summary is logged below)
             wandb.log(layerwise_dict, commit=False)
