@@ -233,6 +233,8 @@ class HPORun():
         train_config = wandb_config["trainer"]
         # inject the metric list from the HPO config to complete the trainer config
         train_config["metrics"] = self.config_info["metrics"]
+        # also inject the GPU configuration
+        train_config["use_gpu"] = self.config_info["use_gpu"]
 
         return train_config
 

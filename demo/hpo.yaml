@@ -20,6 +20,15 @@ project_name: sparsey_hpo_presentation_3
 #     0 = minimal; suppresses Weights & Biases HPO console spam
 verbosity: 0
 
+# use_gpu: bool, default True if the system has a compatible GPU, otherwise False
+#     whether to use a GPU to accelerate system performance, if one is available
+#     (the system supports CUDA and MPS backends)
+#     in general, you are better off leaving this out and letting the system
+#     automatically use a GPU if it is available) unless you specifically want
+#     to refuse to start the run in the absence of a GPU (set True) or
+#     force the system to never use a GPU even if it is present (set False)
+use_gpu: False
+
 hyperparameters:
   # list of hyperparameters to either hold constant or optimize
   #   GENERAL HYPERPARAMETER OPTIONS
