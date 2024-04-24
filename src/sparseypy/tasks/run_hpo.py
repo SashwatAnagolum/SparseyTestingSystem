@@ -6,7 +6,7 @@ Run HPO Task: script to run HPO.
 
 
 import os
-from pprint import pprint
+import shutil
 from tqdm import tqdm
 
 from sparseypy.access_objects.hpo_runs.hpo_run  import HPORun
@@ -75,6 +75,12 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
     hpo_results = hpo_run.run_sweep()
 
     time_delta = hpo_results.end_time - hpo_results.start_time
+
+    # remove results at completion if requested
+    if system_config['wandb'].get('remove_local_files', False):
+        for wandb_dir in hpo_run.wandb_dirs:
+            shutil.rmtree(wandb_dir)
+        tqdm.write("\nRemoved local temporary files.")
 
     print("\n---------------------------------------------------------")
     print("HYPERPARAMETER OPTIMIZATION COMPLETED")

@@ -158,6 +158,8 @@ class DefaultSystemSchema(AbstractSchema):
                             ),
                         Optional('entity', default=None):
                             Schema(str, error="Entity name must be a string"),
+                        Optional('local_log_directory', default=None):
+                            Schema(str, error="local_log_directory must be a string"),
                         Optional('remove_local_files', default=False):
                             Schema(bool, error="remove_local_files must be a Boolean value"),
                         Optional('save_locally', default=True):

@@ -7,6 +7,7 @@ Train Model: script to train models.
 from copy import deepcopy
 import os
 import pprint
+import shutil
 from tqdm import tqdm
 import warnings
 
@@ -68,6 +69,7 @@ def train_model(model_config: dict, trainer_config: dict,
             'training_recipe': trainer_config,
             'preprocessing': preprocessing_config
         },
+        dir=system_config['wandb']['local_log_directory'],
         job_type="train",
         name=trainer_config["run_name"],
         notes=trainer_config['description'],
@@ -172,7 +174,13 @@ Selected metrics:
     run_url = wandb.run.get_url()
     model_name = model_config.get('model_name', wandb.run.id+'-model')
 
+    wandb_run_dir = wandb.run.dir.removesuffix('files')
+
     wandb.finish()
+
+    if system_config['wandb'].get('remove_local_files', False):
+        shutil.rmtree(wandb_run_dir)
+        tqdm.write("Removed local temporary files.")
 
     tqdm.write("\nTRAIN MODEL COMPLETED")
     tqdm.write("Review results in Weights & Biases:")

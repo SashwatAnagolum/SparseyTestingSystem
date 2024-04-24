@@ -4,9 +4,9 @@
 Evaluate Model: script to reload and evaluate models.
 """
 
-from copy import deepcopy
 import os
 import pprint
+import shutil
 import warnings
 
 from tqdm import tqdm
@@ -65,6 +65,7 @@ def evaluate_model(model_name: str, trainer_config: dict,
 
     wandb.init(
         allow_val_change=True,
+        dir=system_config['wandb']['local_log_directory'],
         group=source_group,
         job_type="eval",
         name=trainer_config["run_name"],
@@ -127,7 +128,13 @@ Selected metrics:
     run_url = wandb.run.get_url()
     model_name = model_config.get('model_name', wandb.run.id+'-model')
 
+    wandb_run_dir = wandb.run.dir.removesuffix('files')
+
     wandb.finish()
+
+    if system_config['wandb'].get('remove_local_files', False):
+        shutil.rmtree(wandb_run_dir)
+        tqdm.write("Removed local temporary files.")
 
     tqdm.write("\nEVALUATE MODEL COMPLETED")
     tqdm.write("Review results in Weights & Biases:")

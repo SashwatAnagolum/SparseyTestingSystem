@@ -5,7 +5,8 @@ HPO Run: file holding the HPORun class.
 """
 
 from copy import deepcopy
-from pprint import pprint, pformat
+import os
+from pprint import pformat
 import traceback
 import warnings
 
@@ -88,6 +89,15 @@ class HPORun():
         locator = f"{system_config['wandb']['entity']}/{hpo_config['project_name']}/{self.sweep_id}"
         self.sweep_url = wandb.Api().sweep(locator).url
         self.best_run_url = None
+
+        # start the list of temporary directories with this sweep's temp dir
+        local_dir = system_config['wandb']['local_log_directory']
+        if local_dir is None:
+            local_dir = "."
+
+        self.wandb_dirs = [
+            os.path.join(local_dir, 'wandb', 'sweep-' + self.sweep_id)
+        ]
 
         # only initialize the objective once, in the constructor
         self.objective = HPOObjective(hpo_config)
@@ -251,7 +261,11 @@ class HPORun():
         model, and computing the user-specified objective function
         using the trained model.
         """
-        wandb.init(allow_val_change=True, job_type="train")
+        wandb.init(
+            allow_val_change=True,
+            dir=self.system_config['wandb']['local_log_directory'],
+            job_type="train"
+        )
 
         model_config = self.generate_model_config(
             dict(wandb.config)
@@ -366,6 +380,8 @@ class HPORun():
 
                 # cache run path for updating config
                 run_path = wandb.run.path
+                # add temporary directory to removal list
+                self.wandb_dirs.append(wandb.run.dir.removesuffix("files"))
 
                 # finish the run - wandb.run may no longer be correct below this point
                 wandb.finish()
@@ -381,6 +397,7 @@ class HPORun():
                         del run.config[k]
 
                 run.update()
+
         except Exception as e:
             tqdm.write(f"WARNING: EXCEPTION OCCURRED DURING HPO STEP {self.num_steps}")
             tqdm.write("Exception traceback:")
@@ -400,7 +417,7 @@ class HPORun():
     def _print_breakdown(self, step_results: HPOStepResult, print_config=False):
         objective_results = step_results.get_objective()
         # enhance with summary of metrics
-        tqdm.write(f"Run ID: {step_results.id}")
+        #tqdm.write(f"Run ID: {step_results.id}")
         tqdm.write(f"Objective value: {objective_results['total']:.5f}")
         tqdm.write(f"Combination method: {objective_results['combination_method']}")
         tqdm.write("Objective term breakdown:")
