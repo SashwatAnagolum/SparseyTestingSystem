@@ -65,9 +65,10 @@ def evaluate_model(model_name: str, trainer_config: dict,
 
     wandb.init(
         allow_val_change=True,
+        group=source_group,
         job_type="eval",
         name=trainer_config["run_name"],
-        group=source_group,
+        notes=trainer_config['description'],
         project=system_config["wandb"]["project_name"]
     )
 

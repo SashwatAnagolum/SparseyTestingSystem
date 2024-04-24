@@ -70,6 +70,7 @@ def train_model(model_config: dict, trainer_config: dict,
         },
         job_type="train",
         name=trainer_config["run_name"],
+        notes=trainer_config['description'],
         project=system_config["wandb"]["project_name"],
     )
 
