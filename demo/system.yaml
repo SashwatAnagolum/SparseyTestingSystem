@@ -57,6 +57,10 @@ wandb:
   #     Unset this if you need to diagnose problems with Weights & Biases or you are willing to
   #     put up with the console spam for the mini-metric graphs it creates during training.
   silent: True
+  # remove_local_files: bool, default False - whether to delete the local W&B files on run and sweep
+  #     completion. Defaults to False to avoid deleting files on the local system that users might
+  #     wand. Set to True to reduce unnecessary use of storage space.
+  remove_local_files: False
 
 # database: configuration settings for one or more backend databases
 database:
