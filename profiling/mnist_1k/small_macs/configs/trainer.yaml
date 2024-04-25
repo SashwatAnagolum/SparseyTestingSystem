@@ -15,15 +15,16 @@ optimizer:
 #     in order for it to be detected here and pass validation
 metrics:
   # name: string
-  #     metric name must be written in snake case
-  - name: basis_set_size
-    # save: bool
-    #     whether the results of this metric should be stored to Weights & Biases
-    save: True
+  # #     metric name must be written in snake case
+  # - name: basis_set_size
+  #   # save: bool
+  #   #     whether the results of this metric should be stored to Weights & Biases
+  #   save: True
   - name: num_activations
     save: True
-  - name: feature_coverage
-    save: True
+    reduction: layerwise_mean
+  # - name: feature_coverage
+  #   save: True
   # - name: sisc_adherence
   #   save: True
 
