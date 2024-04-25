@@ -70,7 +70,8 @@ class SparseyLayer(torch.nn.Module):
         self.permanence_steps = permanence_steps
         self.permanence_convexity = permanence_convexity
         self.saturation_threshold = saturation_threshold
-        self.receptive_field_size = min(
+        self.is_active = None
+        self.receptive_field_size = max(
             int(
                 (mac_receptive_field_size * prev_layer_num_macs) // 1
             ), 1
@@ -105,17 +106,6 @@ class SparseyLayer(torch.nn.Module):
             self.mac_positions, prev_layer_mac_positions
         )
 
-        self.weights = torch.nn.Parameter(
-            torch.zeros(
-                self.num_macs,
-                self.receptive_field_size *
-                prev_layer_num_cms_per_mac *
-                prev_layer_num_neurons_per_cm,
-                self.num_cms_per_mac * self.num_neurons_per_cm,
-                dtype=torch.float32, device=self.device
-            )
-        )
-
         self.activation_threshold_min = (
             activation_threshold_min * self.receptive_field_size *
             prev_layer_num_cms_per_mac
@@ -124,6 +114,18 @@ class SparseyLayer(torch.nn.Module):
         self.activation_threshold_max = (
             activation_threshold_max * self.receptive_field_size *
             prev_layer_num_cms_per_mac
+        )
+
+        self.weights = torch.nn.Parameter(
+            torch.zeros(
+                self.num_macs,
+                self.receptive_field_size *
+                prev_layer_num_cms_per_mac *
+                prev_layer_num_neurons_per_cm,
+                self.num_cms_per_mac * self.num_neurons_per_cm,
+                dtype=torch.float32, device=self.device,
+                requires_grad=False
+            )
         )
 
 
@@ -236,7 +238,7 @@ class SparseyLayer(torch.nn.Module):
                 [i for i in indices[:self.receptive_field_size]]
             )
 
-        return torch.LongTensor(connections)
+        return torch.LongTensor(connections, device=self.device)
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -284,6 +286,8 @@ class SparseyLayer(torch.nn.Module):
                     self.activation_threshold_max
                 )
             )
+
+            self.is_active = macs_are_active
 
             raw_activations = torch.matmul(
                 mac_inputs.transpose(0, 1),
