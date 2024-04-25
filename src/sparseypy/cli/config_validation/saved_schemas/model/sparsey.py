@@ -201,7 +201,7 @@ class SparseyModelSchema(AbstractSchema):
                         Optional('mac_grid_num_cols', default=1): And(int, schema_utils.is_positive, error="MAC grid number of columns must be a positive integer"),
                         'num_cms_per_mac': And(int, schema_utils.is_positive, error="Number of CMs per MAC must be a positive integer"),
                         'num_neurons_per_cm': And(int, schema_utils.is_positive, error="Number of neurons per CM must be a positive integer"),
-                        'mac_receptive_field_radius': And(Or(Use(float)), schema_utils.is_positive, error="MAC receptive field radius must be a positive number"),
+                        'mac_receptive_field_size': And(Or(Use(float)), schema_utils.is_positive, error="MAC receptive field size must be a positive number"),
                         'sigmoid_lambda': And(Or(Use(float), int), schema_utils.is_positive, error="Sigmoid lambda must be a positive number"),
                         'sigmoid_phi': Or(Use(float), error="Sigmoid phi must be an integer or float"),
                         'saturation_threshold': And(float, lambda n: 0 <= n <= 1, error="Saturation threshold must be between 0 and 1"),
