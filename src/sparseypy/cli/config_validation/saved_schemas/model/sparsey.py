@@ -208,7 +208,7 @@ class SparseyModelSchema(AbstractSchema):
                         'activation_threshold_min': And(Or(Use(float)), lambda x: schema_utils.is_between(x, 0.0, 1.0), error="Activation threshold min must be between 0 and 1"),
                         'activation_threshold_max': And(Or(Use(float)), lambda x: schema_utils.is_between(x, 0.0, 1.0), error="Activation threshold max must be between 0 and 1"),
                         'sigmoid_chi': Or(Use(float), error="Sigmoid chi must be an integer or float"),
-                        'min_familiarity': And(float, lambda x: schema_utils.is_between(x, 0, 1), error="Min familiarity must be between 0 and 1"),
+                        'min_familiarity': And(float, lambda x: 0 <= x < 1, error="Min familiarity must be between 0 and 1"),
                         'permanence_steps': And(int, Use(float), error='num_steps_to_zero'),
                         'permanence_convexity': And(
                             Use(float),
