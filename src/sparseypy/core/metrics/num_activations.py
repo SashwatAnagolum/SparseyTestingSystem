@@ -27,8 +27,6 @@ class NumActivationsMetric(Metric):
         hook (LayerIOHook): the hook registered with the model
             being evaluated to obtain references to each layer,
             and layerwise inputs and outputs.
-        num_activations (list[list[int]]): the number of activations
-            fr each MAC in each layer of the model.
     """
     def __init__(self, model: torch.nn.Module,
                  device: torch.device,
@@ -45,26 +43,16 @@ class NumActivationsMetric(Metric):
                 Valid options are 'layerwise_mean', 'sum',
                 'mean', 'none', and None.
         """
-        super().__init__(model, "num_activations", best_value, device)
+        super().__init__(
+            model, 'num_activations', best_value,
+            device, reduction
+        )
 
         self.reduction = reduction
         self.hook = LayerIOHook(self.model)
-        self.num_activations = None
 
 
-    def initialize_activation_counts(self, layers):
-        """
-        Initializes the activation counts of the NumActivations object.
-
-        Args:
-            layers (list[list[MAC]]): a list of MACs in the model.
-        """
-        self.num_activations = [
-            [0 for i in range(len(layer))] for layer in layers
-        ]
-
-
-    def compute(self, m: Model, last_batch: torch.Tensor,
+    def _compute(self, m: Model, last_batch: torch.Tensor,
                 labels: torch.Tensor, training: bool = True) -> torch.Tensor:
         """
         Computes the number of activations of a model for a given batch of inputs.
@@ -81,44 +69,14 @@ class NumActivationsMetric(Metric):
         """
         layers, _, _ = self.hook.get_layer_io()
 
-        if self.num_activations is None:
-            self.initialize_activation_counts(layers)
+        num_activations = []
 
         for layer_index, layer in enumerate(layers):
-            for mac_index, mac in enumerate(layer):
-                self.num_activations[
-                    layer_index
-                ][mac_index] = torch.sum(mac.is_active).item()
+            num_activations.append(
+                torch.sum(layer.is_active, dim=0).squeeze()
+            )
 
-        if self.reduction is None or self.reduction == 'none':
-            return [
-                [mac_activations for mac_activations in layer_activations]
-                for layer_activations in self.num_activations
-            ]
-        elif self.reduction == 'layerwise_mean':
-            return [
-                sum(layer_activations) / len(layer_activations)
-                for layer_activations in self.num_activations
-            ]
-        elif self.reduction == 'sum':
-            return sum(
-                [
-                    sum(layer_activations) for layer_activations
-                    in self.num_activations
-                ]
-            )
-        elif self.reduction == 'highest_layer':
-            return list(self.num_activations[-1])
-        else:
-            return sum(
-                [
-                    sum(layer_activations) for layer_activations
-                    in self.num_activations
-                ]
-            ) / sum(
-                [
-                    len(layer_activations)
-                    for layer_activations
-                    in self.num_activations
-                ]
-            )
+        return torch.nested.nested_tensor(
+            num_activations, dtype=torch.float32,
+            device=self.device
+        )
