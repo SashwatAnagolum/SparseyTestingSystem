@@ -1,15 +1,6 @@
 ---
 # trainer.yaml - training recipe configuration for a single experiment
 
-# run_name: str, no default - the name to give the run in Weights & Biases
-#     corresponding to this experiment; if this is not provided, a random 
-#     8-character name will be generated instead
-# run_name: "test_run"
-
-# description: string (optional, default None) - a written description of the purpose of this HPO run
-#     logged to the sweep summary in Weights & Biases
-description: "A test run with the demo configuration files."
-
 # optimizer settings
 optimizer:
   # name: string - the optimizer class to load and use
@@ -23,31 +14,35 @@ optimizer:
 #     metric schema in cli/config_validation/saved_schemas/metric
 #     in order for it to be detected here and pass validation
 metrics:
-  - name: basis_set_size
-    save: True
-    best_value: max_by_layerwise_mean
-  - name: basis_set_size_increase
-    save: False
-  - name: basis_average
-    save: True
-  - name: num_activations
-    save: True
-    reduction: layerwise_mean
-  - name: feature_coverage
+  # - name: basis_set_size
+  #   save: True
+  #   best_value: max_by_layerwise_mean
+  # - name: basis_set_size_increase
+  #   save: False
+  # - name: basis_average
+  #   save: True
+  # - name: num_activations
+  #   save: True
+  #   reduction: layerwise_mean
+  # - name: feature_coverage
+  #   save: True
+  - name: average_familiarity
     save: True
   - name: match_accuracy
     save: True
-  - name: num_activations
-    save: True
+  # - name: num_activations
+  #   save: True
+  # - name: code_similarity
+  #   save: False
 
 # dataloader settings for loading items from the dataset
 dataloader:
   # batch_size: int > 0
   #    number of input items per batch
-  batch_size: 4
+  batch_size: 1
   # shuffle: bool
   #    whether to randomize the inputs as they are drawn from the dataloader
-  shuffle: True
+  shuffle: False
 
 # training-related hyperparameters
 training:
@@ -64,5 +59,5 @@ training:
 #     automatically use a GPU if it is available) unless you specifically want
 #     to refuse to start the run in the absence of a GPU (set True) or
 #     force the system to never use a GPU even if it is present (set False)
-# use_gpu: True
+use_gpu: False
 ...

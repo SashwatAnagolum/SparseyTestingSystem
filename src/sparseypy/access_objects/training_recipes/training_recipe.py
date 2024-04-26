@@ -144,7 +144,11 @@ class TrainingRecipe:
             self.ds.save_training_step(self.training_results.id, results)
             self.training_results.add_step(results)
         else:
-            self.ds.save_evaluation_step(self.training_results.id, results)
+            self.ds.save_evaluation_step(
+                self.training_results.id,
+                results,
+                log_to_wandb=(wandb.run.sweep_id is None)
+            )
             self.eval_results.add_step(results)
 
         return results, epoch_ended

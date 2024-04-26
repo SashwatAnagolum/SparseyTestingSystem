@@ -144,8 +144,10 @@ class FirestoreDbAdapter(DbAdapter):
         """
         if experiment.configs:
             dataset_description = experiment.configs["dataset_config"]["description"]
+            description = experiment.configs["training_recipe_config"]["description"]
         else:
             dataset_description = None
+            description = None
 
         # save on "summary" or better
         if self.resolution > 0:
@@ -164,7 +166,8 @@ class FirestoreDbAdapter(DbAdapter):
                     "end_times": {},
                     "completed": False,
                     "batch_size": self.batch_size,
-                    "dataset_description": dataset_description
+                    "dataset_description": dataset_description,
+                    "description": description
                 }
             )
 
@@ -416,6 +419,8 @@ class FirestoreDbAdapter(DbAdapter):
             # create the DB entry for this experiment in Firestore
             sweep_ref = self.db.collection(self.tables["hpo_runs"]).document(sweep.id)
 
+            description = sweep.configs["hpo_config"]["description"] if sweep.configs else None
+
             sweep_ref.set(
                 {
                     "name": sweep.name,
@@ -426,7 +431,8 @@ class FirestoreDbAdapter(DbAdapter):
                     "configs": {
                         conf_name:json.dumps(conf_json)
                         for conf_name, conf_json in sweep.configs.items()
-                    }
+                    },
+                    "description": description
                 }
             )
 

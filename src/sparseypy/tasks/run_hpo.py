@@ -6,7 +6,7 @@ Run HPO Task: script to run HPO.
 
 
 import os
-from pprint import pprint
+import shutil
 from tqdm import tqdm
 
 from sparseypy.access_objects.hpo_runs.hpo_run  import HPORun
@@ -73,15 +73,27 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
 """)
 
     hpo_results = hpo_run.run_sweep()
-    print("OPTIMIZATION RUN COMPLETED")
-    print(f"Best run: {hpo_results.best_run.id}")
-    hpo_run._print_breakdown(hpo_results.best_run)
-    print("Best run configuration:\n---------------------------------------------------------")
-    layer_number = 1
-    print('INPUT DIMENSIONS ')
-    pprint(hpo_results.best_run.configs["model_config"]["input_dimensions"])
+
+    time_delta = hpo_results.end_time - hpo_results.start_time
+
+    # remove results at completion if requested
+    if system_config['wandb'].get('remove_local_files', False):
+        for wandb_dir in hpo_run.wandb_dirs:
+            shutil.rmtree(wandb_dir)
+        tqdm.write("\nRemoved local temporary files.")
+
     print("\n---------------------------------------------------------")
-    for layer in hpo_results.best_run.configs["model_config"]["layers"]:
-        print("LAYER ", layer_number, "\n---------------------------------------------------------")
-        pprint(layer)
-        layer_number+=1
+    print("HYPERPARAMETER OPTIMIZATION COMPLETED")
+    print(f"\nCompleted {hpo_config['num_candidates']} runs in {str(time_delta.seconds)} seconds.")
+    # print the breakdown of the best-performing run
+    print("\n---------------------------------------------------------")
+    print(f"BEST RUN\n")
+    hpo_run._print_breakdown(hpo_results.best_run, print_config=True)
+
+    print("\n---------------------------------------------------------")
+    print("Review full results in Weights & Biases:")
+    print(f"Project: {hpo_config['project_name']}")
+    print(f"HPO sweep name: {hpo_config['hpo_run_name']}")
+    print(f"HPO sweep URL: {hpo_run.sweep_url}")
+    print(f"Best run ID: {hpo_run.best.id}")
+    print(f"Best run URL: {hpo_run.best_run_url}")

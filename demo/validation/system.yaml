@@ -1,15 +1,12 @@
 # system.yaml - core system and database configuration
 ---
 
-# console: output settings for the console
+# console: output settings for the local command-line interface
 console:
   # hpo_progress_bars: bool, default True - whether to show progress bars for training and evaluation
   #     during HPO runs. Defaults to True for better feedback. Has a very small performance impact.
   #     disable for batch jobs (e.g. on HPC)
   hpo_progress_bars: False
-  # print_best_hpo_config: bool, default True - whether to print the model configuration for the best-
-  #     performing experiment in an HPO run to the console when the HPO run completes.
-  print_best_hpo_config: True
   # whether to print error stack traces when they occur for schema validation errors
   # print_error_stacktrace: True
   print_error_stacktrace: False
@@ -27,7 +24,7 @@ wandb:
   api_key: WANDB_API_KEY
   # project_name: string - the name of the project in Weights & Biases to log data into
   #     this is also the default project for individual training runs using Train Model
-  project_name: post_presentation_4
+  project_name: validation_testing_v4
   # entity: string, default None - the "entity" (organization) to log runs and sweeps to in Weights & Biases
   #     if this is NOT specified, runs and sweeps will log to the default entity for the user whose API key
   #     is used to run the system. This key would be used e.g. for users who are normally part of other
@@ -45,7 +42,7 @@ wandb:
   save_locally: True
   # save_models: bool, default True - whether to save trained models to Weights & Biases
   #     THIS FEATURE IS A WORK IN PROGRESS and you should disable it if you have issues
-  save_models: True
+  save_models: False
   # data_resolution: int 0 "model" (one value per training input), 1 "layer", or 2 "mac", default 2 "mac" 
   #     the granularity of data to log to W&B
   #     each level includes the previous one (e.g. "mac" will log both data for individual MACs 
@@ -57,14 +54,6 @@ wandb:
   #     Unset this if you need to diagnose problems with Weights & Biases or you are willing to
   #     put up with the console spam for the mini-metric graphs it creates during training.
   silent: True
-  # local_log_directory: str, default None = "." - the location to which W&B logs local data during a run
-  #     Weights & Biases will create a "wandb" folder in this location to store its local cache of
-  #     run data.
-  # local_log_directory: .
-  # remove_local_files: bool, default False - whether to delete the local W&B files on run and sweep
-  #     completion. Defaults to False to avoid deleting files on the local system that users might
-  #     wand. Set to True to reduce unnecessary use of storage space.
-  remove_local_files: False
 
 # database: configuration settings for one or more backend databases
 database:

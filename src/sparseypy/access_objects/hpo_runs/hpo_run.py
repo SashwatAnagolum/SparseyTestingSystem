@@ -5,7 +5,8 @@ HPO Run: file holding the HPORun class.
 """
 
 from copy import deepcopy
-import json
+import os
+from pprint import pformat
 import traceback
 import warnings
 
@@ -83,6 +84,20 @@ class HPORun():
 
         # create the sweep
         self.data_storer.create_hpo_sweep(self.hpo_results)
+
+        # save the sweep URL
+        locator = f"{system_config['wandb']['entity']}/{hpo_config['project_name']}/{self.sweep_id}"
+        self.sweep_url = wandb.Api().sweep(locator).url
+        self.best_run_url = None
+
+        # start the list of temporary directories with this sweep's temp dir
+        local_dir = system_config['wandb']['local_log_directory']
+        if local_dir is None:
+            local_dir = "."
+
+        self.wandb_dirs = [
+            os.path.join(local_dir, 'wandb', 'sweep-' + self.sweep_id)
+        ]
 
         # only initialize the objective once, in the constructor
         self.objective = HPOObjective(hpo_config)
@@ -233,6 +248,8 @@ class HPORun():
         train_config = wandb_config["trainer"]
         # inject the metric list from the HPO config to complete the trainer config
         train_config["metrics"] = self.config_info["metrics"]
+        # also inject the GPU configuration
+        train_config["use_gpu"] = self.config_info["use_gpu"]
 
         return train_config
 
@@ -244,7 +261,11 @@ class HPORun():
         model, and computing the user-specified objective function
         using the trained model.
         """
-        wandb.init(allow_val_change=True, job_type="train")
+        wandb.init(
+            allow_val_change=True,
+            dir=self.system_config['wandb']['local_log_directory'],
+            job_type="train"
+        )
 
         model_config = self.generate_model_config(
             dict(wandb.config)
@@ -352,18 +373,22 @@ class HPORun():
                 if (not self.best or
                    (self.best and objective_results["total"] > self.best.get_objective()["total"])):
                     self.best = hpo_step_results
+                    self.best_run_url = wandb.run.url
                     tqdm.write("This is the new best value!")
 
                 self.data_storer.save_hpo_step(wandb.run.sweep_id, hpo_step_results)
 
                 # cache run path for updating config
                 run_path = wandb.run.path
+                # add temporary directory to removal list
+                self.wandb_dirs.append(wandb.run.dir.removesuffix("files"))
 
                 # finish the run - wandb.run may no longer be correct below this point
                 wandb.finish()
 
                 # strip unused layers from W&B side config
-                # this must occur after .finish() due to a bug in W&B
+                # this must occur after .finish() due to a bug in W&B preventing
+                # config file changes during a run even with allow_val_changes
                 max_layers = len(model_config['layers'])
                 run = wandb.Api().run(run_path)
 
@@ -372,7 +397,10 @@ class HPORun():
                         del run.config[k]
 
                 run.update()
+
         except Exception as e:
+            tqdm.write(f"WARNING: EXCEPTION OCCURRED DURING HPO STEP {self.num_steps}")
+            tqdm.write("Exception traceback:")
             tqdm.write(traceback.format_exc())
         if HPORun.tqdm_bar is not None:
             HPORun.tqdm_bar.update(1)
@@ -386,14 +414,28 @@ class HPORun():
             cls.tqdm_bar.close()
             cls.tqdm_bar = None
 
-    def _print_breakdown(self, step_results: HPOStepResult):
+    def _print_breakdown(self, step_results: HPOStepResult, print_config=False):
         objective_results = step_results.get_objective()
         # enhance with summary of metrics
+        #tqdm.write(f"Run ID: {step_results.id}")
         tqdm.write(f"Objective value: {objective_results['total']:.5f}")
         tqdm.write(f"Combination method: {objective_results['combination_method']}")
         tqdm.write("Objective term breakdown:")
         for name, values in objective_results["terms"].items():
             tqdm.write(f"* {name:>25}: {values['value']:.5f} with weight {values['weight']}")
+
+        if print_config:
+            tqdm.write("\n---------------------------------------------------------")
+            tqdm.write("Configuration:\n---------------------------------------------------------")
+            layer_number = 1
+            tqdm.write('INPUT DIMENSIONS ')
+            tqdm.write(pformat(step_results.configs["model_config"]["input_dimensions"]))
+            tqdm.write("\n---------------------------------------------------------")
+            for layer in step_results.configs["model_config"]["layers"]:
+                tqdm.write(f"LAYER {layer_number}")
+                tqdm.write("\n---------------------------------------------------------")
+                tqdm.write(pformat(layer))
+                layer_number+=1
 
 
     def run_sweep(self) -> HPOResult:

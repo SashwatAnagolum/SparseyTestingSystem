@@ -209,7 +209,11 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
                 Optional('use_gpu', default=self.check_if_gpu_exists()): Or(
                     False, lambda x: self.check_if_gpu_exists(),
                     error='Cannot set use_gpu to True when no GPU is available.'
-                )
+                ),
+                Optional('run_name', default=None): 
+                    Schema(str, error="run_name must be a string"),
+                Optional('description', default=None): 
+                    Schema(str, error="description must be a string"),
             }
         )
 
