@@ -1,0 +1,59 @@
+---
+# dataset.yaml - system dataset config file
+
+# dataset_type: string
+#    the dataset class to use to load the dataset
+dataset_type: sparsey
+# description: string (optional, no default)
+#     a friendly name/description for the dataset that will be listed on the W&B summary page
+#     and in the database to more easily identify its contents
+#     (only included if you provide it here; there is no "default" description)
+description: "DARPA report Section 1 dataset"
+
+# params: additional information about the dataset required to load or transform its items
+params:
+  # data_dir: string
+  #     the path to the folder in which the dataset is stored
+  #     can be a relative or an absolute path
+  data_dir: '.\datasets\darpa'
+  width: 12
+  height: 12
+# preprocessed: bool
+#     whether to use a preprocessing stack to transform the dataset and cache results
+#     if set to True, you must also define the preprocessed_stack key and contents below
+preprocessed: False
+# preprocessed_temp_dir: optional, str
+#     specifies the location where the preprocessed dataset should cache its temporary files
+#     default, if not otherwise specified: datasets/preprocessed_dataset
+# preprocessed_temp_dir: datasets/some_other_directory
+# preprocessed_stack: defines the preprocessing stack and transforms to use with the dataset
+#     only used when preprocessed is True
+#     contains a transform_list with a list of transform classes to apply
+#     formatting is the same as in preprocessing.yaml
+preprocessed_stack:
+  # transform_list: the transforms to use in the preprocessing stack
+  #     one entry per transform; general format:
+  #     name: the system or PyTorch transform class to use
+  #     params: if required by the specific transform, additional configuration parameters
+  # WARNING: Any transforms placed in this list will only be applied once the first time
+  # an item is loaded, and the cached result will be returned for further requests.
+  # If you need a transform to be randomized per-experiment it should go in preprocessing.yaml.
+  # Stochastic transforms in this list will only be applied once across ALL runs in an experiment. 
+  # If you are using random transforms for data augmentation this WILL NOT achieve the intended result.
+  # this list otherwise works exactly like the one in preprocessing.yaml; see there for example configuration
+  transform_list:
+    - name: resize
+      params:
+        size: [12, 12]
+        antialias: False
+    - name: binarize
+      params:
+        binarize_threshold: 0.5
+    - name: skeletonize
+      params:
+        sigma: 3
+
+in_memory: True
+load_lazily: True
+save_to_disk: False
+...
