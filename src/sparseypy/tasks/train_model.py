@@ -51,6 +51,7 @@ def train_model(model_config: dict, trainer_config: dict,
 
     # initialize the DataStorer (logs into W&B and Firestore)
     DataStorer.configure(system_config)
+    df = DataFetcher(system_config)
 
     # break out the individual model config layers for better hyperparameter
     # access on W&B (without this you can't use the layer HP in the visualizer)
@@ -79,7 +80,7 @@ def train_model(model_config: dict, trainer_config: dict,
     reload_model = False
 
     if isinstance(model_config, str):
-        model_config, model_weights = DataFetcher(system_config).get_model_data(model_config)
+        model_config, model_weights = df.get_model_data(model_config)
         reload_model = True
 
     trainer = TrainingRecipeBuilder.build_training_recipe(
@@ -127,7 +128,6 @@ Selected metrics:
                 pbar.update(1)
 
         # summarize the best training steps
-        tqdm.write("\nLogging training results...")
         train_summary = trainer.get_summary("training")
         tqdm.write("\n\nTRAINING - SUMMARY\n")
         tqdm.write("Best metric steps:")
@@ -135,8 +135,30 @@ Selected metrics:
             tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
         trainer.model.eval()
+        #print(trainer.model.get_submodule('Layer_0').mac_list[0].weights)
         is_epoch_done = False
         batch_number = 1
+
+        # begin logging a new evaluation run
+        # save the run id
+        run_group = get_update_group(wandb.run.path)
+        train_url = wandb.run.url
+        # end the current run
+        tqdm.write("\nFinalizing training results...")
+        wandb.finish()
+        # start a new evaluation run
+        wandb.init(
+            allow_val_change=True,
+            config={
+                'dataset': dataset_config,
+                'model': model_config,
+                'training_recipe': trainer_config,
+                'preprocessing': preprocessing_config
+            },
+            group=run_group,
+            job_type="eval",
+            project=system_config["wandb"]["project_name"],
+        )
 
         # perform evaluation
         with tqdm(
@@ -162,7 +184,6 @@ Selected metrics:
 
         # print summary here in model script
         # if not printing you still need to call this to finalize the results
-        tqdm.write("\nLogging evaluation results...")
         eval_summary = trainer.get_summary("evaluation")
 
         tqdm.write("\n\nEVALUATION - SUMMARY\n")
@@ -170,8 +191,8 @@ Selected metrics:
         for metric, val in eval_summary.best_steps.items():
             tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
-    tqdm.write("\nFinalizing results...")
-    run_url = wandb.run.get_url()
+    tqdm.write("\nFinalizing evaluation results...")
+    eval_url = wandb.run.get_url()
     model_name = model_config.get('model_name', wandb.run.id+'-model')
 
     wandb_run_dir = wandb.run.dir.removesuffix('files')
@@ -185,4 +206,28 @@ Selected metrics:
     tqdm.write("\nTRAIN MODEL COMPLETED")
     tqdm.write("Review results in Weights & Biases:")
     tqdm.write(f"Model name: {model_name}")
-    tqdm.write(f"Run URL: {run_url}")
+    tqdm.write(f"Group name: {run_group}")
+    tqdm.write(f"Run URL (Training): {train_url}")
+    tqdm.write(f"Run URL (Evaluation): {eval_url}")
+
+
+def get_update_group(source_run_path: str) -> str:
+    """
+    Fetches the existing group of the indicated run, if any. If
+    there is no existing group, creates a new one using the name
+    of the source run and returns that.
+    Args:
+        source_run_path (str): the full path to the source run.
+    Returns:
+        str: the name of the group
+    """
+    api = wandb.Api()
+
+    source_run = api.run(source_run_path)
+
+    if source_run.group is None:
+        source_run.group = source_run.name
+        source_run.update()
+        return source_run.group
+    else:
+        return source_run.group
