@@ -53,8 +53,9 @@ class NumActivationsMetricSchema(AbstractSchema):
                 'name': Schema('num_activations', error="name must be 'num_activations'"),
                 Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
                 Optional('reduction', default=None): Or(
-                    'none', None, 'layerwise_mean', 'sum', 'mean', 'highest_layer',
-                    error="reduction must be 'none', 'layerwise_mean', 'sum', 'highest_layer', or 'mean'"
+                    'none', None, 'layerwise_mean', 'layerwise_sum',
+                    'sum', 'mean', 'highest_layer', 'highest_layer_mean',
+                    error="reduction must be 'none', None, 'layerwise_mean', 'layerwise_sum', 'sum', 'mean', 'highest_layer', 'highest_layer_mean'"
                 ),
                 Optional('best_value', default='min_by_layerwise_mean'): Schema(
                         And(

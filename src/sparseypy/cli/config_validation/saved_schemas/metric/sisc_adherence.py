@@ -29,8 +29,9 @@ class SiscAdherenceMetricSchema(AbstractSchema):
                 'name': And(str, lambda n: n == 'sisc_adherence', error="name must be 'sisc_adherence'"),
                 Optional('save', default=False): And(bool, error="save must be a boolean value"),
                 Optional('reduction', default='none'): Or(
-                    'none', None, 'layerwise_mean', 'sum', 'mean', 'highest_layer',
-                    error="reduction must be 'none', 'layerwise_mean', 'sum', 'highest_layer', or 'mean'"
+                    'none', None, 'layerwise_mean', 'layerwise_sum',
+                    'sum', 'mean', 'highest_layer', 'highest_layer_mean',
+                    error="reduction must be 'none', None, 'layerwise_mean', 'layerwise_sum', 'sum', 'mean', 'highest_layer', 'highest_layer_mean'"
                 ),
                 Optional('best_value', default='max_by_layerwise_mean'): Schema(
                     And(
