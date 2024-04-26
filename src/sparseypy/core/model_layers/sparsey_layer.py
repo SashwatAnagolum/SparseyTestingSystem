@@ -71,11 +71,7 @@ class SparseyLayer(torch.nn.Module):
         self.permanence_convexity = permanence_convexity
         self.saturation_threshold = saturation_threshold
         self.is_active = None
-        self.receptive_field_size = max(
-            int(
-                (mac_receptive_field_size * prev_layer_num_macs) // 1
-            ), 1
-        )
+        self.receptive_field_size = mac_receptive_field_size
 
         self.grid_size = (
             mac_grid_num_rows,
@@ -102,24 +98,28 @@ class SparseyLayer(torch.nn.Module):
             prev_layer_mac_grid_num_cols, prev_layer_grid_layout
         )
 
-        self.input_connections = self.find_connected_macs_in_prev_layer(
-            self.mac_positions, prev_layer_mac_positions
+        (
+            self.input_connections, mac_rf_sizes
+        ) = self.find_connected_macs_in_prev_layer(
+            self.mac_positions, prev_layer_mac_positions, prev_layer_num_macs
         )
 
-        self.activation_threshold_min = (
-            activation_threshold_min * self.receptive_field_size *
-            prev_layer_num_cms_per_mac
-        )
+        self.receptive_field_num_macs = self.input_connections.shape[1]
 
-        self.activation_threshold_max = (
-            activation_threshold_max * self.receptive_field_size *
-            prev_layer_num_cms_per_mac
-        )
+        self.activation_threshold_min = torch.mul(
+            mac_rf_sizes,
+            activation_threshold_min * prev_layer_num_cms_per_mac
+        ).unsqueeze(-1).unsqueeze(0)
+
+        self.activation_threshold_max = torch.mul(
+            mac_rf_sizes,
+            activation_threshold_max * prev_layer_num_cms_per_mac
+        ).unsqueeze(-1).unsqueeze(0)
 
         self.weights = torch.nn.Parameter(
             torch.zeros(
                 self.num_macs,
-                self.receptive_field_size *
+                self.receptive_field_num_macs *
                 prev_layer_num_cms_per_mac *
                 prev_layer_num_neurons_per_cm,
                 self.num_cms_per_mac * self.num_neurons_per_cm,
@@ -206,7 +206,8 @@ class SparseyLayer(torch.nn.Module):
 
     def find_connected_macs_in_prev_layer(
         self, mac_positions: list[Tuple[float, float]],
-        prev_layer_mac_positions: list[Tuple[float, float]]
+        prev_layer_mac_positions: list[Tuple[float, float]],
+        prev_layer_num_macs: int
     ) -> list[torch.Tensor]:
         """
         Finds the list of connected MACs in the previous layer
@@ -217,6 +218,8 @@ class SparseyLayer(torch.nn.Module):
                 of positions of MACs in the current layer.
             prev_layer_mac_positions (list[Tuple[int, int]]):
                 list of positions of MACs in the previous layer.
+            prev_layer_num_macs (int): the number of MACS
+                in the previous layer.
 
         Returns:
             torch.tensor: list of tensors containing the indices
@@ -224,21 +227,35 @@ class SparseyLayer(torch.nn.Module):
                 MAC in the current layer.
         """
         connections = []
-        indices = [i for i in range(len(prev_layer_mac_positions))]
+        mac_rf_sizes = []
+        max_len = 0
 
         for mac_position in mac_positions:
-            indices.sort(
-                key=lambda x: self._compute_distance(
-                    prev_layer_mac_positions[x],
-                    mac_position
-                )
-            )
+            mac_connections = []
 
-            connections.append(
-                [i for i in indices[:self.receptive_field_size]]
-            )
+            for (
+                index, prev_layer_mac_position
+            ) in enumerate(prev_layer_mac_positions):
+                if self._compute_distance(
+                    mac_position,
+                    prev_layer_mac_position
+                ) <= self.receptive_field_size:
+                    mac_connections.append(index)
 
-        return torch.LongTensor(connections, device=self.device)
+            connections.append(mac_connections)
+            max_len = max(max_len, len(mac_connections))
+
+        for i in range(len(connections)):
+            mac_rf_sizes.append(len(connections[i]))
+
+            while len(connections[i]) < max_len:
+                connections[i].append(prev_layer_num_macs)
+
+        return torch.tensor(
+            connections, dtype=torch.long, device=self.device
+        ), torch.tensor(
+            mac_rf_sizes, dtype=torch.float32, device=self.device
+        )
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -267,6 +284,17 @@ class SparseyLayer(torch.nn.Module):
                 f'{tuple(x.shape[1:])} instead.'    
             )
 
+        x = torch.cat(
+            (
+                x,
+                torch.zeros(
+                    (x.shape[0], 1, *self.prev_layer_output_shape[1:]),
+                    dtype=torch.float32,
+                    device=self.device
+                )
+            ), dim=1
+        )
+
         batch_size = x.shape[0]
 
         with torch.no_grad():
@@ -287,7 +315,7 @@ class SparseyLayer(torch.nn.Module):
                 )
             )
 
-            self.is_active = macs_are_active
+            self.is_active = macs_are_active.squeeze()
 
             raw_activations = torch.matmul(
                 mac_inputs.transpose(0, 1),

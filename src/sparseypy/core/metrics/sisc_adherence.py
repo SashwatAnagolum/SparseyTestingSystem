@@ -121,13 +121,15 @@ class SiscAdherenceMetric(Metric):
         if num_images_to_swap:
             swap_indices = torch.randint(
                 0, self.approximation_batch_size,
-                (num_images_to_swap,)
+                (num_images_to_swap,),
+                device=self.device
             )
 
             select_indices = torch.randint(
-                0, batch_size, (num_images_to_swap,)
+                0, batch_size, (num_images_to_swap,),
+                device=self.device
             )
-            
+
             for layer_index, output in enumerate(outputs):
                 self.stored_codes[layer_index][
                     swap_indices
@@ -178,7 +180,8 @@ class SiscAdherenceMetric(Metric):
             self.stored_codes = [
                 torch.zeros(
                     self.approximation_batch_size, 1,
-                    output.shape[1], output.shape[2]
+                    output.shape[1], output.shape[2],
+                    device=self.device
                 ) for output in outputs
             ]
 

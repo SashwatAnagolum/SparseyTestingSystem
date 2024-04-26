@@ -30,11 +30,11 @@ def average_nested_data(data: torch.Tensor):
                         for list in data.unbind()
                     ]
                 )
-            )
+            ).cpu()
         elif data.ndim == 1:
-            return torch.mean(data).item()
+            return torch.mean(data).cpu().item()
         else:
-            return data.item()
+            return data.cpu().item()
     elif isinstance(data, list):
         if len(data) == 0:
             data=[0]

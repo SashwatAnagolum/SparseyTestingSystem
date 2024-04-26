@@ -82,7 +82,7 @@ class HebbianOptimizer(torch.optim.Optimizer):
             torch.ge(
                 timestep_values,
                 permanence_steps
-            ).cpu(), torch.zeros(1),
+            ), torch.zeros(1, device=self.device),
             params, out=params
         )
 
@@ -120,6 +120,19 @@ class HebbianOptimizer(torch.optim.Optimizer):
                             layer.permanence_steps,
                             out=self.timesteps[layer_index]
                         )
+
+                    layer_input = torch.cat(
+                        (
+                            layer_input,
+                            torch.zeros(
+                                (
+                                    layer_input.shape[0],
+                                    1, *layer_input.shape[2:]
+                                ),
+                                dtype=torch.float32, device=self.device
+                            )
+                        ), dim=1
+                    )
 
                     mac_inputs = layer_input[:, layer.input_connections]
 
