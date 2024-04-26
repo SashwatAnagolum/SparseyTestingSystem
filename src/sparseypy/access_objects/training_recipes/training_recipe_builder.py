@@ -85,8 +85,12 @@ class TrainingRecipeBuilder:
                 dataset, dataset_config['load_lazily']
             )
 
-        dataloader = DataLoader(
-            dataset=dataset, **train_config['dataloader']
+        training_dataloader = DataLoader(
+            dataset=dataset, **train_config['training']['dataloader']
+        )
+
+        eval_dataloader = DataLoader(
+            dataset=dataset, **train_config['eval']['dataloader']
         )
 
         metrics_list = []
@@ -126,17 +130,18 @@ class TrainingRecipeBuilder:
         }
 
         return TrainingRecipe(
-            device, model, optimizer, dataloader,
-            preprocessing_stack, metrics_list,
+            device, model, optimizer, training_dataloader,
+            eval_dataloader, preprocessing_stack, metrics_list,
             train_config['metrics'], setup_configs,
             loss_func,
             train_config['training']['step_resolution']
         )
 
     @staticmethod
-    def sense_gpu():
+    def sense_gpu() -> str:
         """
         Detects and returns the type of supported GPU in use in the system.
+
         Returns:
             (str) the identifier for the system's GPU, if any, otherwise "cpu"
         """

@@ -186,17 +186,17 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
                     lambda x: self.validate_metrics_in_order(x, schema_params['metric_schemas']),
                     error="Specified metric is not valid."
                 ),
-                'dataloader': {
-                    'batch_size': And(
-                        int, schema_utils.is_positive,
-                        error="Batch size must be a positive integer."
-                    ),
-                    'shuffle': And(
-                        bool,
-                        error="Shuffle must be a boolean value."
-                    )
-                },
                 'training': {
+                    'dataloader': {
+                        'batch_size': And(
+                            int, schema_utils.is_positive,
+                            error="Batch size must be a positive integer."
+                        ),
+                        'shuffle': And(
+                            bool,
+                            error="Shuffle must be a boolean value."
+                        )
+                    },
                     'num_epochs': And(
                         int, schema_utils.is_positive,
                         error="Num_epochs must be a positive integer."
@@ -205,6 +205,18 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
                         int, schema_utils.is_positive,
                         error="Step_resolution must be a positive integer if specified."
                     )
+                },
+                'eval': {
+                    'dataloader': {
+                        'batch_size': And(
+                            int, schema_utils.is_positive,
+                            error="Batch size must be a positive integer."
+                        ),
+                        'shuffle': And(
+                            bool,
+                            error="Shuffle must be a boolean value."
+                        )
+                    },
                 },
                 Optional('use_gpu', default=self.check_if_gpu_exists()): Or(
                     False, lambda x: self.check_if_gpu_exists(),

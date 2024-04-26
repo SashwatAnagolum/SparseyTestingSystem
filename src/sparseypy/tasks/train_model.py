@@ -96,8 +96,10 @@ def train_model(model_config: dict, trainer_config: dict,
     tqdm.write(f"""
 TRAINING RUN SUMMARY
 Dataset type: {dataset_config['dataset_type']}
-Batch size: {trainer_config['dataloader']['batch_size']}
-Number of batches: {trainer.num_batches}
+Train batch size: {trainer_config['training']['dataloader']['batch_size']}
+Evaluation batch size: {trainer_config['eval']['dataloader']['batch_size']}
+Number of training batches: {trainer.training_num_batches}
+Number of evaluation batches: {trainer.eval_num_batches}
 Selected metrics: 
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
 """)
@@ -109,12 +111,12 @@ Selected metrics:
 
         # perform training
         with tqdm(
-            total=trainer.num_batches,
+            total=trainer.training_num_batches,
             desc="Training",
             leave=False,
             position=1,
             unit="input",
-            miniters=int(trainer.num_batches/100)
+            miniters=int(trainer.training_num_batches/100)
         ) as pbar:
             while not is_epoch_done:
                 output, is_epoch_done = trainer.step(training=True)
@@ -165,12 +167,12 @@ Selected metrics:
 
         # perform evaluation
         with tqdm(
-            total=trainer.num_batches,
+            total=trainer.eval_num_batches,
             desc="Evaluation",
             leave=False,
             position=1,
             unit="input",
-            miniters=int(trainer.num_batches/100)
+            miniters=int(trainer.eval_num_batches/100)
         ) as pbar:
             while not is_epoch_done:
                 # validate this logic VS the design of our EvaluationResult
