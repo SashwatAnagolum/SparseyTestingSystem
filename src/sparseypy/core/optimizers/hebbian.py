@@ -13,6 +13,9 @@ from sparseypy.core.model_layers.sparsey_layer import MAC
 
 
 class HebbianOptimizer(torch.optim.Optimizer):
+    """
+    HebbianOptimizer: class representing the optimizer
+    """
     def __init__(self, model: torch.nn.Module, device: torch.device, 
                  epsilon: float = 1e-7):
         super().__init__(model.parameters(), dict())

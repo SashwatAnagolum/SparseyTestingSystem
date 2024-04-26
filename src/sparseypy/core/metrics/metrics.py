@@ -40,7 +40,7 @@ class Metric(abc.ABC):
 
     @abc.abstractmethod
     def _compute(self, m: Model, last_batch: torch.Tensor,
-                 labels: torch.Tensor, training: bool = True):
+                 labels: torch.Tensor, training: bool = True) -> torch.Tensor:
         """
         Computes a metric.
 
@@ -52,7 +52,7 @@ class Metric(abc.ABC):
             labels: the output from the current batch being evaluated
 
         Returns:
-            the Metric's results as a dict.
+            (torch.Tensor): the raw metric values.
         """
 
     def compute(self, m: Model, last_batch: torch.Tensor,
@@ -131,8 +131,6 @@ class Metric(abc.ABC):
                 metric_val = torch.mean(raw_values[-1])
             case _:
                 metric_val = raw_values
-
-        print(metric_val.shape)
 
         return metric_val
         
