@@ -127,9 +127,9 @@ class DataStorer:
                 )
 
 
-    def save_training_step(self, parent: str, result: TrainingStepResult):
+    def _save_wandb_training_step(self, parent: str, result: TrainingStepResult):
         """
-        Saves a single training step to Weights & Biases and Firestore.
+        Saves a single training or evaluation step to Weights & Biases.
 
         Args:
             parent (str): the experiment ID to which to log this step
@@ -167,12 +167,24 @@ class DataStorer:
         # save the summary to W&B
         wandb.log(summary_dict)
 
+
+    def save_training_step(self, parent: str, result: TrainingStepResult):
+        """
+        Saves a single training step to Weights & Biases and Firestore.
+
+        Args:
+            parent (str): the experiment ID to which to log this step
+            result (TrainingStepResult): the step results to save
+        """
+        self._save_wandb_training_step(parent, result)
+
         # DATABASE
         for db_adapter in self.db_adapters:
             db_adapter.save_training_step(parent, result)
 
 
-    def save_evaluation_step(self, parent: str, result: TrainingStepResult):
+    def save_evaluation_step(self, parent: str, result: TrainingStepResult,
+                             log_to_wandb: bool = False):
         """
         Saves a single evaluation step to Weights & Biases and Firestore.
 
@@ -183,6 +195,8 @@ class DataStorer:
         # WEIGHTS & BIASES
         # step-level evaluation data is not saved to Weigthts & Biases
         # due to platform limitations
+        if log_to_wandb:
+            self._save_wandb_training_step(parent, result)
 
         # DATABASE
         for db_adapter in self.db_adapters:
