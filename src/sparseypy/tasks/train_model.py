@@ -135,12 +135,12 @@ Selected metrics:
             tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
 
         trainer.model.eval()
-        #print(trainer.model.get_submodule('Layer_0').mac_list[0].weights)
         is_epoch_done = False
         batch_number = 1
 
         # begin logging a new evaluation run
         # save the run id
+        run_name = wandb.run.name
         run_group = get_update_group(wandb.run.path)
         train_url = wandb.run.url
         # end the current run
@@ -151,12 +151,15 @@ Selected metrics:
             allow_val_change=True,
             config={
                 'dataset': dataset_config,
-                'model': model_config,
+                'model': wandb_model_config,
                 'training_recipe': trainer_config,
                 'preprocessing': preprocessing_config
             },
+            dir=system_config['wandb']['local_log_directory'],
             group=run_group,
             job_type="eval",
+            name=run_name + "-eval",
+            notes=trainer_config['description'],
             project=system_config["wandb"]["project_name"],
         )
 
