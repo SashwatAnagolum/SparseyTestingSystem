@@ -14,6 +14,7 @@ from sparseypy.core.results.hpo_result import HPOResult
 from sparseypy.core.results.hpo_step_result import HPOStepResult
 from sparseypy.access_objects.models.model import Model
 from sparseypy.core.db_adapters import DbAdapterFactory
+from sparseypy.core.metrics import comparisons
 
 class DataStorer:
     """
@@ -72,6 +73,7 @@ class DataStorer:
             DataStorer.db_config = ds_config["database"]
 
             DataStorer.is_initialized = True
+
 
     def save_model(self, experiment: str, m: Model, model_config: dict):
         """
@@ -337,7 +339,7 @@ class DataStorer:
             db_adapter.save_hpo_result(result)
 
 
-    def average_nested_data(self, data):
+    def average_nested_data(self, data: torch.Tensor):
         """
         Averages an arbitrarily deep data structure
         and returns the result as a single value.
@@ -346,20 +348,10 @@ class DataStorer:
         to store a single value for each step in W&B.
 
         Args:
-            data: the value(s) to reduce
-        Returns:
-            a single value representing the averaged data
-        """
-        if isinstance(data, list):
-            if len(data) == 0:
-                data=[0]
-            ret = np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
-        elif hasattr(data, 'tolist'):  # numpy array
-            if len(data) == 0:
-                data=[0]
-            ret = np.mean(np.nan_to_num(data))
-        else:
-            # Scalar value
-            ret = data
+            data (torch.Tensor): the (possibly nested) tensor
+                containing the raw metric values computed.
 
-        return ret.item() if isinstance(ret, np.generic) else ret
+        Returns:
+            (float): a single value representing the averaged data
+        """
+        return comparisons.average_nested_data(data)

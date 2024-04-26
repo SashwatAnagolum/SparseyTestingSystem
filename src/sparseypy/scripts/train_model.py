@@ -137,7 +137,12 @@ def main():
         args.dataset_config
     )
 
-    print_error_stacktrace = system_config_info['console'].get("print_error_stacktrace", False)
+    if 'console' in system_config_info:
+        print_error_stacktrace = system_config_info['console'].get(
+            "print_error_stacktrace", False
+        )
+    else:
+        print_error_stacktrace = False
 
     validated_system_config = validate_config(
         system_config_info, 'system', 'default',

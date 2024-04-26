@@ -46,112 +46,101 @@ class SiscAdherenceMetric(Metric):
             reduction (Optional[str]): the type of reduction
                 to apply before returning the metric value.
         """
-        super().__init__(model, "sisc_adherence", best_value, device)
+        super().__init__(
+            model, "sisc_adherence",
+            best_value, device, reduction
+        )
 
-        self.reduction = reduction
         self.hook = LayerIOHook(self.model)
         self.approximation_batch_size = 64
-        self.stored_inputs = []
-        self.stored_codes = []
+        self.stored_codes = None
+        self.stored_inputs = None
+        self.active_input_slots = None
 
 
-    def compute_image_similarity(self, tensor_1: torch.Tensor,
-                                  tensor_2: torch.Tensor) -> float:
-        """
-        Returns the similarity between two tensors of the same shape.
-        """
-        return 1.0 - (
-                torch.sum(
-                torch.logical_xor(
-                    tensor_1, tensor_2
-                )
-            ) / tensor_1.numel()
-        ).item()
-
-
-    def compute_code_similarity(self, tensor_1: torch.Tensor,
-                                  tensor_2: torch.Tensor) -> float:
-        """
-        Returns the similarity between two tensors of the same shape.
-        """
-        return (
-            torch.nan_to_num(
-                    torch.sum(
-                    torch.logical_and(tensor_1, tensor_2)
-                ) / (0.5 * torch.sum(tensor_1) + torch.sum(tensor_2)),
-                1.0
-            )
-        ).item()
-
-
-    def compute_similarity(self,
-                                image: torch.Tensor,
-                                code: list[torch.Tensor]) -> list[torch.Tensor]:
+    def compute_similarity_correlation(self, images: torch.Tensor,
+                           outputs: list[torch.Tensor]) -> list[torch.Tensor]:
         """
         Compute the code similarity between the current code and 
         previously stored codes.
         """
-        image_similarities = []
-        code_similarities = []
+        correlations = []
 
-        for stored_input in self.stored_inputs:
-            image_similarities.append(
-                self.compute_image_similarity(
-                    stored_input, image
-                )
-            )
-
-        for layer_index, layer_code in enumerate(code):
-            code_similarities.append([])
-
-            for mac_index, mac_code in enumerate(layer_code):
-                code_similarities[-1].append([])
-
-                for stored_code in self.stored_codes:
-                    code_similarities[-1][-1].append(
-                        self.compute_code_similarity(
-                            stored_code[layer_index][mac_index],
-                            mac_code
-                        )
-                    )
-
-        code_similarities = [
-            [torch.Tensor(mac_sim) for mac_sim in layer_sim]
-            for layer_sim in code_similarities
-        ]
-
-        image_similarities = torch.Tensor(image_similarities)
-
-        similarities = [
-            [
-                torch.nn.functional.cosine_similarity(
-                    code_similarities[layer_index][mac_index],
-                    image_similarities, dim=0
-                ).item() for mac_index in range(len(code_similarities[layer_index]))
-            ] for layer_index in range(len(code_similarities))
-        ]
-
-        if self.reduction is None or self.reduction == 'none':
-            return similarities
-        elif self.reduction == 'layerwise_mean':
+        if not torch.sum(self.active_input_slots):
             return [
-                sum(layer_similarities) / len(layer_similarities)
-                for layer_similarities in similarities
+                [0.0 for i in range(output.shape[1])]
+                for output in outputs
             ]
-        elif self.reduction == 'sum':
-            return sum([sum(layer_sim) for layer_sim in similarities])
-        elif self.reduction == 'mean':
-            return (
-                sum([sum(layer_sim) for layer_sim in similarities]) / 
-                sum([len(layer_sim) for layer_sim in similarities])
+
+        numerator = torch.logical_and(self.stored_inputs, images).sum(2)
+        denominator = torch.logical_or(self.stored_inputs, images).sum(2)
+        image_similarities = torch.div(numerator, denominator).transpose(
+            0, 1
+        ).unsqueeze(1)
+
+        for layer_index, output in enumerate(outputs):
+            code_sim_num = torch.logical_and(
+                self.stored_codes[layer_index],
+                output
+            ).sum(3)
+
+            code_sim_denom = torch.logical_or(
+                self.stored_codes[layer_index],
+                output
+            ).sum(3)
+
+            layer_similarities = torch.div(
+                code_sim_num, code_sim_denom
+            ).permute(1, 2, 0)
+
+            torch.nan_to_num(
+                layer_similarities, 0.0, out=layer_similarities
             )
-        elif self.reduction == 'highest_layer':
-            return similarities[-1]
-        else:
-            return None
+
+            layer_correlations = torch.nn.functional.cosine_similarity(
+                layer_similarities[:, :, self.active_input_slots],
+                image_similarities[:, :, self.active_input_slots], dim=2
+            )
+
+            correlations.append(torch.mean(layer_correlations, dim=0))
+
+        return correlations
 
 
-    def compute(self, m: Model, last_batch: torch.Tensor,
+    def update_stored_images_and_codes(self,
+        images: torch.Tensor, outputs: list[torch.Tensor],
+        batch_size: int) -> None:
+        """
+        Update the list of stored images and codes using images
+        and model outputs from the current batch.
+        """
+        num_images_to_swap = torch.randint(
+            0, min(self.approximation_batch_size, batch_size), (1,)
+        ).item()
+
+        if num_images_to_swap:
+            swap_indices = torch.randint(
+                0, self.approximation_batch_size,
+                (num_images_to_swap,)
+            )
+
+            select_indices = torch.randint(
+                0, batch_size, (num_images_to_swap,)
+            )
+            
+            for layer_index, output in enumerate(outputs):
+                self.stored_codes[layer_index][
+                    swap_indices
+                ] = output[select_indices].unsqueeze(1)
+
+            self.stored_inputs[swap_indices] = images[
+                select_indices
+            ].unsqueeze(1)
+
+            self.active_input_slots[swap_indices] = True
+
+
+    def _compute(self, m: Model, last_batch: torch.Tensor,
                 labels: torch.Tensor, training: bool = True) -> torch.Tensor:
         """
         Computes the code similarity of an input (and associated code)
@@ -167,23 +156,42 @@ class SiscAdherenceMetric(Metric):
             (list[list[float]]): a list of lists containing the code similarity
                 for each MAC in the model.
         """
-        _, _, layer_outputs = self.hook.get_layer_io()
+        _, inputs, outputs = self.hook.get_layer_io()
+        batch_size = inputs[0].shape[0]
 
-        for image in last_batch:
-            if len(self.stored_inputs) == 0:
-                code_similarity = [
-                    [0.0 for i in range(len(layer_outputs[idx]))]
-                    for idx in range(len(layer_outputs))
-                ]
-            else:
-                code_similarity = self.compute_similarity(image, layer_outputs)
+        if self.stored_codes is None:
+            self.stored_codes = []
+            self.stored_inputs = torch.zeros(
+                (
+                    self.approximation_batch_size, 1,
+                    inputs[0].numel() // batch_size
+                ),
+                dtype=torch.float32,
+                device=self.device
+            )
 
-            if len(self.stored_inputs) < self.approximation_batch_size:
-                self.stored_inputs.append(image)
-                self.stored_codes.append(layer_outputs)
-            else:
-                index = random.randint(0, self.approximation_batch_size - 1)
-                self.stored_codes[index] = layer_outputs
-                self.stored_inputs[index] = image
+            self.active_input_slots = torch.zeros(
+                self.approximation_batch_size,
+                dtype=torch.bool, device=self.device
+            )
 
-            return code_similarity
+            self.stored_codes = [
+                torch.zeros(
+                    self.approximation_batch_size, 1,
+                    output.shape[1], output.shape[2]
+                ) for output in outputs
+            ]
+
+        input_images = inputs[0].squeeze_(2)
+        metric_values = self.compute_similarity_correlation(
+            input_images, outputs
+        )
+
+        if training:
+            self.update_stored_images_and_codes(
+                input_images, outputs, batch_size
+            )
+
+        return torch.nested.nested_tensor(
+            metric_values, dtype=torch.float32, device=self.device
+        )

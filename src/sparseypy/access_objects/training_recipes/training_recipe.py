@@ -106,8 +106,8 @@ class TrainingRecipe:
 
             transformed_data = transformed_data.to(self.device)
             transformed_data = transformed_data.reshape(
-                transformed_data.shape[0], *transformed_data.shape[2:]
-            ).unsqueeze(-1).unsqueeze(-1)
+                transformed_data.shape[0], -1, 1
+            )
 
             model_output = self.model(transformed_data)
 
