@@ -19,13 +19,13 @@ def run_command(command):
 
 # Generating .rst files from your docstrings
 if is_windows:
-    run_command(f'sphinx-apidoc -o docs\\source\\{project_directory}')
+    run_command(f'sphinx-apidoc -o docs\\source\\ {project_directory}')
 else:
-    run_command(f'sphinx-apidoc -o source/{project_directory}')
+    run_command(f'sphinx-apidoc -o source/ {project_directory}')
 
 # Build the documentation in HTML format
 if is_windows:
-    run_command('sphinx-build -b html docs\\source\\docs\\build\\html')
+    run_command('sphinx-build -b html docs\\source\\ docs\\build\\html')
 else:
     run_command('sphinx-build -b html source/build/html')
 
