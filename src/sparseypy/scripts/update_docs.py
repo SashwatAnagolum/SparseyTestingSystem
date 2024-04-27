@@ -27,6 +27,6 @@ else:
 if is_windows:
     run_command('sphinx-build -b html docs\\source\\ docs\\build\\html')
 else:
-    run_command('sphinx-build -b html source/build/html')
+    run_command('sphinx-build -b html source/ build/html')
 
 print("Documentation updated successfully.")
