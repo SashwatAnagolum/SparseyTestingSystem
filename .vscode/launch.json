@@ -137,6 +137,15 @@
             "cwd": "${workspaceFolder}",
             "justMyCode": true
         },
+        {
+            "name": "Update Documentation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\update_docs.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
     ],
     "inputs": [
         {
