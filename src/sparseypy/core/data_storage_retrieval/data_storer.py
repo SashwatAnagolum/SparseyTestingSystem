@@ -263,9 +263,15 @@ class DataStorer:
         eval_dict = {
             # create a key for each saved metric containing the nested average
             # of the results of the metric for each step in the evaluation
-            saved_metric:self.average_nested_data(
-                [step.get_metric(saved_metric) for step in result.get_steps()]
-                                                    ) for saved_metric in self.saved_metrics
+            saved_metric: torch.mean(
+                torch.tensor(
+                    [
+                        self.average_nested_data(
+                            step.get_metric(saved_metric)
+                        ) for step in result.get_steps()
+                    ]
+                )
+            ) for saved_metric in self.saved_metrics
         }
         # then add those as "evaluation_" results to the W&B summary level
         for metric_name, metric_val in eval_dict.items():

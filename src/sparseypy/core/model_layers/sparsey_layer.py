@@ -315,7 +315,7 @@ class SparseyLayer(torch.nn.Module):
                 )
             )
 
-            self.is_active = macs_are_active.squeeze()
+            self.is_active = macs_are_active.view(batch_size, self.num_macs)
 
             raw_activations = torch.matmul(
                 mac_inputs.transpose(0, 1),
