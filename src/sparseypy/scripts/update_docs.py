@@ -17,9 +17,6 @@ def run_command(command):
         print(f"Error running command: {command}\n{e}")
         sys.exit(1)
 
-# Change directory to the docs directory
-os.chdir("..")
-
 # Generating .rst files from your docstrings
 if is_windows:
     run_command(f'sphinx-apidoc -o docs\\source\\ {project_directory}')
