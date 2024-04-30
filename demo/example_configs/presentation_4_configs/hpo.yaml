@@ -57,17 +57,6 @@ hyperparameters:
       name: 
         value: hebbian
 
-    # dataloader: controls the dataloader parameters to use
-    dataloader:
-      # batch_size: int > 0
-      #    number of input items per batch
-      batch_size: 
-        value: 1
-      # shuffle: bool
-      #    whether to randomize the inputs as they are drawn from the dataloader
-      shuffle: 
-        value: True
-
     # training: directly training-related hyperparameters
     training:
       # num_epochs: int > 0
@@ -76,6 +65,30 @@ hyperparameters:
       #     but the setting exists for potential future compatibility
       num_epochs: 
         value: 1
+
+      # dataloader: controls the dataloader parameters to use
+      dataloader:
+        # batch_size: int > 0
+        #    number of input items per batch
+        batch_size: 
+          value: 1
+        # shuffle: bool
+        #    whether to randomize the inputs as they are drawn from the dataloader
+        shuffle: 
+          value: True
+
+    # eval: evaluation-related hyperparameters
+    eval:
+      # dataloader: controls the dataloader parameters to use
+      dataloader:
+        # batch_size: int > 0
+        #    number of input items per batch
+        batch_size: 
+          value: 16
+        # shuffle: bool
+        #    whether to randomize the inputs as they are drawn from the dataloader
+        shuffle: 
+          value: True
 
   # the layers section defines the properties of individual layers in the Sparey model
   #     each entry in its list is a new layer, in order from the bottom of the model to the top
@@ -109,12 +122,12 @@ hyperparameters:
           min: 2
           max: 10
           distribution: int_uniform
-        # mac_receptive_field_radius: float > 0
+        # mac_receptive_field_size: float > 0
         #     the receptive field radius of each MAC, defined in terms of the side length of the current layer
         #     a value of 1 represents a full side length
         #     note that this uses Euclidean distance; for all corner MACs in this layer to see all MACs 
         #     in the previous layer, a value of 1.5 is required
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           values: [0.75, 1.0, 1.5]
         # sigmoid_lambda: float > 0
         #     parameter for the familiarity computation
@@ -170,7 +183,7 @@ hyperparameters:
           values: [4, 9]
         num_cms_per_mac:
           values: [5, 10, 15, 20, 25]
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           value: 1.0
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -206,7 +219,7 @@ hyperparameters:
           values: [4, 9]
         num_cms_per_mac:
           value: 2
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           values: [1.0, 1.5]
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -242,7 +255,7 @@ hyperparameters:
           value: 5
         num_macs:
           values: [4, 9]
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           value: 1.0
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -278,7 +291,7 @@ hyperparameters:
           value: 5
         num_macs:
           value: 4
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           value: 0.75
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
