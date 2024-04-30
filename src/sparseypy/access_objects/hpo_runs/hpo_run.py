@@ -314,12 +314,12 @@ class HPORun():
 
             # perform training
             with tqdm(
-                total=training_recipe.num_batches,
+                total=training_recipe.training_num_batches,
                 desc=f"Training (Trial {self.num_steps})",
                 leave=False, position=0,
                 disable=(not self.progress_bars),
                 unit="input",
-                miniters=int(training_recipe.num_batches/100)
+                miniters=int(training_recipe.training_num_batches/100)
             ) as pbar:
                 while not done:
                     results, done = training_recipe.step()
@@ -329,12 +329,12 @@ class HPORun():
             # perform evaluation
             done = False
             with tqdm(
-                total=training_recipe.num_batches,
+                total=training_recipe.eval_num_batches,
                 desc=f"Evaluation (Trial {self.num_steps})",
                 leave=False, position=0,
                 disable=(not self.progress_bars),
                 unit="input",
-                miniters=int(training_recipe.num_batches/100)
+                miniters=int(training_recipe.eval_num_batches/100)
             ) as pbar:
                 while not done:
                     results, done = training_recipe.step(training=False)
