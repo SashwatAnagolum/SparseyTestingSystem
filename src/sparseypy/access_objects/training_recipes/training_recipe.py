@@ -51,8 +51,7 @@ class TrainingRecipe:
                  preprocessing_stack: PreprocessingStack,
                  metrics_list: list[torch.nn.Module],
                  metric_config: dict, setup_configs: dict,
-                 loss_func: Optional[torch.nn.Module],
-                 step_resolution: Optional[int] = None) -> None:
+                 loss_func: Optional[torch.nn.Module]) -> None:
         """
         Initializes the TrainingRecipe.
         Args:
