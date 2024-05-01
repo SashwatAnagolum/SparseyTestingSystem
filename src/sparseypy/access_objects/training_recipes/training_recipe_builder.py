@@ -5,15 +5,17 @@ Build Trainer: class to build trainers for models.
 """
 
 
+from typing import Optional
+
 import torch
-from torch.utils.data import DataLoader
+import torch.utils
+from torch.utils.data import DataLoader, Dataset
 
 from sparseypy.access_objects.training_recipes.training_recipe import TrainingRecipe
 from sparseypy.core.optimizers.optimizer_factory import OptimizerFactory
 from sparseypy.access_objects.datasets.dataset_factory import DatasetFactory
 from sparseypy.access_objects.preprocessing_stack.preprocessing_stack import PreprocessingStack
 from sparseypy.core.metrics.metric_factory import MetricFactory
-from sparseypy.access_objects.datasets import PreprocessedDataset, InMemoryDataset
 from sparseypy.access_objects.models.model_builder import ModelBuilder
 
 
@@ -25,7 +27,8 @@ class TrainingRecipeBuilder:
     @staticmethod
     def build_training_recipe(model_config: dict,
         dataset_config: dict, preprocessing_config: dict,
-        train_config: dict) -> TrainingRecipe:
+        train_config: dict,
+        dataset: Optional[Dataset] = None) -> TrainingRecipe:
         """
         Builds the training recipe object using the
         passed in config information.
@@ -41,7 +44,10 @@ class TrainingRecipeBuilder:
             train_config (dict): the config info for
                 the training recipe to use to train the
                 model.
-
+            dataset (Optional[torch.utils.data.Dataset]): 
+                the dataset to use instead of creating a new
+                dataset using the dataset_config.
+            
         Returns:
             (TrainingRecipe): the constructed
                 TrainingRecipe object.
@@ -63,27 +69,8 @@ class TrainingRecipeBuilder:
             device=device, model=model
         )
 
-        dataset = DatasetFactory.create_dataset(
-            dataset_config['dataset_type'],
-            **dataset_config['params']
-        )
-
-        # if a preprocessed dataset then wrap the dataset
-        if dataset_config['preprocessed'] is True:
-            preprocessed_dataset_stack = PreprocessingStack(
-                dataset_config['preprocessed_stack']
-            )
-
-            dataset = PreprocessedDataset(
-                dataset, preprocessed_dataset_stack,
-                dataset_config['preprocessed_temp_dir'],
-                dataset_config['save_to_disk']
-            )
-
-        if dataset_config['in_memory']:
-            dataset = InMemoryDataset(
-                dataset, dataset_config['load_lazily']
-            )
+        if dataset is None:
+            dataset = DatasetFactory.build_and_wrap_dataset(dataset_config)
 
         training_dataloader = DataLoader(
             dataset=dataset, **train_config['training']['dataloader']

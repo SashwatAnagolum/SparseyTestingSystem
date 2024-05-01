@@ -16,6 +16,7 @@ import wandb
 from sparseypy.access_objects.training_recipes.training_recipe_builder import TrainingRecipeBuilder
 from sparseypy.cli.config_validation.validate_config import validate_config
 from sparseypy.core.data_storage_retrieval import DataStorer
+from sparseypy.access_objects.datasets.dataset_factory import DatasetFactory
 from sparseypy.core.hpo_objectives.hpo_objective import HPOObjective
 from sparseypy.core.results import HPOResult, HPOStepResult
 from sparseypy.core.printing import Printer
@@ -37,7 +38,6 @@ class HPORun():
         num_steps_to_perform (int): the total number of 
             candidates to try out during the HPO process
     """
-
     tqdm_bar = None
 
     def __init__(self, hpo_config: dict,
@@ -55,7 +55,6 @@ class HPORun():
             wandb_api_key (str): the Weights and Biases API key to 
                 use to login to WandB and log data.
         """
-
         self.sweep_config = self.construct_sweep_config(hpo_config, system_config)
         self.sweep_id = wandb.sweep(sweep=self.sweep_config)
         self.num_trials = hpo_config['num_candidates']
@@ -63,10 +62,12 @@ class HPORun():
 
         #trainer_config = hpo_config['trainer']
 
+        self.system_config = system_config  
         self.preprocessing_config = preprocessing_config
         self.dataset_config = dataset_config
-        #self.training_recipe_config = trainer_config
-        self.system_config = system_config
+        self.dataset = DatasetFactory.build_and_wrap_dataset(
+            dataset_config
+        )
 
         # BUG does this approach log things in an incorrect order for multithreaded runs?
         logged_configs = {
@@ -293,7 +294,8 @@ class HPORun():
                 model_config=validated_model_config,
                 dataset_config=deepcopy(self.dataset_config),
                 preprocessing_config=deepcopy(self.preprocessing_config),
-                train_config=validated_trainer_config
+                train_config=validated_trainer_config,
+                dataset=self.dataset
             )
 
             done = False
