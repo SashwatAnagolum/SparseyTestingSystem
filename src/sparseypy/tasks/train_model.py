@@ -102,9 +102,13 @@ def train_model(model_config: dict, trainer_config: dict,
             trainer_config=trainer_config,
             training_num_batches=trainer.training_num_batches,
             eval_num_batches=trainer.eval_num_batches,
-            run_name=wandb.run.name,
-            run_url=wandb.run.url
         )
+    
+    Printer.print_run_start_message(
+        run_name=wandb.run.name,
+        run_url=wandb.run.url,
+        phase="training"
+    )
 
     for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs", position=0):
         is_epoch_done = False
@@ -165,6 +169,12 @@ def train_model(model_config: dict, trainer_config: dict,
             name=run_name + "-eval",
             notes=trainer_config['description'],
             project=system_config["wandb"]["project_name"],
+        )
+
+        Printer.print_run_start_message(
+            run_name=wandb.run.name,
+            run_url=wandb.run.url,
+            phase="evaluation"
         )
 
         # perform evaluation

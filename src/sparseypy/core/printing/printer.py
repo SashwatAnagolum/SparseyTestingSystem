@@ -24,12 +24,13 @@ class Printer:
             results (TrainingResult): the results to summarize
             run_type (str): the type of run to summarize
         """
-        tqdm.write(f"Run completed.\n{run_type.upper()} - SUMMARY\n")
+        tqdm.write(f"Run completed.\n\n{run_type.upper()} - SUMMARY\n")
         tqdm.write("Best metric steps:")
         for metric, val in results.best_steps.items():
             tqdm.write(
                 f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})"
             )
+        tqdm.write("")
 
     @staticmethod
     def print_pre_hpo_summary(hpo_config: dict) -> None:
@@ -115,8 +116,8 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
 
     @staticmethod
     def print_pre_training_summary(dataset_config: dict, trainer_config: dict,
-                                   training_num_batches: int, eval_num_batches: int,
-                                   run_name: str, run_url: str) -> None:
+                                   training_num_batches: int,
+                                   eval_num_batches: int,) -> None:
         """
         Prints a pre-execution summary of a single training run.
 
@@ -127,8 +128,6 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
                 used for the run.
             training_num_batches (int): the number of batches in this training run.
             eval_num_batches (int): the number of batches in this evaluation run.
-            run_name (str): the name of the training run in Weights & Biases
-            run_url (str): the URL of the training run in Weights & Biases
         """
         # print training run summary
         met_separator = "\n* "
@@ -141,11 +140,22 @@ Number of training batches: {training_num_batches}
 Number of evaluation batches: {eval_num_batches}
 Selected metrics: 
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
-
-BEGINNING TRAINING
-Run name: {run_name}
-View results live: {run_url}
     """)
+
+
+    @staticmethod
+    def print_run_start_message(run_name: str, run_url: str, phase: str = "training"):
+        """
+        Prints the "beginning run" summary to the console.
+
+        Args:
+            run_name (str): the name of the run in Weights & Biases
+            run_url (str): the URL of the run in Weights & Biases
+            phase (str): the current phase (training/validation/evaluation)
+        """
+        tqdm.write(f"{phase.upper()} STARTED")
+        tqdm.write(f"Run name: {run_name}")
+        tqdm.write(f"View results live: {run_url}\n")
 
 
     @staticmethod

@@ -91,6 +91,12 @@ def evaluate_model(model_name: str, trainer_config: dict,
     Printer.print_pre_evaluate_model_summary(dataset_config, trainer_config,
                                              model_name, trainer.eval_num_batches)
 
+    Printer.print_run_start_message(
+        run_name=wandb.run.name,
+        run_url=wandb.run.url,
+        phase="evaluation"
+    )
+
     for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs", position=0):
         trainer.model.eval()
         is_epoch_done = False
