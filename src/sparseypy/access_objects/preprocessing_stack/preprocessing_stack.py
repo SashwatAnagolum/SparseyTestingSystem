@@ -11,7 +11,17 @@ from sparseypy.core.transforms.transform_factory import TransformFactory
 
 
 class PreprocessingStack(torch.nn.Module):
+    """
+    A class to represent a stack of transforms
+    Attributes:
+        transform_list (list[torch.nn.Module]): The list of transforms to apply.
+    """
     def __init__(self, transform_configs):
+        """
+        Initializes the PreprocessingStack.
+        Args:
+            transform_configs (dict): A dictionary containing the list of transforms to apply.
+        """
         super().__init__()
 
         self.transform_list = []
@@ -26,6 +36,13 @@ class PreprocessingStack(torch.nn.Module):
 
 
     def forward(self, x: torch.Tensor):
+        """
+        Forward pass through the preprocessing stack.
+        Args:
+            x (torch.Tensor): The input data.
+        Returns:
+            (torch.Tensor): The transformed data.
+        """
         for transform in self.transform_list:
             x = transform(x)
 

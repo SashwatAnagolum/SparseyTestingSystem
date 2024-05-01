@@ -21,12 +21,22 @@ from sparseypy.access_objects.datasets.dataset import Dataset
 
 class BuiltInDataset(Dataset):
     """
-    
+    A dataset class that wraps around a built-in dataset.
+    Attributes:
+        dataset_name (str): The name of the dataset.
+        dataset_folder (str): The folder where the dataset is stored.
+        transform (torchvision.transforms): The transformation to apply to the dataset.
+        wrapped_dataset (TorchDataset): The wrapped dataset.
     """
     def __init__(self, name: str, root: str,
                  download: bool, transform: str):
         """
-        
+        Initalize the BuiltInDataset.
+        Args:
+            name (str): The name of the dataset.
+            root (str): The folder where the dataset is stored.
+            download (bool): Whether to download the dataset.
+            transform (str): The transformation to apply to the dataset.
         """
         self.dataset_name = name
         self.dataset_folder = root

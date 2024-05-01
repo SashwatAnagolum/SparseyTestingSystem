@@ -415,6 +415,12 @@ class HPORun():
             cls.tqdm_bar = None
 
     def _print_breakdown(self, step_results: HPOStepResult, print_config=False):
+        """
+        Print the breakdown of the objective function for a given step.
+        Args:
+            step_results (HPOStepResult): the results of the HPO step
+            print_config (bool): whether to print the model configuration
+        """
         objective_results = step_results.get_objective()
         # enhance with summary of metrics
         #tqdm.write(f"Run ID: {step_results.id}")

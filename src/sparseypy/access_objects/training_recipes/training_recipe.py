@@ -22,6 +22,27 @@ class TrainingRecipe:
     TrainingRecipe: class that trains a given model on a 
     particular dataset, using configurations passed in by
     the user.
+    Attributes:
+        device (torch.device): the device to train the model on.
+        model (torch.nn.Module): the model to train.
+        optimizer (torch.optim.Optimizer): the optimizer to use.
+        train_dataloader (DataLoader): the training dataloader.
+        eval_dataloader (DataLoader): the evaluation dataloader.
+        preprocessing_stack (PreprocessingStack): the preprocessing stack to apply.
+        metrics_list (list[torch.nn.Module]): the metrics to compute.
+        metric_config (dict): the configuration for the metrics.
+        setup_configs (dict): the setup configurations.
+        loss_func (torch.nn.Module): the loss function to use.
+        step_resolution (int): the number of batches to train on before logging results.
+        batch_index (int): the current batch index.
+        training_num_batches (int): the number of batches in the training dataloader.
+        training_iterator (iter): the training dataloader iterator.
+        eval_num_batches (int): the number of batches in the evaluation dataloader.
+        eval_iterator (iter): the evaluation dataloader iterator.
+        ds (DataStorer): the data storer object.
+        training_results (TrainingResult): the training results object.
+        eval_results (TrainingResult): the evaluation results object.
+        first_eval (bool): whether this is the first evaluation step.
     """
     def __init__(self, device: torch.device, model: torch.nn.Module,
                  optimizer: torch.optim.Optimizer,
@@ -32,6 +53,21 @@ class TrainingRecipe:
                  metric_config: dict, setup_configs: dict,
                  loss_func: Optional[torch.nn.Module],
                  step_resolution: Optional[int] = None) -> None:
+        """
+        Initializes the TrainingRecipe.
+        Args:
+            device (torch.device): the device to train the model on.
+            model (torch.nn.Module): the model to train.
+            optimizer (torch.optim.Optimizer): the optimizer to use.
+            train_dataloader (DataLoader): the training dataloader.
+            eval_dataloader (DataLoader): the evaluation dataloader.
+            preprocessing_stack (PreprocessingStack): the preprocessing stack to apply.
+            metrics_list (list[torch.nn.Module]): the metrics to compute.
+            metric_config (dict): the configuration for the metrics.
+            setup_configs (dict): the setup configurations.
+            loss_func (torch.nn.Module): the loss function to use.
+            step_resolution (int): the number of batches to train on before logging results.
+            """
         self.optimizer = optimizer
         self.model = model
         self.train_dataloader = train_dataloader
