@@ -1,2 +1,3 @@
 from .skeletonize_transform import SkeletonizeTransform
 from .binarize_transform import BinarizeTransform
+from .sparsey_input_reshape_transform import SparseyInputReshapeTransform

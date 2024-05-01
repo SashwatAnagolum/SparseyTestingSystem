@@ -22,8 +22,12 @@ metrics:
     save: True
   - name: sisc_adherence
     save: True
+    params:
+      approximation_batch_size: 128
   - name: match_accuracy
     save: True
+    params:
+      approximation_batch_size: 1024
   - name: basis_average
     save: True
 
@@ -42,7 +46,7 @@ training:
     batch_size: 1
     # shuffle: bool
     #    whether to randomize the inputs as they are drawn from the dataloader
-    shuffle: True
+    shuffle: False
 
 eval:
   # dataloader settings for loading items from the dataset
@@ -52,7 +56,7 @@ eval:
     batch_size: 16
     # shuffle: bool
     #    whether to randomize the inputs as they are drawn from the dataloader
-    shuffle: True
+    shuffle: False
 
 use_gpu: False
 ...
