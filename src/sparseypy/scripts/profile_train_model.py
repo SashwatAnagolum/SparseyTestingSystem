@@ -67,6 +67,13 @@ def parse_args() -> argparse.Namespace:
 
 
 def main():
+    """
+    Main function for the profile_train_model script. 
+    
+    Profiles the project during a complete training run: Accepts and parses the 
+    command line arguments, validates the configuration files with the config schemas,
+    and starts the train_model task.
+    """
     args = parse_args()
 
     if args.model_config and args.model_name:

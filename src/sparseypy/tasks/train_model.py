@@ -6,10 +6,10 @@ Train Model: script to train models.
 
 from copy import deepcopy
 import os
-import pprint
 import shutil
-from tqdm import tqdm
 import warnings
+
+from tqdm import tqdm
 
 import wandb
 
@@ -92,7 +92,7 @@ def train_model(model_config: dict, trainer_config: dict,
     if reload_model:
         trainer.model.load_state_dict(model_weights)
 
-    Printer.print_pre_training_summary(dataset_config, trainer_config, 
+    Printer.print_pre_training_summary(dataset_config, trainer_config,
                                        trainer.training_num_batches, trainer.eval_num_batches)
 
     for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs", position=0):
@@ -115,8 +115,9 @@ def train_model(model_config: dict, trainer_config: dict,
                 # the user (for performance reasons--metrics print a lot of data)
                 if system_config['console'].get('print_metric_values', False):
                     Printer.print_step_metrics(
-                        batch_number=batch_number,
                         step_data=output,
+                        batch_number=batch_number,
+                        batch_size=trainer_config['training']['dataloader']['batch_size'],
                         step_type="training"
                     )
                 batch_number+=1
@@ -168,12 +169,13 @@ def train_model(model_config: dict, trainer_config: dict,
                 # validate this logic VS the design of our EvaluationResult
                 # this looks like old-style logic for which we should remove the "while"
                 output, is_epoch_done = trainer.step(training=False)
-                # only print metric values to the console if explicitly requested by 
+                # only print metric values to the console if explicitly requested by
                 # the user (for performance reasons--metrics print a lot of data)
                 if system_config['console'].get('print_metric_values', False):
                     Printer.print_step_metrics(
-                        batch_number=batch_number,
                         step_data=output,
+                        batch_number=batch_number,
+                        batch_size=trainer_config['eval']['dataloader']['batch_size'],
                         step_type="evaluation"
                     )
                 batch_number+=1

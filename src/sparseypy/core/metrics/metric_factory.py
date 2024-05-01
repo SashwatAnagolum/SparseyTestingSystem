@@ -1,3 +1,6 @@
+"""
+metric_factory.py - module containing the MetricFactory
+"""
 import inspect
 from typing import Callable, Optional
 
@@ -9,6 +12,18 @@ import sparseypy.core.metrics.comparisons as comparisons
 
 
 class MetricFactory:
+    """
+    MetricFactory: Factory class for validating and constructing Metrics and comparison functions.
+
+    Provides methods for validating the existence of and instantiating system Metric classes
+    and comparison functions using reflection.
+    
+    Attributes:
+        allowed_comparisons (set[str]): the names of all the valid comparison functions available
+            as part of the system.
+        allowed_modules (set[str]): the names of all the valid metrics available as part of
+            the system.
+    """
     allowed_modules = set([i for i in dir(metrics) if i[:2] != '__'])
     allowed_comparisons = set([i[0] for i in inspect.getmembers(comparisons, inspect.isfunction)])
 
