@@ -25,7 +25,11 @@ warnings.filterwarnings(
     "ignore",
     message="Run (.*) is finished. The call to `_console_raw_callback` will be ignored."
     )
-
+# PyTorch nested tensors are in beta and print a warning about API changes
+warnings.filterwarnings(
+    "ignore",
+    message=r"The PyTorch API of nested tensors is in prototype stage and will change in the.+"
+)
 
 def train_model(model_config: dict, trainer_config: dict,
                 preprocessing_config: dict, dataset_config: dict,

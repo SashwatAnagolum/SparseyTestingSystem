@@ -29,6 +29,11 @@ warnings.filterwarnings(
     "ignore",
     message="Run (.*) is finished. The call to `_console_raw_callback` will be ignored."
     )
+# PyTorch nested tensors are in beta and print a warning about API changes
+warnings.filterwarnings(
+    "ignore",
+    message="The PyTorch API of nested tensors is in prototype stage and will change in the near future."
+)
 
 class HPORun():
     """
