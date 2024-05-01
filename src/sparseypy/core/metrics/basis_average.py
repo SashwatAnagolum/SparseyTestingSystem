@@ -166,6 +166,7 @@ class BasisAverageMetric(Metric):
         """
         layers, _, outputs = self.hook.get_layer_io()
         last_batch = last_batch.view(last_batch.shape[0], 1, -1)
+        batch_size = last_batch.shape[0]
 
         if self.num_inputs_seen is None:
             self.initialize_shapes(layers, outputs, last_batch)
@@ -203,13 +204,19 @@ class BasisAverageMetric(Metric):
                     self.num_inputs_seen
                 )
             ]
+
+            basis_averages = [
+                b.expand(batch_size, *b.shape[1:])
+                for b in basis_averages
+            ]
         else:
             basis_averages = [
                 torch.zeros(
                     (1, output.shape[1], last_batch.shape[1]),
                     dtype=torch.float32,
                     device=self.device
-                ) for output in outputs
+                ).expand(batch_size, output.shape[1], last_batch.shape[1])
+                for output in outputs
             ]
 
         return torch.nested.nested_tensor(
