@@ -11,6 +11,15 @@ from sparseypy.core import optimizers
 
 
 class OptimizerFactory:
+    """
+    Factory class for constructing Optimizers.
+
+    Contains methods for checking for the existence of optimizers by name and instantiating
+    optimizer instances using reflection.
+
+    Attributes:
+        allowed_modules (set[str]): the valid optimizers available for use in the system
+    """
     allowed_modules = set([i for i in dir(optimizers) if i[:2] != '__'])
 
     @staticmethod
@@ -29,7 +38,7 @@ class OptimizerFactory:
             return getattr(torch.optim, opt_name)
         else:
             raise ValueError('Invalid optimizer name!')
-    
+
 
     @staticmethod
     def create_optimizer(opt_name, **kwargs) -> torch.optim.Optimizer:
