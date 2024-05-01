@@ -51,9 +51,37 @@ class SparseyLayer(torch.nn.Module):
         device: torch.device):
         """
         Initializes the SparseyLayer object.
-
         Args:
-
+            autosize_grid (bool): whether the grid should be autosized.
+            grid_layout (str): the layout of the grid (rectangular or hexagonal).
+            num_macs (int): the number of MACs in the layer.
+            num_cms_per_mac (int): the number of CMs in each MAC.
+            num_neurons_per_cm (int): the number of neurons in each CM.
+            mac_grid_num_rows (int): the number of rows in the grid.
+            mac_grid_num_cols (int): the number of columns in the grid.
+            mac_receptive_field_size (float): the size of the receptive field.
+            prev_layer_num_cms_per_mac (int): the number of CMs per MAC in the
+                previous layer.
+            prev_layer_num_neurons_per_cm (int): the number of neurons per CM
+                in the previous layer.
+            prev_layer_mac_grid_num_rows (int): the number of rows in the grid
+                for the previous layer.
+            prev_layer_mac_grid_num_cols (int): the number of columns in the grid
+                for the previous layer.
+            prev_layer_num_macs (int): the number of MACs in the previous layer.
+            prev_layer_grid_layout (str): the layout of the grid for the previous
+                layer.
+            layer_index (int): the index of the layer.
+            sigmoid_phi (float): the phi parameter for the sigmoid function.
+            sigmoid_lambda (float): the lambda parameter for the sigmoid function.
+            saturation_threshold (float): the threshold for saturation.
+            permanence_steps (float): the number of permanence steps.
+            permanence_convexity (float): the convexity of the permanence.
+            activation_threshold_min (float): the minimum activation threshold.
+            activation_threshold_max (float): the maximum activation threshold.
+            min_familiarity (float): the minimum familiarity.
+            sigmoid_chi (float): the chi parameter for the sigmoid function.
+            device (torch.device): the device to run the model on.
         """
         super().__init__()
 
@@ -421,6 +449,36 @@ class SparseyLayerV2(torch.nn.Module):
         """
         Initializes the SparseyLayer object.
         Args:
+            autosize_grid (bool): whether the grid should be autosized.
+            grid_layout (str): the layout of the grid (rectangular or hexagonal).
+            num_macs (int): the number of MACs in the layer.
+            num_cms_per_mac (int): the number of CMs in each MAC.
+            num_neurons_per_cm (int): the number of neurons in each CM.
+            mac_grid_num_rows (int): the number of rows in the grid.
+            mac_grid_num_cols (int): the number of columns in the grid.
+            mac_receptive_field_radius (float): the radius of the receptive field.
+            prev_layer_num_cms_per_mac (int): the number of CMs per MAC in the
+                previous layer.
+            prev_layer_num_neurons_per_cm (int): the number of neurons per CM
+                in the previous layer.
+            prev_layer_mac_grid_num_rows (int): the number of rows in the grid
+                for the previous layer.
+            prev_layer_mac_grid_num_cols (int): the number of columns in the grid
+                for the previous layer.
+            prev_layer_num_macs (int): the number of MACs in the previous layer.
+            prev_layer_grid_layout (str): the layout of the grid for the previous
+                layer.
+            layer_index (int): the index of the layer.
+            sigmoid_phi (float): the phi parameter for the sigmoid function.
+            sigmoid_lambda (float): the lambda parameter for the sigmoid function.
+            saturation_threshold (float): the threshold for saturation.
+            permanence_steps (float): the number of permanence steps.
+            permanence_convexity (float): the convexity of the permanence.
+            activation_threshold_min (float): the minimum activation threshold.
+            activation_threshold_max (float): the maximum activation threshold.
+            min_familiarity (float): the minimum familiarity.
+            sigmoid_chi (float): the chi parameter for the sigmoid function.
+            device (torch.device): the device to run the model on.
         """
         super().__init__()
 

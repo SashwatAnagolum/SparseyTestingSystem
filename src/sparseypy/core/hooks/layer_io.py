@@ -52,6 +52,13 @@ class LayerIOHook(Hook):
 
 
     def pre_hook(self, module: torch.nn.Module, input: torch.Tensor) -> None:
+        """
+        Pre-hook to capture the input of the model.
+        Args:
+            module (torch.nn.Module): the module that the hook was
+                registered to.
+            input (torch.Tensor): module input
+        """
         self.input_list = []
         self.output_list = []
         self.layer_list = []

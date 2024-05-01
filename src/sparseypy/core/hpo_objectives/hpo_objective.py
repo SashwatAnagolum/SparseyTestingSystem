@@ -4,11 +4,26 @@ import torch
 from sparseypy.core.results import TrainingResult
 
 class HPOObjective:
+    """
+    Hyperparameter Optimization Objective: class to combine multiple metric results into a single scalar value.
+    """
     def __init__(self, hpo_config: dict):
+        """
+        Initialize the HPOObjective.
+        Args:
+            hpo_config (dict): the configuration for the hyperparameter optimization.
+        """
         self.hpo_config = hpo_config
 
     # using nan_to_num() carries significant performance penalties so we should redo this
     def average_nested_data(self, data):
+        """
+        Recursively averages data at different levels of nesting.
+        Args:
+            data: The data to average.
+        Returns:
+            The average of the data.
+        """
         if isinstance(data, list):
             if data.__len__() == 0:
                 data=[0]
@@ -25,6 +40,13 @@ class HPOObjective:
 
 
     def _convert_name(self, metric_name):
+        """
+        Convert metric name to class name format.
+        Args:
+            metric_name: The metric name to convert.
+        Returns:
+            The class name format of the metric name.
+        """
         return ''.join(
                 [l.capitalize() for l in metric_name.split('_')] + ['Metric']
                 )

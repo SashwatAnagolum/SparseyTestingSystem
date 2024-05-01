@@ -9,10 +9,22 @@ from sparseypy.access_objects.models.model import Model
 
 
 class BasisSetSizeMetric(Metric):
+    """
+    Basis Set Size Metric: computes the size of the basis set
+        for each MAC in the model.
+    """
     def __init__(self, model: torch.nn.Module,
                  device: torch.device,
                  reduction: Optional[str] = None,
                  best_value: Optional[Callable] = min_by_layerwise_mean):
+        """
+        Initializes the Basis Set Size Metric.
+        Args:
+            model (torch.nn.Module): the model to compute the metric on.
+            device (torch.device): the device to compute the metric on.
+            reduction (str): the reduction method to use.
+            best_value (function): the best value function to use.
+        """
         super().__init__(
             model, 'basis_set_size', best_value,
             device, reduction
