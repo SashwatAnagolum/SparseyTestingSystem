@@ -150,29 +150,38 @@ class DataStorer:
                         torch.select(metric_val, dim=1, index=batch_index)
                     )
 
-            # log layerwise data to W&B, if requested
+            # log higher-resolution data to W&B, if requested
             if self.wandb_resolution > 0:
-                layerwise_dict = {}
+                full_dict = {}
                 # get the data for each metric
                 for met_name, met_val in result.get_metrics().items():
-                    # if that metric is requested for saving and is at least 1D in layers (is a list)
+                    # if that metric is requested for saving and is a Tensor
                     if met_name in self.saved_metrics and isinstance(met_val, torch.Tensor):
-                        # then break out each layer as a separate metric for W&B using prefix grouping
-                        for idx, layer_data in enumerate(torch.select(met_val, dim=1, index=batch_index)):
+                        # then break out each layer as a separate metric for W&B
+                        # using prefix grouping
+                        for idx, layer_data in enumerate(
+                            torch.select(met_val, dim=1, index=batch_index)
+                        ):
                             layer_name = f"{met_name}/layer_{idx+1}"
-                            layerwise_dict[layer_name] = reductions.average_nested_data(layer_data)
+                            full_dict[layer_name] = reductions.average_nested_data(layer_data)
                             # if the resolution is 2 (MAC-level)
                             # also log the MAC-level data with prefix grouping
-                            # FIXME tensors are not logged here pending adjustment of feature_coverage
                             if self.wandb_resolution == 2 and isinstance(layer_data, torch.Tensor):
                                 for idy, mac_data in enumerate(layer_data):
                                     mac_name = f"{met_name}/layer_{idx+1}/mac_{idy+1}"
-                                    layerwise_dict[mac_name] = reductions.average_nested_data(mac_data) if mac_data.dim() > 0 else mac_data.cpu().item()
+                                    if mac_data.dim() > 0:
+                                        full_dict[mac_name] = reductions.average_nested_data(mac_data)
+                                    else:
+                                        full_dict[mac_name] = mac_data.cpu().item()
                 # then log without updating the step (done when the summary is logged below)
-                wandb.log(layerwise_dict, commit=False)
+                wandb.log(full_dict, commit=False)
 
             # save the summary to W&B
-            wandb.log(summary_dict, step=(base_step + batch_index), commit=(batch_index == result.batch_size - 1))
+            wandb.log(
+                summary_dict, # log the summary
+                step=(base_step + batch_index), # to the corresponding step
+                commit=(batch_index == result.batch_size - 1) # commit only on last step
+            )
 
 
     def save_training_step(self, parent: str, result: TrainingStepResult):
