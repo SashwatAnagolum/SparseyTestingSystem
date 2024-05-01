@@ -15,6 +15,7 @@ import wandb
 
 from sparseypy.access_objects.training_recipes.training_recipe_builder import TrainingRecipeBuilder
 from sparseypy.core.data_storage_retrieval import DataFetcher, DataStorer
+from sparseypy.core.printing import Printer
 
 # Weights & Biases attempts to read tqdm updates from the console even after the last run
 # in an HPO sweep finishes, causing an unnecessary UserWarning when it attempts to log data
@@ -91,18 +92,8 @@ def train_model(model_config: dict, trainer_config: dict,
     if reload_model:
         trainer.model.load_state_dict(model_weights)
 
-    # print training run summary
-    met_separator = "\n* "
-    tqdm.write(f"""
-TRAINING RUN SUMMARY
-Dataset type: {dataset_config['dataset_type']}
-Train batch size: {trainer_config['training']['dataloader']['batch_size']}
-Evaluation batch size: {trainer_config['eval']['dataloader']['batch_size']}
-Number of training batches: {trainer.training_num_batches}
-Number of evaluation batches: {trainer.eval_num_batches}
-Selected metrics: 
-* {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
-""")
+    Printer.print_pre_training_summary(dataset_config, trainer_config, 
+                                       trainer.training_num_batches, trainer.eval_num_batches)
 
     for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs", position=0):
         is_epoch_done = False
@@ -120,21 +111,20 @@ Selected metrics:
         ) as pbar:
             while not is_epoch_done:
                 output, is_epoch_done = trainer.step(training=True)
-                # only print metric values to the console if explicitly requested by 
+                # only print metric values to the console if explicitly requested by
                 # the user (for performance reasons--metrics print a lot of data)
                 if system_config['console'].get('print_metric_values', False):
-                    tqdm.write(f"\n\nTraining results - INPUT {batch_number}\n--------------------")
-                    metric_str = pprint.pformat(output.get_metrics())
-                    tqdm.write(metric_str)
+                    Printer.print_step_metrics(
+                        batch_number=batch_number,
+                        step_data=output,
+                        step_type="training"
+                    )
                 batch_number+=1
                 pbar.update(1)
 
         # summarize the best training steps
         train_summary = trainer.get_summary("training")
-        tqdm.write("\n\nTRAINING - SUMMARY\n")
-        tqdm.write("Best metric steps:")
-        for metric, val in train_summary.best_steps.items():
-            tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
+        Printer.print_best_steps(results=train_summary, run_type="training")
 
         trainer.model.eval()
         is_epoch_done = False
@@ -181,20 +171,19 @@ Selected metrics:
                 # only print metric values to the console if explicitly requested by 
                 # the user (for performance reasons--metrics print a lot of data)
                 if system_config['console'].get('print_metric_values', False):
-                    tqdm.write(f"\n\nEvaluation results - INPUT {batch_number}\n------------------")
-                    metric_str = pprint.pformat(output.get_metrics())
-                    tqdm.write(metric_str)
+                    Printer.print_step_metrics(
+                        batch_number=batch_number,
+                        step_data=output,
+                        step_type="evaluation"
+                    )
                 batch_number+=1
                 pbar.update(1)
 
-        # print summary here in model script
+        # get summary
         # if not printing you still need to call this to finalize the results
         eval_summary = trainer.get_summary("evaluation")
-
-        tqdm.write("\n\nEVALUATION - SUMMARY\n")
-        tqdm.write("Best metric steps:")
-        for metric, val in eval_summary.best_steps.items():
-            tqdm.write(f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})")
+        # then print the best steps
+        Printer.print_best_steps(eval_summary, run_type="evaluation")
 
     tqdm.write("\nFinalizing evaluation results...")
     eval_url = wandb.run.get_url()
@@ -208,12 +197,7 @@ Selected metrics:
         shutil.rmtree(wandb_run_dir)
         tqdm.write("Removed local temporary files.")
 
-    tqdm.write("\nTRAIN MODEL COMPLETED")
-    tqdm.write("Review results in Weights & Biases:")
-    tqdm.write(f"Model name: {model_name}")
-    tqdm.write(f"Group name: {run_group}")
-    tqdm.write(f"Run URL (Training): {train_url}")
-    tqdm.write(f"Run URL (Evaluation): {eval_url}")
+    Printer.print_post_train_model_summary(model_name, run_group, train_url, eval_url)
 
 
 def get_update_group(source_run_path: str) -> str:

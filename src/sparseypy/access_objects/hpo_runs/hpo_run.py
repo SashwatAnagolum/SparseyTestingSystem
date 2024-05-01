@@ -18,6 +18,7 @@ from sparseypy.cli.config_validation.validate_config import validate_config
 from sparseypy.core.data_storage_retrieval import DataStorer
 from sparseypy.core.hpo_objectives.hpo_objective import HPOObjective
 from sparseypy.core.results import HPOResult, HPOStepResult
+from sparseypy.core.printing import Printer
 
 # Weights & Biases attempts to read tqdm updates from the console even after the last run
 # in an HPO sweep finishes, causing an unnecessary UserWarning when it attempts to log data
@@ -358,23 +359,25 @@ class HPORun():
                 # add the HPOStepResults to the HPOResult
                 self.hpo_results.add_step(hpo_step_results)
 
-                tqdm.write(f"Completed trial {self.num_steps} of {self.num_trials}")
-
-                # if there is a previous best value, print the prior objective value
-                if self.best:
-                    tqdm.write(
-                        f"Previous best objective value: {self.best.get_objective()['total']:.5f}"
-                    )
-
-                self._print_breakdown(hpo_step_results)
-
                 # this step is the best step if 1) there is no previous result or
                 # 2) its objective value is higher than the previous best result
-                if (not self.best or
-                   (self.best and objective_results["total"] > self.best.get_objective()["total"])):
+                new_best = (
+                    not self.best or
+                    (objective_results["total"] > self.best.get_objective()["total"])
+                   )
+
+                if new_best:
                     self.best = hpo_step_results
                     self.best_run_url = wandb.run.url
-                    tqdm.write("This is the new best value!")
+
+                # print the step summary
+                Printer.summarize_hpo_trial(
+                    step_results=hpo_step_results,
+                    step_num=self.num_steps,
+                    num_trials=self.num_trials,
+                    print_config=False,
+                    new_best=new_best
+                )
 
                 self.data_storer.save_hpo_step(wandb.run.sweep_id, hpo_step_results)
 
@@ -399,9 +402,10 @@ class HPORun():
                 run.update()
 
         except Exception as e:
-            tqdm.write(f"WARNING: EXCEPTION OCCURRED DURING HPO STEP {self.num_steps}")
-            tqdm.write("Exception traceback:")
-            tqdm.write(traceback.format_exc())
+            Printer.print_hpo_exception(
+                current_step=self.num_steps,
+                message=traceback.format_exc()
+            )
         if HPORun.tqdm_bar is not None:
             HPORun.tqdm_bar.update(1)
 
@@ -413,29 +417,6 @@ class HPORun():
         if cls.tqdm_bar is not None:
             cls.tqdm_bar.close()
             cls.tqdm_bar = None
-
-    def _print_breakdown(self, step_results: HPOStepResult, print_config=False):
-        objective_results = step_results.get_objective()
-        # enhance with summary of metrics
-        #tqdm.write(f"Run ID: {step_results.id}")
-        tqdm.write(f"Objective value: {objective_results['total']:.5f}")
-        tqdm.write(f"Combination method: {objective_results['combination_method']}")
-        tqdm.write("Objective term breakdown:")
-        for name, values in objective_results["terms"].items():
-            tqdm.write(f"* {name:>25}: {values['value']:.5f} with weight {values['weight']}")
-
-        if print_config:
-            tqdm.write("\n---------------------------------------------------------")
-            tqdm.write("Configuration:\n---------------------------------------------------------")
-            layer_number = 1
-            tqdm.write('INPUT DIMENSIONS ')
-            tqdm.write(pformat(step_results.configs["model_config"]["input_dimensions"]))
-            tqdm.write("\n---------------------------------------------------------")
-            for layer in step_results.configs["model_config"]["layers"]:
-                tqdm.write(f"LAYER {layer_number}")
-                tqdm.write("\n---------------------------------------------------------")
-                tqdm.write(pformat(layer))
-                layer_number+=1
 
 
     def run_sweep(self) -> HPOResult:

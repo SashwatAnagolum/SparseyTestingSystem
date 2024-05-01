@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from sparseypy.access_objects.hpo_runs.hpo_run  import HPORun
 from sparseypy.core.data_storage_retrieval.data_storer import DataStorer
+from sparseypy.core.printing import Printer
 
 
 def run_hpo(hpo_config: dict,
@@ -47,53 +48,16 @@ def run_hpo(hpo_config: dict,
     if hpo_config["verbosity"] == 0:
         os.environ["WANDB_SILENT"] = "true"
 
-    met_separator = "\n* "
-    combination_item = "{mn:<25} (weight: {mw:.5f})"
-
-    obj_vals = [
-        combination_item.format(mn=x['metric']['name'], mw=x['weight'])
-        for x in hpo_config['optimization_objective']['objective_terms']
-        ]
-
-    tqdm.write(f"""
-HYPERPARAMETER OPTIMIZATION SUMMARY
-          
-W&B project name: {hpo_config['project_name']}
-W&B sweep name: {hpo_config['hpo_run_name']}
-
-Model family: {hpo_config['model_family']}
-Optimization strategy: {hpo_config['hpo_strategy']}
-Number of runs: {hpo_config['num_candidates']}
-
-Selected metrics: 
-* {met_separator.join([x["name"] for x in hpo_config["metrics"]])}
-
-Objective calculation: {hpo_config['optimization_objective']['combination_method']} of
-* {met_separator.join(obj_vals)}
-""")
+    # print the HPO summary
+    Printer.print_pre_hpo_summary(hpo_config)
 
     hpo_results = hpo_run.run_sweep()
 
-    time_delta = hpo_results.end_time - hpo_results.start_time
+    Printer.print_post_hpo_summary(hpo_results, hpo_config,
+                                   hpo_run.sweep_url, hpo_run.best_run_url)
 
     # remove results at completion if requested
     if system_config['wandb'].get('remove_local_files', False):
         for wandb_dir in hpo_run.wandb_dirs:
             shutil.rmtree(wandb_dir)
         tqdm.write("\nRemoved local temporary files.")
-
-    print("\n---------------------------------------------------------")
-    print("HYPERPARAMETER OPTIMIZATION COMPLETED")
-    print(f"\nCompleted {hpo_config['num_candidates']} runs in {str(time_delta.seconds)} seconds.")
-    # print the breakdown of the best-performing run
-    print("\n---------------------------------------------------------")
-    print(f"BEST RUN\n")
-    hpo_run._print_breakdown(hpo_results.best_run, print_config=True)
-
-    print("\n---------------------------------------------------------")
-    print("Review full results in Weights & Biases:")
-    print(f"Project: {hpo_config['project_name']}")
-    print(f"HPO sweep name: {hpo_config['hpo_run_name']}")
-    print(f"HPO sweep URL: {hpo_run.sweep_url}")
-    print(f"Best run ID: {hpo_run.best.id}")
-    print(f"Best run URL: {hpo_run.best_run_url}")
