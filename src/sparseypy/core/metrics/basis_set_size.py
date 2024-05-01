@@ -25,7 +25,6 @@ class BasisSetSizeMetric(Metric):
 
     def _compute(self, m: Model, last_batch: torch.Tensor,
                 labels: torch.Tensor, training: bool = True) -> torch.Tensor:
-        last_batch = last_batch.view(last_batch.shape[0], -1)
         """
         Computes a metric.
 
@@ -39,6 +38,8 @@ class BasisSetSizeMetric(Metric):
         Returns:
             (torch.Tensor): the raw metric values.     
         """
+        last_batch = last_batch.view(last_batch.shape[0], -1)
+
         layers, _, outputs = self.hook.get_layer_io()
         batch_size = last_batch.shape[0]
         last_batch = last_batch.view(batch_size, -1)
@@ -62,7 +63,7 @@ class BasisSetSizeMetric(Metric):
                 proj_codes = torch.matmul(
                     outputs[layer_index],
                     self.projections[layer_index]
-                ).view(batch_size, -1)
+                ).int().view(batch_size, -1)
 
                 for image_index in range(batch_size):
                     for mac_index in range(layer.is_active.shape[1]):

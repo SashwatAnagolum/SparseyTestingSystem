@@ -71,9 +71,9 @@ class NumActivationsMetric(Metric):
 
         num_activations = []
 
-        for layer_index, layer in enumerate(layers):
+        for layer in layers:
             num_activations.append(
-                torch.sum(layer.is_active, dim=0).squeeze()
+                layer.is_active.clone()
             )
 
         return torch.nested.nested_tensor(

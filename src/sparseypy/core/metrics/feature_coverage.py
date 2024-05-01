@@ -69,19 +69,18 @@ class FeatureCoverageMetric(Metric):
             ) for output in outputs
         ]
 
-        feature_coverage[0].scatter_(
-            2, layers[0].input_connections.view(
+        connections_view = layers[0].input_connections.view(
                 1, *layers[0].input_connections.shape
-            ), torch.ones(
-                (1, 1, 1),
-                dtype=torch.float32,
-                device=self.device
-            ).expand(
-                batch_size,
-                outputs[0].shape[1],
-                layers[0].input_connections.shape[-1]
-            )
+        ).expand(batch_size, *layers[0].input_connections.shape)
+
+        ones = torch.ones(
+            (1, 1, 1), dtype=torch.float32, device=self.device
+        ).expand(
+            batch_size, outputs[0].shape[1],
+            layers[0].input_connections.shape[-1]
         )
+
+        feature_coverage[0].scatter_(2, connections_view, ones)
 
         for i in range(1, len(layers)):
             feature_coverage[i][:, :-1] = torch.mul(

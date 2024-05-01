@@ -71,7 +71,7 @@ class Metric(abc.ABC):
         Returns:
             (torch.Tensor): the computed metric.
         """
-        raw_values = self._compute(m, last_batch, labels)
+        raw_values = self._compute(m, last_batch, labels, training)
 
         return self.reduce_metric_values(raw_values)
 

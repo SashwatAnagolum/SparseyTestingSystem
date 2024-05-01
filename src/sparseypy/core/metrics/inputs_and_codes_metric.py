@@ -53,6 +53,7 @@ class InputsAndCodesMetric(Metric):
         self.stored_codes = None
         self.stored_inputs = None
         self.active_input_slots = None
+        self.num_active_input_slots = None
 
 
     def initialize_storage(self, inputs: torch.Tensor,
@@ -74,6 +75,7 @@ class InputsAndCodesMetric(Metric):
             dtype=torch.bool, device=self.device
         )
 
+        self.num_active_input_slots = 0
         self.stored_codes = [
             torch.zeros(
                 self.approximation_batch_size, 1,
@@ -154,21 +156,41 @@ class InputsAndCodesMetric(Metric):
         Update the list of stored images and codes using images
         and model outputs from the current batch.
         """
-        num_images_to_swap = torch.randint(
-            0, min(self.approximation_batch_size, batch_size), (1,)
-        ).item()
+        random_insertion = False
+        num_empty_slots = (
+            self.approximation_batch_size - self.num_active_input_slots
+        )
+
+        if num_empty_slots >= batch_size:
+            num_images_to_swap = batch_size
+        elif num_empty_slots > 0:
+            num_images_to_swap = num_empty_slots
+        else:
+            random_insertion = True
+            num_images_to_swap = torch.randint(
+                0, batch_size + 1, (1,)
+            ).item()
 
         if num_images_to_swap:
-            swap_indices = torch.randint(
-                0, self.approximation_batch_size,
-                (num_images_to_swap,),
-                device=self.device
-            )
+            if random_insertion:
+                swap_indices = torch.randint(
+                    0, self.approximation_batch_size,
+                    (num_images_to_swap,),
+                    device=self.device
+                )
 
-            select_indices = torch.randint(
-                0, batch_size, (num_images_to_swap,),
-                device=self.device
-            )
+                select_indices = torch.randint(
+                    0, batch_size, (num_images_to_swap,),
+                    device=self.device
+                )
+            else:
+                select_indices = [i for i in range(num_images_to_swap)]
+                swap_indices = [
+                    i for i in range(
+                        self.num_active_input_slots,
+                        self.num_active_input_slots + num_images_to_swap
+                    )
+                ]
 
             for layer_index, output in enumerate(outputs):
                 self.stored_codes[layer_index][
@@ -180,6 +202,7 @@ class InputsAndCodesMetric(Metric):
             ].unsqueeze(1)
 
             self.active_input_slots[swap_indices] = True
+            self.num_active_input_slots += num_images_to_swap
 
 
     @abc.abstractmethod

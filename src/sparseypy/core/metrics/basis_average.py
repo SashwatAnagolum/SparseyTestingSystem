@@ -98,7 +98,17 @@ class BasisAverageMetric(Metric):
                 dim=2
             )
 
-        projected_rfs = [p[:, :-1, :-1] for p in projected_rfs]
+        projected_rfs = [
+            p[:, :-1, :-1].ge(
+                torch.ones(
+                    (1), dtype=torch.float32,
+                    device=self.device
+                )
+            )
+            for p in projected_rfs
+        ]
+
+        print(projected_rfs[-1])
 
         return projected_rfs
 
@@ -195,6 +205,8 @@ class BasisAverageMetric(Metric):
                     self.num_inputs_seen
                 )
             ]
+
+            print(self.summed_inputs[-1][0][-1][300:310])
         else:
             basis_averages = [
                 torch.zeros(
