@@ -6,7 +6,7 @@ os.chdir(os.path.dirname(__file__))
 os.chdir('..')
 os.chdir('..')
 # Paths to the script and configuration files
-SCRIPT_PATH = 'scripts\\run_hpo.py'
+SCRIPT_PATH = 'src\\sparseypy\\scripts\\run_hpo.py'
 ORIGINAL_HPO_CONFIG = 'test\\reference_configs\\hpo.yaml'
 TEST_HPO_CONFIG = 'test\\reference_configs\\hpo.yaml'
 

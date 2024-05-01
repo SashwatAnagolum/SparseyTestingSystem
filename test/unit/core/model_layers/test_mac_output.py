@@ -20,6 +20,7 @@ def mac_config():
         'activation_threshold_max': 1,
         'sigmoid_chi': 2.5,
         'min_familiarity': 0.2,
+        'device': torch.device("cpu")
     }
 
 @pytest.fixture
@@ -27,6 +28,9 @@ def mock_input():
     return torch.rand(1, 4, 2, 2)  # should find one that is actually a real input when running
 
 def test_mac_output_shape(mac_config, mock_input):
+    """
+    TC-04-01: Test for correct output tensor shape from a MAC based on the size of its input
+    """
     mac = MAC(**mac_config)
     # Pass the mock input through the MAC
     output = mac(mock_input)
