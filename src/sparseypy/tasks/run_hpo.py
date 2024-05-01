@@ -8,11 +8,17 @@ Run HPO Task: script to run HPO.
 import os
 import shutil
 from tqdm import tqdm
+import warnings
 
 from sparseypy.access_objects.hpo_runs.hpo_run  import HPORun
 from sparseypy.core.data_storage_retrieval.data_storer import DataStorer
 from sparseypy.core.printing import Printer
 
+# filter out PyTorch warnings for using NestedTensors
+warnings.filterwarnings(
+    "ignore",
+    message=r"The PyTorch API of nested tensors is in prototype stage and will change in the.+"
+)
 
 def run_hpo(hpo_config: dict,
             dataset_config: dict, preprocessing_config: dict,
