@@ -5,7 +5,6 @@ Evaluate Model: script to reload and evaluate models.
 """
 
 import os
-import pprint
 import shutil
 import warnings
 
@@ -95,15 +94,14 @@ def evaluate_model(model_name: str, trainer_config: dict,
         # perform evaluation
         with tqdm(total=trainer.eval_num_batches, desc="Evaluation", leave=False, position=1) as pbar:
             while not is_epoch_done:
-                # validate this logic VS the design of our EvaluationResult
-                # this looks like old-style logic for which we should remove the "while"
                 output, is_epoch_done = trainer.step(training=False)
                 # only print metric values to the console if explicitly requested by
                 # the user (for performance reasons--metrics print a lot of data)
                 if system_config['console'].get('print_metric_values', False):
                     Printer.print_step_metrics(
-                        batch_number,
                         step_data=output,
+                        batch_number=batch_number,
+                        batch_size=trainer_config['eval']['dataloader']['batch_size'],
                         step_type="evaluation"
                     )
                 batch_number+=1
@@ -149,6 +147,5 @@ def get_update_group(source_run_path: str) -> str:
     if source_run.group is None:
         source_run.group = source_run.name
         source_run.update()
-        return source_run.group
-    else:
-        return source_run.group
+
+    return source_run.group
