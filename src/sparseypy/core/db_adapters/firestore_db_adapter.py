@@ -371,24 +371,36 @@ class FirestoreDbAdapter(DbAdapter):
         return step_result
 
 
-    def save_training_step(self, parent: str, result: TrainingStepResult):
+    def save_training_step(self, parent: str, result: TrainingStepResult,
+                           phase: str = "training"):
         """
         Saves a single training step to Weights & Biases and Firestore.
 
         Args:
             parent (str): the experiment ID to which to log this step
             result (TrainingStepResult): the step results to save
+            phase (str): the type of step to save (training/validation/evaluation)
         """
         if self.resolution == 2:
-            full_dict = {}
-            # gather the saved metrics for full storage in the DB
-            for metric_name, metric_val in result.get_metrics().items():
-                if metric_name in self.saved_metrics:
-                    full_dict[metric_name] = pickle.dumps(
-                        self.unnest_tensor(metric_val)
-                    ) # pickling
+            # for each item in the batch in this TSR
+            for batch_index in range(result.batch_size):
+                # gather the saved metrics for full storage in the DB
+                full_dict = {}
+                # for each metric in the TSR
+                for metric_name, metric_val in result.get_metrics().items():
+                    # that is also on the list of saved metrics
+                    if metric_name in self.saved_metrics:
+                        # pickle the following as a new key by that metric name:
+                        full_dict[metric_name] = pickle.dumps(
+                            # the un-nested form of the tensor obtained by
+                            # slicing the overall results to get the results
+                            # for each batch
+                            self.unnest_tensor(
+                                torch.select(metric_val, dim=1, index=batch_index)
+                            )
+                        )
 
-            self._save_firestore_step(parent, "training", full_dict)
+                self._save_firestore_step(experiment=parent, phase=phase, metric_data=full_dict)
 
 
     def get_evaluation_result(self, experiment_id: str) -> TrainingResult:
@@ -435,23 +447,23 @@ class FirestoreDbAdapter(DbAdapter):
                 )
 
 
-    def save_evaluation_step(self, parent: str, result: TrainingStepResult):
-        """
-        Saves a single evaluation step to Firestore.
+    # def save_evaluation_step(self, parent: str, result: TrainingStepResult):
+    #     """
+    #     Saves a single evaluation step to Firestore.
 
-        Args:
-            parent (str): the experiment ID to which to log this step
-            result (TrainingStepResult): the step results to save
-        """
-        # save on "step" resolution only
-        if self.resolution == 2:
-            # gather the saved metrics for storage in the DB
-            full_dict = {}
-            for metric_name, metric_val in result.get_metrics().items():
-                if metric_name in self.saved_metrics:
-                    full_dict[metric_name] = pickle.dumps(self.unnest_tensor(metric_val)) # pickling
+    #     Args:
+    #         parent (str): the experiment ID to which to log this step
+    #         result (TrainingStepResult): the step results to save
+    #     """
+    #     # save on "step" resolution only
+    #     if self.resolution == 2:
+    #         # gather the saved metrics for storage in the DB
+    #         full_dict = {}
+    #         for metric_name, metric_val in result.get_metrics().items():
+    #             if metric_name in self.saved_metrics:
+    #                 full_dict[metric_name] = pickle.dumps(self.unnest_tensor(metric_val)) # pickling
 
-            self._save_firestore_step(parent, "evaluation", full_dict)
+    #         self._save_firestore_step(parent, "evaluation", full_dict)
 
 
     def create_hpo_sweep(self, sweep: HPOResult):
