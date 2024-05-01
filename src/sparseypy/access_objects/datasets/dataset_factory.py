@@ -14,6 +14,11 @@ from sparseypy.access_objects import datasets
 
 
 class DatasetFactory:
+    """
+    Factory class for creating datasets.
+    Attributes:
+        allowed_modules (set): A set of allowed modules to create datasets from.
+    """
     allowed_modules = set([i for i in dir(datasets) if i[:2] != '__'])
 
     @staticmethod

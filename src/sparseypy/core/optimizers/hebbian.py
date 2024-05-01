@@ -15,9 +15,30 @@ from sparseypy.core.model_layers.sparsey_layer import MAC
 class HebbianOptimizer(torch.optim.Optimizer):
     """
     HebbianOptimizer: class representing the optimizer
+        for the Sparsey model.
+        Attributes:
+            model (torch.nn.Module): the model to optimize.
+            device (torch.device): the device to run the model on.
+            epsilon (float): the epsilon value to use for
+                numerical stability.
+            saturation_thresholds (list[float]): the saturation
+                thresholds for each layer.
+            timesteps (dict): the number of timesteps that each
+                weight has not been updated for.
+            verbosity (int): the verbosity level.
+            hook (LayerIOHook): the hook to use for
+                retrieving layer inputs and outputs.
     """
     def __init__(self, model: torch.nn.Module, device: torch.device, 
                  epsilon: float = 1e-7):
+        """
+        Initialize the HebbianOptimizer.
+        Args:
+            model (torch.nn.Module): the model to optimize.
+            device (torch.device): the device to run the model on.
+            epsilon (float): the epsilon value to use for
+                numerical stability.
+        """
         super().__init__(model.parameters(), dict())
 
         self.model = model
