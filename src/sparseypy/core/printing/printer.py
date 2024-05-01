@@ -24,7 +24,7 @@ class Printer:
             results (TrainingResult): the results to summarize
             run_type (str): the type of run to summarize
         """
-        tqdm.write(f"Run completed.\n\n{run_type.upper()} - SUMMARY\n")
+        tqdm.write(f"{run_type.capitalize()} completed.\n\n{run_type.upper()} - SUMMARY\n")
         tqdm.write("Best metric steps:")
         for metric, val in results.best_steps.items():
             tqdm.write(
