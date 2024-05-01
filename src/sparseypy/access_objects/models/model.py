@@ -35,6 +35,11 @@ class Model(torch.nn.Module):
 
 
     def train(self, mode: bool = True) -> None:
+        """
+        Sets the model to training mode.
+        Args:
+            mode (bool): whether to set the model to training mode.
+        """
         for module in self.children():
             module.train(mode)               
 

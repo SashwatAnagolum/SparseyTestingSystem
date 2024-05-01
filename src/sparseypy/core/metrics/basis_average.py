@@ -45,17 +45,23 @@ class BasisAverageMetric(Metric):
             reduction (Optional[str]): the type of reduction
                 to apply before returning the metric value.
         """
-        super().__init__(model, "basis_average", best_value, device)
+        super().__init__(
+            model, "basis_average", best_value,
+            device, reduction
+        )
 
-        self.reduction = reduction
         self.hook = LayerIOHook(self.model)
         self.summed_inputs = None
         self.num_inputs_seen = None
         self.projected_rfs = None
         self.expected_input_shape = None
+        self.layer_sizes = []
 
 
-    def get_projected_receptive_fields(self, layers, input_shape) -> None:
+    def get_projected_receptive_fields(self,
+        layers: list[torch.nn.Module],
+        outputs: list[torch.Tensor],
+        input_shape: int) -> list[torch.Tensor]:
         """
         Compute the projected receptive fields of each MAC in the model,
         i.e. what input elements in each sample can be seen by each MAC.
@@ -65,29 +71,51 @@ class BasisAverageMetric(Metric):
             input_shape (int): shape of each input sample.
         """
         projected_rfs = [
-            [
-                torch.zeros(
-                    input_shape, dtype=torch.bool,
-                    device=self.device
-                ) for j in range(len(layers[i]))
-            ] for i in range(len(layers))
+            torch.zeros(
+                (1, output.shape[1] + 1, input_shape + 1),
+                dtype=torch.float32,
+                device=self.device
+            ) for output in outputs
         ]
 
-        for mac_index, mac in enumerate(layers[0]):
-            projected_rfs[0][mac_index][mac.input_filter] = True
+        projected_rfs[0].scatter_(
+            2, layers[0].input_connections.view(
+                1, *layers[0].input_connections.shape
+            ), torch.ones(
+                (1, 1, 1),
+                dtype=torch.float32,
+                device=self.device
+            ).expand(
+                1,
+                outputs[0].shape[1],
+                layers[0].input_connections.shape[-1]
+            )
+        )
 
-        for layer_num in range(1, len(layers)):
-            for mac_index, mac in enumerate(layers[layer_num]):
-                for input_source in mac.input_filter:
-                    projected_rfs[layer_num][mac_index] = torch.logical_or(
-                        projected_rfs[layer_num][mac_index],
-                        projected_rfs[layer_num - 1][input_source]
-                    )
+        for i in range(1, len(layers)):
+            projected_rfs[i][:, :-1] = torch.sum(
+                projected_rfs[i - 1][:, layers[i].input_connections],
+                dim=2
+            )
+
+        projected_rfs = [
+            p[:, :-1, :-1].ge(
+                torch.ones(
+                    (1), dtype=torch.float32,
+                    device=self.device
+                )
+            )
+            for p in projected_rfs
+        ]
+
+        print(projected_rfs[-1])
 
         return projected_rfs
 
 
-    def initialize_shapes(self, layers, last_batch: torch.Tensor) -> None:
+    def initialize_shapes(self, layers: list[torch.nn.Module],
+                          outputs: list[torch.Tensor],
+                          last_batch: torch.Tensor) -> None:
         """
         Initialize the shapes of different storage objects in the model
         based on the shape of the inputs and the model structure.
@@ -103,99 +131,91 @@ class BasisAverageMetric(Metric):
         )
 
         self.projected_rfs = self.get_projected_receptive_fields(
-            layers, self.expected_input_shape
+            layers, outputs, self.expected_input_shape
         )
 
         self.summed_inputs = [
-            [
-                torch.zeros(
-                    torch.sum(self.projected_rfs[i][j]),
-                    dtype=torch.float32,
-                    device=self.device
-                ) for j in range(len(layers[i]))
-            ] for i in range(len(layers))
+            torch.zeros(
+                (1, output.shape[1], self.expected_input_shape), 
+                dtype=torch.float32,
+                device=self.device
+            ) for output in outputs
         ]
 
         self.num_inputs_seen = [
-            [0 for j in range(len(layers[i]))]
-            for i in range(len(layers))
+            torch.zeros(
+                (1, output.shape[1]),
+                dtype=torch.float32,
+                device=self.device
+            ) for output in outputs
         ]
 
 
-    def compute(self, m: Model, last_batch: torch.Tensor,
-                labels: torch.Tensor, training: bool = True) -> torch.Tensor:
+    def _compute(self, m: Model, last_batch: torch.Tensor,
+                 labels: torch.Tensor, training: bool = True) -> torch.Tensor:
         """
-        Computes the basis average of a model.
+        Computes a metric.
 
         Args:
-            m (Model): Model to evaluate.
-            last_batch (torch.Tensor): the model input for the current step
-            labels (torch.Tensor): the model output for the current step
-            training (bool): whether the model is training or evaluating
+            m (torch.nn.Module): the model currently being trained.
+            last_batch (torch.Tensor): the inputs to the
+                current batch being evaluated
+            labels (torch.Tensor): the output from the
+                current batch being evaluated
 
         Returns:
-            (list[torch.Tensor]): a list of Tensors containing the average
-                feature that each MAC has seen.
+            (torch.Tensor): the raw metric values.     
         """
-        layers, _, _ = self.hook.get_layer_io()
+        layers, _, outputs = self.hook.get_layer_io()
+        last_batch = last_batch.view(last_batch.shape[0], 1, -1)
 
         if self.num_inputs_seen is None:
-            self.initialize_shapes(layers, last_batch)
+            self.initialize_shapes(layers, outputs, last_batch)
 
         if training:
-            last_batch = last_batch.view(last_batch.shape[0], -1)
-
             for layer_index, layer in enumerate(layers):
-                for mac_index, mac in enumerate(layer):
-                    self.summed_inputs[layer_index][mac_index] += (
-                        torch.sum(
-                            last_batch[
-                                :,
-                                self.projected_rfs[layer_index][mac_index]
-                            ] * mac.is_active.unsqueeze(1), 0
-                        )
-                    )
+                proj_inputs = torch.mul(
+                    last_batch, self.projected_rfs[layer_index]
+                )
 
-                    self.num_inputs_seen[layer_index][mac_index] += (
-                        torch.sum(mac.is_active).item()
-                    )
+                torch.mul(
+                    proj_inputs,
+                    layer.is_active.view(*layer.is_active.shape, 1),
+                    out=proj_inputs
+                )
 
-        if self.reduction is None:
-            return [
-                [
-                    torch.zeros(
-                        self.expected_input_shape,
-                        dtype=torch.float32,
-                        device=self.device
-                    ).scatter_(
-                        0, torch.argwhere(self.projected_rfs[i][j]).squeeze(),
-                        torch.nan_to_num(
-                            self.summed_inputs[i][j] /
-                            self.num_inputs_seen[i][j]
-                        )
-                    ).cpu() for j in range(len(layers[i]))
-                ] for i in range(len(layers))
+                torch.add(
+                    self.summed_inputs[layer_index],
+                    proj_inputs.sum(0, keepdim=True),
+                    out=self.summed_inputs[layer_index]
+                )
+
+                torch.add(
+                    self.num_inputs_seen[layer_index],
+                    layer.is_active.sum(0, keepdim=True),
+                    out=self.num_inputs_seen[layer_index]
+                )
+
+            basis_averages = [
+                torch.nan_to_num(
+                    torch.div(basis, num_inputs.unsqueeze(-1)),
+                    0.0
+                ) for basis, num_inputs in zip(
+                    self.summed_inputs,
+                    self.num_inputs_seen
+                )
             ]
-        elif self.reduction == 'highest_layer':
-            return [
+
+            print(self.summed_inputs[-1][0][-1][300:310])
+        else:
+            basis_averages = [
                 torch.zeros(
-                    self.expected_input_shape,
+                    (1, output.shape[1], last_batch.shape[1]),
                     dtype=torch.float32,
                     device=self.device
-                ).scatter_(
-                    0, torch.argwhere(self.projected_rfs[-1][j]).squeeze(),
-                    torch.nan_to_num(
-                        self.summed_inputs[-1][j] /
-                        self.num_inputs_seen[-1][j]
-                    )
-                ).cpu() for j in range(len(layers[-1]))
+                ) for output in outputs
             ]
-        else:
-            return [
-                [
-                    torch.nan_to_num(
-                        self.summed_inputs[i][j] /
-                        self.num_inputs_seen[i][j]
-                    ).cpu() for j in range(len(layers[i]))
-                ] for i in range(len(layers))
-            ]
+
+        return torch.nested.nested_tensor(
+            basis_averages, dtype=torch.float32, device=self.device
+        )

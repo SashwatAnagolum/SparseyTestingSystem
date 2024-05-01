@@ -64,6 +64,12 @@ class MetricFactory:
 
     @staticmethod
     def get_comparison_function(comparison_name: str) -> Callable:
+        """
+        Gets the comparison function corresponding to the name passed in.
+        Throws an error if the name is not valid.
+        args:
+            comparison_name (str): The name of the comparison function.
+        """
         if comparison_name in MetricFactory.allowed_comparisons:
             return getattr(comparisons, comparison_name)
         else:

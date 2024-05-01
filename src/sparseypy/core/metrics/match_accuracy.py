@@ -1,53 +1,42 @@
-import abc
+# -*- coding: utf-8 -*-
+
+"""
+Match Accuracy: file holding the MatchAccuracyMetric class.
+"""
+
+
 from typing import Optional
 import torch
 
 from typing import Optional, Callable
 
 from sparseypy.access_objects.models.model import Model
-from sparseypy.core.model_layers.sparsey_layer import MAC
-from sparseypy.core.hooks import LayerIOHook
-from sparseypy.core.metrics.metrics import Metric
+from sparseypy.core.metrics.inputs_and_codes_metric import InputsAndCodesMetric
 from sparseypy.core.metrics.comparisons import max_by_layerwise_mean
 
 
-class MatchAccuracyMetric(Metric):
-
-    def __init__(self, 
-                 model: torch.nn.Module, 
+class MatchAccuracyMetric(InputsAndCodesMetric):
+    """
+    MatchAccuracyMetric: class computing the match
+        accuracy for a Sparsey model over a batch of input
+        images.
+    """
+    def __init__(self,
+                 model: torch.nn.Module,
                  device: torch.device,
                  reduction: Optional[str] = None,
                  best_value: Optional[Callable] = max_by_layerwise_mean):
-        super().__init__(model, "match_accuracy", best_value, device)
-        # attaches the hook anew for this Metric to gain access to the hook data
-        # consider hook managerlater if we need to use many metrics with hooks
-        self.hook = LayerIOHook(self.model)
-        # initialize input map
-        self.stored_inputs = {}
-        self.input_images = []
-        self.reduction = reduction
+        super().__init__(
+            model, device, 'match_accuracy',
+            reduction, best_value
+        )
 
 
-    def get_normalized_hamming_distance(self,
-        stored_code: torch.Tensor,
-        selected_code: torch.Tensor) -> float:
+    def _compute(self, m: Model, last_batch: torch.Tensor,
+                 labels: torch.Tensor, training: bool = True) -> torch.Tensor:
         """
-        Computes the normalized hamming distance between two codes.
-
-        Args:
-            stored_code (list[torch.Tensor]): the code generated for a
-                particular input during training
-            selected_code (list[torch.Tensor]): the code generated for
-                the same input during evaluation
-        """
-        diffs = torch.abs(torch.sub(stored_code, selected_code))
-
-        return torch.mean(torch.lt(diffs, 1e-5).float()).item()
-
-
-    def compute(self, m: Model, last_batch: torch.Tensor, labels: torch.Tensor, training: bool = True):
-        """
-        Computes the approximate match accuracy of a model for a given batch of inputs.
+        Computes the approximate match accuracy of a model
+        for a given batch of inputs.
 
         Args:
             m: Model to evaluate.
@@ -61,84 +50,46 @@ class MatchAccuracyMetric(Metric):
             approximate match accuracy as a list of accuracies:
             one pertaining to each layer
         """
-        # fetch the outputs from each model layer using the hoo
-        # so we can get the codes for the current input item
-        layers, _, layer_outputs = self.hook.get_layer_io()
+        _, inputs, outputs = self.hook.get_layer_io()
+        batch_size = inputs[0].shape[0]
+        input_images = inputs[0].view(batch_size, -1)
 
-        fidelities: list[list[float]] = [[] for i in range(len(layers))]
+        if self.stored_codes is None:
+            self.initialize_storage(inputs, outputs, batch_size)
 
-        # loop over batch items
-        for image_index, image in enumerate(last_batch):
-            # construct dict keys by flattening image tensor to 1D,
-            # converting to ints, and concatenating to a string
-            image_str = "".join(
-                [str(i.item()) for i in image.flatten().int()]
+        if not training and torch.sum(self.active_input_slots):
+            input_similarities = self.compute_input_similarities(input_images)
+            input_similarities = input_similarities.squeeze(1)
+            closest_code_indices = torch.argmax(input_similarities, 1)
+
+            metric_values = []
+
+            for layer_index, output in enumerate(outputs):
+                closest_codes = self.stored_codes[layer_index][
+                    closest_code_indices
+                ].squeeze(1)
+
+                sim_num = torch.logical_and(closest_codes, output).sum(2)
+                sim_den = torch.logical_or(closest_codes, output).sum(2)
+                layer_sims = torch.div(sim_num, sim_den)
+                torch.nan_to_num(layer_sims, 0.0, out=layer_sims)
+
+                metric_values.append(layer_sims)
+        else:
+            metric_values = [
+                torch.zeros(
+                    (batch_size, output.shape[1]),
+                    dtype=torch.float32,
+                    device=self.device
+                )
+                for output in outputs
+            ]
+
+        if training:
+            self.update_stored_images_and_codes(
+                input_images, outputs, batch_size
             )
 
-            if training:
-                self.stored_inputs[image_str] = layer_outputs
-                self.input_images.append(image_str)
-
-            else:
-                # Find a similar image string in the stored inputs
-                # using the approximation_tolerace as a threshold 
-                # for tensor similarity
-                similar_image_str = None
-
-                # Initialize a variable to track the minimum number of differing bits
-                min_diff_bits = float('inf')
-                similar_image_str = None
-
-                # push image to the CPU, only convert data type once
-                cpu_image = image.to(torch.int64).cpu()
-
-                # Convert stored inputs to binary tensors and perform XOR
-                # and sum operations
-                #May require we use a version that isnt condensed here
-                for stored_image_str in self.stored_inputs.keys():
-                    stored_image_tensor = torch.tensor(
-                        [int(i) for i in stored_image_str],
-                        dtype=torch.int64
-                    ).view(image.shape)
-
-                    # Perform XOR operation between the binary image
-                    # and stored binary images
-                    diff = torch.bitwise_xor(
-                        cpu_image, stored_image_tensor
-                    )
-
-                    # Sum the bits - count of 1's will give
-                    # the number of differing bits
-                    diff_sum = torch.sum(diff).item()
-
-                    # Find the position with the lowest sum of differing bits
-                    if diff_sum < min_diff_bits:
-                        min_diff_bits = diff_sum
-                        similar_image_str = stored_image_str
-
-                for layer_index in range(len(layer_outputs)):
-                        for mac_index in range(len(layer_outputs[layer_index])):
-                            fidelities[layer_index].append(
-                                self.get_normalized_hamming_distance(
-                                    self.stored_inputs[similar_image_str][layer_index][mac_index],
-                                    layer_outputs[layer_index][mac_index][image_index]
-                                )
-                            )
-
-        # non-None reductions need updating for the extra added dimension
-        if self.reduction is None:
-            return fidelities
-        elif self.reduction == 'mean':
-            return [
-                sum(fid_list) / len(fid_list)
-                if len(fid_list) > 0 else None
-                for fid_list in fidelities
-            ]
-        elif self.reduction == 'sum':
-            return [
-                sum(fid_list) for fid_list in fidelities
-            ]
-        elif self.reduction == 'highest_level':
-            return fidelities[-1]
-        else:
-            return None
+        return torch.nested.nested_tensor(
+            metric_values, dtype=torch.float32, device=self.device
+        )

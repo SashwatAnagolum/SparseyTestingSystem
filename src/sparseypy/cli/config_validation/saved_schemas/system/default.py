@@ -124,6 +124,11 @@ class DefaultSystemSchema(AbstractSchema):
                                     bool,
                                     error="hpo_progress_bars must be a Boolean value"
                                 ),
+                            Optional('print_best_hpo_config', default=False):
+                                Schema(
+                                    bool,
+                                    error="print_best_hpo_config must be a Boolean value"
+                                ),
                             Optional('print_error_stacktrace', default=False):
                                 Schema(
                                     bool,
@@ -145,18 +150,22 @@ class DefaultSystemSchema(AbstractSchema):
                             ),
                         'project_name': 
                             Schema(str, error="Project name must be a string"),
-                        Optional('entity', default=None):
-                            Schema(str, error="Entity name must be a string"),
-                        Optional('save_locally', default=True):
-                            Schema(bool, error="save_locally must be a Boolean value"),
-                        Optional('save_models', default=True):
-                            Schema(bool, error="save_models must be a Boolean value"),
                         Optional('data_resolution', default=2):
                             And(
                                 int,
                                 lambda x : 0 <= x <= 2,
                                 error="data_resolution must be 0, 1, or 2"
                             ),
+                        Optional('entity', default=None):
+                            Schema(str, error="Entity name must be a string"),
+                        Optional('local_log_directory', default=None):
+                            Schema(str, error="local_log_directory must be a string"),
+                        Optional('remove_local_files', default=False):
+                            Schema(bool, error="remove_local_files must be a Boolean value"),
+                        Optional('save_locally', default=True):
+                            Schema(bool, error="save_locally must be a Boolean value"),
+                        Optional('save_models', default=True):
+                            Schema(bool, error="save_models must be a Boolean value"),
                         Optional('silent', default=True):
                             Schema(bool, error="silent must be a Boolean value")
                     },

@@ -5,4 +5,4 @@ transform_list:
   - name: to_dtype
     params:
       dtype: float32
-      scale: True
+      scale: False

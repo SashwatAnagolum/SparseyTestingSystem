@@ -14,6 +14,7 @@ from sparseypy.core.results.hpo_result import HPOResult
 from sparseypy.core.results.hpo_step_result import HPOStepResult
 from sparseypy.access_objects.models.model import Model
 from sparseypy.core.db_adapters import DbAdapterFactory
+from sparseypy.core.metrics import comparisons
 
 class DataStorer:
     """
@@ -73,6 +74,7 @@ class DataStorer:
 
             DataStorer.is_initialized = True
 
+
     def save_model(self, experiment: str, m: Model, model_config: dict):
         """
         Saves a model to Weights & Biases.
@@ -127,9 +129,9 @@ class DataStorer:
                 )
 
 
-    def save_training_step(self, parent: str, result: TrainingStepResult):
+    def _save_wandb_training_step(self, parent: str, result: TrainingStepResult):
         """
-        Saves a single training step to Weights & Biases and Firestore.
+        Saves a single training or evaluation step to Weights & Biases.
 
         Args:
             parent (str): the experiment ID to which to log this step
@@ -152,14 +154,14 @@ class DataStorer:
                 if met_name in self.saved_metrics and isinstance(met_val, (list, torch.Tensor)):
                     # then break out each layer as a separate metric for W&B using prefix grouping
                     for idx, layer_data in enumerate(met_val):
-                        layer_name = f"{met_name}/layer_{idx}"
+                        layer_name = f"{met_name}/layer_{idx+1}"
                         layerwise_dict[layer_name] = self.average_nested_data(layer_data)
                         # if the resolution is 2 (MAC-level)
                         # also log the MAC-level data with prefix grouping
                         # FIXME tensors are not logged here pending adjustment of feature_coverage
                         if self.wandb_resolution == 2 and isinstance(layer_data, list):
                             for idy, mac_data in enumerate(layer_data):
-                                mac_name = f"{met_name}/layer_{idx}/mac_{idy}"
+                                mac_name = f"{met_name}/layer_{idx+1}/mac_{idy+1}"
                                 layerwise_dict[mac_name] = self.average_nested_data(mac_data)
             # then log without updating the step (done when the summary is logged below)
             wandb.log(layerwise_dict, commit=False)
@@ -167,12 +169,24 @@ class DataStorer:
         # save the summary to W&B
         wandb.log(summary_dict)
 
+
+    def save_training_step(self, parent: str, result: TrainingStepResult):
+        """
+        Saves a single training step to Weights & Biases and Firestore.
+
+        Args:
+            parent (str): the experiment ID to which to log this step
+            result (TrainingStepResult): the step results to save
+        """
+        self._save_wandb_training_step(parent, result)
+
         # DATABASE
         for db_adapter in self.db_adapters:
             db_adapter.save_training_step(parent, result)
 
 
-    def save_evaluation_step(self, parent: str, result: TrainingStepResult):
+    def save_evaluation_step(self, parent: str, result: TrainingStepResult,
+                             log_to_wandb: bool = False):
         """
         Saves a single evaluation step to Weights & Biases and Firestore.
 
@@ -183,6 +197,8 @@ class DataStorer:
         # WEIGHTS & BIASES
         # step-level evaluation data is not saved to Weigthts & Biases
         # due to platform limitations
+        if log_to_wandb:
+            self._save_wandb_training_step(parent, result)
 
         # DATABASE
         for db_adapter in self.db_adapters:
@@ -247,9 +263,15 @@ class DataStorer:
         eval_dict = {
             # create a key for each saved metric containing the nested average
             # of the results of the metric for each step in the evaluation
-            saved_metric:self.average_nested_data(
-                [step.get_metric(saved_metric) for step in result.get_steps()]
-                                                    ) for saved_metric in self.saved_metrics
+            saved_metric: torch.mean(
+                torch.tensor(
+                    [
+                        self.average_nested_data(
+                            step.get_metric(saved_metric)
+                        ) for step in result.get_steps()
+                    ]
+                )
+            ) for saved_metric in self.saved_metrics
         }
         # then add those as "evaluation_" results to the W&B summary level
         for metric_name, metric_val in eval_dict.items():
@@ -337,7 +359,7 @@ class DataStorer:
             db_adapter.save_hpo_result(result)
 
 
-    def average_nested_data(self, data):
+    def average_nested_data(self, data: torch.Tensor):
         """
         Averages an arbitrarily deep data structure
         and returns the result as a single value.
@@ -346,20 +368,10 @@ class DataStorer:
         to store a single value for each step in W&B.
 
         Args:
-            data: the value(s) to reduce
-        Returns:
-            a single value representing the averaged data
-        """
-        if isinstance(data, list):
-            if len(data) == 0:
-                data=[0]
-            ret = np.mean(np.nan_to_num([self.average_nested_data(item) for item in data]))
-        elif hasattr(data, 'tolist'):  # numpy array
-            if len(data) == 0:
-                data=[0]
-            ret = np.mean(np.nan_to_num(data))
-        else:
-            # Scalar value
-            ret = data
+            data (torch.Tensor): the (possibly nested) tensor
+                containing the raw metric values computed.
 
-        return ret.item() if isinstance(ret, np.generic) else ret
+        Returns:
+            (float): a single value representing the averaged data
+        """
+        return comparisons.average_nested_data(data)

@@ -5,7 +5,8 @@ HPO Run: file holding the HPORun class.
 """
 
 from copy import deepcopy
-import json
+import os
+from pprint import pformat
 import traceback
 import warnings
 
@@ -17,6 +18,7 @@ from sparseypy.cli.config_validation.validate_config import validate_config
 from sparseypy.core.data_storage_retrieval import DataStorer
 from sparseypy.core.hpo_objectives.hpo_objective import HPOObjective
 from sparseypy.core.results import HPOResult, HPOStepResult
+from sparseypy.core.printing import Printer
 
 # Weights & Biases attempts to read tqdm updates from the console even after the last run
 # in an HPO sweep finishes, causing an unnecessary UserWarning when it attempts to log data
@@ -83,6 +85,20 @@ class HPORun():
 
         # create the sweep
         self.data_storer.create_hpo_sweep(self.hpo_results)
+
+        # save the sweep URL
+        locator = f"{system_config['wandb']['entity']}/{hpo_config['project_name']}/{self.sweep_id}"
+        self.sweep_url = wandb.Api().sweep(locator).url
+        self.best_run_url = None
+
+        # start the list of temporary directories with this sweep's temp dir
+        local_dir = system_config['wandb']['local_log_directory']
+        if local_dir is None:
+            local_dir = "."
+
+        self.wandb_dirs = [
+            os.path.join(local_dir, 'wandb', 'sweep-' + self.sweep_id)
+        ]
 
         # only initialize the objective once, in the constructor
         self.objective = HPOObjective(hpo_config)
@@ -233,6 +249,8 @@ class HPORun():
         train_config = wandb_config["trainer"]
         # inject the metric list from the HPO config to complete the trainer config
         train_config["metrics"] = self.config_info["metrics"]
+        # also inject the GPU configuration
+        train_config["use_gpu"] = self.config_info["use_gpu"]
 
         return train_config
 
@@ -244,7 +262,11 @@ class HPORun():
         model, and computing the user-specified objective function
         using the trained model.
         """
-        wandb.init(allow_val_change=True, job_type="train")
+        wandb.init(
+            allow_val_change=True,
+            dir=self.system_config['wandb']['local_log_directory'],
+            job_type="train"
+        )
 
         model_config = self.generate_model_config(
             dict(wandb.config)
@@ -293,12 +315,12 @@ class HPORun():
 
             # perform training
             with tqdm(
-                total=training_recipe.num_batches,
+                total=training_recipe.training_num_batches,
                 desc=f"Training (Trial {self.num_steps})",
                 leave=False, position=0,
                 disable=(not self.progress_bars),
                 unit="input",
-                miniters=int(training_recipe.num_batches/100)
+                miniters=int(training_recipe.training_num_batches/100)
             ) as pbar:
                 while not done:
                     results, done = training_recipe.step()
@@ -308,12 +330,12 @@ class HPORun():
             # perform evaluation
             done = False
             with tqdm(
-                total=training_recipe.num_batches,
+                total=training_recipe.eval_num_batches,
                 desc=f"Evaluation (Trial {self.num_steps})",
                 leave=False, position=0,
                 disable=(not self.progress_bars),
                 unit="input",
-                miniters=int(training_recipe.num_batches/100)
+                miniters=int(training_recipe.eval_num_batches/100)
             ) as pbar:
                 while not done:
                     results, done = training_recipe.step(training=False)
@@ -337,33 +359,39 @@ class HPORun():
                 # add the HPOStepResults to the HPOResult
                 self.hpo_results.add_step(hpo_step_results)
 
-                tqdm.write(f"Completed trial {self.num_steps} of {self.num_trials}")
-
-                # if there is a previous best value, print the prior objective value
-                if self.best:
-                    tqdm.write(
-                        f"Previous best objective value: {self.best.get_objective()['total']:.5f}"
-                    )
-
-                self._print_breakdown(hpo_step_results)
-
                 # this step is the best step if 1) there is no previous result or
                 # 2) its objective value is higher than the previous best result
-                if (not self.best or
-                   (self.best and objective_results["total"] > self.best.get_objective()["total"])):
+                new_best = (
+                    not self.best or
+                    (objective_results["total"] > self.best.get_objective()["total"])
+                   )
+
+                if new_best:
                     self.best = hpo_step_results
-                    tqdm.write("This is the new best value!")
+                    self.best_run_url = wandb.run.url
+
+                # print the step summary
+                Printer.summarize_hpo_trial(
+                    step_results=hpo_step_results,
+                    step_num=self.num_steps,
+                    num_trials=self.num_trials,
+                    print_config=False,
+                    new_best=new_best
+                )
 
                 self.data_storer.save_hpo_step(wandb.run.sweep_id, hpo_step_results)
 
                 # cache run path for updating config
                 run_path = wandb.run.path
+                # add temporary directory to removal list
+                self.wandb_dirs.append(wandb.run.dir.removesuffix("files"))
 
                 # finish the run - wandb.run may no longer be correct below this point
                 wandb.finish()
 
                 # strip unused layers from W&B side config
-                # this must occur after .finish() due to a bug in W&B
+                # this must occur after .finish() due to a bug in W&B preventing
+                # config file changes during a run even with allow_val_changes
                 max_layers = len(model_config['layers'])
                 run = wandb.Api().run(run_path)
 
@@ -372,8 +400,12 @@ class HPORun():
                         del run.config[k]
 
                 run.update()
+
         except Exception as e:
-            tqdm.write(traceback.format_exc())
+            Printer.print_hpo_exception(
+                current_step=self.num_steps,
+                message=traceback.format_exc()
+            )
         if HPORun.tqdm_bar is not None:
             HPORun.tqdm_bar.update(1)
 
@@ -385,15 +417,6 @@ class HPORun():
         if cls.tqdm_bar is not None:
             cls.tqdm_bar.close()
             cls.tqdm_bar = None
-
-    def _print_breakdown(self, step_results: HPOStepResult):
-        objective_results = step_results.get_objective()
-        # enhance with summary of metrics
-        tqdm.write(f"Objective value: {objective_results['total']:.5f}")
-        tqdm.write(f"Combination method: {objective_results['combination_method']}")
-        tqdm.write("Objective term breakdown:")
-        for name, values in objective_results["terms"].items():
-            tqdm.write(f"* {name:>25}: {values['value']:.5f} with weight {values['weight']}")
 
 
     def run_sweep(self) -> HPOResult:

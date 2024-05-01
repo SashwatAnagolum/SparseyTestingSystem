@@ -4,7 +4,7 @@
 Default HPO Schema: the schema for HPO runs.
 """
 
-
+import torch
 from schema import Schema, And, Or, Use, Optional
 
 from sparseypy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
@@ -12,8 +12,6 @@ from sparseypy.cli.config_validation import schema_factory
 from sparseypy.cli.config_validation.saved_schemas import (
     model, schema_utils, metric
 )
-
-from sparseypy.cli.config_validation.saved_schemas import training_recipe
 
 
 class DefaultHpoSchema(AbstractSchema):
@@ -123,6 +121,19 @@ class DefaultHpoSchema(AbstractSchema):
             )
 
         return schema_params
+
+
+    def check_if_gpu_exists(self):
+        """
+        Checks if a supported GPU exists on the current system.
+        Returns:
+            (bool): whether or not a GPU is present
+        """
+        return (
+            torch.cuda.is_available()
+            or
+            torch.backends.mps.is_available()
+        )
 
 
     def check_if_model_family_exists(self, model_family) -> bool:
@@ -274,6 +285,10 @@ class DefaultHpoSchema(AbstractSchema):
                 'project_name': And(str, error="Project name must be a string"),
                 Optional('description', default=None):
                     And(str, error="description must be a string"),
+                Optional('use_gpu', default=self.check_if_gpu_exists()): Or(
+                    False, lambda x: self.check_if_gpu_exists(),
+                    error='Cannot set use_gpu to True when no GPU is available.'
+                ),
                 'hyperparameters': And(
                     dict, self.check_optimized_hyperparams_validity,
                     lambda x: self.has_enough_layer_configs(

@@ -1,6 +1,15 @@
 ---
 # trainer.yaml - training recipe configuration for a single experiment
 
+# run_name: str, no default - the name to give the run in Weights & Biases
+#     corresponding to this experiment; if this is not provided, a random 
+#     8-character name will be generated instead
+# run_name: "test_run"
+
+# description: string (optional, default None) - a written description of the purpose of this HPO run
+#     logged to the sweep summary in Weights & Biases
+description: "A test run with the demo configuration files."
+
 # optimizer settings
 optimizer:
   # name: string - the optimizer class to load and use
@@ -17,8 +26,6 @@ metrics:
   - name: basis_set_size
     save: True
     best_value: max_by_layerwise_mean
-  - name: basis_set_size_increase
-    save: False
   - name: basis_average
     save: True
   - name: num_activations
@@ -31,15 +38,6 @@ metrics:
   - name: num_activations
     save: True
 
-# dataloader settings for loading items from the dataset
-dataloader:
-  # batch_size: int > 0
-  #    number of input items per batch
-  batch_size: 4
-  # shuffle: bool
-  #    whether to randomize the inputs as they are drawn from the dataloader
-  shuffle: True
-
 # training-related hyperparameters
 training:
   # num_epochs: int > 0
@@ -47,6 +45,25 @@ training:
   #     for Sparsey single-shot learning this will always be 1
   #     but the setting exists for potential future compatibility
   num_epochs: 1
+
+  # dataloader settings for loading items from the dataset
+  dataloader:
+    # batch_size: int > 0
+    #    number of input items per batch
+    batch_size: 1
+    # shuffle: bool
+    #    whether to randomize the inputs as they are drawn from the dataloader
+    shuffle: True
+
+eval:
+  # dataloader settings for loading items from the dataset
+  dataloader:
+    # batch_size: int > 0
+    #    number of input items per batch
+    batch_size: 16
+    # shuffle: bool
+    #    whether to randomize the inputs as they are drawn from the dataloader
+    shuffle: True
 
 # use_gpu: bool, default True if the system has a compatible GPU, otherwise False
 #     whether to use a GPU to accelerate system performance, if one is available

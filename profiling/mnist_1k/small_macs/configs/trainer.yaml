@@ -14,27 +14,18 @@ optimizer:
 #     metric schema in cli/config_validation/saved_schemas/metric
 #     in order for it to be detected here and pass validation
 metrics:
-  # name: string
-  #     metric name must be written in snake case
   - name: basis_set_size
-    # save: bool
-    #     whether the results of this metric should be stored to Weights & Biases
     save: True
   - name: num_activations
     save: True
   - name: feature_coverage
     save: True
-  # - name: sisc_adherence
-  #   save: True
-
-# dataloader settings for loading items from the dataset
-dataloader:
-  # batch_size: int > 0
-  #    number of input items per batch
-  batch_size: 1
-  # shuffle: bool
-  #    whether to randomize the inputs as they are drawn from the dataloader
-  shuffle: True
+  - name: sisc_adherence
+    save: True
+  - name: match_accuracy
+    save: True
+  - name: basis_average
+    save: True
 
 # training-related hyperparameters
 training:
@@ -43,6 +34,25 @@ training:
   #     for Sparsey single-shot learning this will always be 1
   #     but the setting exists for potential future compatibility
   num_epochs: 1
+
+  # dataloader settings for loading items from the dataset
+  dataloader:
+    # batch_size: int > 0
+    #    number of input items per batch
+    batch_size: 1
+    # shuffle: bool
+    #    whether to randomize the inputs as they are drawn from the dataloader
+    shuffle: True
+
+eval:
+  # dataloader settings for loading items from the dataset
+  dataloader:
+    # batch_size: int > 0
+    #    number of input items per batch
+    batch_size: 16
+    # shuffle: bool
+    #    whether to randomize the inputs as they are drawn from the dataloader
+    shuffle: True
 
 use_gpu: False
 ...

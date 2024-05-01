@@ -7,6 +7,9 @@ console:
   #     during HPO runs. Defaults to True for better feedback. Has a very small performance impact.
   #     disable for batch jobs (e.g. on HPC)
   hpo_progress_bars: False
+  # print_best_hpo_config: bool, default True - whether to print the model configuration for the best-
+  #     performing experiment in an HPO run to the console when the HPO run completes.
+  print_best_hpo_config: True
   # whether to print error stack traces when they occur for schema validation errors
   # print_error_stacktrace: True
   print_error_stacktrace: False
@@ -54,6 +57,14 @@ wandb:
   #     Unset this if you need to diagnose problems with Weights & Biases or you are willing to
   #     put up with the console spam for the mini-metric graphs it creates during training.
   silent: True
+  # local_log_directory: str, default None = "." - the location to which W&B logs local data during a run
+  #     Weights & Biases will create a "wandb" folder in this location to store its local cache of
+  #     run data.
+  # local_log_directory: .
+  # remove_local_files: bool, default False - whether to delete the local W&B files on run and sweep
+  #     completion. Defaults to False to avoid deleting files on the local system that users might
+  #     wand. Set to True to reduce unnecessary use of storage space.
+  remove_local_files: False
 
 # database: configuration settings for one or more backend databases
 database:

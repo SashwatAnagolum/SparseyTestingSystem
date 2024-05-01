@@ -22,18 +22,56 @@ class TrainingRecipe:
     TrainingRecipe: class that trains a given model on a 
     particular dataset, using configurations passed in by
     the user.
+    Attributes:
+        device (torch.device): the device to train the model on.
+        model (torch.nn.Module): the model to train.
+        optimizer (torch.optim.Optimizer): the optimizer to use.
+        train_dataloader (DataLoader): the training dataloader.
+        eval_dataloader (DataLoader): the evaluation dataloader.
+        preprocessing_stack (PreprocessingStack): the preprocessing stack to apply.
+        metrics_list (list[torch.nn.Module]): the metrics to compute.
+        metric_config (dict): the configuration for the metrics.
+        setup_configs (dict): the setup configurations.
+        loss_func (torch.nn.Module): the loss function to use.
+        step_resolution (int): the number of batches to train on before logging results.
+        batch_index (int): the current batch index.
+        training_num_batches (int): the number of batches in the training dataloader.
+        training_iterator (iter): the training dataloader iterator.
+        eval_num_batches (int): the number of batches in the evaluation dataloader.
+        eval_iterator (iter): the evaluation dataloader iterator.
+        ds (DataStorer): the data storer object.
+        training_results (TrainingResult): the training results object.
+        eval_results (TrainingResult): the evaluation results object.
+        first_eval (bool): whether this is the first evaluation step.
     """
     def __init__(self, device: torch.device, model: torch.nn.Module,
                  optimizer: torch.optim.Optimizer,
-                 dataloader: DataLoader,
+                 train_dataloader: DataLoader,
+                 eval_dataloader: DataLoader,
                  preprocessing_stack: PreprocessingStack,
                  metrics_list: list[torch.nn.Module],
                  metric_config: dict, setup_configs: dict,
                  loss_func: Optional[torch.nn.Module],
                  step_resolution: Optional[int] = None) -> None:
+        """
+        Initializes the TrainingRecipe.
+        Args:
+            device (torch.device): the device to train the model on.
+            model (torch.nn.Module): the model to train.
+            optimizer (torch.optim.Optimizer): the optimizer to use.
+            train_dataloader (DataLoader): the training dataloader.
+            eval_dataloader (DataLoader): the evaluation dataloader.
+            preprocessing_stack (PreprocessingStack): the preprocessing stack to apply.
+            metrics_list (list[torch.nn.Module]): the metrics to compute.
+            metric_config (dict): the configuration for the metrics.
+            setup_configs (dict): the setup configurations.
+            loss_func (torch.nn.Module): the loss function to use.
+            step_resolution (int): the number of batches to train on before logging results.
+            """
         self.optimizer = optimizer
         self.model = model
-        self.dataloader = dataloader
+        self.train_dataloader = train_dataloader
+        self.eval_dataloader = eval_dataloader
         self.preprocessing_stack = preprocessing_stack
         self.metrics_list = metrics_list
         self.loss_func = loss_func
@@ -46,8 +84,10 @@ class TrainingRecipe:
             self.step_resolution = step_resolution
 
         self.batch_index = 0
-        self.num_batches = len(self.dataloader)
-        self.iterator = iter(self.dataloader)
+        self.training_num_batches = len(self.train_dataloader)
+        self.training_iterator = iter(self.train_dataloader)
+        self.eval_num_batches = len(self.eval_dataloader)
+        self.eval_iterator = iter(self.eval_dataloader)
 
         self.ds = DataStorer(metric_config)
 
@@ -83,8 +123,15 @@ class TrainingRecipe:
             epoch_ended: whether this step has completed the current epoch (in which case
             the full training/evaluation results will be available from get_summary())
         """
-        if self.batch_index + self.step_resolution >= self.num_batches:
-            num_batches_in_step = self.num_batches - self.batch_index
+        if training:
+            num_batches_in_epoch = self.training_num_batches
+            data_iterator = self.training_iterator
+        else:
+            num_batches_in_epoch = self.eval_num_batches
+            data_iterator = self.eval_iterator
+
+        if self.batch_index + self.step_resolution >= num_batches_in_epoch:
+            num_batches_in_step = num_batches_in_epoch - self.batch_index
         else:
             num_batches_in_step = self.step_resolution
 
@@ -95,7 +142,7 @@ class TrainingRecipe:
         results = TrainingStepResult(self.step_resolution)
 
         for _ in range(num_batches_in_step):
-            data, labels = next(self.iterator)
+            data, labels = next(data_iterator)
             labels = labels.to(self.device)
 
             self.optimizer.zero_grad()
@@ -106,8 +153,8 @@ class TrainingRecipe:
 
             transformed_data = transformed_data.to(self.device)
             transformed_data = transformed_data.reshape(
-                transformed_data.shape[0], *transformed_data.shape[2:]
-            ).unsqueeze(-1).unsqueeze(-1)
+                transformed_data.shape[0], -1, 1
+            )
 
             model_output = self.model(transformed_data)
 
@@ -129,10 +176,14 @@ class TrainingRecipe:
 
         self.batch_index += num_batches_in_step
 
-        if self.batch_index == self.num_batches:
+        if self.batch_index == num_batches_in_epoch:
             epoch_ended = True
             self.batch_index = 0
-            self.iterator = iter(self.dataloader)
+
+            if training:
+                self.train_iterator = iter(self.train_dataloader)
+            else:
+                self.eval_iterator = iter(self.eval_dataloader)
         else:
             epoch_ended = False
 
@@ -144,7 +195,11 @@ class TrainingRecipe:
             self.ds.save_training_step(self.training_results.id, results)
             self.training_results.add_step(results)
         else:
-            self.ds.save_evaluation_step(self.training_results.id, results)
+            self.ds.save_evaluation_step(
+                self.training_results.id,
+                results,
+                log_to_wandb=(wandb.run.sweep_id is None)
+            )
             self.eval_results.add_step(results)
 
         return results, epoch_ended
