@@ -97,8 +97,14 @@ def train_model(model_config: dict, trainer_config: dict,
     if reload_model:
         trainer.model.load_state_dict(model_weights)
 
-    Printer.print_pre_training_summary(dataset_config, trainer_config,
-                                       trainer.training_num_batches, trainer.eval_num_batches)
+    Printer.print_pre_training_summary(
+            dataset_config=dataset_config,
+            trainer_config=trainer_config,
+            training_num_batches=trainer.training_num_batches,
+            eval_num_batches=trainer.eval_num_batches,
+            run_name=wandb.run.name,
+            run_url=wandb.run.url
+        )
 
     for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs", position=0):
         is_epoch_done = False

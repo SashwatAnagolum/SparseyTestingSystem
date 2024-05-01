@@ -24,7 +24,7 @@ class Printer:
             results (TrainingResult): the results to summarize
             run_type (str): the type of run to summarize
         """
-        tqdm.write(f"\n\n{run_type.upper()} - SUMMARY\n")
+        tqdm.write(f"Run completed.\n{run_type.upper()} - SUMMARY\n")
         tqdm.write("Best metric steps:")
         for metric, val in results.best_steps.items():
             tqdm.write(
@@ -115,7 +115,8 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
 
     @staticmethod
     def print_pre_training_summary(dataset_config: dict, trainer_config: dict,
-                                   training_num_batches: int, eval_num_batches: int) -> None:
+                                   training_num_batches: int, eval_num_batches: int,
+                                   run_name: str, run_url: str) -> None:
         """
         Prints a pre-execution summary of a single training run.
 
@@ -124,6 +125,10 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
                 used for the run.
             trainer_config (dict): the validated trainer configuration that will be
                 used for the run.
+            training_num_batches (int): the number of batches in this training run.
+            eval_num_batches (int): the number of batches in this evaluation run.
+            run_name (str): the name of the training run in Weights & Biases
+            run_url (str): the URL of the training run in Weights & Biases
         """
         # print training run summary
         met_separator = "\n* "
@@ -136,6 +141,10 @@ Number of training batches: {training_num_batches}
 Number of evaluation batches: {eval_num_batches}
 Selected metrics: 
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
+
+BEGINNING TRAINING
+Run name: {run_name}
+View results live: {run_url}
     """)
 
 
