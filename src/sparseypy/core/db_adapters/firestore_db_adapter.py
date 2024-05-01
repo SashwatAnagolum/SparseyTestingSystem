@@ -161,12 +161,12 @@ class FirestoreDbAdapter(DbAdapter):
                         "experiment": experiment.start_time,
                         "training": experiment.start_time
                     },
-                    "saved_metrics": {
-                        "resolution": experiment.resolution
-                    },
+                    "saved_metrics": {},
                     "end_times": {},
                     "completed": False,
-                    "batch_size": self.batch_size,
+                    "batch_sizes": {
+                        experiment.result_type: experiment.max_batch_size
+                    },
                     "dataset_description": dataset_description,
                     "description": description
                 }
@@ -246,10 +246,23 @@ class FirestoreDbAdapter(DbAdapter):
             (list | torch.Tensor): the original tensor (if not a NestedTensor) 
                 or the unbound values as a list
         """
+        # only un-nest if the Tensor is nested
         if isinstance(values, torch.Tensor) and values.is_nested:
+            # return the numpy representation for each of the Tensors x in the NestedTensor
+            # to do this we unbind the NestedTensor
+            # to do so we first need to copy it to contiguous memory
+            # and move it to the CPU
             return [
-                x.numpy() for x in values.cpu().unbind()
+                x.numpy() for x in values.contiguous().cpu().unbind()
             ]
+            # if values.is_contiguous():
+            #     return [
+            #         x.numpy() for x in values.cpu().unbind()
+            #     ]
+            # else:
+            #     return [
+            #         x.cpu().numpy() for x in values.unbind()
+            #     ]
         else:
             return values
 
@@ -281,21 +294,39 @@ class FirestoreDbAdapter(DbAdapter):
                         "start_times.training": result.start_time,
                         "end_times.training": result.end_time,
                         "completed": True,
-                        "best_steps.training": {
-                                metric_name:{
-                                    'best_index': metric_vals["best_index"],
-                                    'best_value': pickle.dumps(
-                                        self.unnest_tensor(metric_vals["best_value"])
-                                    ),
-                                    'best_function': metric_vals["best_function"].__name__} 
-                                for metric_name, metric_vals in result.best_steps.items()
-                            },
+                        f"batch_sizes.{result.result_type}": result.max_batch_size,
+                        "best_steps.training": self._extract_best_steps(result),
                         "configs": {
                             conf_name: json.dumps(conf_data)
                             for conf_name, conf_data in result.configs.items()
                         }
                     }
                 )
+
+
+    def _extract_best_steps(self, result: TrainingResult) -> dict:
+        """
+        Extract the best-performing steps from a TrainingResult into a dictionary for
+        saving in Firestore.
+
+        Args:
+            result (TrainingResult): the result from which to extract the best steps
+
+        Returns:
+            (dict): the best steps in a serialized format suitable for saving to Firestore
+        """
+        return {
+            metric_name:{
+                'best_batch': metric_vals["best_batch"],
+                'best_function': metric_vals["best_function"].__name__,
+                'best_index': metric_vals["best_index"],
+                'best_value': pickle.dumps(
+                    self.unnest_tensor(metric_vals["best_value"]),
+                ),
+                'in_batch_index': metric_vals["in_batch_index"]
+            }
+            for metric_name, metric_vals in result.best_steps.items()
+        }
 
 
     def get_training_step_result(
@@ -394,19 +425,12 @@ class FirestoreDbAdapter(DbAdapter):
                 # add step to existing experiment
                 experiment_ref.update(
                     {
-                        "start_times.evaluation": result.start_time,
+                        f"batch_sizes.{result.result_type}": result.max_batch_size,
+                        "best_steps.evaluation": self._extract_best_steps(result),
+                        "completed": True,
                         "end_times.evaluation": result.end_time,
                         "end_times.experiment": result.end_time,
-                        "completed": True,
-                        "best_steps.evaluation": {
-                                metric_name:{
-                                    'best_index': metric_vals["best_index"],
-                                    'best_value': pickle.dumps(
-                                        self.unnest_tensor(metric_vals["best_value"])
-                                    ),
-                                    'best_function': metric_vals["best_function"].__name__} 
-                                for metric_name, metric_vals in result.best_steps.items()
-                            }
+                        "start_times.evaluation": result.start_time,
                     }
                 )
 
