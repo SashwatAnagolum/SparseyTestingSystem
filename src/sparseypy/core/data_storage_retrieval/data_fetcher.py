@@ -138,26 +138,6 @@ class DataFetcher:
             step_index=step_index,
             result_type=result_type
         )
-        # experiment_data = self._get_experiment_data(experiment_id)
-        # training_steps = experiment_data.get("saved_metrics", {}).get(result_type, [])
-        # if step_index < 0 or step_index >= len(training_steps):
-        #     raise ValueError("Step index is out of bounds for the given experiment.")
-
-        # # fetch the step metadata (batch containing the step data and its index within the batch)
-        # batch_index = step_index // experiment_data["batch_size"] # integer division
-        # step_offset = step_index % experiment_data["batch_size"]
-
-        # # fetch the batch
-        # batch_data = self._get_batch_data(training_steps[batch_index]["batch"])
-        # # retrieve the step data from the batch using the index
-        # step_data = batch_data["steps"][step_offset]
-
-        # step_result = TrainingStepResult(resolution=experiment_data["saved_metrics"]["resolution"])
-
-        # for metric_name, metric_data in step_data.items():
-        #     step_result.add_metric(name=metric_name, values=self._deserialize_metric(metric_data))
-
-        # return step_result
 
 
     def get_evaluation_step_result(

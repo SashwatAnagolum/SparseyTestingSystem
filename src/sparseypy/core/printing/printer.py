@@ -24,12 +24,13 @@ class Printer:
             results (TrainingResult): the results to summarize
             run_type (str): the type of run to summarize
         """
-        tqdm.write(f"\n\n{run_type.upper()} - SUMMARY\n")
+        tqdm.write(f"{run_type.capitalize()} completed.\n\n{run_type.upper()} - SUMMARY\n")
         tqdm.write("Best metric steps:")
         for metric, val in results.best_steps.items():
             tqdm.write(
                 f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})"
             )
+        tqdm.write("")
 
     @staticmethod
     def print_pre_hpo_summary(hpo_config: dict) -> None:
@@ -115,7 +116,8 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
 
     @staticmethod
     def print_pre_training_summary(dataset_config: dict, trainer_config: dict,
-                                   training_num_batches: int, eval_num_batches: int) -> None:
+                                   training_num_batches: int,
+                                   eval_num_batches: int,) -> None:
         """
         Prints a pre-execution summary of a single training run.
 
@@ -124,6 +126,8 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
                 used for the run.
             trainer_config (dict): the validated trainer configuration that will be
                 used for the run.
+            training_num_batches (int): the number of batches in this training run.
+            eval_num_batches (int): the number of batches in this evaluation run.
         """
         # print training run summary
         met_separator = "\n* "
@@ -137,6 +141,21 @@ Number of evaluation batches: {eval_num_batches}
 Selected metrics: 
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
     """)
+
+
+    @staticmethod
+    def print_run_start_message(run_name: str, run_url: str, phase: str = "training"):
+        """
+        Prints the "beginning run" summary to the console.
+
+        Args:
+            run_name (str): the name of the run in Weights & Biases
+            run_url (str): the URL of the run in Weights & Biases
+            phase (str): the current phase (training/validation/evaluation)
+        """
+        tqdm.write(f"{phase.upper()} STARTED")
+        tqdm.write(f"Run name: {run_name}")
+        tqdm.write(f"View results live: {run_url}\n")
 
 
     @staticmethod
@@ -210,32 +229,21 @@ Selected metrics:
 
     @staticmethod
     def print_step_metrics(step_data: TrainingStepResult, batch_number: int,
-                            batch_size: int = 1, step_type: str = "training"):
+                            max_batch_size: int = 1, step_type: str = "training"):
         """
         Prints the metrics for a single training/evaluation step to the console.
 
         Args:
             step_data (TrainingStepResult): the metric data for this step
             batch_number (int): the current batch number for this input (e.g. input 50)
-            batch_size (int): the maximum size of the current batch
+            max_batch_size (int): the maximum possible size of the current batch
             batch_type (str): whether the current step is training or evaluation
         """
         metric_data = step_data.get_metrics()
-
-        # if step_type == "evaluation":
-        #     for n, t in metric_data.items():
-        #         tqdm.write(f"{n} metric shape: {[l.shape for l in t.unbind()]}")
-
-        # HACK for batch size
-        # this batch is the smaller of the maximum batch size and 
-        # dimension 1 (batch size) in the first metric NestedTensor in the batch
-        # which is dimension 0 of the first Tensor unbound from the NestedTensor
-        # for the first item returned from the metric dictionary
-        this_batch = min(batch_size, next(iter(metric_data.values())).unbind()[0].size(dim=0))
-
-        for batch_index in range(this_batch):
+        # for each item in the batch
+        for batch_index in range(step_data.batch_size):
             # calculate input number and print input header
-            input_num = (batch_number - 1) * batch_size + (batch_index + 1)
+            input_num = (batch_number - 1) * max_batch_size + (batch_index + 1)
             tqdm.write(
                 f"\n\n{step_type.capitalize()} results - INPUT {input_num}\n--------------------"
             )

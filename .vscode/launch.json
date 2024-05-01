@@ -157,7 +157,7 @@
         {
             "id": "getSparseyConfigDirectoryString",
             "type": "promptString",
-            "description": "enter the path to the directory containing your HPO config files",
+            "description": "enter the path to the directory containing your config files (without the trailing slash)",
             "default": ".\\demo"
         },
         {

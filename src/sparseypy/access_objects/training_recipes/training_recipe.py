@@ -51,8 +51,7 @@ class TrainingRecipe:
                  preprocessing_stack: PreprocessingStack,
                  metrics_list: list[torch.nn.Module],
                  metric_config: dict, setup_configs: dict,
-                 loss_func: Optional[torch.nn.Module],
-                 step_resolution: Optional[int] = None) -> None:
+                 loss_func: Optional[torch.nn.Module]) -> None:
         """
         Initializes the TrainingRecipe.
         Args:
@@ -127,10 +126,11 @@ class TrainingRecipe:
             self.first_eval = False
             self.eval_results.start_time = datetime.now()
 
-        results = TrainingStepResult()
-
         data, labels = next(data_iterator)
         labels = labels.to(self.device)
+
+        results = TrainingStepResult(batch_size=data.size(dim=0))
+
         self.optimizer.zero_grad()
 
         transformed_data = self.preprocessing_stack(data)

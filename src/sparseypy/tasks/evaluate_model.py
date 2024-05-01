@@ -23,7 +23,11 @@ warnings.filterwarnings(
     "ignore",
     message="Run (.*) is finished. The call to `_console_raw_callback` will be ignored."
     )
-
+# PyTorch nested tensors are in beta and print a warning about API changes
+warnings.filterwarnings(
+    "ignore",
+    message=r"The PyTorch API of nested tensors is in prototype stage and will change in the.+"
+)
 
 def evaluate_model(model_name: str, trainer_config: dict,
                 preprocessing_config: dict, dataset_config: dict,
@@ -55,6 +59,7 @@ def evaluate_model(model_name: str, trainer_config: dict,
             break
 
     # initialize the DataStorer (logs into W&B and Firestore)
+    tqdm.write("Connecting to Weights & Biases...")
     DataStorer.configure(system_config)
 
     df = DataFetcher(system_config)
@@ -86,6 +91,12 @@ def evaluate_model(model_name: str, trainer_config: dict,
     Printer.print_pre_evaluate_model_summary(dataset_config, trainer_config,
                                              model_name, trainer.eval_num_batches)
 
+    Printer.print_run_start_message(
+        run_name=wandb.run.name,
+        run_url=wandb.run.url,
+        phase="evaluation"
+    )
+
     for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs", position=0):
         trainer.model.eval()
         is_epoch_done = False
@@ -101,7 +112,7 @@ def evaluate_model(model_name: str, trainer_config: dict,
                     Printer.print_step_metrics(
                         step_data=output,
                         batch_number=batch_number,
-                        batch_size=trainer_config['eval']['dataloader']['batch_size'],
+                        max_batch_size=trainer_config['eval']['dataloader']['batch_size'],
                         step_type="evaluation"
                     )
                 batch_number+=1

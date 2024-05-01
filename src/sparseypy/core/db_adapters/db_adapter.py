@@ -63,7 +63,6 @@ class DbAdapter:
         """
 
 
-    @abc.abstractmethod
     def save_evaluation_step(self, parent: str, result: TrainingStepResult):
         """
         Saves a single evaluation step to the database.
@@ -72,16 +71,21 @@ class DbAdapter:
             parent (str): the experiment ID to which to log this step
             result (TrainingStepResult): the step results to save
         """
+        self.save_training_step(
+            parent, result, phase="evaluation"
+        )
 
 
     @abc.abstractmethod
-    def save_training_step(self, parent: str, result: TrainingStepResult):
+    def save_training_step(self, parent: str, result: TrainingStepResult,
+                           phase: str = "training"):
         """
         Saves a single training step to the database.
 
         Args:
             parent (str): the experiment ID to which to log this step
             result (TrainingStepResult): the step results to save
+            phase (str): the type of step (training/validation/evaluation) to save
         """
 
 

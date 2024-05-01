@@ -25,7 +25,11 @@ warnings.filterwarnings(
     "ignore",
     message="Run (.*) is finished. The call to `_console_raw_callback` will be ignored."
     )
-
+# PyTorch nested tensors are in beta and print a warning about API changes
+warnings.filterwarnings(
+    "ignore",
+    message=r"The PyTorch API of nested tensors is in prototype stage and will change in the.+"
+)
 
 def train_model(model_config: dict, trainer_config: dict,
                 preprocessing_config: dict, dataset_config: dict,
@@ -51,6 +55,7 @@ def train_model(model_config: dict, trainer_config: dict,
         os.environ["WANDB_SILENT"] = "true"
 
     # initialize the DataStorer (logs into W&B and Firestore)
+    tqdm.write("Connecting to Weights & Biases...")
     DataStorer.configure(system_config)
     df = DataFetcher(system_config)
 
@@ -92,8 +97,18 @@ def train_model(model_config: dict, trainer_config: dict,
     if reload_model:
         trainer.model.load_state_dict(model_weights)
 
-    Printer.print_pre_training_summary(dataset_config, trainer_config,
-                                       trainer.training_num_batches, trainer.eval_num_batches)
+    Printer.print_pre_training_summary(
+            dataset_config=dataset_config,
+            trainer_config=trainer_config,
+            training_num_batches=trainer.training_num_batches,
+            eval_num_batches=trainer.eval_num_batches,
+        )
+    
+    Printer.print_run_start_message(
+        run_name=wandb.run.name,
+        run_url=wandb.run.url,
+        phase="training"
+    )
 
     for epoch in tqdm(range(trainer_config['training']['num_epochs']), desc="Epochs", position=0):
         is_epoch_done = False
@@ -106,7 +121,7 @@ def train_model(model_config: dict, trainer_config: dict,
             desc="Training",
             leave=False,
             position=1,
-            unit="input",
+            unit="input"if trainer_config['training']['dataloader']['batch_size'] == 1 else "batch",
             miniters=int(trainer.training_num_batches/100)
         ) as pbar:
             while not is_epoch_done:
@@ -117,7 +132,7 @@ def train_model(model_config: dict, trainer_config: dict,
                     Printer.print_step_metrics(
                         step_data=output,
                         batch_number=batch_number,
-                        batch_size=trainer_config['training']['dataloader']['batch_size'],
+                        max_batch_size=trainer_config['training']['dataloader']['batch_size'],
                         step_type="training"
                     )
                 batch_number+=1
@@ -156,13 +171,19 @@ def train_model(model_config: dict, trainer_config: dict,
             project=system_config["wandb"]["project_name"],
         )
 
+        Printer.print_run_start_message(
+            run_name=wandb.run.name,
+            run_url=wandb.run.url,
+            phase="evaluation"
+        )
+
         # perform evaluation
         with tqdm(
             total=trainer.eval_num_batches,
             desc="Evaluation",
             leave=False,
             position=1,
-            unit="input",
+            unit="input"if trainer_config['eval']['dataloader']['batch_size'] == 1 else "batch",
             miniters=int(trainer.eval_num_batches/100)
         ) as pbar:
             while not is_epoch_done:
@@ -175,7 +196,7 @@ def train_model(model_config: dict, trainer_config: dict,
                     Printer.print_step_metrics(
                         step_data=output,
                         batch_number=batch_number,
-                        batch_size=trainer_config['eval']['dataloader']['batch_size'],
+                        max_batch_size=trainer_config['eval']['dataloader']['batch_size'],
                         step_type="evaluation"
                     )
                 batch_number+=1
