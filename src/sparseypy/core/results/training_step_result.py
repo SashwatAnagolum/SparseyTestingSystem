@@ -9,12 +9,17 @@ class TrainingStepResult(Result):
         resolution (str): The resolution of the training step.
         metrics (dict): The metrics for the training step.
     """
-    def __init__(self):
+    def __init__(self, batch_size: int = 1):
         """
         Initializes the TrainingStepResult.
+
+        Args:
+            batch_size (int): the size of the batch of items that will be stored
+                in this TrainingStepResult
         """
         super().__init__()
         self.metrics = {}
+        self.batch_size = batch_size
 
 
     def add_metric(self, name: str, values: list):

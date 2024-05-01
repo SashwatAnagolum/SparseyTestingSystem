@@ -127,10 +127,11 @@ class TrainingRecipe:
             self.first_eval = False
             self.eval_results.start_time = datetime.now()
 
-        results = TrainingStepResult()
-
         data, labels = next(data_iterator)
         labels = labels.to(self.device)
+
+        results = TrainingStepResult(batch_size=data.size(dim=0))
+
         self.optimizer.zero_grad()
 
         transformed_data = self.preprocessing_stack(data)
