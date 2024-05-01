@@ -10,6 +10,7 @@ import pickle
 import firebase_admin
 from firebase_admin import firestore # firestore_async for async client
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
+import torch
 
 from sparseypy.access_objects.models.model import Model
 from sparseypy.core.db_adapters.db_adapter import DbAdapter
@@ -233,6 +234,26 @@ class FirestoreDbAdapter(DbAdapter):
         return tr
 
 
+    def unnest_tensor(self, values: torch.Tensor):
+        """
+        If the input is a NestedTensor, unbinds the values, converts to NumPy, moves to the CPU,
+        and returns a list.
+
+        Args:
+            values (torch.Tensor): the input to unbind
+
+        Returns:
+            (list | torch.Tensor): the original tensor (if not a NestedTensor) 
+                or the unbound values as a list
+        """
+        if isinstance(values, torch.Tensor) and values.is_nested:
+            return [
+                x.numpy() for x in values.cpu().unbind()
+            ]
+        else:
+            return values
+
+
     def save_training_result(self, result: TrainingResult):
         """
         Saves the summary-level training results for the current run
@@ -263,7 +284,9 @@ class FirestoreDbAdapter(DbAdapter):
                         "best_steps.training": {
                                 metric_name:{
                                     'best_index': metric_vals["best_index"],
-                                    'best_value': pickle.dumps(metric_vals["best_value"]),
+                                    'best_value': pickle.dumps(
+                                        self.unnest_tensor(metric_vals["best_value"])
+                                    ),
                                     'best_function': metric_vals["best_function"].__name__} 
                                 for metric_name, metric_vals in result.best_steps.items()
                             },
@@ -330,7 +353,9 @@ class FirestoreDbAdapter(DbAdapter):
             # gather the saved metrics for full storage in the DB
             for metric_name, metric_val in result.get_metrics().items():
                 if metric_name in self.saved_metrics:
-                    full_dict[metric_name] = pickle.dumps(metric_val) # pickling
+                    full_dict[metric_name] = pickle.dumps(
+                        self.unnest_tensor(metric_val)
+                    ) # pickling
 
             self._save_firestore_step(parent, "training", full_dict)
 
@@ -376,7 +401,9 @@ class FirestoreDbAdapter(DbAdapter):
                         "best_steps.evaluation": {
                                 metric_name:{
                                     'best_index': metric_vals["best_index"],
-                                    'best_value': pickle.dumps(metric_vals["best_value"]),
+                                    'best_value': pickle.dumps(
+                                        self.unnest_tensor(metric_vals["best_value"])
+                                    ),
                                     'best_function': metric_vals["best_function"].__name__} 
                                 for metric_name, metric_vals in result.best_steps.items()
                             }
@@ -398,7 +425,7 @@ class FirestoreDbAdapter(DbAdapter):
             full_dict = {}
             for metric_name, metric_val in result.get_metrics().items():
                 if metric_name in self.saved_metrics:
-                    full_dict[metric_name] = pickle.dumps(metric_val) # pickling
+                    full_dict[metric_name] = pickle.dumps(self.unnest_tensor(metric_val)) # pickling
 
             self._save_firestore_step(parent, "evaluation", full_dict)
 
