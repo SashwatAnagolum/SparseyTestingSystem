@@ -1,5 +1,10 @@
+"""
+metric_factory.py - module containing the MetricFactory
+"""
 import inspect
-from typing import Callable
+from typing import Callable, Optional
+
+import torch
 
 from sparseypy.core import metrics
 from sparseypy.core.metrics.metrics import Metric
@@ -7,6 +12,18 @@ import sparseypy.core.metrics.comparisons as comparisons
 
 
 class MetricFactory:
+    """
+    MetricFactory: Factory class for validating and constructing Metrics and comparison functions.
+
+    Provides methods for validating the existence of and instantiating system Metric classes
+    and comparison functions using reflection.
+    
+    Attributes:
+        allowed_comparisons (set[str]): the names of all the valid comparison functions available
+            as part of the system.
+        allowed_modules (set[str]): the names of all the valid metrics available as part of
+            the system.
+    """
     allowed_modules = set([i for i in dir(metrics) if i[:2] != '__'])
     allowed_comparisons = set([i[0] for i in inspect.getmembers(comparisons, inspect.isfunction)])
 
@@ -31,16 +48,21 @@ class MetricFactory:
 
 
     @staticmethod
-    def create_metric(metric_name, **kwargs) -> Metric:
+    def create_metric(metric_name: str, reduction: str,
+        comparison: Optional[str], params: dict, model: torch.nn.Module,
+        device: torch.device) -> Metric:
         """
-        Creates a layer passed in based on the layer name and kwargs.
+        Creates a layer passed in based on the metric name and kwargs.
         """
         metric_class = MetricFactory.get_metric_class(metric_name)
 
-        if "best_value" in kwargs.keys():
-            kwargs["best_value"] = getattr(comparisons, kwargs["best_value"])
+        if comparison:
+            comparison = getattr(comparisons, comparison)
 
-        metric_obj = metric_class(**kwargs)
+        metric_obj = metric_class(
+            model, device, reduction,
+            comparison, **params
+        )
 
         return metric_obj
 

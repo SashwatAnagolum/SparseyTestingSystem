@@ -3,6 +3,7 @@ printer.py - contains the printer class for printing result and metric data to t
 """
 
 from pprint import pformat
+import torch
 from tqdm import tqdm
 
 from sparseypy.core.results import TrainingResult, TrainingStepResult, HPOResult, HPOStepResult
@@ -163,7 +164,7 @@ Selected metrics:
 
 
     @staticmethod
-    def print_pre_evaluate_model_summary(dataset_config: dict, trainer_config: dict, 
+    def print_pre_evaluate_model_summary(dataset_config: dict, trainer_config: dict,
                                          model_name: str, num_batches: int):
         """
         Prints the initial summary for the evaluate_model task, including the
@@ -208,25 +209,55 @@ Selected metrics:
 
 
     @staticmethod
-    def print_step_metrics(batch_number: int, step_data: TrainingStepResult,
-                            step_type: str = "training"):
+    def print_step_metrics(step_data: TrainingStepResult, batch_number: int,
+                            batch_size: int = 1, step_type: str = "training"):
         """
         Prints the metrics for a single training/evaluation step to the console.
 
         Args:
-            batch_number (int): the current batch number for this input (e.g. input 50)
             step_data (TrainingStepResult): the metric data for this step
+            batch_number (int): the current batch number for this input (e.g. input 50)
+            batch_size (int): the maximum size of the current batch
             batch_type (str): whether the current step is training or evaluation
         """
-        tqdm.write(
-            f"\n\n{step_type.capitalize()} results - INPUT {batch_number}\n--------------------"
-        )
-        metric_str = pformat(step_data.get_metrics())
-        tqdm.write(metric_str)
+        metric_data = step_data.get_metrics()
+
+        # if step_type == "evaluation":
+        #     for n, t in metric_data.items():
+        #         tqdm.write(f"{n} metric shape: {[l.shape for l in t.unbind()]}")
+
+        # HACK for batch size
+        # this batch is the smaller of the maximum batch size and 
+        # dimension 1 (batch size) in the first metric NestedTensor in the batch
+        # which is dimension 0 of the first Tensor unbound from the NestedTensor
+        # for the first item returned from the metric dictionary
+        this_batch = min(batch_size, next(iter(metric_data.values())).unbind()[0].size(dim=0))
+
+        for batch_index in range(this_batch):
+            # calculate input number and print input header
+            input_num = (batch_number - 1) * batch_size + (batch_index + 1)
+            tqdm.write(
+                f"\n\n{step_type.capitalize()} results - INPUT {input_num}\n--------------------"
+            )
+            # then write metric values
+            # for each metric, slice the batch input for the current step
+            # step output data is in the dimensions [layers][batch][MACs][...]
+            # so to extract the batch data we need to slice across dimension 1
+            # push it to the CPU to avoid cluttering the output with "device=cuda:0"
+            # and assemble it into a dict so it looks the same as non-batched output
+            # then pretty-format it and write it to the console
+            tqdm.write(
+                pformat(
+                    {
+                        metric: torch.select(data.cpu(), dim=1, index=batch_index)
+                        for metric, data in metric_data.items()
+                    }
+                )
+            )
 
 
     @staticmethod
-    def summarize_hpo_trial(step_results: HPOStepResult, step_num: int, num_trials: int, 
+    def summarize_hpo_trial(step_results: HPOStepResult, step_num: int, num_trials: int,
                         print_config: bool = False, new_best: bool = False):
         """
         Prints a summary for a single HPO trial.
@@ -289,3 +320,24 @@ Selected metrics:
             tqdm.write("\n---------------------------------------------------------")
             tqdm.write(pformat(layer))
             layer_number+=1
+
+
+    @staticmethod
+    def unnest_tensor(values: torch.Tensor):
+        """
+        If the input is a NestedTensor, unbinds the values, converts to NumPy, moves to the CPU,
+        and returns a list.
+
+        Args:
+            values (torch.Tensor): the input to unbind
+
+        Returns:
+            (list | torch.Tensor): the original tensor (if not a NestedTensor) 
+                or the unbound values as a list
+        """
+        if isinstance(values, torch.Tensor) and values.is_nested:
+            return [
+                x.numpy() for x in values.cpu().unbind()
+            ]
+        else:
+            return values

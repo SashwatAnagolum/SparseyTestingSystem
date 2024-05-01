@@ -60,7 +60,8 @@ class NumActivationsMetricSchema(AbstractSchema):
                 Optional('best_value', default='min_by_layerwise_mean'): Schema(
                         And(
                             Const(Use(MetricFactory.is_valid_comparision), True)
-                            ), error="best_value must be the name of a valid comparison function from comparisons.py")
+                            ), error="best_value must be the name of a valid comparison function from comparisons.py"),
+                Optional('params', default={}): {}
             },
             ignore_extra_keys=True,
             error="Invalid configuration for num_activations metric"

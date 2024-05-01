@@ -94,6 +94,14 @@ class BasisSetSizeMetric(Metric):
                 for layer_index in range(len(layers))
             ]
 
+        basis_set_sizes = [
+            torch.tensor(
+                b, dtype=torch.float32,
+                device=self.device
+            ).unsqueeze(0).expand(batch_size, len(b))
+            for b in basis_set_sizes
+        ]
+
         return torch.nested.nested_tensor(
             basis_set_sizes, dtype=torch.float32, device=self.device
         )

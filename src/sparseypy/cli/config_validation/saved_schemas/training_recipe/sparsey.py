@@ -200,10 +200,6 @@ class SparseyTrainingRecipeSchema(AbstractSchema):
                     'num_epochs': And(
                         int, schema_utils.is_positive,
                         error="Num_epochs must be a positive integer."
-                    ),
-                    Optional('step_resolution', default=None): And(
-                        int, schema_utils.is_positive,
-                        error="Step_resolution must be a positive integer if specified."
                     )
                 },
                 'eval': {

@@ -12,7 +12,6 @@ class Metric(abc.ABC):
         to provide estimations of model progress and information
         required for Dr. Rinkus' experiments.
     """
-
     def __init__(self, model: torch.nn.Module, name: str,
                  best_comparison: Callable, device: torch.device,
                  reduction: str) -> None:
@@ -105,11 +104,17 @@ class Metric(abc.ABC):
         match self.reduction:
             case 'layerwise_mean':
                 metric_val = torch.stack(
-                    [torch.mean(t) for t in torch.unbind(raw_values)]
+                    [
+                        torch.mean(t, dim=1, keepdim=True)
+                        for t in torch.unbind(raw_values)
+                    ]
                 )
             case 'layerwise_sum':
                 metric_val = torch.stack(
-                    [torch.sum(t) for t in torch.unbind(raw_values)]
+                    [
+                        torch.sum(t, dim=1, keepdim=True)
+                        for t in torch.unbind(raw_values)
+                    ]
                 )
             case 'mean':
                 metric_val = torch.mean(

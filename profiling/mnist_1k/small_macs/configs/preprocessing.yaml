@@ -6,3 +6,5 @@ transform_list:
     params:
       dtype: float32
       scale: False
+  - name: sparsey_input_reshape
+    params: {}

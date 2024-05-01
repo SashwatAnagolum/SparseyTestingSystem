@@ -95,19 +95,13 @@ class TrainingRecipeBuilder:
 
         metrics_list = []
 
-        # BUG this is a bad way to do metric initialization and
-        # will break every time we add a Metric parameter
-        # we should revisit it
         for metric_config in train_config['metrics']:
             metric = MetricFactory.create_metric(
-                metric_config['name'],
-                #**metric_config['params'],
-                model=model,
-                # WARNING this formulation assumes all Metrics
-                # support a reduction constructor parameter
-                # doing a **kwargs would be better
+                metric_name=metric_config['name'],
                 reduction=metric_config['reduction'],
-                best_value=metric_config['best_value'],
+                comparison=metric_config['best_value'],
+                params=metric_config['params'],
+                model=model,
                 device=device
             )
 
@@ -133,8 +127,7 @@ class TrainingRecipeBuilder:
             device, model, optimizer, training_dataloader,
             eval_dataloader, preprocessing_stack, metrics_list,
             train_config['metrics'], setup_configs,
-            loss_func,
-            train_config['training']['step_resolution']
+            loss_func
         )
 
     @staticmethod

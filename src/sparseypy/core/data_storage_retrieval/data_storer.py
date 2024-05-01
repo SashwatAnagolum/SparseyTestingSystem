@@ -14,7 +14,7 @@ from sparseypy.core.results.hpo_result import HPOResult
 from sparseypy.core.results.hpo_step_result import HPOStepResult
 from sparseypy.access_objects.models.model import Model
 from sparseypy.core.db_adapters import DbAdapterFactory
-from sparseypy.core.metrics import comparisons
+from sparseypy.core.metrics import reductions
 
 class DataStorer:
     """
@@ -374,4 +374,4 @@ class DataStorer:
         Returns:
             (float): a single value representing the averaged data
         """
-        return comparisons.average_nested_data(data)
+        return reductions.average_nested_data(data)
