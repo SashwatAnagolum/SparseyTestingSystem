@@ -98,7 +98,7 @@ class BasisSetSizeMetric(Metric):
             torch.tensor(
                 b, dtype=torch.float32,
                 device=self.device
-            ).unsqueeze(0)
+            ).unsqueeze(0).expand(batch_size, len(b))
             for b in basis_set_sizes
         ]
 
