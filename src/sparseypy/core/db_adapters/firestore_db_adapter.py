@@ -196,17 +196,19 @@ class FirestoreDbAdapter(DbAdapter):
         experiment_data = self._get_experiment_data(experiment_id)
 
         metrics = []
-        tr = TrainingResult(id=experiment_id,
-                            result_type=result_type,
-                            resolution=experiment_data["saved_metrics"]["resolution"],
-                            metrics=metrics,
-                            configs={
-                                    conf_name:json.loads(conf_data)
-                                    for conf_name, conf_data in experiment_data["configs"]
-                                }
-                            )
+        tr = TrainingResult(
+            id=experiment_id,
+            result_type=result_type,
+            metrics=metrics,
+            max_batch_size=1,
+            configs={
+                    conf_name:json.loads(conf_data)
+                    for conf_name, conf_data in experiment_data["configs"]
+                }
+        )
 
-        for step_index in range(len(experiment_data.get("saved_metrics", {}).get(result_type, []))):
+        saved_metrics = experiment_data.get("saved_metrics", {}).get(result_type, [])
+        for step_index in range(len(saved_metrics)):
             step_result = self.get_training_step_result(experiment_id, step_index, result_type)
             tr.add_step(step_result)
 
@@ -216,25 +218,49 @@ class FirestoreDbAdapter(DbAdapter):
         tr.end_time = self._convert_firestore_timestamp(
                 experiment_data.get("end_times", {}).get(result_type)
             )
-        best_steps = {}
 
-        phase_data = experiment_data.get("best_steps", {}).get(result_type, {})
-        best_steps = {}
-        for metric, metric_data in phase_data.items():
-            best_function = metric_data.get("best_function")
-            best_index = metric_data.get("best_index")
-            best_value_bytes = metric_data.get("best_value")
+        step_dict = experiment_data.get("best_steps", {}).get(result_type, {})
 
-            best_steps[metric] = {
-                "best_function": getattr(comparisons, best_function),
-                "best_index": best_index,
-                "best_value": pickle.loads(best_value_bytes)
-            }
-        tr.best_steps = best_steps
+        tr.best_steps = self._rehydrate_best_steps(step_dict)
+
         return tr
 
 
-    def unnest_tensor(self, values: torch.Tensor):
+    def _rehydrate_best_steps(self, step_dict: dict) -> dict:
+        """
+        Reconstructs the best-performing steps for a TrainingResult from the dictionary value
+        as saved in Firestore.
+
+        Args:
+            step_dict (dict): the serialized best steps retrieved from Firestore
+
+        Returns:
+            (dict): the rehydrated best steps for insertion into a TrainingResult
+        """
+        best_steps = {}
+
+        for metric, metric_data in step_dict.items():
+            best_function = metric_data.get("best_function")
+            best_value_bytes = metric_data.get("best_value")
+
+            # this takes a few liberties with the best steps to deal with batches
+            # regardless of what the batch size in the DB was, the batch size for
+            # a reloaded training result will be 1
+            # so the best batch number will also be equal to the best index
+            # and the in-batch index is always zero since all batches are size 1
+            best_steps[metric] = {
+                "best_batch": metric_data["best_index"],
+                "best_function": getattr(comparisons, best_function),
+                "best_index": metric_data["best_index"],
+                "best_value": pickle.loads(best_value_bytes),
+                "in_batch_index": 0
+            }
+
+        return best_steps
+
+
+
+    def _unnest_tensor(self, values: torch.Tensor):
         """
         If the input is a NestedTensor, unbinds the values, converts to NumPy, moves to the CPU,
         and returns a list.
@@ -321,7 +347,7 @@ class FirestoreDbAdapter(DbAdapter):
                 'best_function': metric_vals["best_function"].__name__,
                 'best_index': metric_vals["best_index"],
                 'best_value': pickle.dumps(
-                    self.unnest_tensor(metric_vals["best_value"]),
+                    self._unnest_tensor(metric_vals["best_value"]),
                 ),
                 'in_batch_index': metric_vals["in_batch_index"]
             }
@@ -363,7 +389,7 @@ class FirestoreDbAdapter(DbAdapter):
         # retrieve the step data from the batch using the index
         step_data = batch_data["steps"][step_offset]
 
-        step_result = TrainingStepResult(resolution=experiment_data["saved_metrics"]["resolution"])
+        step_result = TrainingStepResult(batch_size=1)
 
         for metric_name, metric_data in step_data.items():
             step_result.add_metric(name=metric_name, values=pickle.loads(metric_data))
@@ -383,6 +409,8 @@ class FirestoreDbAdapter(DbAdapter):
         """
         if self.resolution == 2:
             # for each item in the batch in this TSR
+            # (this batch size is the *step's* batch size, not the Firestore batch)
+            # (and the two do not need to be the same)
             for batch_index in range(result.batch_size):
                 # gather the saved metrics for full storage in the DB
                 full_dict = {}
@@ -390,16 +418,16 @@ class FirestoreDbAdapter(DbAdapter):
                 for metric_name, metric_val in result.get_metrics().items():
                     # that is also on the list of saved metrics
                     if metric_name in self.saved_metrics:
-                        # pickle the following as a new key by that metric name:
+                        # serialize the values from its result tensor...
                         full_dict[metric_name] = pickle.dumps(
-                            # the un-nested form of the tensor obtained by
-                            # slicing the overall results to get the results
-                            # for each batch
-                            self.unnest_tensor(
+                            # ... by first selecting only the entries corresponding
+                            # to the current batch
+                            # ... then un-nesting those values so we can pickle them
+                            self._unnest_tensor(
                                 torch.select(metric_val, dim=1, index=batch_index)
                             )
                         )
-
+                # then save this batch item as a step to Firestore
                 self._save_firestore_step(experiment=parent, phase=phase, metric_data=full_dict)
 
 
@@ -445,25 +473,6 @@ class FirestoreDbAdapter(DbAdapter):
                         "start_times.evaluation": result.start_time,
                     }
                 )
-
-
-    # def save_evaluation_step(self, parent: str, result: TrainingStepResult):
-    #     """
-    #     Saves a single evaluation step to Firestore.
-
-    #     Args:
-    #         parent (str): the experiment ID to which to log this step
-    #         result (TrainingStepResult): the step results to save
-    #     """
-    #     # save on "step" resolution only
-    #     if self.resolution == 2:
-    #         # gather the saved metrics for storage in the DB
-    #         full_dict = {}
-    #         for metric_name, metric_val in result.get_metrics().items():
-    #             if metric_name in self.saved_metrics:
-    #                 full_dict[metric_name] = pickle.dumps(self.unnest_tensor(metric_val)) # pickling
-
-    #         self._save_firestore_step(parent, "evaluation", full_dict)
 
 
     def create_hpo_sweep(self, sweep: HPOResult):
