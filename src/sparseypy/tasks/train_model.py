@@ -110,7 +110,7 @@ def train_model(model_config: dict, trainer_config: dict,
             desc="Training",
             leave=False,
             position=1,
-            unit="input",
+            unit="input"if trainer_config['training']['dataloader']['batch_size'] == 1 else "batch",
             miniters=int(trainer.training_num_batches/100)
         ) as pbar:
             while not is_epoch_done:
@@ -166,7 +166,7 @@ def train_model(model_config: dict, trainer_config: dict,
             desc="Evaluation",
             leave=False,
             position=1,
-            unit="input",
+            unit="input"if trainer_config['eval']['dataloader']['batch_size'] == 1 else "batch",
             miniters=int(trainer.eval_num_batches/100)
         ) as pbar:
             while not is_epoch_done:
