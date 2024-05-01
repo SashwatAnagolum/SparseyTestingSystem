@@ -1,3 +1,6 @@
+"""
+test.py - short CUDA testing script
+"""
 from sparseypy.core.model_layers.sparsey_layer import SparseyLayer, SparseyLayerOld, SparseyLayerV2
 
 import torch
