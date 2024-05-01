@@ -25,10 +25,27 @@ class MatchAccuracyMetric(InputsAndCodesMetric):
                  model: torch.nn.Module,
                  device: torch.device,
                  reduction: Optional[str] = None,
-                 best_value: Optional[Callable] = max_by_layerwise_mean):
+                 best_value: Optional[Callable] = max_by_layerwise_mean,
+                 approximation_batch_size: Optional[int] = 64) -> None:
+        """
+        Initializes the SiscAdherenceMetric object. 
+
+        Args:
+            model (torch.nn.Module): the model to compute feature
+                coverage using.
+            device (torch.device): the device to use.
+            reduction (Optional[str]): the type of reduction
+                to apply before returning the metric value.
+            best_value (Callable): the comparison function
+                to use to determine the best value obtained for this
+                metric.
+            approximation_batch_size (Optional[int]): the 
+                size of the approximation batch to use while
+                computing the metric.
+        """
         super().__init__(
             model, device, 'match_accuracy',
-            reduction, best_value
+            reduction, best_value, approximation_batch_size
         )
 
 

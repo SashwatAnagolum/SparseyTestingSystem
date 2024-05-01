@@ -37,7 +37,12 @@ class SiscAdherenceMetricSchema(AbstractSchema):
                     And(
                         Const(Use(MetricFactory.is_valid_comparision), True)
                     ), error="best_value must be the name of a valid comparison function from comparisons.py"
-                )
+                ),
+                Optional('params', default={}): {
+                    Optional('approximation_batch_size', default=64): And(
+                    int, lambda x: x > 0
+                    )
+                }
             },
             error="Invalid configuration for sisc_adherence metric"
         )

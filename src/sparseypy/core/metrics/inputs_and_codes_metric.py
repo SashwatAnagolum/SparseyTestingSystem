@@ -26,9 +26,10 @@ class InputsAndCodesMetric(Metric):
     """
     def __init__(self, model: torch.nn.Module,
                  device: torch.device,
-                 metric_name: str,
+                 name: str,
                  reduction: Optional[str] = None,
-                 best_value: Optional[Callable] = max_by_layerwise_mean) -> None:
+                 best_value: Optional[Callable] = max_by_layerwise_mean,
+                 approximation_batch_size: Optional[int] = 64) -> None:
         """
         Initializes the InputsAndCodesMetric object. 
 
@@ -41,15 +42,18 @@ class InputsAndCodesMetric(Metric):
             best_value (Callable): the comparison function
                 to use to determine the best value obtained for this
                 metric.
-            metric_name (str): the name of the metric being created.
+            name (str): the name of the metric being created.
+            approximation_batch_size (Optional[int]): the 
+                size of the approximation batch to use while
+                computing the metric.
         """
         super().__init__(
-            model, metric_name,
+            model, name,
             best_value, device, reduction
         )
 
         self.hook = LayerIOHook(self.model)
-        self.approximation_batch_size = 1024
+        self.approximation_batch_size = approximation_batch_size
         self.stored_codes = None
         self.stored_inputs = None
         self.active_input_slots = None

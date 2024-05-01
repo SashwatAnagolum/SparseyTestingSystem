@@ -9,15 +9,13 @@ class TrainingStepResult(Result):
         resolution (str): The resolution of the training step.
         metrics (dict): The metrics for the training step.
     """
-    def __init__(self, resolution: str):
+    def __init__(self):
         """
         Initializes the TrainingStepResult.
-        Args:
-            resolution (str): The resolution of the training step.
         """
         super().__init__()
-        self.resolution = resolution
         self.metrics = {}
+
 
     def add_metric(self, name: str, values: list):
         """
@@ -37,6 +35,7 @@ class TrainingStepResult(Result):
             (list): The values of the metric.
         """
         return self.metrics.get(name, None)
+
 
     def get_metrics(self) -> dict:
         """

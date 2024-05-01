@@ -78,11 +78,6 @@ class TrainingRecipe:
         self.setup_configs = setup_configs
         self.device = device
 
-        if step_resolution is None:
-            self.step_resolution = 1
-        else:
-            self.step_resolution = step_resolution
-
         self.batch_index = 0
         self.training_num_batches = len(self.train_dataloader)
         self.training_iterator = iter(self.train_dataloader)
@@ -94,7 +89,6 @@ class TrainingRecipe:
         self.training_results = TrainingResult(
             id=wandb.run.id,
             result_type="training",
-            resolution=self.step_resolution,
             metrics=self.metrics_list,
             configs=setup_configs
         )
@@ -102,7 +96,6 @@ class TrainingRecipe:
         self.eval_results = TrainingResult(
             id=wandb.run.id,
             result_type="evaluation",
-            resolution=self.step_resolution,
             metrics=self.metrics_list,
             configs=setup_configs
         )
@@ -130,58 +123,48 @@ class TrainingRecipe:
             num_batches_in_epoch = self.eval_num_batches
             data_iterator = self.eval_iterator
 
-        if self.batch_index + self.step_resolution >= num_batches_in_epoch:
-            num_batches_in_step = num_batches_in_epoch - self.batch_index
-        else:
-            num_batches_in_step = self.step_resolution
-
         if not training and self.first_eval:
             self.first_eval = False
             self.eval_results.start_time = datetime.now()
 
-        results = TrainingStepResult(self.step_resolution)
+        results = TrainingStepResult()
 
-        for _ in range(num_batches_in_step):
-            data, labels = next(data_iterator)
-            labels = labels.to(self.device)
+        data, labels = next(data_iterator)
+        labels = labels.to(self.device)
+        self.optimizer.zero_grad()
 
-            self.optimizer.zero_grad()
+        transformed_data = self.preprocessing_stack(data)
+        transformed_data = transformed_data.to(self.device)
+        transformed_data = transformed_data.reshape(
+            transformed_data.shape[0], -1, 1
+        )
 
-            transformed_data = self.preprocessing_stack(
-                data
+        model_output = self.model(transformed_data)
+
+        for metric in self.metrics_list:
+            output = metric.compute(
+                self.model, transformed_data,
+                model_output, training
             )
 
-            transformed_data = transformed_data.to(self.device)
-            transformed_data = transformed_data.reshape(
-                transformed_data.shape[0], -1, 1
-            )
+            # need to add logic for "save only during training/eval" metrics
+            results.add_metric(metric.get_name(), output)
 
-            model_output = self.model(transformed_data)
+        if training:
+            if self.loss_func is not None:
+                loss = self.loss_func(model_output, labels)
+                loss.backward()
 
-            for metric in self.metrics_list:
-                output = metric.compute(
-                    self.model, transformed_data,
-                    model_output, training
-                )
+            self.optimizer.step()
 
-                # need to add logic for "save only during training/eval" metrics
-                results.add_metric(metric.get_name(), output)
-
-            if training:
-                if self.loss_func is not None:
-                    loss = self.loss_func(model_output, labels)
-                    loss.backward()
-
-                self.optimizer.step()
-
-        self.batch_index += num_batches_in_step
+        self.batch_index += 1
 
         if self.batch_index == num_batches_in_epoch:
             epoch_ended = True
             self.batch_index = 0
 
             if training:
-                self.train_iterator = iter(self.train_dataloader)
+                self.training_iterator = iter(self.train_dataloader)
             else:
                 self.eval_iterator = iter(self.eval_dataloader)
         else:

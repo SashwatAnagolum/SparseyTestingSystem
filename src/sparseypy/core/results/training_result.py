@@ -9,25 +9,22 @@ class TrainingResult(Result):
     Training Result: class to store the results of a training run.
     Attributes:
         id (str): The id of the training run.
-        resolution (str): The resolution of the training run.
         result_type (str): The type of result.
         results (list[TrainingStepResult]): The list of results from the training run.
         best_steps (dict): The best steps from the training run.
         configs (dict): The configurations for the training run.
     """
-    def __init__(self, id: str, result_type: str, resolution: str, metrics: list[Metric], configs: Optional[dict] = None):
+    def __init__(self, id: str, result_type: str, metrics: list[Metric], configs: Optional[dict] = None):
         """
         Initializes the TrainingResult.
         Args:
             id (str): The id of the training run.
-            resolution (str): The resolution of the training run.
             result_type (str): The type of result.
             metrics (list[Metric]): The metrics to track.
             configs (dict): The configurations for the training run.
         """
         super().__init__()
         self.id = id
-        self.resolution = resolution
         self.result_type = result_type
         self.results = []  # List of TrainingStepResult objects
         self.best_steps = {}
@@ -42,9 +39,11 @@ class TrainingResult(Result):
                 'best_function': metric.get_best_comparison_function()
             }
 
+
     def add_step(self, step: TrainingStepResult):
         """
         Add a step to the training result.
+
         Args:
             step (TrainingStepResult): The step to add.
         """

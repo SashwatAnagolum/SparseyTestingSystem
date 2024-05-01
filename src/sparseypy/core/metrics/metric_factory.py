@@ -1,5 +1,7 @@
 import inspect
-from typing import Callable
+from typing import Callable, Optional
+
+import torch
 
 from sparseypy.core import metrics
 from sparseypy.core.metrics.metrics import Metric
@@ -31,16 +33,21 @@ class MetricFactory:
 
 
     @staticmethod
-    def create_metric(metric_name, **kwargs) -> Metric:
+    def create_metric(metric_name: str, reduction: str,
+        comparison: Optional[str], params: dict, model: torch.nn.Module,
+        device: torch.device) -> Metric:
         """
-        Creates a layer passed in based on the layer name and kwargs.
+        Creates a layer passed in based on the metric name and kwargs.
         """
         metric_class = MetricFactory.get_metric_class(metric_name)
 
-        if "best_value" in kwargs.keys():
-            kwargs["best_value"] = getattr(comparisons, kwargs["best_value"])
+        if comparison:
+            comparison = getattr(comparisons, comparison)
 
-        metric_obj = metric_class(**kwargs)
+        metric_obj = metric_class(
+            model, device, reduction,
+            comparison, **params
+        )
 
         return metric_obj
 
