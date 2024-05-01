@@ -55,6 +55,7 @@ def train_model(model_config: dict, trainer_config: dict,
         os.environ["WANDB_SILENT"] = "true"
 
     # initialize the DataStorer (logs into W&B and Firestore)
+    tqdm.write("Connecting to Weights & Biases...")
     DataStorer.configure(system_config)
     df = DataFetcher(system_config)
 
@@ -121,7 +122,7 @@ def train_model(model_config: dict, trainer_config: dict,
                     Printer.print_step_metrics(
                         step_data=output,
                         batch_number=batch_number,
-                        batch_size=trainer_config['training']['dataloader']['batch_size'],
+                        max_batch_size=trainer_config['training']['dataloader']['batch_size'],
                         step_type="training"
                     )
                 batch_number+=1
@@ -179,7 +180,7 @@ def train_model(model_config: dict, trainer_config: dict,
                     Printer.print_step_metrics(
                         step_data=output,
                         batch_number=batch_number,
-                        batch_size=trainer_config['eval']['dataloader']['batch_size'],
+                        max_batch_size=trainer_config['eval']['dataloader']['batch_size'],
                         step_type="evaluation"
                     )
                 batch_number+=1

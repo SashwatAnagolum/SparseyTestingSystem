@@ -210,32 +210,21 @@ Selected metrics:
 
     @staticmethod
     def print_step_metrics(step_data: TrainingStepResult, batch_number: int,
-                            batch_size: int = 1, step_type: str = "training"):
+                            max_batch_size: int = 1, step_type: str = "training"):
         """
         Prints the metrics for a single training/evaluation step to the console.
 
         Args:
             step_data (TrainingStepResult): the metric data for this step
             batch_number (int): the current batch number for this input (e.g. input 50)
-            batch_size (int): the maximum size of the current batch
+            max_batch_size (int): the maximum possible size of the current batch
             batch_type (str): whether the current step is training or evaluation
         """
         metric_data = step_data.get_metrics()
-
-        # if step_type == "evaluation":
-        #     for n, t in metric_data.items():
-        #         tqdm.write(f"{n} metric shape: {[l.shape for l in t.unbind()]}")
-
-        # HACK for batch size
-        # this batch is the smaller of the maximum batch size and 
-        # dimension 1 (batch size) in the first metric NestedTensor in the batch
-        # which is dimension 0 of the first Tensor unbound from the NestedTensor
-        # for the first item returned from the metric dictionary
-        this_batch = min(batch_size, next(iter(metric_data.values())).unbind()[0].size(dim=0))
-
-        for batch_index in range(this_batch):
+        # for each item in the batch
+        for batch_index in range(step_data.batch_size):
             # calculate input number and print input header
-            input_num = (batch_number - 1) * batch_size + (batch_index + 1)
+            input_num = (batch_number - 1) * max_batch_size + (batch_index + 1)
             tqdm.write(
                 f"\n\n{step_type.capitalize()} results - INPUT {input_num}\n--------------------"
             )

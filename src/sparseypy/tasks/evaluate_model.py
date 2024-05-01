@@ -59,6 +59,7 @@ def evaluate_model(model_name: str, trainer_config: dict,
             break
 
     # initialize the DataStorer (logs into W&B and Firestore)
+    tqdm.write("Connecting to Weights & Biases...")
     DataStorer.configure(system_config)
 
     df = DataFetcher(system_config)
@@ -105,7 +106,7 @@ def evaluate_model(model_name: str, trainer_config: dict,
                     Printer.print_step_metrics(
                         step_data=output,
                         batch_number=batch_number,
-                        batch_size=trainer_config['eval']['dataloader']['batch_size'],
+                        max_batch_size=trainer_config['eval']['dataloader']['batch_size'],
                         step_type="evaluation"
                     )
                 batch_number+=1
