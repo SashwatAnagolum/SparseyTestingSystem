@@ -1,6 +1,15 @@
 ---
 # trainer.yaml - training recipe configuration for a single experiment
 
+# run_name: str, no default - the name to give the run in Weights & Biases
+#     corresponding to this experiment; if this is not provided, a random 
+#     8-character name will be generated instead
+# run_name: "test_run"
+
+# description: string (optional, default None) - a written description of the purpose of this HPO run
+#     logged to the sweep summary in Weights & Biases
+description: "A test run with the demo configuration files."
+
 # optimizer settings
 optimizer:
   # name: string - the optimizer class to load and use
@@ -14,36 +23,20 @@ optimizer:
 #     metric schema in cli/config_validation/saved_schemas/metric
 #     in order for it to be detected here and pass validation
 metrics:
-  # name: string
-  #     metric name must be written in snake case
   - name: basis_set_size
-    # save: bool
-    #     whether the results of this metric should be stored to Weights & Biases
     save: True
     best_value: max_by_layerwise_mean
-  - name: basis_set_size_increase
-    save: False
   - name: basis_average
     save: True
   - name: num_activations
     save: True
-    # some metrics also support "reductions" to provide less granular data
-    # reduction: string
-    #     common options include {none, layerwise_mean, sum, mean} but exact types
-    #     (and whether they are supported at all) varies by metric class
-    #     "none" provides full-resolution per-MAC per-level data
-    #     other reductions will average/sum/etc. this to provide per-level or per-step data only
-    #     check the returns of the metric compute() functions to see which reductions are applicable to which metrics
     reduction: layerwise_mean
-
-# dataloader settings for loading items from the dataset
-dataloader:
-  # batch_size: int > 0
-  #    number of input items per batch
-  batch_size: 4
-  # shuffle: bool
-  #    whether to randomize the inputs as they are drawn from the dataloader
-  shuffle: True
+  - name: feature_coverage
+    save: True
+  - name: match_accuracy
+    save: True
+  - name: num_activations
+    save: True
 
 # training-related hyperparameters
 training:
@@ -53,5 +46,31 @@ training:
   #     but the setting exists for potential future compatibility
   num_epochs: 1
 
-use_gpu: False
+  # dataloader settings for loading items from the dataset
+  dataloader:
+    # batch_size: int > 0
+    #    number of input items per batch
+    batch_size: 1
+    # shuffle: bool
+    #    whether to randomize the inputs as they are drawn from the dataloader
+    shuffle: True
+
+eval:
+  # dataloader settings for loading items from the dataset
+  dataloader:
+    # batch_size: int > 0
+    #    number of input items per batch
+    batch_size: 16
+    # shuffle: bool
+    #    whether to randomize the inputs as they are drawn from the dataloader
+    shuffle: True
+
+# use_gpu: bool, default True if the system has a compatible GPU, otherwise False
+#     whether to use a GPU to accelerate system performance, if one is available
+#     (the system supports CUDA and MPS backends)
+#     in general, you are better off leaving this out and letting the system
+#     automatically use a GPU if it is available) unless you specifically want
+#     to refuse to start the run in the absence of a GPU (set True) or
+#     force the system to never use a GPU even if it is present (set False)
+# use_gpu: True
 ...

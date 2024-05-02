@@ -47,7 +47,7 @@ def test_error_handling():
     command = ['python', SCRIPT_PATH] + [f'--{k}={v}' for k, v in CONFIG_FILES.items()]
     result = subprocess.run(command, text=True, capture_output=True)
     assert result.returncode != 0, "Script should have failed but it didn't."
-    assert "Missing" in result.stdout, "Error handling failed."
+    assert "INVALID" in result.stdout, "Error handling failed."
     
 def test_weights_and_biases_integration():
     """
