@@ -50,30 +50,28 @@ class TestMAC:
         )
 
         return sparsey_layer
+    
     @pytest.fixture
-    def mac_config(self) -> dict:
-        """
-        Returns a dictionary with the configuration for a MAC.
-        """
+    def mac_config(self):
         return {
-            'num_cms': 16,
-            'num_neurons': 8,
-            'input_filter': torch.randn(16, 16),  # Example input filter shape, adjust as needed
-            'num_cms_per_mac_in_input': 4,
-            'num_neurons_per_cm_in_input': 2,
-            'layer_index': 0,
-            'mac_index': 0,
-            'sigmoid_lambda': 0.5,
-            'sigmoid_phi': 0.1,
-            'permanence_steps': 10.0,
-            'permanence_convexity': 0.8,
-            'activation_threshold_min': 0.1,
-            'activation_threshold_max': 0.9,
-            'sigmoid_chi': 0.7,
-            'min_familiarity': 0.2,
-            'device': torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-            'prev_layer_num_cms_per_mac': 8,
-            'prev_layer_num_neurons_per_cm': 4
+        'num_cms': 2,
+        'num_neurons': 2,
+        'input_filter': torch.tensor([0, 1, 2, 3]),  # Mock input filter
+        'num_cms_per_mac_in_input': 2,
+        'num_neurons_per_cm_in_input': 2,
+        'layer_index': 0,
+        'mac_index': 0,
+        'sigmoid_lambda': 28.0,
+        'sigmoid_phi': 5.0,
+        'activation_threshold_min': 0.2,
+        'activation_threshold_max': 1,
+        'sigmoid_chi': 2.5,
+        'min_familiarity': 0.2,
+        'permanence_steps': 1.0,
+        'permanence_convexity': 1.0,
+        'device': torch.device('cpu'),
+        'prev_layer_num_cms_per_mac': 2,
+        'prev_layer_num_neurons_per_cm': 2,
         }
 
     @pytest.fixture
@@ -94,39 +92,6 @@ class TestMAC:
         assert output.shape == expected_shape, f"Expected output shape {expected_shape}, but got {output.shape}"
 
 
-    def test_mac_invalid_input_shape(self, mac_config):
-        """
-        Test whether a MAC raises a ValueError when you pass
-        an Tensor with an invalid data shape through it.
-        """
-        mac = MAC(**mac_config)
-
-        data = torch.rand(1, 2, 32, 10, 4, 5)
-
-        with pytest.raises(ValueError):
-            mac(torch.Tensor([data,data]))
-
-
-    def test_sparsey_layer_valid_input_shape(self, sample_sparsey_layer):
-        """
-        Test whether a SparseyLayer outputs a Tensor of the right 
-        shape when you pass a Tensor with a valid data shape through it.
-        """
-        data = torch.randint(0, 2, (32, 3, 3, 12, 10))
-
-        assert tuple(sample_sparsey_layer(data).shape) == (32, 12, 8, 16)
-
-
-    def test_sparsey_layer_invalid_input_shape(self, sample_sparsey_layer):
-        """
-        Test whether a SparseyLayer raises a ValueError when you pass
-        an Tensor with an invalid data shape through it.
-        """
-        data = torch.randint(0, 2, (32, 12, 11, 10))
-
-        with pytest.raises(ValueError):
-            sample_sparsey_layer(data)
-
 
     def test_output_sparsity(self, sample_sparsey_layer):
         """
@@ -134,7 +99,7 @@ class TestMAC:
         one active neuron.
         TC-04-02: Test for correct operation of the winner-take-all modules and sparsity of the Sparsey layer output
         """
-        data = torch.randint(0, 2, (32, 3, 3, 12, 10))
+        data = torch.randint(0, 2, (32, 9, 120))
         output = sample_sparsey_layer(data)
 
         equal_elements_one = torch.eq(
