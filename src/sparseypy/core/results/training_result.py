@@ -1,10 +1,11 @@
 from typing import Optional
 
+import torch
+
 from sparseypy.core.results.result import Result
 from sparseypy.core.results.training_step_result import TrainingStepResult
 from sparseypy.core.metrics.metrics import Metric
 
-import torch
 
 class TrainingResult(Result):
     """
@@ -32,7 +33,7 @@ class TrainingResult(Result):
             max_batch_size (int): The maximum batch size stored in this TrainingResult.
             configs (dict): The configurations for the training run.
         """
-        super().__init__()
+        super().__init__(configs)
         self.id = id
         self.result_type = result_type
         self.results = []  # List of TrainingStepResult objects
@@ -84,48 +85,40 @@ class TrainingResult(Result):
         # finally, update item count to account for the new batch
         self.num_items += step.batch_size
 
+
     def get_best_step(self, metric: str) -> TrainingStepResult:
         """
         Get the best step for a given metric.
+
         Args:
             metric (str): The metric to get the best step for.
+
         Returns:
             (TrainingStepResult): the batch of results containing the best step
             (int): the index of the best step within those results
         """
         return self.results[self.best_steps[metric]["best_batch"]], self.best_steps[metric]["in_batch_index"]
 
+
     def get_step(self, index: int) -> TrainingStepResult:
         """
         Get a step by index.
+
         Args:
             index (int): The index of the step to get.
+
         Returns:
             (TrainingStepResult): The step at the given index.
         """
         return self.results[index]
 
+
     def get_steps(self) -> list[TrainingStepResult]:
         """ 
         Get the steps from the training result.
+
         Returns:
-            (list[TrainingStepResult]): The steps from the training result.
+            (list[TrainingStepResult]): The steps
+                from the training result.
         """
         return self.results
-
-    def add_config(self, name, config):
-        """
-        Add a configuration to the training result.
-        Args:
-            name (str): The name of the configuration.
-            config: The configuration to add.
-        """
-        self.configs[name] = config
-
-    def get_configs(self) -> dict:
-        """
-        Get the configurations for the training run.
-        Returns:
-            (dict): The configurations for the training run.
-        """
-        return self.configs

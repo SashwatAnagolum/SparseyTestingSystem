@@ -2,6 +2,7 @@ from datetime import datetime
 
 from sparseypy.core.results.result import Result
 
+
 class TrainingStepResult(Result):
     """
     Training Step Result: class to store the results of a single training step.
@@ -25,17 +26,21 @@ class TrainingStepResult(Result):
     def add_metric(self, name: str, values: list):
         """
         Add a metric to the training step result.
+
         Args:
             name (str): The name of the metric.
             values (list): The values of the metric.
         """
         self.metrics[name] = values
 
+
     def get_metric(self, name: str) -> list:
         """
         Get a metric from the training step result.
+
         Args:
             name (str): The name of the metric.
+
         Returns:
             (list): The values of the metric.
         """
@@ -45,6 +50,7 @@ class TrainingStepResult(Result):
     def get_metrics(self) -> dict:
         """
         Get the metrics from the training step result.
+
         Returns:
             (dict): The metrics from the training step result.
         """

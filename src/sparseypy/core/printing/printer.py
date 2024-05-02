@@ -115,25 +115,30 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
 
 
     @staticmethod
-    def print_pre_training_summary(dataset_config: dict, trainer_config: dict,
-                                   training_num_batches: int,
-                                   eval_num_batches: int,) -> None:
+    def print_pre_training_summary(training_dataset_config: dict,
+        evaluation_dataset_config: dict, trainer_config: dict,
+        training_num_batches: int, eval_num_batches: int) -> None:
         """
         Prints a pre-execution summary of a single training run.
 
         Args:
-            dataset_config (dict): the validated dataset configuration that will be
-                used for the run.
+            training_dataset_config (dict): the validated training dataset
+                configuration that will be used for the run.
+            evaluation_dataset_config (dict):  the validated evaluation dataset
+                configuration that will be used for the run.
             trainer_config (dict): the validated trainer configuration that will be
                 used for the run.
-            training_num_batches (int): the number of batches in this training run.
-            eval_num_batches (int): the number of batches in this evaluation run.
+            training_num_batches (int): the number of batches passed to 
+                the model during training.
+            eval_num_batches (int): the number of batches passed to
+                the model during evaluation.
         """
         # print training run summary
         met_separator = "\n* "
         tqdm.write(f"""
 TRAINING RUN SUMMARY
-Dataset type: {dataset_config['dataset_type']}
+Training dataset type: {training_dataset_config['dataset_type']}
+Evaluation dataset type: {evaluation_dataset_config['dataset_type']}
 Train batch size: {trainer_config['training']['dataloader']['batch_size']}
 Evaluation batch size: {trainer_config['eval']['dataloader']['batch_size']}
 Number of training batches: {training_num_batches}

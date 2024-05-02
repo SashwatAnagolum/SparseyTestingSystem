@@ -16,7 +16,7 @@
             "request": "launch",
             "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\evaluate_model.py",
             "args": [
-                "--dataset_config", ".\\demo\\dataset.yaml",
+                "--dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
                 "--model_name", "${input:getModelNameString}",
                 "--training_recipe_config", ".\\demo\\trainer.yaml",
@@ -32,7 +32,8 @@
             "request": "launch",
             "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\run_hpo.py",
             "args": [
-                "--dataset_config", ".\\demo\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
                 "--hpo_config", ".\\demo\\hpo.yaml",
                 "--system_config", ".\\demo\\system.yaml"
@@ -47,7 +48,8 @@
             "request": "launch",
             "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\run_hpo.py",
             "args": [
-                "--dataset_config", "${input:getSparseyConfigDirectoryString}\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
                 "--hpo_config", "${input:getSparseyConfigDirectoryString}\\hpo.yaml",
                 "--system_config", "${input:getSparseyConfigDirectoryString}\\system.yaml",
@@ -62,7 +64,8 @@
             "request": "launch",
             "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\run_hpo.py",
             "args": [
-                "--dataset_config", "${input:getSparseyConfigDirectoryString}\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
                 "--hpo_config", "${input:getSparseyConfigDirectoryString}\\hpo.yaml",
                 "--system_config", "${input:getSparseyConfigDirectoryString}\\system.yaml",
@@ -78,7 +81,8 @@
             "request": "launch",
             "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
             "args": [
-                "--dataset_config", ".\\demo\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
                 "--model_config", ".\\demo\\network.yaml",
                 "--training_recipe_config", ".\\demo\\trainer.yaml",
@@ -94,7 +98,8 @@
             "request": "launch",
             "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
             "args": [
-                "--dataset_config", ".\\demo\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
                 "--model_name", "${input:getModelNameString}",
                 "--training_recipe_config", ".\\demo\\trainer.yaml",
@@ -110,7 +115,8 @@
             "request": "launch",
             "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
             "args": [
-                "--dataset_config", "${input:getSparseyConfigDirectoryString}\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
                 "--model_config", "${input:getSparseyConfigDirectoryString}\\network.yaml",
                 "--training_recipe_config", "${input:getSparseyConfigDirectoryString}\\trainer.yaml",
@@ -126,7 +132,8 @@
             "request": "launch",
             "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
             "args": [
-                "--dataset_config", "${input:getSparseyConfigDirectoryString}\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
                 "--model_config", "${input:getSparseyConfigDirectoryString}\\network.yaml",
                 "--training_recipe_config", "${input:getSparseyConfigDirectoryString}\\trainer.yaml",

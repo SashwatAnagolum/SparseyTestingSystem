@@ -229,10 +229,24 @@ class DataStorer:
         """
 
         # WEIGHTS & BIASES
-        if experiment.configs:
-            dataset_description = experiment.configs["dataset_config"]["description"]
-            if dataset_description:
-                wandb.run.summary["dataset_description"] = dataset_description
+        training_ds_config = experiment.get_config('training_dataset_config')
+        eval_ds_config = experiment.get_config('evaluation_dataset_config')
+
+        if training_ds_config is not None:
+            description = training_ds_config.get('description', None)
+
+            if description:
+                wandb.run.summary[
+                        "training_dataset_description"
+                ] = description
+
+        if eval_ds_config is not None:
+            description = eval_ds_config.get('description', None)
+
+            if description:
+                wandb.run.summary[
+                    "evaluation_dataset_description"
+                ] = description
 
         # DATABASE
         for db_adapter in self.db_adapters:
@@ -317,8 +331,8 @@ class DataStorer:
         # FIXME correct duplicate logging, only log hpo_objective
         wandb.log(
                     {
-                    'hpo_objective': objective["total"],
-                    'objective_details': objective 
+                        'hpo_objective': objective["total"],
+                        'objective_details': objective 
                     }
                 )
 
