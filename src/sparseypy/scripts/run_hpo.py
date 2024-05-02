@@ -65,8 +65,13 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        '--dataset_config', type=str,
-        help='The location of the dataset config file.'
+        '--training_dataset_config', type=str,
+        help='The location of the training dataset config file.'
+    )
+
+    parser.add_argument(
+        '--evaluation_dataset_config', type=str,
+        help='The location of the evaluation dataset config file.'
     )
 
     parser.add_argument(
@@ -105,10 +110,13 @@ def main():
         args.preprocessing_config
     )
 
-    dataset_config_info = get_config_info(
-        args.dataset_config
+    training_dataset_config_info = get_config_info(
+        args.training_dataset_config
     )
 
+    evaluation_dataset_config_info = get_config_info(
+        args.evaluation_dataset_config
+    )
 
     hpo_config_info = get_config_info(
         args.hpo_config
@@ -126,8 +134,15 @@ def main():
         print_error_stacktrace=print_error_stacktrace
     )
 
-    validated_dataset_config = validate_config(
-        dataset_config_info, 'dataset', dataset_config_info['dataset_type'],
+    validated_training_dataset_config = validate_config(
+        training_dataset_config_info, 'dataset',
+        training_dataset_config_info['dataset_type'],
+        print_error_stacktrace=print_error_stacktrace
+    )
+
+    validated_evaluation_dataset_config = validate_config(
+        evaluation_dataset_config_info, 'dataset',
+        evaluation_dataset_config_info['dataset_type'],
         print_error_stacktrace=print_error_stacktrace
     )
 
@@ -138,7 +153,8 @@ def main():
 
     run_hpo(
         hpo_config=validated_hpo_config,
-        dataset_config=validated_dataset_config,
+        training_dataset_config=validated_training_dataset_config,
+        evaluation_dataset_config=validated_evaluation_dataset_config,
         preprocessing_config=validated_preprocessing_config,
         system_config=validated_system_config
     )

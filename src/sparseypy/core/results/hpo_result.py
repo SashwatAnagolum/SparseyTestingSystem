@@ -2,6 +2,7 @@ from datetime import datetime
 from sparseypy.core.results.result import Result
 from sparseypy.core.results.hpo_step_result import HPOStepResult
 
+
 class HPOResult(Result):
     """
     Hyperparameter Optimization Result: class to store the results of a hyperparameter optimization run.
@@ -20,12 +21,12 @@ class HPOResult(Result):
             id (str): The id of the hyperparameter optimization run.
             name (str): The name of the hyperparameter optimization run.
         """
-        super().__init__()
+        super().__init__(configs)
         self.name = name
         self.id = id
         self.best_run = None
         self.runs = []  # List of HPOStepResult objects
-        self.configs = configs
+
 
     def add_step(self, step: HPOStepResult):
         """

@@ -40,8 +40,9 @@ class HPORun():
     """
     tqdm_bar = None
 
-    def __init__(self, hpo_config: dict,
-        dataset_config: dict, preprocessing_config: dict, system_config: dict):
+    def __init__(self, hpo_config: dict, training_dataset_config: dict,
+        evaluation_dataset_config: dict,
+        preprocessing_config: dict, system_config: dict) -> None:
         """
         Initializes the HPORun object.
 
@@ -49,7 +50,10 @@ class HPORun():
             hpo_config (dict): configurations for the HPO Run.
             trainer_config (dict): configruations for the
                 training recipe.
-            dataset_config (dict): configurations for the dataset.
+            training_dataset_config (dict): configurations for
+                the training dataset.
+            evaluation_dataset_config (dict): configurations for
+                the evaluation dataset.
             preprocessing_config (dict): configurations for the
                 preprocessing stack.
             wandb_api_key (str): the Weights and Biases API key to 
@@ -64,17 +68,22 @@ class HPORun():
 
         self.system_config = system_config  
         self.preprocessing_config = preprocessing_config
-        self.dataset_config = dataset_config
-        self.dataset = DatasetFactory.build_and_wrap_dataset(
-            dataset_config
+        self.training_dataset_config = training_dataset_config
+        self.evaluation_dataset_config = evaluation_dataset_config
+
+        self.training_dataset = DatasetFactory.build_and_wrap_dataset(
+            training_dataset_config
         )
 
-        # BUG does this approach log things in an incorrect order for multithreaded runs?
+        self.evaluation_dataset = DatasetFactory.build_and_wrap_dataset(
+            evaluation_dataset_config
+        )
+
         logged_configs = {
             'hpo_config': hpo_config,
-            'sweep_config': self.sweep_config, # do we need to log this?
-            'dataset_config': dataset_config,
-            #'training_recipe_config': trainer_config,
+            'sweep_config': self.sweep_config,
+            'training_dataset_config': training_dataset_config,
+            'evaluation_dataset_config': evaluation_dataset_config,
             'preprocessing_config': preprocessing_config
         }
 
@@ -82,7 +91,9 @@ class HPORun():
         self.data_storer = DataStorer(hpo_config['metrics'])
 
         # create the HPOResult (also sets start time)
-        self.hpo_results = HPOResult(logged_configs, self.sweep_id, hpo_config['hpo_run_name'])
+        self.hpo_results = HPOResult(
+            logged_configs, self.sweep_id, hpo_config['hpo_run_name']
+        )
 
         # create the sweep
         self.data_storer.create_hpo_sweep(self.hpo_results)
@@ -178,7 +189,8 @@ class HPORun():
         return sweep_parameters
 
 
-    def construct_sweep_config(self, hpo_config: dict, system_config: dict) -> dict:
+    def construct_sweep_config(self, hpo_config: dict,
+        system_config: dict) -> dict:
         """
         Construct the sweep configuration for the Weights and Biases
         sweep to be performed as part of the HPO run.
@@ -210,10 +222,12 @@ class HPORun():
 
     def generate_model_config(self, wandb_config: dict) -> dict:
         """
-        Generate the model configuration for the next run to be performed as part of the sweep.
+        Generate the model configuration for the next run
+        to be performed as part of the sweep.
 
         Args:
-            wandb_config (dict): the Weights & Biases configuration for the current run in the sweep
+            wandb_config (dict): the Weights & Biases configuration
+                for the current run in the sweep
 
         Returns:
             dict: the model configuration in the system format
@@ -238,10 +252,12 @@ class HPORun():
 
     def generate_trainer_config(self, wandb_config: dict) -> dict:
         """
-        Generate the trainer configuration for the next run to be performed as part of the sweep.
+        Generate the trainer configuration for the next run
+        to be performed as part of the sweep.
 
         Args:
-            wandb_config (dict): the Weights & Biases configuration for the current run in the sweep
+            wandb_config (dict): the Weights & Biases configuration
+                for the current run in the sweep.
 
         Returns:
             dict: the trainer configuration in the system format
@@ -292,10 +308,12 @@ class HPORun():
         try:
             training_recipe = TrainingRecipeBuilder.build_training_recipe(
                 model_config=validated_model_config,
-                dataset_config=deepcopy(self.dataset_config),
-                preprocessing_config=deepcopy(self.preprocessing_config),
+                training_dataset_config=self.training_dataset_config,
+                evaluation_dataset_config=self.evaluation_dataset_config,
+                preprocessing_config=self.preprocessing_config,
                 train_config=validated_trainer_config,
-                dataset=self.dataset
+                training_dataset=self.training_dataset,
+                evaluation_dataset=self.evaluation_dataset
             )
 
             done = False
@@ -305,7 +323,8 @@ class HPORun():
             hpo_step_results = HPOStepResult(
                 parent_run=self.sweep_id, id=wandb.run.id,
                 configs={
-                    'dataset_config': self.dataset_config,
+                    'training_dataset_config': self.training_dataset_config,
+                    'evaluation_dataset_config': self.evaluation_dataset_config,
                     'preprocessing_config': self.preprocessing_config,
                     'training_recipe_config': validated_trainer_config,
                     'model_config': validated_model_config
@@ -402,14 +421,15 @@ class HPORun():
                         del run.config[k]
 
                 run.update()
-
         except Exception as e:
             Printer.print_hpo_exception(
                 current_step=self.num_steps,
                 message=traceback.format_exc()
             )
+
         if HPORun.tqdm_bar is not None:
             HPORun.tqdm_bar.update(1)
+
 
     @classmethod
     def close_tqdm(cls):
@@ -431,9 +451,9 @@ class HPORun():
         )
 
         wandb._teardown()
-
         self.hpo_results.mark_finished()
 
         self.data_storer.save_hpo_result(self.hpo_results)
         HPORun.close_tqdm()
+
         return self.hpo_results

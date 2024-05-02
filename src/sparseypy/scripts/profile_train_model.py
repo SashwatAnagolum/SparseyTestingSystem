@@ -47,8 +47,13 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        '--dataset_config', type=str,
-        help='The location of the dataset config file.'
+        '--training_dataset_config', type=str,
+        help='The location of the training dataset config file.'
+    )
+
+    parser.add_argument(
+        '--evaluation_dataset_config', type=str,
+        help='The location of the evaluation dataset config file.'
     )
 
     parser.add_argument(
@@ -95,11 +100,17 @@ def main():
         args.preprocessing_config
     )
 
-    dataset_config_info = get_config_info(
-        args.dataset_config
+    training_dataset_config_info = get_config_info(
+        args.training_dataset_config
     )
 
-    print_error_stacktrace = system_config_info['console'].get("print_error_stacktrace", False)
+    evaluation_dataset_config_info = get_config_info(
+        args.evaluation_dataset_config
+    )
+
+    print_error_stacktrace = system_config_info['console'].get(
+        "print_error_stacktrace", False
+    )
 
     validated_system_config = validate_config(
         system_config_info, 'system', 'default',
@@ -116,8 +127,15 @@ def main():
         print_error_stacktrace=print_error_stacktrace
     )
 
-    validated_dataset_config = validate_config(
-        dataset_config_info, 'dataset', dataset_config_info['dataset_type'],
+    validated_training_dataset_config = validate_config(
+        training_dataset_config_info, 'dataset',
+        training_dataset_config_info['dataset_type'],
+        print_error_stacktrace=print_error_stacktrace
+    )
+
+    validated_evaluation_dataset_config = validate_config(
+        evaluation_dataset_config_info, 'dataset',
+        evaluation_dataset_config_info['dataset_type'],
         print_error_stacktrace=print_error_stacktrace
     )
 
@@ -134,7 +152,7 @@ def main():
         model_data = args.model_name
 
     cProfile.runctx(
-        'train_model(model_config=model_data,trainer_config=validated_trainer_config,preprocessing_config=validated_preprocessing_config,dataset_config=validated_dataset_config,system_config=validated_system_config)',
+        'train_model(model_config=model_data,trainer_config=validated_trainer_config,preprocessing_config=validated_preprocessing_config,training_dataset_config=validated_training_dataset_config,evaluation_dataset_config=validated_evaluation_dataset_config,system_config=validated_system_config)',
         globals={},
         locals={
             'train_model': train_model,
@@ -142,7 +160,8 @@ def main():
             'validated_trainer_config': validated_trainer_config,
             'validated_preprocessing_config': validated_preprocessing_config,
             'validated_system_config': validated_system_config,
-            'validated_dataset_config': validated_dataset_config
+            'validated_evaluation_dataset_config': validated_evaluation_dataset_config,
+            'validated_training_dataset_config': validated_training_dataset_config
         },
         filename=args.profile_filepath
     )
