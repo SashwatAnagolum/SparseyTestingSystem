@@ -7,7 +7,7 @@ from sparseypy.core.data_storage_retrieval.data_storer import DataStorer
 from sparseypy.core.metrics.feature_coverage import FeatureCoverageMetric
 from sparseypy.core.metrics.match_accuracy import MatchAccuracyMetric
 
-class TestTrainingRecipeBuilderIntegration:
+class TestTRBIntegration:
     """
     Integration tests for the TrainingRecipeBuilder class.
     """
@@ -26,7 +26,7 @@ class TestTrainingRecipeBuilderIntegration:
                         'num_neurons_per_cm': 5,
                         'mac_grid_num_rows': 5, 
                         'mac_grid_num_cols': 5,
-                        'mac_receptive_field_radius': 1.5, 
+                        'mac_receptive_field_size': 1.5, 
                         'prev_layer_num_cms_per_mac': 12,
                         'prev_layer_num_neurons_per_cm': 10,
                         'prev_layer_mac_grid_num_rows': 4,
@@ -81,14 +81,20 @@ class TestTrainingRecipeBuilderIntegration:
                 'params': {}
             },
             'metrics': [
-                {'name': 'match_accuracy', 'save': False, 'best_value': 'max_by_layerwise_mean', 'reduction': 'mean'},
-                {'name': 'feature_coverage', 'save': False, 'best_value': 'max_by_layerwise_mean', 'reduction': 'mean'},
+                {'name': 'match_accuracy', 'save': False, 'best_value': 'max_by_layerwise_mean', 'reduction': 'mean', 'params': {}},
+                {'name': 'feature_coverage', 'save': False, 'best_value': 'max_by_layerwise_mean', 'reduction': 'mean', 'params': {}},
             ],
-            'dataloader': {
-                'batch_size': 4,
-                'shuffle': True
+            'eval': {
+                'dataloader': {
+                    'batch_size': 4,
+                    'shuffle': True
+                },
             },
             'training': {
+                'dataloader': {
+                    'batch_size': 4,
+                    'shuffle': True
+                },
                 'num_epochs': 1,
                 'step_resolution': 10
             },
@@ -134,17 +140,17 @@ class TestTrainingRecipeBuilderIntegration:
         """
         DataStorer.configure(self.system_config)
 
-        wandb.init(
-            project=self.system_config["wandb"]["project_name"],
-            allow_val_change=True,
-            job_type="train",
-            config={
-                'dataset': self.dataset_config,
-                'model': self.model_config,
-                'training_recipe': self.train_config,
-                'preprocessing': self.preprocessing_config
-            }
-        )
+        # wandb.init(
+        #     project=self.system_config["wandb"]["project_name"],
+        #     allow_val_change=True,
+        #     job_type="train",
+        #     config={
+        #         'dataset': self.dataset_config,
+        #         'model': self.model_config,
+        #         'training_recipe': self.train_config,
+        #         'preprocessing': self.preprocessing_config
+        #     }
+        # )
 
         training_recipe = TrainingRecipeBuilder.build_training_recipe(
             self.model_config, self.dataset_config,
