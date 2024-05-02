@@ -188,7 +188,7 @@ Metrics:
         tqdm.write("Review results in Weights & Biases:")
         tqdm.write(f"Model name: {model_name}")
         tqdm.write(f"Group name: {run_group}")
-        tqdm.write(f"Run URL (Training): {train_url}")
+        tqdm.write(f"Run URL (Training):   {train_url}")
         tqdm.write(f"Run URL (Evaluation): {eval_url}")
 
 
@@ -208,11 +208,12 @@ Metrics:
         met_separator = "\n* "
         tqdm.write(f"""
 EVALUATION RUN SUMMARY
-Using model: {model_name}
-Dataset type: {dataset_config['dataset_type']}
-Batch size: {trainer_config['eval']['dataloader']['batch_size']}
+Model:             {model_name}
+Dataset type:      {dataset_config['dataset_type']}
+Batch size:        {trainer_config['eval']['dataloader']['batch_size']}
 Number of batches: {num_batches}
-Selected metrics: 
+
+Metrics: 
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
     """)
 
@@ -234,7 +235,7 @@ Selected metrics:
         tqdm.write("Review results in Weights & Biases:")
         tqdm.write(f"Model name: {model_name}")
         tqdm.write(f"Group name: {run_group}")
-        tqdm.write(f"Run URL: {run_url}")
+        tqdm.write(f"Run URL:    {run_url}")
 
 
     @staticmethod
@@ -309,11 +310,11 @@ Selected metrics:
         """
         objective_results = step_results.get_objective()
         # TODO enhance with summary of metrics
-        tqdm.write(f"Objective value: {objective_results['total']:.5f}")
+        tqdm.write(f"Objective value:    {objective_results['total']:.5f}")
         tqdm.write(f"Combination method: {objective_results['combination_method']}")
         tqdm.write("Objective term breakdown:")
         for name, values in objective_results["terms"].items():
-            tqdm.write(f"* {name:>25}: {values['value']:.5f} with weight {values['weight']}")
+            tqdm.write(f"* {name:>20}: {values['value']:.5f} with weight {values['weight']}")
 
         if print_config:
             Printer.print_model_config(step_results.configs["model_config"])
