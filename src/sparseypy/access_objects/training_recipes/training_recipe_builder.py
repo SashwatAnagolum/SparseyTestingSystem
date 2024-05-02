@@ -73,19 +73,25 @@ class TrainingRecipeBuilder:
         )
 
         if training_dataset is None:
-            training_dataset = DatasetFactory.build_and_wrap_dataset(
-                training_dataset_config
-            )
+            if training_dataset_config is not None:
+                training_dataset = DatasetFactory.build_and_wrap_dataset(
+                    training_dataset_config
+                )
+            else:
+                training_dataset = None
 
         if evaluation_dataset is None:
             evaluation_dataset = DatasetFactory.build_and_wrap_dataset(
                 evaluation_dataset_config
             )
 
-        training_dataloader = DataLoader(
-            dataset=training_dataset,
-            **train_config['training']['dataloader']
-        )
+        if training_dataset is not None:
+            training_dataloader = DataLoader(
+                dataset=training_dataset,
+                **train_config['training']['dataloader']
+            )
+        else:
+            training_dataloader = None
 
         eval_dataloader = DataLoader(
             dataset=evaluation_dataset,

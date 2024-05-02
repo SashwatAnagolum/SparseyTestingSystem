@@ -78,8 +78,12 @@ class TrainingRecipe:
         self.device = device
 
         self.batch_index = 0
-        self.training_num_batches = len(self.train_dataloader)
-        self.training_iterator = iter(self.train_dataloader)
+        if self.train_dataloader:
+            self.training_num_batches = len(self.train_dataloader)
+            self.training_iterator = iter(self.train_dataloader)
+        else:
+            self.training_num_batches = 0
+            self.training_iterator = None
         self.eval_num_batches = len(self.eval_dataloader)
         self.eval_iterator = iter(self.eval_dataloader)
 
