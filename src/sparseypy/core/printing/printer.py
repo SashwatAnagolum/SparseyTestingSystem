@@ -30,7 +30,6 @@ class Printer:
             tqdm.write(
                 f"* {metric:>25}: step {val['best_index']:<5} (using {val['best_function'].__name__})"
             )
-        tqdm.write("")
 
     @staticmethod
     def print_pre_hpo_summary(hpo_config: dict) -> None:
@@ -52,12 +51,12 @@ class Printer:
         tqdm.write(f"""
 HYPERPARAMETER OPTIMIZATION SUMMARY
           
-W&B project name: {hpo_config['project_name']}
-W&B sweep name: {hpo_config['hpo_run_name']}
+W&B project name:      {hpo_config['project_name']}
+W&B sweep name:        {hpo_config['hpo_run_name']}
 
-Model family: {hpo_config['model_family']}
+Model family:          {hpo_config['model_family']}
 Optimization strategy: {hpo_config['hpo_strategy']}
-Number of runs: {hpo_config['num_candidates']}
+Number of runs:        {hpo_config['num_candidates']}
 
 Selected metrics: 
 * {met_separator.join([x["name"] for x in hpo_config["metrics"]])}
@@ -93,11 +92,11 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
         tqdm.write("\n---------------------------------------------------------")
         # print the summary directing users to Weights & Biases
         tqdm.write("Review full results in Weights & Biases:")
-        tqdm.write(f"Project: {hpo_config['project_name']}")
+        tqdm.write(f"Project:        {hpo_config['project_name']}")
         tqdm.write(f"HPO sweep name: {hpo_config['hpo_run_name']}")
-        tqdm.write(f"HPO sweep URL: {sweep_url}")
-        tqdm.write(f"Best run ID: {hpo_results.best_run.id}")
-        tqdm.write(f"Best run URL: {best_run_url}")
+        tqdm.write(f"HPO sweep URL:  {sweep_url}")
+        tqdm.write(f"Best run ID:    {hpo_results.best_run.id}")
+        tqdm.write(f"Best run URL:   {best_run_url}")
 
 
     @staticmethod
@@ -148,7 +147,7 @@ Evaluation:
 * batch size:        {trainer_config['eval']['dataloader']['batch_size']}
 * Number of batches: {eval_num_batches}
 
-Metrics: 
+Selected metrics: 
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
 """)
 
@@ -164,7 +163,7 @@ Metrics:
             phase (str): the current phase (training/validation/evaluation)
         """
         tqdm.write(f"{phase.upper()} STARTED")
-        tqdm.write(f"Run name: {run_name}")
+        tqdm.write(f"Run name:          {run_name}")
         tqdm.write(f"View results live: {run_url}\n")
 
 
@@ -186,8 +185,8 @@ Metrics:
         """
         tqdm.write("\nTRAIN MODEL COMPLETED")
         tqdm.write("Review results in Weights & Biases:")
-        tqdm.write(f"Model name: {model_name}")
-        tqdm.write(f"Group name: {run_group}")
+        tqdm.write(f"Model name:           {model_name}")
+        tqdm.write(f"Group name:           {run_group}")
         tqdm.write(f"Run URL (Training):   {train_url}")
         tqdm.write(f"Run URL (Evaluation): {eval_url}")
 
@@ -213,7 +212,7 @@ Dataset type:      {dataset_config['dataset_type']}
 Batch size:        {trainer_config['eval']['dataloader']['batch_size']}
 Number of batches: {num_batches}
 
-Metrics: 
+Selected metrics: 
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
     """)
 
