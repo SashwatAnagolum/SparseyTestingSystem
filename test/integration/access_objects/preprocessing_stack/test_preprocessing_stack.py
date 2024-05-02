@@ -12,6 +12,7 @@ def mnist_image_dataset():
     # Adjust the `data_dir` path to where your MNIST dataset is located
     return ImageDataset(data_dir=".\\demo\\sample_mnist_dataset", image_format=".png")
 
+
 @pytest.fixture
 def simple_preprocessing_stack():
     # Define a simple preprocessing configuration for demonstration
@@ -21,11 +22,16 @@ def simple_preprocessing_stack():
             {'name': 'random_posterize', 'params': { 'p': 1.0, 'bits': 1,}} 
         ]
     }
+
     return PreprocessingStack(transform_configs)
+
 
 @pytest.mark.usefixtures("mnist_image_dataset", "simple_preprocessing_stack")
 def test_transform_order(mnist_image_dataset, simple_preprocessing_stack):
+    """
+    Test case ID: TC-14-01
+    """
     preprocessed_dataset = PreprocessedDataset(dataset=mnist_image_dataset, preprocessing_stack=simple_preprocessing_stack)
-    print(type(preprocessed_dataset.preprocessing_stack.transform_list[0]))
+
     assert isinstance(preprocessed_dataset.preprocessing_stack.transform_list[0], Grayscale), "First transform should be ToTensor"
     assert isinstance(preprocessed_dataset.preprocessing_stack.transform_list[1], RandomPosterize), "Second transform should be Normalize"

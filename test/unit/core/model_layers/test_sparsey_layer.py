@@ -22,76 +22,39 @@ class TestMAC:
         tests with.
         """
         sparsey_layer = SparseyLayer(
-            autosize_grid=False, 
+            autosize_grid=False,
             grid_layout="rect",
-            num_macs=16, 
+            num_macs=16,
             num_cms_per_mac=8,
-            num_neurons_per_cm=16, 
+            num_neurons_per_cm=16,
             mac_grid_num_rows=4,
-            mac_grid_num_cols=4, 
+            mac_grid_num_cols=4,
             prev_layer_num_macs=9,
             mac_receptive_field_size=0.5,
-            prev_layer_num_cms_per_mac=12, 
+            prev_layer_num_cms_per_mac=12,
             prev_layer_num_neurons_per_cm=10,
             prev_layer_mac_grid_num_rows=3,
             prev_layer_mac_grid_num_cols=3,
-            prev_layer_grid_layout="rect", 
+            prev_layer_grid_layout="rect",
             layer_index=2,
-            sigmoid_phi=5.0, 
+            sigmoid_phi=5.0,
             sigmoid_lambda=28.0,
-            saturation_threshold=0.5, 
+            saturation_threshold=0.5,
             permanence_steps=1.0,
             permanence_convexity=1.0,
-            activation_threshold_max=1.0, 
+            activation_threshold_max=1.0,
             activation_threshold_min=0.2,
-            min_familiarity=0.2, 
+            min_familiarity=0.2,
             sigmoid_chi=2.5,
-            device=torch.device("cpu"),
-            # prev_layer_mac_positions=[
-            #     (0.0, 0.0), (0.0, 0.5), (0.0, 1.0),
-            #     (0.5, 0.0), (0.5, 0.5), (0.5, 1.0),
-            #     (1.0, 0.0), (1.0, 0.5), (1.0, 1.0),
-            # ]            
-            )
+            device=torch.device("cpu")           
+        )
 
         return sparsey_layer
-
-
-    @pytest.mark.parametrize(
-            'bsz, num_cms, num_neurons, input_filter,' + 
-            ' prev_num_cms, prev_num_neurons, output_shape',
-            [
-                (16, 5, 5, [1, 2, 3], 10, 8, (16, 5, 5)),
-                (8, 5, 8, [1, 2], 10, 8, (8, 5, 8)),
-                (16, 3, 3, [1, 4], 2, 2, (16, 3, 3)),
-                (1, 16, 8, [1], 4, 8, (1, 16, 8)),
-                (4, 4, 4, [1, 2, 7], 10, 10, (4, 4, 4))
-            ]
-    )
-    @pytest.fixture
-    def mac_config(self):
-        return {
-        'num_cms': 2,
-        'num_neurons': 2,
-        'input_filter': torch.tensor([0, 1, 2, 3]),  # Mock input filter
-        'num_cms_per_mac_in_input': 2,
-        'num_neurons_per_cm_in_input': 2,
-        'layer_index': 0,
-        'mac_index': 0,
-        'sigmoid_lambda': 28.0,
-        'sigmoid_phi': 5.0,
-        'permanence_steps':0.5,
-        'permanence_convexity':1.0,
-        'activation_threshold_min': 0.2,
-        'activation_threshold_max': 1,
-        'sigmoid_chi': 2.5,
-        'min_familiarity': 0.2,
-        'device': torch.device("cpu")
-        }
 
     @pytest.fixture
     def mock_input(self):
         return torch.rand(1, 4, 2, 2)  # should find one that is actually a real input when running
+
 
     def test_mac_output_shape(self, mac_config, mock_input):
         mac = MAC(**mac_config)
@@ -100,6 +63,7 @@ class TestMAC:
         expected_shape = (1, mac_config['num_cms'], mac_config['num_neurons'])
         # Verify the output shape
         assert output.shape == expected_shape, f"Expected output shape {expected_shape}, but got {output.shape}"
+
 
     def test_mac_invalid_input_shape(self, mac_config):
         """
@@ -143,8 +107,6 @@ class TestMAC:
         """
         data = torch.randint(0, 2, (32, 3, 3, 12, 10))
         output = sample_sparsey_layer(data)
-
-        #assert tuple(output.shape) == (32, 12, 8, 16)
 
         equal_elements_one = torch.eq(
             output,

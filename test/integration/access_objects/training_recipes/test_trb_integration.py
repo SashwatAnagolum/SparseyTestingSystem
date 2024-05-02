@@ -136,7 +136,7 @@ class TestTRBIntegration:
         """
         Tests integration and functionality of metrics within the TrainingRecipe object.
 
-        Test Case ID: TC-10-03
+        Test Case ID: TC-10-02
         """
         DataStorer.configure(self.system_config)
 

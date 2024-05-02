@@ -8,7 +8,9 @@ and artifact creation in Weights & Biases.
 
 import pytest
 from unittest.mock import Mock, patch
-from sparseypy.core.data_storage_retrieval import DataStorer, Model, TrainingResult
+from sparseypy.core.data_storage_retrieval import DataStorer
+from sparseypy.access_objects.models.model import Model
+from sparseypy.core.results.training_result import TrainingResult
 import wandb
 
 @pytest.fixture

@@ -9,7 +9,7 @@ import pytest
 
 # Import the main function from hpo_run_task.py
 # Ensure that hpo_run_task.py is in the Python path
-from sparseypy.tasks.run_hpo import main
+from sparseypy.tasks.run_hpo import run_hpo
 
 class TestHPORunTask:
     """
@@ -24,12 +24,13 @@ class TestHPORunTask:
         """
         try:
             config_file_path = 'config.yaml'
-            main(config_file_path)
+            run_hpo(config_file_path)
             assert True
 
         except Exception as e:
             pytest.fail(f"Execution of hpo_run_task.py failed: {e}")
-    
+
+
     def test_run_hpo_task_invalid_filepath(self):
         """
         This test calls the main function of hpo_run_task.py and checks
@@ -37,6 +38,6 @@ class TestHPORunTask:
         """
         with pytest.raises(FileNotFoundError) as exc_info:
             invalid_path = 'non_existent_config.yaml'
-            main(invalid_path)  # Call with an invalid file path
+            run_hpo(invalid_path)  # Call with an invalid file path
         
         assert "No such file or directory" in str(exc_info.value)

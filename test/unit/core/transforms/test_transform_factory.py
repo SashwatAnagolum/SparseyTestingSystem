@@ -14,6 +14,7 @@ def test_invalid_transform_creation():
     with pytest.raises(ValueError) as exc_info:
         TransformFactory.create_transform('non_existent_transform')
 
+
 def test_valid_system_transform():
     """
     Test TransformFactory with valid system transform parameters.
@@ -25,6 +26,7 @@ def test_valid_system_transform():
     
     # Check if the transform is an instance of  SkeletonizeTransform
     assert isinstance(transform, SkeletonizeTransform), "Failed to create a  SkeletonizeTransform transform."
+
 
 def test_valid_pytorch_transform():
     """
