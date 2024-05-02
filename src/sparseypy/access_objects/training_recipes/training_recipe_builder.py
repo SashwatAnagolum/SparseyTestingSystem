@@ -26,9 +26,12 @@ class TrainingRecipeBuilder:
     """
     @staticmethod
     def build_training_recipe(model_config: dict,
-        dataset_config: dict, preprocessing_config: dict,
+        training_dataset_config: dict,
+        evaluation_dataset_config: dict,
+        preprocessing_config: dict,
         train_config: dict,
-        dataset: Optional[Dataset] = None) -> TrainingRecipe:
+        training_dataset: Optional[Dataset] = None,
+        evaluation_dataset: Optional[Dataset] = None) -> TrainingRecipe:
         """
         Builds the training recipe object using the
         passed in config information.
@@ -69,15 +72,24 @@ class TrainingRecipeBuilder:
             device=device, model=model
         )
 
-        if dataset is None:
-            dataset = DatasetFactory.build_and_wrap_dataset(dataset_config)
+        if training_dataset is None:
+            training_dataset = DatasetFactory.build_and_wrap_dataset(
+                training_dataset_config
+            )
+
+        if evaluation_dataset is None:
+            evaluation_dataset = DatasetFactory.build_and_wrap_dataset(
+                evaluation_dataset_config
+            )
 
         training_dataloader = DataLoader(
-            dataset=dataset, **train_config['training']['dataloader']
+            dataset=training_dataset,
+            **train_config['training']['dataloader']
         )
 
         eval_dataloader = DataLoader(
-            dataset=dataset, **train_config['eval']['dataloader']
+            dataset=evaluation_dataset,
+            **train_config['eval']['dataloader']
         )
 
         metrics_list = []
@@ -104,7 +116,8 @@ class TrainingRecipeBuilder:
 
         # store the configs inside the finished TrainingRecipe for later saving
         setup_configs = {
-            'dataset_config': dataset_config,
+            'training_dataset_config': training_dataset_config,
+            'evaluation_dataset_config': evaluation_dataset_config,
             'model_config': model_config,
             'preprocessing_config': preprocessing_config,
             'training_recipe_config': train_config
@@ -116,6 +129,7 @@ class TrainingRecipeBuilder:
             train_config['metrics'], setup_configs,
             loss_func
         )
+
 
     @staticmethod
     def sense_gpu() -> str:

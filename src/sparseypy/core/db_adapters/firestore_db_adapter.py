@@ -50,7 +50,8 @@ class FirestoreDbAdapter(DbAdapter):
             # initialize Firestore
             cred_obj = firebase_admin.credentials.Certificate(
                 self.config['firebase_service_key_path']
-                )
+            )
+
             firebase_admin.initialize_app(cred_obj)
             # mark as initialized
             FirestoreDbAdapter.is_initialized = True
@@ -59,9 +60,7 @@ class FirestoreDbAdapter(DbAdapter):
         self.db = firestore.client()
 
         self.batch_size = self.config["batch_size"]
-
         self.resolution = self.config["data_resolution"]
-
         self.tables = self.config["table_names"]
 
         self.step_cache = {
@@ -143,12 +142,36 @@ class FirestoreDbAdapter(DbAdapter):
             experiment (TrainingResult): the TrainingResult for the new experiment
             for which to create a database entry
         """
-        if experiment.configs:
-            dataset_description = experiment.configs["dataset_config"]["description"]
-            description = experiment.configs["training_recipe_config"]["description"]
-        else:
-            dataset_description = None
-            description = None
+        training_ds_config = experiment.get_config(
+            'training_dataset_config'
+        )
+
+        eval_ds_config = experiment.get_config(
+            'evaluation_dataset_config'
+        )
+
+        training_recipe_config = experiment.get_config(
+            'training_recipe_config'
+        )
+
+        training_dataset_description = None
+        evaluation_dataset_description = None
+        training_recipe_description = None
+
+        if training_ds_config is not None:
+            training_dataset_description = training_ds_config.get(
+                'description', None
+            )
+
+        if eval_ds_config is not None:
+            evaluation_dataset_description = eval_ds_config.get(
+                'description', None
+            )
+
+        if training_recipe_config is not None:
+            training_recipe_description = training_recipe_config.get(
+                'description'
+            )
 
         # save on "summary" or better
         if self.resolution > 0:
@@ -164,11 +187,13 @@ class FirestoreDbAdapter(DbAdapter):
                     "saved_metrics": {},
                     "end_times": {},
                     "completed": False,
-                    "batch_sizes": {
-                        experiment.result_type: experiment.max_batch_size
-                    },
-                    "dataset_description": dataset_description,
-                    "description": description
+                    "batch_size": self.batch_size,
+                    "dataset_descriptions": 
+                        {
+                            "training": training_dataset_description,
+                            "evaluation": evaluation_dataset_description
+                        },
+                    "description": training_recipe_description
                 }
             )
 
@@ -691,6 +716,7 @@ class FirestoreDbAdapter(DbAdapter):
             second=firestore_timestamp.second,
             microsecond=firestore_timestamp.microsecond,
         )
+
         return converted_datetime
 
 
@@ -764,6 +790,7 @@ class FirestoreDbAdapter(DbAdapter):
         experiment_ref = self.db.collection(self.tables["experiments"]).document(experiment_id)
         return experiment_ref.get().to_dict()
 
+
     @lru_cache(maxsize=16)
     def _get_batch_data(self, batch_id) -> dict:
         """
@@ -777,6 +804,7 @@ class FirestoreDbAdapter(DbAdapter):
         """
         batch_ref = self.db.collection(self.tables["batches"]).document(batch_id)
         return batch_ref.get().to_dict()
+
 
     @lru_cache(maxsize=16)
     def _get_hpo_run_data(self, hpo_run_id) -> dict:

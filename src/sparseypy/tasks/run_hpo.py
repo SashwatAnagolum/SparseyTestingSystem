@@ -21,8 +21,10 @@ warnings.filterwarnings(
 )
 
 def run_hpo(hpo_config: dict,
-            dataset_config: dict, preprocessing_config: dict,
-            system_config: dict):
+            training_dataset_config: dict,
+            evaluation_dataset_config: dict,
+            preprocessing_config: dict,
+            system_config: dict) -> None:
     """
     Runs hyperparameter optimization
     over the specified network hyperparameters
@@ -31,8 +33,10 @@ def run_hpo(hpo_config: dict,
     Args:
         hpo_config (dict): config info used to build the
             HPORun object.
-        dataset_config (dict): config info used to build the
-            dataset object.
+        training_dataset_config (dict): config info used to
+            build the training dataset object.
+        evaluation_dataset_config (dict): config info used to
+            build the evaluation dataset object.
         preprocessing_config (dict): config info used to build the
             preprocessing stack.
         system_config (dict): config info for the overall system
@@ -46,8 +50,9 @@ def run_hpo(hpo_config: dict,
     DataStorer.configure(system_config)
 
     hpo_run = HPORun(
-        hpo_config,
-        dataset_config, preprocessing_config, system_config
+        hpo_config, training_dataset_config,
+        evaluation_dataset_config, preprocessing_config, 
+        system_config
     )
 
     # if we are in production mode (verbosity 0), suppress the W&B output

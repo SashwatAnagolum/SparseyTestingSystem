@@ -32,8 +32,8 @@ warnings.filterwarnings(
 )
 
 def train_model(model_config: dict, trainer_config: dict,
-                preprocessing_config: dict, dataset_config: dict,
-                system_config: dict):
+                preprocessing_config: dict, training_dataset_config: dict,
+                evaluation_dataset_config: dict, system_config: dict) -> None:
     """
     Builds a model using the model_config, and trains
     it using the trainer built using trainer_config on 
@@ -45,8 +45,10 @@ def train_model(model_config: dict, trainer_config: dict,
         trainer_config (dict): config info to build the trainer.
         preprocessing_config (dict): config info to build the
             preprocessing stack.
-        dataset_config (dict): config info to build the dataset
-            to train on.
+        training_dataset_config (dict): config info used to
+            build the training dataset object.
+        evaluation_dataset_config (dict): config info used to
+            build the evaluation dataset object.
         system_config (dict): config info for the overall system
     """
 
@@ -71,7 +73,7 @@ def train_model(model_config: dict, trainer_config: dict,
     wandb.init(
         allow_val_change=True,
         config={
-            'dataset': dataset_config,
+            'dataset': training_dataset_config,
             'model': wandb_model_config,
             'training_recipe': trainer_config,
             'preprocessing': preprocessing_config
@@ -90,7 +92,8 @@ def train_model(model_config: dict, trainer_config: dict,
         reload_model = True
 
     trainer = TrainingRecipeBuilder.build_training_recipe(
-        model_config, dataset_config, preprocessing_config,
+        model_config, training_dataset_config,
+        evaluation_dataset_config, preprocessing_config,
         trainer_config
     )
 
@@ -98,12 +101,13 @@ def train_model(model_config: dict, trainer_config: dict,
         trainer.model.load_state_dict(model_weights)
 
     Printer.print_pre_training_summary(
-            dataset_config=dataset_config,
-            trainer_config=trainer_config,
-            training_num_batches=trainer.training_num_batches,
-            eval_num_batches=trainer.eval_num_batches,
-        )
-    
+        training_dataset_config=training_dataset_config,
+        evaluation_dataset_config=evaluation_dataset_config,
+        trainer_config=trainer_config,
+        training_num_batches=trainer.training_num_batches,
+        eval_num_batches=trainer.eval_num_batches
+    )
+
     Printer.print_run_start_message(
         run_name=wandb.run.name,
         run_url=wandb.run.url,
@@ -154,11 +158,12 @@ def train_model(model_config: dict, trainer_config: dict,
         # end the current run
         tqdm.write("\nFinalizing training results...")
         wandb.finish()
+
         # start a new evaluation run
         wandb.init(
             allow_val_change=True,
             config={
-                'dataset': dataset_config,
+                'dataset': evaluation_dataset_config,
                 'model': wandb_model_config,
                 'training_recipe': trainer_config,
                 'preprocessing': preprocessing_config
