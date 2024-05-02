@@ -137,15 +137,20 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
         met_separator = "\n* "
         tqdm.write(f"""
 TRAINING RUN SUMMARY
-Training dataset type: {training_dataset_config['dataset_type']}
-Evaluation dataset type: {evaluation_dataset_config['dataset_type']}
-Train batch size: {trainer_config['training']['dataloader']['batch_size']}
-Evaluation batch size: {trainer_config['eval']['dataloader']['batch_size']}
-Number of training batches: {training_num_batches}
-Number of evaluation batches: {eval_num_batches}
-Selected metrics: 
+
+Training:
+* Dataset type:      {training_dataset_config['dataset_type']}
+* Batch size:        {trainer_config['training']['dataloader']['batch_size']}
+* Number of batches: {training_num_batches}
+
+Evaluation:
+* Dataset type:      {evaluation_dataset_config['dataset_type']}
+* batch size:        {trainer_config['eval']['dataloader']['batch_size']}
+* Number of batches: {eval_num_batches}
+
+Metrics: 
 * {met_separator.join([x["name"] for x in trainer_config["metrics"]])}
-    """)
+""")
 
 
     @staticmethod
