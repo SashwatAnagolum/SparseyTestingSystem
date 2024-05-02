@@ -156,7 +156,7 @@ def train_model(model_config: dict, trainer_config: dict,
         run_group = get_update_group(wandb.run.path)
         train_url = wandb.run.url
         # end the current run
-        tqdm.write("\nFinalizing training results...")
+        tqdm.write("\nFinalizing training results...\n")
         wandb.finish()
 
         # start a new evaluation run

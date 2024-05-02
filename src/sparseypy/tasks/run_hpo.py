@@ -47,6 +47,7 @@ def run_hpo(hpo_config: dict,
         os.environ["WANDB_SILENT"] = "true"
 
     # initialize the DataStorer (logs into W&B and Firestore)
+    tqdm.write("Connecting to Weights & Biases...")
     DataStorer.configure(system_config)
 
     hpo_run = HPORun(

@@ -62,8 +62,7 @@ Selected metrics:
 * {met_separator.join([x["name"] for x in hpo_config["metrics"]])}
 
 Objective calculation: {hpo_config['optimization_objective']['combination_method']} of
-* {met_separator.join(obj_vals)}
-""")
+* {met_separator.join(obj_vals)}""")
 
 
     @staticmethod
@@ -91,12 +90,15 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
         Printer.summarize_hpo_step(step_results=hpo_results.best_run, print_config=True)
         tqdm.write("\n---------------------------------------------------------")
         # print the summary directing users to Weights & Biases
-        tqdm.write("Review full results in Weights & Biases:")
-        tqdm.write(f"Project:        {hpo_config['project_name']}")
-        tqdm.write(f"HPO sweep name: {hpo_config['hpo_run_name']}")
-        tqdm.write(f"HPO sweep URL:  {sweep_url}")
-        tqdm.write(f"Best run ID:    {hpo_results.best_run.id}")
-        tqdm.write(f"Best run URL:   {best_run_url}")
+        tqdm.write(f"""Review full results in Weights & Biases:
+
+Project:        {hpo_config['project_name']}")
+
+HPO sweep name: {hpo_config['hpo_run_name']}")
+HPO sweep URL:  {sweep_url}")
+
+Best run ID:    {hpo_results.best_run.id}")
+Best run URL:   {best_run_url}""")
 
 
     @staticmethod
@@ -183,12 +185,15 @@ Selected metrics:
             eval_url (str): the URL for this evaluation run in 
                 Weights & Biases
         """
-        tqdm.write("\nTRAIN MODEL COMPLETED")
-        tqdm.write("Review results in Weights & Biases:")
-        tqdm.write(f"Model name:           {model_name}")
-        tqdm.write(f"Group name:           {run_group}")
-        tqdm.write(f"Run URL (Training):   {train_url}")
-        tqdm.write(f"Run URL (Evaluation): {eval_url}")
+        tqdm.write(f"""
+TRAIN MODEL COMPLETED
+Review results in Weights & Biases:
+
+Model name:           {model_name}
+Group name:           {run_group}
+
+Run URL (Training):   {train_url}
+Run URL (Evaluation): {eval_url}""")
 
 
     @staticmethod
