@@ -50,6 +50,31 @@ class TestMAC:
         )
 
         return sparsey_layer
+    @pytest.fixture
+    def mac_config(self) -> dict:
+        """
+        Returns a dictionary with the configuration for a MAC.
+        """
+        return {
+            'num_cms': 16,
+            'num_neurons': 8,
+            'input_filter': torch.randn(16, 16),  # Example input filter shape, adjust as needed
+            'num_cms_per_mac_in_input': 4,
+            'num_neurons_per_cm_in_input': 2,
+            'layer_index': 0,
+            'mac_index': 0,
+            'sigmoid_lambda': 0.5,
+            'sigmoid_phi': 0.1,
+            'permanence_steps': 10.0,
+            'permanence_convexity': 0.8,
+            'activation_threshold_min': 0.1,
+            'activation_threshold_max': 0.9,
+            'sigmoid_chi': 0.7,
+            'min_familiarity': 0.2,
+            'device': torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+            'prev_layer_num_cms_per_mac': 8,
+            'prev_layer_num_neurons_per_cm': 4
+        }
 
     @pytest.fixture
     def mock_input(self):
@@ -57,6 +82,10 @@ class TestMAC:
 
 
     def test_mac_output_shape(self, mac_config, mock_input):
+        """
+        Test that the output shape of the mac is correct
+        TC-04-01: The shape of the output tensor for a MAC is correct, depending on the parameters of the MAC and the size of the input data
+        """
         mac = MAC(**mac_config)
         # Pass the mock input through the MAC
         output = mac(mock_input)

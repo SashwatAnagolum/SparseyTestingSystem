@@ -117,7 +117,7 @@ class TestSparseyTrainerConfigs:
 
         Test case ID: TC-01-19
         """
-        sparsey_trainer_schema['dataloader']['batch_size'] = 1
+        sparsey_trainer_schema['training']['dataloader']['batch_size'] = 1
 
         validated_config = validate_config(
             sparsey_trainer_schema, 'training_recipe', 'sparsey',
@@ -139,7 +139,7 @@ class TestSparseyTrainerConfigs:
 
         Test case ID: TC-01-20
         """
-        sparsey_trainer_schema['dataloader']['batch_size'] = 0
+        sparsey_trainer_schema['training']['dataloader']['batch_size'] = 0
 
         with pytest.raises(SchemaError):
             validate_config(
