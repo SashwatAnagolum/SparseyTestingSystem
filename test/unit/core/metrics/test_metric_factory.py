@@ -38,7 +38,7 @@ class TestMetricFactory:
         Test if the MetricFactory correctly loads a FeatureCoverageMetric class.
         """
         # Simulate a model object since FeatureCoverageMetric expects one
-        model = Model()
+        model = Model(device=torch.device("cpu"))
         layer = SparseyLayer(
             autosize_grid=True,  
             grid_layout="rectangular",
@@ -47,7 +47,7 @@ class TestMetricFactory:
             num_neurons_per_cm=1,
             mac_grid_num_rows=1,
             mac_grid_num_cols=1,
-            mac_receptive_field_radius=3.0,
+            mac_receptive_field_size=3.0,
             prev_layer_num_cms_per_mac=1,
             prev_layer_num_neurons_per_cm=1,
             prev_layer_mac_grid_num_rows=2,
@@ -63,7 +63,8 @@ class TestMetricFactory:
             activation_threshold_min=0.2, 
             activation_threshold_max=1.0, 
             min_familiarity=0.2, 
-            sigmoid_chi=1.5 
+            sigmoid_chi=1.5 ,
+            device=torch.device("cpu")
         )
     
         model.add_layer(layer)
@@ -74,7 +75,7 @@ class TestMetricFactory:
         assert metric_class == FeatureCoverageMetric, "MetricFactory did not return the expected metric class."
 
         # Instantiate the metric to verify it can be created successfully
-        metric = metric_class(model=model, reduction='mean')
+        metric = metric_class(model=model, reduction='mean', device=torch.device('cpu'))
 
         # Create mock inputs, should use better tensors
         mock_input = torch.rand(10, 10)
@@ -111,7 +112,7 @@ class TestMetricFactory:
         Test if the MetricFactory correctly loads a FeatureCoverageMetric class.
         """
         # Simulate a model object since FeatureCoverageMetric expects one
-        model = Model()
+        model = Model(device=torch.device("cpu"))
         layer = SparseyLayer(
             autosize_grid=True,  
             grid_layout="rectangular",
@@ -120,7 +121,7 @@ class TestMetricFactory:
             num_neurons_per_cm=1,
             mac_grid_num_rows=1,
             mac_grid_num_cols=1,
-            mac_receptive_field_radius=3.0,
+            mac_receptive_field_size=3.0,
             prev_layer_num_cms_per_mac=1,
             prev_layer_num_neurons_per_cm=1,
             prev_layer_mac_grid_num_rows=2,
@@ -136,13 +137,20 @@ class TestMetricFactory:
             activation_threshold_min=0.2, 
             activation_threshold_max=1.0, 
             min_familiarity=0.2, 
-            sigmoid_chi=1.5 
+            sigmoid_chi=1.5 ,
+            device=torch.device("cpu")
         )
     
         model.add_layer(layer)
         
         metric_class = MetricFactory.get_metric_class('feature_coverage')
-        metric = metric_class(model=model, reduction='average_metric')
+        metric = MetricFactory.create_metric(
+            'feature_coverage',
+            params={},
+            device=torch.device('cpu'),
+            model=model,
+            reduction='average_metric',
+            comparison="max_by_layerwise_mean")
         # Create mock inputs, should use better tensors
         mock_input = torch.rand(10, 10)
         mock_labels = torch.randint(0, 5, (10,))  

@@ -26,7 +26,7 @@ def test_approximate_match():
     num_neurons_per_cm=1,
     mac_grid_num_rows=1,
     mac_grid_num_cols=1,
-    mac_receptive_field_radius=3.0,
+    mac_receptive_field_size=3.0,
     prev_layer_num_cms_per_mac=1,
     prev_layer_num_neurons_per_cm=1,
     prev_layer_mac_grid_num_rows=2,

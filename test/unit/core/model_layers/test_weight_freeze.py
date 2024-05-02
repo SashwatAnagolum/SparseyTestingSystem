@@ -17,7 +17,7 @@ def setup_sparsey_layer():
         num_neurons_per_cm=100,
         mac_grid_num_rows=2,
         mac_grid_num_cols=5,
-        mac_receptive_field_radius=1.0,
+        mac_receptive_field_size=1.0,
         prev_layer_num_cms_per_mac=5,
         prev_layer_num_neurons_per_cm=20,
         prev_layer_mac_grid_num_rows=2,

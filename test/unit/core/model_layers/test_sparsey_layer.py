@@ -30,7 +30,7 @@ class TestMAC:
             mac_grid_num_rows=4,
             mac_grid_num_cols=4, 
             prev_layer_num_macs=9,
-            mac_receptive_field_radius=0.5,
+            mac_receptive_field_size=0.5,
             prev_layer_num_cms_per_mac=12, 
             prev_layer_num_neurons_per_cm=10,
             prev_layer_mac_grid_num_rows=3,

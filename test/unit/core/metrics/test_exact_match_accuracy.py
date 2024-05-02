@@ -1,7 +1,6 @@
 import pytest
 import torch
 
-from torch import tensor
 from sparseypy.access_objects.models.model import Model
 from sparseypy.core.metrics.match_accuracy import MatchAccuracyMetric
 from sparseypy.core.model_layers.sparsey_layer import SparseyLayer
@@ -26,7 +25,7 @@ input_params = [
 ]
 
 #create 1 layer, 1 mac, 1cm, 1 neuron model, expecting 1x1 input tensor
-m = Model()
+m = Model(torch.device("cpu"))
 slay = SparseyLayer(
     autosize_grid=True,  # Assuming this is what True was meant to indicate
     grid_layout="rectangular",  # Assuming a layout, since it's not specified in your snippet
@@ -35,7 +34,7 @@ slay = SparseyLayer(
     num_neurons_per_cm=1,
     mac_grid_num_rows=1,
     mac_grid_num_cols=1,
-    mac_receptive_field_radius=3.0,
+    mac_receptive_field_size=3.0,
     prev_layer_num_cms_per_mac=1,
     prev_layer_num_neurons_per_cm=1,
     prev_layer_mac_grid_num_rows=2,
@@ -51,10 +50,11 @@ slay = SparseyLayer(
     activation_threshold_min=0.2, 
     activation_threshold_max=1.0, 
     min_familiarity=0.2, 
-    sigmoid_chi=1.5 
-)
+    sigmoid_chi=1.5,
+    device=torch.device("cpu")
+    )
 m.add_layer(slay)
-emam = MatchAccuracyMetric(m)
+emam = MatchAccuracyMetric(m, device=torch.device("cpu"))
 
 
 @pytest.mark.parametrize('input', input_params)
