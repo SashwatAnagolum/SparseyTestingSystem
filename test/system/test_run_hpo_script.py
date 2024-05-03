@@ -13,7 +13,8 @@ TEST_HPO_CONFIG = 'test\\reference_configs\\hpo.yaml'
 # Prepare configuration files for each category
 CONFIG_FILES = {
     'preprocessing_config': 'test\\reference_configs\\preprocessing.yaml',
-    'dataset_config': 'test\\reference_configs\\dataset.yaml',
+    'training_dataset_config': 'test\\reference_configs\\train_dataset.yaml',
+    'evaluation_dataset_config': 'test\\reference_configs\\eval_dataset.yaml',
     'hpo_config': TEST_HPO_CONFIG,
     'system_config': 'test\\reference_configs\\system.yaml'
 }
@@ -40,7 +41,8 @@ def test_error_handling():
     TEST_HPO_CONFIG = 'test\\reference_configs\\hpo_invalid.yaml'
     CONFIG_FILES = {
     'preprocessing_config': 'test\\reference_configs\\preprocessing.yaml',
-    'dataset_config': 'test\\reference_configs\\dataset.yaml',
+    'evaluation_dataset_config': 'test\\reference_configs\\eval_dataset.yaml',
+    'training_dataset_config': 'test\\reference_configs\\train_dataset.yaml',
     'hpo_config': TEST_HPO_CONFIG,
     'system_config': 'test\\reference_configs\\system.yaml'
     }
