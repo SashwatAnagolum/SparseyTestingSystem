@@ -30,6 +30,7 @@ def run_script_with_configs():
 def test_successful_run():
     """
     Test to verify that the script runs successfully with the original configuration.
+    Test case ID: TC-18-01
     """
     result = run_script_with_configs()
     assert result.returncode == 0, f"Script failed with error: {result.stderr}"
@@ -37,6 +38,7 @@ def test_successful_run():
 def test_error_handling():
     """
     Test the script's ability to handle erroneous hyperparameter values.
+    Test case ID: TC-18-03
     """
     TEST_HPO_CONFIG = 'test\\reference_configs\\hpo_invalid.yaml'
     CONFIG_FILES = {
@@ -61,6 +63,7 @@ def test_weights_and_biases_integration():
 def test_hyperparameter_application():
     """
     Test that hyperparameters are correctly applied as per configuration during HPO runs.
+    Test case ID: TC-18-02
     """
     command = ['python', SCRIPT_PATH] + [f'--{k}={v}' for k, v in CONFIG_FILES.items()]
     result = subprocess.run(command, text=True, capture_output=True)

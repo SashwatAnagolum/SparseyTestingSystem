@@ -33,7 +33,8 @@ def setup_sparsey_layer():
         activation_threshold_min=0.2,
         activation_threshold_max=0.8,
         min_familiarity=0.1,
-        sigmoid_chi=0.1
+        sigmoid_chi=0.1,
+        device=torch.device('cpu')
     )
 
     # Setting additional properties if needed
@@ -47,6 +48,6 @@ def test_sparsey_layer_functionality(setup_sparsey_layer):
     A test to verify some functionality of the SparseyLayer.
     """
     layer = setup_sparsey_layer
-    inputs = torch.randn(1, 2, 5, 5, 20)
+    inputs = torch.randn(1, 10, 100)
     output = layer(inputs)
-    assert output.shape == torch.Size([1, 2, 5, 5, 100]), "Output dimensions are incorrect"
+    assert output.shape == torch.Size([1, 10, 500]), "Output dimensions are incorrect"
