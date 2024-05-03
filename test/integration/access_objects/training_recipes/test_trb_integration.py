@@ -140,20 +140,20 @@ class TestTRBIntegration:
         """
         DataStorer.configure(self.system_config)
 
-        # wandb.init(
-        #     project=self.system_config["wandb"]["project_name"],
-        #     allow_val_change=True,
-        #     job_type="train",
-        #     config={
-        #         'dataset': self.dataset_config,
-        #         'model': self.model_config,
-        #         'training_recipe': self.train_config,
-        #         'preprocessing': self.preprocessing_config
-        #     }
-        # )
+        wandb.init(
+            project=self.system_config["wandb"]["project_name"],
+            allow_val_change=True,
+            job_type="train",
+            config={
+                'dataset': self.dataset_config,
+                'model': self.model_config,
+                'training_recipe': self.train_config,
+                'preprocessing': self.preprocessing_config
+            }
+        )
 
         training_recipe = TrainingRecipeBuilder.build_training_recipe(
-            self.model_config, self.dataset_config,
+            self.model_config, self.dataset_config, self.dataset_config,
             self.preprocessing_config, self.train_config
         )
         #assert all(isinstance(metric, torch.nn.Module) for metric in training_recipe.metrics_list), \

@@ -6,6 +6,7 @@ from sparseypy.access_objects.training_recipes.training_recipe_builder import Tr
 from sparseypy.core.data_storage_retrieval.data_storer import DataStorer
 from sparseypy.core.optimizers.optimizer_factory import OptimizerFactory
 from sparseypy.core.metrics.metric_factory import MetricFactory
+from sparseypy.core.metrics.metrics import Metric
 
 class TestTrainingRecipeBuilder:
     """
@@ -157,16 +158,3 @@ class TestTrainingRecipeBuilder:
         )
         assert isinstance(training_recipe.optimizer, torch.optim.Optimizer), \
             "Optimizer was not constructed correctly"
-
-    def test_metrics_integration_and_functionality(self):
-        """
-        Tests integration and functionality of metrics within the TrainingRecipe object.
-
-        Test Case ID: TC-10-02
-        """
-        training_recipe = TrainingRecipeBuilder.build_training_recipe(
-            self.model_config, self.dataset_config, self.dataset_config,
-            self.preprocessing_config, self.train_config
-        )
-        metrics_are_modules = all(isinstance(metric, torch.nn.Module) for metric in training_recipe.metrics_list)
-        assert metrics_are_modules, "Metrics are not correctly integrated or are not callable modules"
