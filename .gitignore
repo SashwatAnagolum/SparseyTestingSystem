@@ -1,17 +1,24 @@
+# exclude application credentails
 .env
-__pycache__/
-.rinkus_experiments/
-.venv/
-venv/
+firebase_service_account_key.json
+# exclude project configuration (except settings.json/launch.json configuration)
 .vscode/**
 !.vscode/launch.json
 !.vscode/settings.json
-wandb/
-firebase_service_account_key.json
-datasets/preprocessed_dataset
-datasets/MNIST-1K
-datasets/cifar-10
-artifacts/
-datasets/MNIST_5K
-scratch
+# exclude temporary files
 .ipynb_checkpoints
+__pycache__/
+scratch
+# exclude virtual environments
+.venv/
+venv/
+# exclude default datasets
+datasets/preprocessed_dataset
+datasets/cifar-10
+datasets/MNIST-1K
+datasets/MNIST_5K
+# exclude Weights & Biases output
+artifacts/
+wandb/
+# exclude experiment data
+.rinkus_experiments/
