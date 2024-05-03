@@ -9,6 +9,7 @@ import pytest
 import torch
 
 from sparseypy.core.hpo_objectives.hpo_objective import HPOObjective
+from sparseypy.core.results import TrainingResult, TrainingStepResult
 
 
 class TestHPOObjective:
@@ -24,20 +25,25 @@ class TestHPOObjective:
         # construct test metric data
         test_metric_data = [
             {
-                'BasisSetSizeMetric': [[1,2,3,4], [5,6,7,8]],
-                'MatchAccuracyMetric': [[1,1,1,1], [1,1,1,1]],
-                'FeatureCoverageMetric': [[1.0, 0.1]],
-                'BasisSetSizeIncreaseMetric': [np.array([1,1,1,1]), np.array([1,1,1,1])]
+                'basis_set_size': torch.nested.nested_tensor([torch.Tensor([1,2,3,4]), torch.Tensor([5,6,7,8])]),
+                'match_accuracy': torch.nested.nested_tensor([torch.Tensor([1,1,1,1]), torch.Tensor([1,1,1,1])]),
+                'feature_coverage': torch.nested.nested_tensor([torch.Tensor([1.0]), torch.Tensor([0.1])]),
+                'basis_set_size_increase': torch.nested.nested_tensor([torch.Tensor([1,1,1,1]), torch.Tensor([1,1,1,1])])
             },
             {
-                'BasisSetSizeMetric': [[1,1,1,1], [1,1,1,1]],
-                'MatchAccuracyMetric': [[1,1,1,1], [1,1,1,1]],
-                'FeatureCoverageMetric': [1.0, 1.0],
-                'BasisSetSizeIncreaseMetric': [np.array([1,1,1,1]), np.array([1,1,1,1])]
+                'basis_set_size': torch.nested.nested_tensor([torch.Tensor([1,1,1,1]), torch.Tensor([1,1,1,1])]),
+                'match_accuracy': torch.nested.nested_tensor([torch.Tensor([1,1,1,1]), torch.Tensor([1,1,1,1])]),
+                'feature_coverage': torch.nested.nested_tensor([torch.Tensor([1.0]), torch.Tensor([1.0])]),
+                'basis_set_size_increase': torch.nested.nested_tensor([torch.Tensor([1,1,1,1]), torch.Tensor([1,1,1,1])])
             },
             # Add more entries as needed
         ]
 
+        test_result = TrainingResult("test", result_type="evaluation", metrics=[])
+        for test_metric in test_metric_data:
+            tsr = TrainingStepResult()
+            tsr.metrics = test_metric
+            test_result.results.append(tsr)
         # construct test HPO configuration
         hpo_config = {
             "optimization_objective": {
@@ -55,17 +61,17 @@ class TestHPOObjective:
         hpo_objective = HPOObjective(hpo_config)
 
         # Calculate combined metric
-        combined_metric = hpo_objective.combine_metrics(test_metric_data)
+        combined_metric = hpo_objective.combine_metrics(test_result)
         # assert metric values
-        assert combined_metric['total'] == 1.38125
+        np.testing.assert_almost_equal(combined_metric['total'], 1.38125)
         test_metric_data = [
             {
-                'MatchAccuracyMetric': 5,
-                'BasisSetSizeIncreaseMetric': [np.array([3,5,5,7]), np.array([1,9,1,9])]
+                'match_accuracy': torch.nested.nested_tensor([torch.Tensor([5.0])]),
+                'basis_set_size': torch.nested.nested_tensor([torch.Tensor([3,5,5,7]), torch.Tensor([1,9,1,9])])
             },
             {
-                'MatchAccuracyMetric': 3,
-                'BasisSetSizeIncreaseMetric': [np.array([1,5,1,5]), np.array([2,4,2,4])]
+                'match_accuracy': torch.nested.nested_tensor([torch.Tensor([3.0])]),
+                'basis_set_size': torch.nested.nested_tensor([torch.Tensor([1,5,1,5]), torch.Tensor([2,4,2,4])])
             },
             # Add more entries as needed
         ]
@@ -76,7 +82,7 @@ class TestHPOObjective:
                 "combination_method": "mean",
                 "objective_terms": [
                     {'metric': {"name": "match_accuracy"}, "weight": 1.0},
-                    {'metric': {"name": "basis_set_size_increase"}, "weight": 0.5}
+                    {'metric': {"name": "basis_set_size"}, "weight": 0.5}
                 ]
             }
         }
@@ -84,6 +90,12 @@ class TestHPOObjective:
         # Initialize HPOObjective with the configuration
         hpo_objective = HPOObjective(hpo_config)
 
+        test_result = TrainingResult("test", result_type="evaluation", metrics=[])
+        for test_metric in test_metric_data:
+            tsr = TrainingStepResult()
+            tsr.metrics = test_metric
+            test_result.results.append(tsr)
+
         # Calculate combined metric
-        combined_metric = hpo_objective.combine_metrics(test_metric_data)
-        assert combined_metric['total'] == 3
+        combined_metric = hpo_objective.combine_metrics(test_result)
+        np.testing.assert_almost_equal(combined_metric['total'], 3)

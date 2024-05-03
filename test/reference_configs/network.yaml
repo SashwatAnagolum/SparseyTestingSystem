@@ -7,10 +7,10 @@
 #     WARNING: IF THERE IS AN EXISTING REGISTRY ENTRY WITH THIS NAME IT WILL 
 #     BE UPDATED WITH THE RESULTS OF TRAINING RUNS USING THIS NETWORK.YAML
 #     AS NEW VERSIONS.
-model_name: example_model
+model_name: example_model_v2
 # model_description: string, optional (no default)
 #     friendly description for this model to be displayed in the database and model registry
-model_description: "The example model from network.yaml!"
+model_description: "The example model from network.yaml, but better!"
 
 # input_dimensions: the dimensions to which to resize the input during HPO
 #     width and height can be any positive integer values and do not need to be the same;
@@ -53,12 +53,12 @@ layers:
       # num_neurons_per_cm: int > 0
       #     the number of neurons in each competitive module in each MAC in the layer
       num_neurons_per_cm: 2
-      # mac_receptive_field_radius: float > 0
+      # mac_receptive_field_size: float > 0
       #     the receptive field radius of each MAC, defined in terms of the side length of the current layer
       #     a value of 1 represents a full side length
       #     (note that this uses Euclidean distance; for all corner MACs in this layer to see all MACs 
       #     in the previous layer, a value of 1.5 is required)
-      mac_receptive_field_radius: 0.6
+      mac_receptive_field_size: 0.6
       # sigmoid_lambda: float > 0
       #     parameter for the familiarity computation
       sigmoid_lambda: 28.0
@@ -92,7 +92,7 @@ layers:
       mac_grid_num_cols: 2
       num_cms_per_mac: 5
       num_neurons_per_cm: 5
-      mac_receptive_field_radius: 1.5
+      mac_receptive_field_size: 1.5
       sigmoid_lambda: 28.0
       sigmoid_phi: 5.0
       saturation_threshold: 0.5

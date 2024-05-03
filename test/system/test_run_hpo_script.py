@@ -6,14 +6,15 @@ os.chdir(os.path.dirname(__file__))
 os.chdir('..')
 os.chdir('..')
 # Paths to the script and configuration files
-SCRIPT_PATH = 'scripts\\run_hpo.py'
+SCRIPT_PATH = 'src\\sparseypy\\scripts\\run_hpo.py'
 ORIGINAL_HPO_CONFIG = 'test\\reference_configs\\hpo.yaml'
 TEST_HPO_CONFIG = 'test\\reference_configs\\hpo.yaml'
 
 # Prepare configuration files for each category
 CONFIG_FILES = {
     'preprocessing_config': 'test\\reference_configs\\preprocessing.yaml',
-    'dataset_config': 'test\\reference_configs\\dataset.yaml',
+    'training_dataset_config': 'test\\reference_configs\\train_dataset.yaml',
+    'evaluation_dataset_config': 'test\\reference_configs\\eval_dataset.yaml',
     'hpo_config': TEST_HPO_CONFIG,
     'system_config': 'test\\reference_configs\\system.yaml'
 }
@@ -29,6 +30,7 @@ def run_script_with_configs():
 def test_successful_run():
     """
     Test to verify that the script runs successfully with the original configuration.
+    Test case ID: TC-18-01
     """
     result = run_script_with_configs()
     assert result.returncode == 0, f"Script failed with error: {result.stderr}"
@@ -36,18 +38,20 @@ def test_successful_run():
 def test_error_handling():
     """
     Test the script's ability to handle erroneous hyperparameter values.
+    Test case ID: TC-18-03
     """
     TEST_HPO_CONFIG = 'test\\reference_configs\\hpo_invalid.yaml'
     CONFIG_FILES = {
     'preprocessing_config': 'test\\reference_configs\\preprocessing.yaml',
-    'dataset_config': 'test\\reference_configs\\dataset.yaml',
+    'evaluation_dataset_config': 'test\\reference_configs\\eval_dataset.yaml',
+    'training_dataset_config': 'test\\reference_configs\\train_dataset.yaml',
     'hpo_config': TEST_HPO_CONFIG,
     'system_config': 'test\\reference_configs\\system.yaml'
     }
     command = ['python', SCRIPT_PATH] + [f'--{k}={v}' for k, v in CONFIG_FILES.items()]
     result = subprocess.run(command, text=True, capture_output=True)
     assert result.returncode != 0, "Script should have failed but it didn't."
-    assert "Missing" in result.stdout, "Error handling failed."
+    assert "INVALID" in result.stdout, "Error handling failed."
     
 def test_weights_and_biases_integration():
     """
@@ -59,6 +63,7 @@ def test_weights_and_biases_integration():
 def test_hyperparameter_application():
     """
     Test that hyperparameters are correctly applied as per configuration during HPO runs.
+    Test case ID: TC-18-02
     """
     command = ['python', SCRIPT_PATH] + [f'--{k}={v}' for k, v in CONFIG_FILES.items()]
     result = subprocess.run(command, text=True, capture_output=True)

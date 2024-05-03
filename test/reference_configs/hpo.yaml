@@ -7,13 +7,27 @@ model_family: sparsey
 # hpo_run_name: string
 #     the name to use for this HPO run and its corresponding Sweep in Weights & Biases
 hpo_run_name: sample_hpo_run
+
+# description: string (optional, default None) - a written description of the purpose of this HPO run
+#     logged to the sweep summary in Weights & Biases
+description: "A testing sweep using the demo configuration files."
+
 # project_name: string
 #     the project in Weights & Biases to which to log this run's results (its Sweep, the constituent Runs, and all metrics)
-project_name: sparsey_hpo_pytest
+project_name: sparsey_hpo_presentation_3
 # verbosity: int >= 0
 #     controls how much information about the HPO process is output to the console
 #     0 = minimal; suppresses Weights & Biases HPO console spam
 verbosity: 0
+
+# use_gpu: bool, default True if the system has a compatible GPU, otherwise False
+#     whether to use a GPU to accelerate system performance, if one is available
+#     (the system supports CUDA and MPS backends)
+#     in general, you are better off leaving this out and letting the system
+#     automatically use a GPU if it is available) unless you specifically want
+#     to refuse to start the run in the absence of a GPU (set True) or
+#     force the system to never use a GPU even if it is present (set False)
+use_gpu: False
 
 hyperparameters:
   # list of hyperparameters to either hold constant or optimize
@@ -57,16 +71,14 @@ hyperparameters:
       name: 
         value: hebbian
 
-    # dataloader: controls the dataloader parameters to use
-    dataloader:
-      # batch_size: int > 0
-      #    number of input items per batch
-      batch_size: 
-        value: 1
-      # shuffle: bool
-      #    whether to randomize the inputs as they are drawn from the dataloader
-      shuffle: 
-        value: True
+    # the trainer section defines the training-related hyperparameters of the Sparsey model
+  trainer:
+  # optimizer settings
+    optimizer:
+      # name: string - the optimizer class to load and use
+      #    for Sparsey models you should always use "hebbian"
+      name: 
+        value: hebbian
 
     # training: directly training-related hyperparameters
     training:
@@ -76,6 +88,30 @@ hyperparameters:
       #     but the setting exists for potential future compatibility
       num_epochs: 
         value: 1
+
+      # dataloader: controls the dataloader parameters to use
+      dataloader:
+        # batch_size: int > 0
+        #    number of input items per batch
+        batch_size: 
+          value: 1
+        # shuffle: bool
+        #    whether to randomize the inputs as they are drawn from the dataloader
+        shuffle: 
+          value: True
+
+    # eval: evaluation-related hyperparameters
+    eval:
+      # dataloader: controls the dataloader parameters to use
+      dataloader:
+        # batch_size: int > 0
+        #    number of input items per batch
+        batch_size: 
+          value: 16
+        # shuffle: bool
+        #    whether to randomize the inputs as they are drawn from the dataloader
+        shuffle: 
+          value: True
 
   # the layers section defines the properties of individual layers in the Sparey model
   #     each entry in its list is a new layer, in order from the bottom of the model to the top
@@ -109,12 +145,12 @@ hyperparameters:
           min: 2
           max: 10
           distribution: int_uniform
-        # mac_receptive_field_radius: float > 0
+        # mac_receptive_field_size: float > 0
         #     the receptive field radius of each MAC, defined in terms of the side length of the current layer
         #     a value of 1 represents a full side length
         #     note that this uses Euclidean distance; for all corner MACs in this layer to see all MACs 
         #     in the previous layer, a value of 1.5 is required
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           values: [0.75, 1.0, 1.5]
         # sigmoid_lambda: float > 0
         #     parameter for the familiarity computation
@@ -175,7 +211,7 @@ hyperparameters:
           values: [4, 9]
         num_cms_per_mac:
           values: [5, 10, 15, 20, 25]
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           value: 1.0
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -213,7 +249,7 @@ hyperparameters:
           values: [4, 9]
         num_cms_per_mac:
           value: 2
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           values: [1.0, 1.5]
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -251,7 +287,7 @@ hyperparameters:
           value: 5
         num_macs:
           values: [4, 9]
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           value: 1.0
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -289,7 +325,7 @@ hyperparameters:
           value: 5
         num_macs:
           value: 4
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           value: 0.75
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -361,9 +397,6 @@ metrics:
     save: True
 
   - name: basis_set_size
-    save: True
-
-  - name: basis_set_size_increase
     save: True
 
   #- name: basis_average

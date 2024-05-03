@@ -432,7 +432,7 @@ class SparseyLayerV2(torch.nn.Module):
     def __init__(self, autosize_grid: bool, grid_layout: str,
         num_macs: int, num_cms_per_mac: int, num_neurons_per_cm: int,
         mac_grid_num_rows: int, mac_grid_num_cols: int,
-        mac_receptive_field_radius: float,
+        mac_receptive_field_size: float,
         prev_layer_num_cms_per_mac: int,
         prev_layer_num_neurons_per_cm: int,
         prev_layer_mac_grid_num_rows: int,
@@ -456,7 +456,7 @@ class SparseyLayerV2(torch.nn.Module):
             num_neurons_per_cm (int): the number of neurons in each CM.
             mac_grid_num_rows (int): the number of rows in the grid.
             mac_grid_num_cols (int): the number of columns in the grid.
-            mac_receptive_field_radius (float): the radius of the receptive field.
+            mac_receptive_field_size (float): the radius of the receptive field.
             prev_layer_num_cms_per_mac (int): the number of CMs per MAC in the
                 previous layer.
             prev_layer_num_neurons_per_cm (int): the number of neurons per CM
@@ -488,7 +488,7 @@ class SparseyLayerV2(torch.nn.Module):
         self.num_macs = num_macs
         self.num_cms_per_mac = num_cms_per_mac
         self.num_neurons_per_cm = num_neurons_per_cm
-        self.receptive_field_radius = mac_receptive_field_radius
+        self.receptive_field_radius = mac_receptive_field_size
         self.min_familiarity = min_familiarity
         self.sigmoid_phi = sigmoid_phi
         self.sigmoid_lambda = sigmoid_lambda
@@ -1035,7 +1035,7 @@ class SparseyLayerOld(torch.nn.Module):
     def __init__(self, autosize_grid: bool, grid_layout: str,
         num_macs: int, num_cms_per_mac: int, num_neurons_per_cm: int,
         mac_grid_num_rows: int, mac_grid_num_cols: int,
-        mac_receptive_field_radius: float,
+        mac_receptive_field_size: float,
         prev_layer_num_cms_per_mac: int,
         prev_layer_num_neurons_per_cm: int,
         prev_layer_mac_grid_num_rows: int,
@@ -1060,7 +1060,7 @@ class SparseyLayerOld(torch.nn.Module):
         self.device = device
         self.is_grid_autosized = autosize_grid
         self.num_macs = num_macs
-        self.receptive_field_radius = mac_receptive_field_radius
+        self.receptive_field_radius = mac_receptive_field_size
         self.grid_size = (
             mac_grid_num_rows,
             mac_grid_num_cols

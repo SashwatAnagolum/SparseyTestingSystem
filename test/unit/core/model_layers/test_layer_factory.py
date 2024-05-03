@@ -52,7 +52,7 @@ class TestLayerFactory:
             autosize_grid=True, grid_layout='hex',
             num_macs=25, num_cms_per_mac=5, num_neurons_per_cm=5,
             mac_grid_num_rows=5, mac_grid_num_cols=5,
-            mac_receptive_field_radius=1.5, prev_layer_num_cms_per_mac=12,
+            mac_receptive_field_size=1.5, prev_layer_num_cms_per_mac=12,
             prev_layer_num_neurons_per_cm=10,
             prev_layer_mac_grid_num_rows=4,
             prev_layer_mac_grid_num_cols=6,
@@ -61,7 +61,7 @@ class TestLayerFactory:
             saturation_threshold=0.8,
             permanence_steps=0.1, permanence_convexity=0.1, 
             activation_threshold_min=0.4, activation_threshold_max=0.8,
-            min_familiarity=0.5, sigmoid_chi=1.2
+            min_familiarity=0.5, sigmoid_chi=1.2, device=torch.device("cpu")
         )
 
         assert isinstance(layer_obj, SparseyLayer)
@@ -80,7 +80,7 @@ class TestLayerFactory:
                 autosize_grid=True, grid_layout='hex',
                 num_macs=25, num_cms_per_mac=5, num_neurons_per_cm=5,
                 mac_grid_num_rows=5, mac_grid_num_cols=5,
-                mac_receptive_field_radius=1.5, prev_layer_num_cms_per_mac=12,
+                mac_receptive_field_size=1.5, prev_layer_num_cms_per_mac=12,
                 prev_layer_num_neurons_per_cm=10,
                 prev_layer_mac_grid_num_rows=4,
                 prev_layer_mac_grid_num_cols=6,

@@ -18,7 +18,7 @@ hyperparameters:
         value: true
       grid_layout:
         value: rect
-      mac_receptive_field_radius:
+      mac_receptive_field_size:
         values:
         - 0.75
         - 1.0
@@ -73,7 +73,7 @@ hyperparameters:
         value: true
       grid_layout:
         value: rect
-      mac_receptive_field_radius:
+      mac_receptive_field_size:
         value: 1.0
       min_familiarity:
         distribution: uniform
@@ -128,7 +128,7 @@ hyperparameters:
         value: true
       grid_layout:
         value: rect
-      mac_receptive_field_radius:
+      mac_receptive_field_size:
         values:
         - 1.0
         - 1.5
@@ -180,7 +180,7 @@ hyperparameters:
         value: true
       grid_layout:
         value: rect
-      mac_receptive_field_radius:
+      mac_receptive_field_size:
         value: 1.0
       min_familiarity:
         distribution: uniform
@@ -230,7 +230,7 @@ hyperparameters:
         value: true
       grid_layout:
         value: rect
-      mac_receptive_field_radius:
+      mac_receptive_field_size:
         value: 0.75
       min_familiarity:
         distribution: uniform
