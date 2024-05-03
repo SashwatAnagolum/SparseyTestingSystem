@@ -47,7 +47,7 @@ class ModelBuilder:
 
 
     @staticmethod
-    def rehydrate_model(model_config: dict, state_dict: str):
+    def rehydrate_model(model_config: dict, state_dict: str, device: torch.device):
         """
         Builds a model layer by layer and then reloads its state
         from an existing state dictionary at the provided path.
@@ -56,8 +56,9 @@ class ModelBuilder:
             model_config (str): information about the structure
                 of the model and its layers.
             state_dict (str): the model state dictionary to reload.
+            device (torch.device): the device (CPU, CUDA, or MPS) to use.
         """
-        model = ModelBuilder.build_model(model_config)
+        model = ModelBuilder.build_model(model_config, device=device)
         model.load_state_dict(state_dict)
 
         return model
