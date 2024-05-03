@@ -1,4 +1,4 @@
-# exclude application credentails
+# exclude application credentials
 .env
 firebase_service_account_key.json
 # exclude project configuration (except settings.json/launch.json configuration)
