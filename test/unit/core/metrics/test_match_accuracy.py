@@ -52,35 +52,33 @@ def test_approximate_match():
 
     #three inputs that are very different from one target input
     diff_in_1 = torch.tensor([[
-        [[[1.]], [[1.]]],
-        [[[1.]], [[1.]]]
+        [1.], [1.], [1.], [1.]
     ]])
     diff_in_2 = torch.tensor([[
-        [[[1.]], [[1.]]],
-        [[[1.]], [[0.]]]
+        [1.], [1.], [1.], [0.]
     ]])
     diff_in_3 = torch.tensor([[
-        [[[1.]], [[1.]]],
-        [[[0.]], [[1.]]]
+        [1.], [1.], [0.], [1.]
     ]])
 
     #perform training run on the three of these inputs, each with the same model with empty outputs because it has not been passed data
-    output = torch.tensor([])
+    #output = torch.tensor([])
+    output = m(diff_in_1)#model is passed data, an now has layer_ouputs on hooks
     amam.compute(m, diff_in_1, output, True)
+    output = m(diff_in_2)
     amam.compute(m, diff_in_2, output, True)
+    output = m(diff_in_3)
     amam.compute(m, diff_in_3, output, True)
     
 
 
     #one input with another slightly altered version of itself
-    norm_in = torch.tensor([[
-        [[[0.]], [[0.]]],
-        [[[0.]], [[0.]]]
-    ]])
-    perm_in = torch.tensor([[
-        [[[0.]], [[0.]]],
-        [[[0.]], [[1.]]]
-    ]])
+    norm_in = torch.tensor([
+        [[0.], [0.], [0.], [0.]]
+    ])
+    perm_in = torch.tensor([
+        [[0.], [0.], [0.], [1.]]
+    ])
 
 
     #perform training run on normal input, perform evaluation run on permuted input
@@ -89,6 +87,4 @@ def test_approximate_match():
     output = m(perm_in)
     metric_result = amam.compute(m, perm_in, output, False)
 
-    #assert metric_result == [[1.0]]
-    #modify this later
-    assert metric_result == [[0.0]]
+    assert torch.stack([t.squeeze() for t in metric_result]) == tensor([1.])

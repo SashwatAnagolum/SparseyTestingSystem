@@ -80,16 +80,21 @@ class TestTrainingRecipeBuilder:
                 'params': {}
             },
             'metrics': [
-                {'name': 'basis_set_size', 'save': False, 'best_value': 'max_by_layerwise_mean', 'reduction': 'mean'},
-                {'name': 'feature_coverage', 'save': False, 'best_value': 'max_by_layerwise_mean', 'reduction': 'mean'}
+                {'name': 'basis_set_size', 'save': False, 'best_value': 'max_by_layerwise_mean', 'reduction': 'mean', 'params': {}},
+                {'name': 'feature_coverage', 'save': False, 'best_value': 'max_by_layerwise_mean', 'reduction': 'mean', 'params': {}},
             ],
-            'dataloader': {
-                'batch_size': 4,
-                'shuffle': True
-            },
             'training': {
                 'num_epochs': 1,
-                'step_resolution': 10
+                'dataloader': {
+                    'batch_size': 4,
+                    'shuffle': True
+                },
+            },
+            'eval': {
+                'dataloader': {
+                    'batch_size': 4,
+                    'shuffle': False
+                }
             },
             'use_gpu': False
         }
@@ -147,29 +152,20 @@ class TestTrainingRecipeBuilder:
         )
 
         training_recipe = TrainingRecipeBuilder.build_training_recipe(
-            self.model_config, self.dataset_config,
+            self.model_config, self.dataset_config, self.dataset_config,
             self.preprocessing_config, self.train_config
         )
         assert isinstance(training_recipe.optimizer, torch.optim.Optimizer), \
             "Optimizer was not constructed correctly"
 
-    def test_learning_rate_scheduler_setup(self):
-        """
-        Placeholder test for learning rate scheduler setup.
-        The actual implementation needs to be completed.
-
-        Test Case ID: TC-10-02
-        """
-        assert True, "Placeholder test passed - Implementation pending"
-
     def test_metrics_integration_and_functionality(self):
         """
         Tests integration and functionality of metrics within the TrainingRecipe object.
 
-        Test Case ID: TC-10-03
+        Test Case ID: TC-10-02
         """
         training_recipe = TrainingRecipeBuilder.build_training_recipe(
-            self.model_config, self.dataset_config,
+            self.model_config, self.dataset_config, self.dataset_config,
             self.preprocessing_config, self.train_config
         )
         metrics_are_modules = all(isinstance(metric, torch.nn.Module) for metric in training_recipe.metrics_list)
