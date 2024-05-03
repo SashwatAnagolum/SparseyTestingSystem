@@ -14,7 +14,6 @@ class TestHebbianOptimizer:
     TestHebbianOptimizer: a class holding a collection
         of tests focused on the HebbianOptimizer class.
     """
-
     @pytest.fixture
     def simple_model(self):
         """
@@ -25,32 +24,75 @@ class TestHebbianOptimizer:
         sparsey_layer = SparseyLayer(
             autosize_grid=False,
             grid_layout="rect",
-            num_macs=16,
-            num_cms_per_mac=8,
-            num_neurons_per_cm=16,
-            mac_grid_num_rows=4,
-            mac_grid_num_cols=4,
+            num_macs=1,
+            num_cms_per_mac=5,
+            num_neurons_per_cm=5,
+            mac_grid_num_rows=1,
+            mac_grid_num_cols=1,
             prev_layer_num_macs=1,
-            mac_receptive_field_size=0.5,
-            prev_layer_num_cms_per_mac=1,
-            prev_layer_num_neurons_per_cm=16,
+            mac_receptive_field_size=1.5,
+            prev_layer_num_cms_per_mac=10,
+            prev_layer_num_neurons_per_cm=10,
             prev_layer_mac_grid_num_rows=1,
             prev_layer_mac_grid_num_cols=1,
             prev_layer_grid_layout="rect",
             layer_index=2,
             sigmoid_phi=5.0,
             sigmoid_lambda=28.0,
-            saturation_threshold=0.5,
-            permanence_steps=1000,
-            permanence_convexity=1.0,
+            saturation_threshold=0.1,
+            permanence_steps=10,
+            permanence_convexity=5.0,
             activation_threshold_max=1.0,
             activation_threshold_min=0.2,
             min_familiarity=0.2,
             sigmoid_chi=2.5,
             device=torch.device("cpu")           
         )
+
         simple_model.add_layer(sparsey_layer)
+
         return simple_model
+
+
+    @pytest.fixture
+    def simple_model_2(self):
+        """
+        Returns a sample SparseyLayer object to perform
+        tests with.
+        """
+        simple_model_2 = Model(device='cpu')
+        sparsey_layer_2 = SparseyLayer(
+            autosize_grid=False,
+            grid_layout="rect",
+            num_macs=1,
+            num_cms_per_mac=5,
+            num_neurons_per_cm=5,
+            mac_grid_num_rows=1,
+            mac_grid_num_cols=1,
+            prev_layer_num_macs=1,
+            mac_receptive_field_size=1.5,
+            prev_layer_num_cms_per_mac=10,
+            prev_layer_num_neurons_per_cm=10,
+            prev_layer_mac_grid_num_rows=1,
+            prev_layer_mac_grid_num_cols=1,
+            prev_layer_grid_layout="rect",
+            layer_index=2,
+            sigmoid_phi=5.0,
+            sigmoid_lambda=28.0,
+            saturation_threshold=0.1,
+            permanence_steps=int(1e8),
+            permanence_convexity=0.0,
+            activation_threshold_max=1.0,
+            activation_threshold_min=0.2,
+            min_familiarity=0.2,
+            sigmoid_chi=2.5,
+            device=torch.device("cpu")           
+        )
+
+        simple_model_2.add_layer(sparsey_layer_2)
+
+        return simple_model_2
+
 
     def test_weight_updates(self, simple_model) -> None:
         """
@@ -61,50 +103,121 @@ class TestHebbianOptimizer:
         hook = LayerIOHook(simple_model)
         optimizer = HebbianOptimizer(simple_model, torch.device('cpu'))
 
-        input_tensor = torch.tensor([[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]])
-        simple_model(input_tensor)
-        layers_before, inputs, _ = hook.get_layer_io()
-        optimizer.step()
-        layers_after, _, _ = hook.get_layer_io()
-        #use hooks to iterate through macs and verify the weights updated as expected
-        for layer_index, (layer_before, layer_after) in enumerate(zip(layers_before, layers_after)):
-            assert layer_after == layer_before, "Weights not updated as expected"
+        input_tensor = torch.zeros((1, 1, 100), dtype=torch.float32)
+        input_tensor[0, 0, [1, 2, 4, 8, 16, 32, 64]] = 1.0
+        output = simple_model(input_tensor)
 
-    def test_weight_freezing(self, simple_model) -> None:
+        optimizer.step()
+
+        active_neurons = torch.argwhere(output)[:, -1]
+        layers, _, _ = hook.get_layer_io()
+
+        assert (
+            torch.sum(layers[0].weights).item() == 7 * 5
+        ) and (
+            torch.sum(
+                layers[0].weights[:, [1, 2, 4, 8, 16, 32, 64]]
+            ).item() == 7 * 5
+        ) and (
+            torch.sum(
+                layers[0].weights[:, :, active_neurons]
+            ).item() == 7 * 5
+        )
+
+
+    def test_weight_freezing(self, simple_model_2) -> None:
         """
-        TC-02-02: Tests the weight freezing logic in the Hebbian optimizer, which should activate when the fraction
-        of a neuron's incoming active weights crosses a user-defined threshold, freezing all further weight updates.
+        TC-02-02: Tests the weight freezing logic in the Hebbian optimizer,
+        which should activate when the fraction of a neuron's incoming
+        active weights crosses a user-defined threshold,
+        freezing all further weight updates.
         """
         #Initialize optimizer and hook
-        hook = LayerIOHook(simple_model)
-        optimizer = HebbianOptimizer(simple_model, torch.device('cpu'))
+        optimizer = HebbianOptimizer(simple_model_2, torch.device('cpu'))
+        layer = simple_model_2.get_submodule(f'Layer_0')
+        weights = layer.weights
 
-        input_tensor = torch.tensor([[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]])
-        simple_model(input_tensor)
-        layers_before, inputs, _ = hook.get_layer_io()
+        input_tensor = torch.zeros((1, 1, 100), dtype=torch.float32)
+        input_tensor[:, :, 0:10] = 1
+
+        output = simple_model_2(input_tensor)
         optimizer.step()
-        layers_after, _, _ = hook.get_layer_io()
-        #use hooks to iterate through macs and verify the weights updated as expected
-        for layer_index, (layer_before, layer_after) in enumerate(zip(layers_before, layers_after)):
-            assert layer_after == layer_before, "Weights not updated as expected"
+        active_neurons = torch.argwhere(output)[:, -1]
+        overlapping_neurons = None
+
+        num_trials = 1
+
+        while True:
+            input_tensor = torch.zeros((1, 1, 100), dtype=torch.float32)
+            input_tensor[:, :, 10 * num_trials - 5:10 * num_trials + 5] = 1
+            num_trials = (num_trials + 1) % 10
+
+            output = simple_model_2(input_tensor)
+
+            curr_active_neurons = torch.argwhere(output)[:, -1]
+            has_overlap = torch.eq(
+                active_neurons, curr_active_neurons.unsqueeze(-1)
+            )
+
+            if torch.sum(has_overlap):
+                overlapping_neurons = active_neurons[
+                    torch.argwhere(has_overlap.sum(1))
+                ]
+
+                break
+
+        assert torch.all(
+            torch.le(
+                torch.sum(weights[:, :, overlapping_neurons], dim=(0, 1)),
+                layer.prev_layer_output_shape[1] * layer.saturation_threshold
+            )
+        )
+
 
     def test_weight_permanence(self, simple_model) -> None:
         """
-        TC-02-03: Tests the secondary weight updates to implement the permanence feature of weights in Sparsey models,
-        ensuring weights not set during the current frame decay according to an exponential schedule.
+        TC-02-03: Tests the secondary weight updates to implement the
+        permanence feature of weights in Sparsey models, ensuring weights
+        not set during the current frame decay according to an
+        exponential schedule.
         """
         #Initialize optimizer and hook
-        hook = LayerIOHook(simple_model)
         optimizer = HebbianOptimizer(simple_model, torch.device('cpu'))
+        layer = simple_model.get_submodule(f'Layer_0')
+        weights = layer.weights
+        steps = layer.permanence_steps
+        convexity = layer.permanence_convexity
 
-        input_tensor = torch.tensor([[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]])
-        simple_model(input_tensor)
-        layers_before, inputs, _ = hook.get_layer_io()
+        input_tensor = torch.zeros((1, 1, 100), dtype=torch.float32)
+        input_tensor[:, :, 0:10] = 1
+        output = simple_model(input_tensor)
         optimizer.step()
-        layers_after, _, _ = hook.get_layer_io()
-        #use hooks to iterate through macs and verify the weights updated as expected
-        for layer_index, (layer_before, layer_after) in enumerate(zip(layers_before, layers_after)):
-            assert layer_after == layer_before, "Weights not updated as expected"
 
-# Additional tests can be added to the TestHebbianOptimizer class to cover more aspects like error handling,
-# performance, or other specific functionalities of the HebbianOptimizer class.
+        active_neurons = torch.argwhere(output)[:, -1]
+        active_weight_indices = [i for i in range(10)]
+        input_tensor[:, :, :] = 0.0
+
+        for i in range(steps + 5):
+            if i < steps:
+                expected_weight_value = torch.tensor(
+                    (1.0 + (convexity / steps)) / (
+                        1.0 + (
+                            convexity / (
+                                steps - i
+                            )
+                        )
+                    )
+                )
+            else:
+                expected_weight_value = torch.zeros(
+                    (), dtype=torch.float32
+                )
+
+            assert torch.allclose(
+                weights[0, active_weight_indices][:, active_neurons],
+                expected_weight_value,
+                atol=1e-5
+            )
+
+            output = simple_model(input_tensor)
+            optimizer.step()

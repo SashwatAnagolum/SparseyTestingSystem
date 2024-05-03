@@ -37,9 +37,6 @@ def setup_sparsey_layer():
         device=torch.device('cpu')
     )
 
-    # Setting additional properties if needed
-    # layer.some_property = value
-
     return layer
 
 
