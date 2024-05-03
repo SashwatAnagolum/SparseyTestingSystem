@@ -3,7 +3,7 @@ echo "Creating new virtual environment."
 python3.11 -m venv .venv
 # activate virtual environment
 echo "Activating virtual environment."
-./venv/Scripts/activate
+./.venv/Scripts/activate
 # install requirements
 echo "Installing project requirements."
 python -m pip install -r requirements.txt
