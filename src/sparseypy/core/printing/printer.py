@@ -92,12 +92,12 @@ Objective calculation: {hpo_config['optimization_objective']['combination_method
         # print the summary directing users to Weights & Biases
         tqdm.write(f"""Review full results in Weights & Biases:
 
-Project:        {hpo_config['project_name']}")
+Project name:   {hpo_config['project_name']}
 
-HPO sweep name: {hpo_config['hpo_run_name']}")
-HPO sweep URL:  {sweep_url}")
+HPO sweep name: {hpo_config['hpo_run_name']}
+HPO sweep URL:  {sweep_url}
 
-Best run ID:    {hpo_results.best_run.id}")
+Best run ID:    {hpo_results.best_run.id}
 Best run URL:   {best_run_url}""")
 
 
@@ -314,11 +314,11 @@ Selected metrics:
         """
         objective_results = step_results.get_objective()
         # TODO enhance with summary of metrics
-        tqdm.write(f"Objective value:    {objective_results['total']:.5f}")
-        tqdm.write(f"Combination method: {objective_results['combination_method']}")
+        tqdm.write(f"Objective value:            {objective_results['total']:.5f}")
+        tqdm.write(f"Combination method:         {objective_results['combination_method']}")
         tqdm.write("Objective term breakdown:")
         for name, values in objective_results["terms"].items():
-            tqdm.write(f"* {name:>20}: {values['value']:.5f} with weight {values['weight']}")
+            tqdm.write(f"* {name:>24}: {values['value']:.5f} with weight {values['weight']}")
 
         if print_config:
             Printer.print_model_config(step_results.configs["model_config"])
