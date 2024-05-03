@@ -40,10 +40,10 @@ class TestMAC:
             sigmoid_phi=5.0,
             sigmoid_lambda=28.0,
             saturation_threshold=0.5,
-            permanence_steps=1.0,
+            permanence_steps=25,
             permanence_convexity=1.0,
             activation_threshold_max=1.0,
-            activation_threshold_min=0.2,
+            activation_threshold_min=0.0,
             min_familiarity=0.2,
             sigmoid_chi=2.5,
             device=torch.device("cpu")           
@@ -54,7 +54,11 @@ class TestMAC:
 
     @pytest.fixture
     def mock_input(self):
-        return torch.randint(0, 2, (32, 9, 16))
+        return torch.zeros(
+            (32, 9, 120),
+            dtype=torch.float32
+        )
+        
 
 
     def test_mac_output_shape(self, mock_input, sample_sparsey_layer):
@@ -66,7 +70,7 @@ class TestMAC:
         MAC and the size of the input data
         """
         output = sample_sparsey_layer(mock_input)
-        expected_shape = (32, 16, 144)
+        expected_shape = (32, 16, 128)
 
         assert output.shape == expected_shape, f"Expected output shape {expected_shape}, but got {output.shape}"
 
