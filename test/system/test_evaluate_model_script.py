@@ -9,12 +9,12 @@ for _ in range(2):  # Adjust depth as needed to reach the root directory
     os.chdir('..')
 
 # Paths to the script and configuration files
-SCRIPT_PATH = 'scripts/evaluate_model.py'
+SCRIPT_PATH = 'src/sparseypy/scripts/evaluate_model.py'
 
 # Prepare configuration files for each category
 CONFIG_FILES = {
     'preprocessing_config': 'test/reference_configs/preprocessing.yaml',
-    'dataset_config': 'test/reference_configs/dataset.yaml',
+    'dataset_config': 'test/reference_configs/eval_dataset.yaml',
     'training_recipe_config': 'test/reference_configs/trainer.yaml',
     'system_config': 'test/reference_configs/system.yaml'
 }

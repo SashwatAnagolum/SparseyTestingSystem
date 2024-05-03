@@ -9,10 +9,10 @@ console:
   hpo_progress_bars: False
   # print_best_hpo_config: bool, default True - whether to print the model configuration for the best-
   #     performing experiment in an HPO run to the console when the HPO run completes.
-  print_best_hpo_config: True
+  print_best_hpo_config: False
   # whether to print error stack traces when they occur for schema validation errors
   # print_error_stacktrace: True
-  print_error_stacktrace: False
+  print_error_stacktrace: True
   # print_metric_values: bool, default False - whether to print the values of the selected metrics
   #     to the console at each step of training. More informative about model progress, but printing
   #     this much data to the console has a significant performance impact so it is disabled by default.
@@ -27,7 +27,7 @@ wandb:
   api_key: WANDB_API_KEY
   # project_name: string - the name of the project in Weights & Biases to log data into
   #     this is also the default project for individual training runs using Train Model
-  project_name: post_presentation_4
+  project_name: unit_testing
   # entity: string, default None - the "entity" (organization) to log runs and sweeps to in Weights & Biases
   #     if this is NOT specified, runs and sweeps will log to the default entity for the user whose API key
   #     is used to run the system. This key would be used e.g. for users who are normally part of other

@@ -81,7 +81,7 @@ def evaluate_model(model_name: str, trainer_config: dict,
     model_config, model_weights = df.get_model_data(model_name)
 
     trainer = TrainingRecipeBuilder.build_training_recipe(
-        model_config, dataset_config, preprocessing_config,
+        model_config, dataset_config, dataset_config, preprocessing_config,
         trainer_config
     )
 
