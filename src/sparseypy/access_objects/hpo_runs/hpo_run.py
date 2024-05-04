@@ -104,7 +104,9 @@ class HPORun():
         self.data_storer.create_hpo_sweep(self.hpo_results)
 
         # save the sweep URL
-        locator = f"{system_config['wandb']['entity']}/{hpo_config['project_name']}/{self.sweep_id}"
+        entity = system_config['wandb'].get('entity', None)
+        entity_locator = f"{entity}/" if entity else ""
+        locator = f"{entity_locator}{hpo_config['project_name']}/{self.sweep_id}"
         self.sweep_url = wandb.Api().sweep(locator).url
         self.best_run_url = None
 
