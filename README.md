@@ -6,6 +6,7 @@ A full-featured framework for experimenting with the Sparsey model, including:
 * Freely extensible with custom classes
 * Automatic experiment logging to Google Firestore
 * Rich data visualization using Weights & Biases
+* Built on PyTorch with GPU acceleration
 
 # Sparsey
 
@@ -18,6 +19,42 @@ In conjunction with the multi-level, hierarchical architecture of the memory, th
 # The Testing System
 
 sparseypy makes getting started with the capabilities of Sparsey easy and accessible.
+
+Define your model and experiment parameters using automatically validated YAML configuration files.
+
+```yaml
+layers:
+  - name: sparsey
+    params:
+      # grid_layout: string "rect" or "hex", default "rect", optional
+      #     whether to arrange the MACs in this layer on a rectangular or hexagonal grid
+      grid_layout: rect
+      autosize_grid: false
+      # num_macs: int > 0
+      #     the number of MACs in the layer
+      #     if this is smaller than the layer size, not all rows will be filled
+      num_macs: 9
+      # num_cms_per_mac: int > 0
+      #     the number of coding modules that comprise each MAC in this layer
+      num_cms_per_mac: 2
+      # num_neurons_per_cm: int > 0
+      #     the number of neurons in each competitive module in each MAC in the layer
+      num_neurons_per_cm: 2
+      # mac_receptive_field_size: float > 0
+      #     the receptive field radius of each MAC, defined in terms of the side length of the current layer
+      mac_receptive_field_size: 0.6
+      ...
+```
+
+Execute experiments in the CLI with feedback on core performance indicators.
+
+INSERT CLI SCREENSHOT HERE
+
+Then review the full detail of your results on Weights & Biases.
+
+INSERT W&B SCREENSHOT
+
+
 
 # Installation
 
@@ -67,8 +104,7 @@ The system also ships with **fully-commented reference configuration files**, in
 
 # Command-Line Reference
 
-`train_model`  
-Train and evaluate a new (or existing) model in a single experiment.
+`train_model` - Train and evaluate a new (or existing) model in a single experiment.
 
 **Required arguments:**  
 `--training_dataset_config <path to training dataset.yaml>`  
@@ -90,8 +126,7 @@ Reload the previously-trained model with name “example_model” from Weights &
 
 ***
 
-`evaluate_model`  
-Reload a chosen model from Weights & Biases and evaluate its performance on the provided dataset.  
+`evaluate_model` - Reload a chosen model from Weights & Biases and evaluate its performance on the provided dataset.  
 
 **Required arguments:**  
 `--dataset_config <path to dataset.yaml>`  
@@ -107,8 +142,7 @@ The name of the model from the Weights & Biases model registry to use for this e
 
 ***
 
-`run_hpo`  
-Perform a hyperparameter optimization run.
+`run_hpo` - Perform a hyperparameter optimization run to optimize a Sparsey model for a particular task.
 
 **Required arguments:**  
 `--training_dataset_config <path to dataset.yaml>`  
