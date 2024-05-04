@@ -1,0 +1,87 @@
+---
+# network.yaml - Sparsey model config file for an individual experiment
+
+# model_name: string, optional (no default)
+#     the name of the model in the model registry to which this config refers.
+#     will create the registry entry if it does not exist.
+#     WARNING: IF THERE IS AN EXISTING REGISTRY ENTRY WITH THIS NAME IT WILL 
+#     BE UPDATED WITH THE RESULTS OF TRAINING RUNS USING THIS NETWORK.YAML
+#     AS NEW VERSIONS.
+model_name: darpa_model
+# model_description: string, optional (no default)
+#     friendly description for this model to be displayed in the database and model registry
+model_description: "The validation model from Section I of the DARPA case study."
+
+# input_dimensions: the dimensions to which to resize the input during HPO
+#     width and height can be any positive integer values and do not need to be the same;
+#     however, the model's input dimensions 
+#     must match the dimensions of the output from the preprocessing stack
+input_dimensions:
+  height: 12
+  width: 12
+
+# layerwise configurations for each layer in the network
+#     each entry in the list is a new layer, in order from the bottom of the model to the top
+#     each layer has a name and a list of parameters
+layers:
+  # name: the type of layer to create, currently "sparsey" for a SparseyLayer
+  - name: sparsey
+    params:
+      # grid_layout: string "rect" or "hex", default "rect", optional
+      #     whether to arrange the MACs in this layer on a rectangular or hexagonal grid
+      #     defaults to "rect" unless specified otherwise
+      # grid_layout: rect
+      # autosize_grid: bool, default False, optional
+      #     if this setting is enabled the system will automatically arrange the MACs on the selected grid
+      #     rather than needing to explicitly specify the layer dimensions
+      # autosize_grid: false
+      # num_macs: int > 0
+      #     the number of MACs in the layer
+      #     if this is smaller than the layer size, not all rows will be filled
+      num_macs: 1
+      # mac_grid_num_rows: int > 0
+      #     the number of rows on the MAC grid for this layer
+      #     required unless autosize_grid is enabled
+      mac_grid_num_rows: 1
+      # mac_grid_num_cols: int > 0
+      #     the number of columns on the MAC grid for this layer
+      #     required unless autosize_grid is enabled
+      mac_grid_num_cols: 1
+      # num_cms_per_mac: int > 0
+      #     the number of coding modules that comprise each MAC in this layer ("Q")
+      num_cms_per_mac: 25
+      # num_neurons_per_cm: int > 0
+      #     the number of neurons in each competitive module in each MAC in the layer ("K")
+      num_neurons_per_cm: 9
+      # mac_receptive_field_size: float > 0
+      #     the receptive field radius of each MAC, defined in terms of the side length of the current layer
+      #     a value of 1 represents a full side length
+      #     (note that this uses Euclidean distance; for all corner MACs in this layer to see all MACs 
+      #     in the previous layer, a value of 1.5 is required)
+      mac_receptive_field_size: 1.5
+      # sigmoid_lambda: float > 0
+      #     parameter for the familiarity computation
+      sigmoid_lambda: 3.5
+      # sigmoid_phi: float > 0
+      #     parameter for the familiarity computation
+      sigmoid_phi: 5.0
+      saturation_threshold: 0.5
+      permanence_steps: 100000
+      permanence_convexity: 100000
+      # activation thresholds: float, 0 < min <= max <= 1
+        #     the upper and lower bounds for the number of MACs that need to be 
+        #     active in the receptive field of the MAC for it to become active
+        #     both values are required
+      # activation_threshold_min: the lower bound 
+      activation_threshold_min: 0.08
+      # activation_threshold_max: the upper bound
+      activation_threshold_max: 0.7
+      # min_familiarity: 0 < float < 1
+        #     the minimum average global familiarty required for the CSA to not construct 
+        #     a uniform distribution over neurons in a CM
+      min_familiarity: 0.2
+      # sigmoid_chi: float > 0
+        #     expansion factor for the sigmoid used to compute the 
+        #     distribution over CMs for the CSA
+      sigmoid_chi: 1.5
+...

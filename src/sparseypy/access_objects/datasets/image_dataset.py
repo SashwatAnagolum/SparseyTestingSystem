@@ -18,8 +18,21 @@ from sparseypy.access_objects.datasets.dataset import Dataset
 
 
 class ImageDataset(Dataset):
+    """
+    A dataset class that contains images.
+    Attributes:
+        data_folder (str): The directory where the images are stored.
+        subfolders (list[str]): The subfolders in the data folder.
+        subfolder_images (list[list[str]]): The images in each subfolder.
+        subfolder_image_counts (list[int]): The number of images in each subfolder.
+        total_images (int): The total number of images in the dataset.
+    """
     def __init__(self, data_dir: str, image_format: str):
         """
+        Initialize the ImageDataset.
+        Args:
+            data_dir (str): The directory where the images are stored.
+            image_format (str): The format of the images.
         """
         super().__init__()
 
@@ -51,6 +64,11 @@ class ImageDataset(Dataset):
 
 
     def __getitem__(self, index) -> Any:
+        """
+        Get an item from the dataset.
+        Args:
+            index (int): The index of the item to get.
+        """
         image_subfolder = np.argwhere(
             self.subfolder_image_counts <= index
         )[-1].item()
@@ -70,4 +88,7 @@ class ImageDataset(Dataset):
     
 
     def __len__(self):
+        """
+        Get the length of the dataset.
+        """
         return self.total_images

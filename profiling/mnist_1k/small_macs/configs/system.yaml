@@ -1,0 +1,100 @@
+# system.yaml - core system and database configuration
+---
+
+# wandb: configuration settings for Weights & Biases
+wandb:
+  # api_key: str (optional) - the API key to use to connect to Weights & Biases
+  #     SET THIS KEY TO THE NAME OF THE ENVIRONMENT VARIABLE FROM WHICH THE API KEY SHOULD BE READ
+  #     if this does not exist, the system will attempt to read the API key from
+  #     the WANDB_API_KEY environment variable/entry in the .env file in the execution directory
+  api_key: WANDB_API_KEY
+  # project_name: string - the name of the project in Weights & Biases to log data into
+  #     this is also the default project for individual training runs using Train Model
+  project_name: profiling
+  # save_models: bool, default True - whether to save model weights into Weights & Biases
+  # NOTE: CURRENTLY A DUMMY OPTION because model saving is not implemented yet
+  # save_models: True
+  # save_locally: bool, default True - whether W&B should save run information to the <project name>/<run name>
+  #     directory on the local machine
+  #     CURRENTLY A DUMMY OPTION
+  #     implementing this requires deleting folders on the host machine because W&B doesn't do it for you
+  #     https://github.com/wandb/wandb/issues/3564 so I want more testing first
+  save_locally: False
+  # save_models: bool, default True - whether to save trained models to Weights & Biases
+  #     THIS FEATURE IS A WORK IN PROGRESS and you should disable it if you have issues
+  save_models: False
+  # data_resolution: int 0 "model" (one value per training input), 1 "layer", or 2 "mac", default 2 "mac" 
+  #     the granularity of data to log to W&B
+  #     each level includes the previous one (e.g. "mac" will log both data for individual MACs 
+  #     and an average for all the MACs in a layer)
+  #     NOTE that using "mac" level can substantially increase W&B data usage
+  #     expansion factor is (# of layers * # of macs) in the amount of metric data stored
+  data_resolution: 2
+
+# database: configuration settings for one or more backend databases
+database:
+  # you can configure as many database backends as you like and data will be saved to all of them
+  # however, data is only fetched back from the database defined below as the read_database
+  # WRITE UP the fact that you need to set the environment variables indicated by whatever
+  # database adapter you use in order to use it
+  # do schema thing
+  # in config file put names of environment variables
+  # read_database: str - the name of the database (which must also be in the write_databases below)
+  #     to read data back from when experiment data is requested from the DataFetcher
+  read_database: firestore
+  # write_databases: a list of one or more databases to which to save project results
+  #     the read_database above *must* have an entry here
+  write_databases:
+    # firestore adapter
+    - name: firestore
+      # table_names: the names to use for the system database tables in Firestore
+      #     (optional; see config schema for the defaults)
+      table_names:
+        # hpo_runs: name of the table containing HPO run data
+        hpo_runs: "hpo_runs"
+        # experiments: name of the data containing experiment metadata
+        experiments: "experiments"
+        # batches: name of the table containing the (batched) experiment step data
+        batches: "batches"
+        # models: name of the table containing data on individual model instances
+        models: "models"
+        # model_registry: name of the table containing overall metadata for named models
+        model_registry: "model_registry"
+      # firebase_service_key_path: the name of the environment variable from which the system
+      #     should read the path to the service account key required to access the Firestore database
+      #     (this key also contains the path to the DB and all other required information)
+      firebase_service_key_path: FIREBASE_CONFIG_FILE
+      # data_resolution: int - the level of data to log back to Firestore, default 0 ("nothing")
+      # 0 = nothing, 1 = only summary data, 2 = every step
+      # to log data back to Firestore you need to raise this value
+      data_resolution: 0
+      # save_models: bool, default False - whether to save model weights to Firestore
+      #     Firestore is limited to 1 MiB per document so if you turn this on you
+      #     may encounter issues! this setting comes with absolutely no warranty,
+      #     express or implied
+      #     (note that models are still saved to W&B and model *summary* data is still
+      #     saved regardless of this setting)
+      save_models: False
+      # batch_size: int, default 64
+      #     the size of each batch to save to the database
+      #     Firestore has a 1 MiB limit for each document in the database; each batch is one document
+      #     if you encounter issues with saving data, reducing the batch size can help
+      batch_size: 64
+    # - name: dynamodb
+    #   sso_profile: $AWS_SSO_PROFILE
+    # - name: mongo
+    #   connection_string: $MONGO_CONNECTION_STRING
+
+console:
+  # hpo_progress_bars: bool, default True - whether to show progress bars for training and evaluation
+  #     during HPO runs. Defaults to True for better feedback. Has a very small performance impact.
+  #     disable for batch jobs (e.g. on HPC)
+  hpo_progress_bars: False
+  # whether to print error stack traces when they occur for schema validation errors
+  # print_error_stacktrace: True
+  print_error_stacktrace: False
+  # print_metric_values: bool, default False - whether to print the values of the selected metrics
+  #     to the console at each step of training. More informative about model progress, but printing
+  #     this much data to the console has a significant performance impact so it is disabled by default.
+  print_metric_values: False
+...

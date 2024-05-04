@@ -51,6 +51,16 @@ class SparseyDatasetSchema(AbstractSchema):
 
 
     def transform_schema(self, config_info: dict) -> dict:
+        """
+        Transforms the config info passed in by the user to 
+        construct the config information required by the model builder.
+
+        Args:
+            config_info: dict containing the config information
+
+        Returns:
+            (dict): the transformed config info
+        """
         return config_info
 
 
@@ -81,9 +91,19 @@ class SparseyDatasetSchema(AbstractSchema):
                     Schema(bool, error="preprocessed must be a boolean value"),
                 Optional('preprocessed_temp_dir', default='datasets/preprocessed_dataset'): 
                     Schema(str, error="preprocessed_temp_dir must be a valid path"),
-                'preprocessed_stack': schema_params[
-                    'preprocessing_stack_schema'
-                ],
+                Optional(
+                    'preprocessed_stack',
+                    default={'transform_list': []}
+                ): schema_params['preprocessing_stack_schema'],
+                Optional('save_to_disk', default=False): Schema(
+                    bool, error='save_to_disk must be a boolean value'
+                ),
+                Optional('in_memory', default=False): Schema(
+                    bool, "in_memory must be a boolean value"
+                ),
+                Optional('load_lazily', default=True): Schema(
+                    bool, "load_lazily must be a boolean value"
+                )
             }, error="Invalid Sparsey binary dataset configuration"
         )
 

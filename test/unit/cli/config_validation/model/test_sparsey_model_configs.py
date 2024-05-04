@@ -145,15 +145,14 @@ class TestSparseyModelConfigs:
         Test case ID: TC-01-12
         """
         sparsey_model_schema['layers'][0]['params'][
-            'permanence'
-        ] = 1.0
+            'permanence_convexity'
+        ] = 0.5
 
         validated_config = validate_config(
             sparsey_model_schema, 'model', 'sparsey'
         )
 
         assert isinstance(validated_config, dict)
-
 
 
     def test_permanence_low_boundary(
@@ -194,7 +193,7 @@ class TestSparseyModelConfigs:
         Test case ID: TC-01-13
         """
         sparsey_model_schema['layers'][0]['params'][
-            'mac_receptive_field_radius'
+            'mac_receptive_field_size'
         ] = 0.0
 
         with pytest.raises(SchemaError):

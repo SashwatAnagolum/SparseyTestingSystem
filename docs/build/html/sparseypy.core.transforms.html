@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html lang="python" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>sparseypy.core.transforms package &#8212; Sparsey Testing System 1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=61cf8be8"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="sparseypy-core-transforms-package">
+<h1>sparseypy.core.transforms package<a class="headerlink" href="#sparseypy-core-transforms-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-sparseypy.core.transforms.abstract_transform">
+<span id="sparseypy-core-transforms-abstract-transform-module"></span><h2>sparseypy.core.transforms.abstract_transform module<a class="headerlink" href="#module-sparseypy.core.transforms.abstract_transform" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.abstract_transform.AbstractTransform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.transforms.abstract_transform.</span></span><span class="sig-name descname"><span class="pre">AbstractTransform</span></span><a class="headerlink" href="#sparseypy.core.transforms.abstract_transform.AbstractTransform" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>An abstract class representing a transformation. All transformations
+should inherit from this class and implement the forward method.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.abstract_transform.AbstractTransform.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.transforms.abstract_transform.AbstractTransform.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call. Should be overridden by all subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sample</strong> -- The input data to be transformed.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transformed data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.transforms.binarize_transform">
+<span id="sparseypy-core-transforms-binarize-transform-module"></span><h2>sparseypy.core.transforms.binarize_transform module<a class="headerlink" href="#module-sparseypy.core.transforms.binarize_transform" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.binarize_transform.BinarizeTransform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.transforms.binarize_transform.</span></span><span class="sig-name descname"><span class="pre">BinarizeTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binarize_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.transforms.binarize_transform.BinarizeTransform" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.transforms.abstract_transform.AbstractTransform" title="sparseypy.core.transforms.abstract_transform.AbstractTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractTransform</span></code></a></p>
+<p>A transform to first convert an image to grayscale and then
+binarize it based on a threshold.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.binarize_transform.BinarizeTransform.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.transforms.binarize_transform.BinarizeTransform.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Apply grayscale conversion and binarization to the input sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sample</strong> -- The input data to be transformed, assumed to be a PyTorch tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Binarized grayscale data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.transforms.skeletonize_transform">
+<span id="sparseypy-core-transforms-skeletonize-transform-module"></span><h2>sparseypy.core.transforms.skeletonize_transform module<a class="headerlink" href="#module-sparseypy.core.transforms.skeletonize_transform" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.skeletonize_transform.SkeletonizeTransform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.transforms.skeletonize_transform.</span></span><span class="sig-name descname"><span class="pre">SkeletonizeTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.transforms.skeletonize_transform.SkeletonizeTransform" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sparseypy.core.transforms.abstract_transform.AbstractTransform" title="sparseypy.core.transforms.abstract_transform.AbstractTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractTransform</span></code></a></p>
+<p>A transform to apply Canny edge detection followed by skeletonization.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.skeletonize_transform.SkeletonizeTransform.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.transforms.skeletonize_transform.SkeletonizeTransform.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Apply Canny edge detection and skeletonization to the input sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sample</strong> -- The input data to be transformed, assumed to be a PyTorch tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Skeletonized edge data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.transforms.transform_factory">
+<span id="sparseypy-core-transforms-transform-factory-module"></span><h2>sparseypy.core.transforms.transform_factory module<a class="headerlink" href="#module-sparseypy.core.transforms.transform_factory" title="Link to this heading">¶</a></h2>
+<p>Transform Factory: class to build transforms.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.transform_factory.TransformFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sparseypy.core.transforms.transform_factory.</span></span><span class="sig-name descname"><span class="pre">TransformFactory</span></span><a class="headerlink" href="#sparseypy.core.transforms.transform_factory.TransformFactory" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>TransformFactory: factory class for constructing built-in system and
+PyTorch transforms.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.transform_factory.TransformFactory.allowed_modules">
+<span class="sig-name descname"><span class="pre">allowed_modules</span></span><a class="headerlink" href="#sparseypy.core.transforms.transform_factory.TransformFactory.allowed_modules" title="Link to this definition">¶</a></dt>
+<dd><p>the names of the transform classes shipped as</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[string]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">part</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">system</span> <span class="pre">that</span> <span class="pre">are</span> <span class="pre">allowed</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">constructed</span> <span class="pre">with</span> <span class="pre">get_transform_class().</span></span></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">allowed_modules</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'BinarizeTransform',</span> <span class="pre">'SkeletonizeTransform',</span> <span class="pre">'abstract_transform',</span> <span class="pre">'binarize_transform',</span> <span class="pre">'skeletonize_transform'}</span></em><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.transform_factory.TransformFactory.create_transform">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transform_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Transform</span></span></span><a class="headerlink" href="#sparseypy.core.transforms.transform_factory.TransformFactory.create_transform" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a transform passed in based on the transform name and kwargs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transform_name</strong> (<em>str</em>) -- the name of the transform to create.</p></li>
+<li><p><strong>**kwargs</strong> -- arbitrary keyword arguments, passed to the transform</p></li>
+<li><p><strong>class constructor.</strong></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.transform_factory.TransformFactory.get_transform_class">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_transform_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sparseypy.core.transforms.transform_factory.TransformFactory.get_transform_class" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the class corresponding to the name passed in.
+Throws an error if the name is not valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>class_name</strong> (<em>str</em>) -- the transform class name to create</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sparseypy.core.transforms.transform_factory.TransformFactory.get_transform_name">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_transform_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transform_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#sparseypy.core.transforms.transform_factory.TransformFactory.get_transform_name" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a transform name from config file format (&quot;transform_name&quot;) to
+transform class name format (&quot;TransformName&quot;).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>transform_name</strong> (<em>str</em>) -- the config-style transform name</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>str</em> -- the class-style transform name</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sparseypy.core.transforms">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sparseypy.core.transforms" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Sparsey Testing System</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Sashwat Anagolum, JD Padrnos, Andrew Klawa, Christopher Pereira.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/sparseypy.core.transforms.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

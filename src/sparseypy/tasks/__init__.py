@@ -4,4 +4,4 @@
 Init: initialization for the tasks module.
 """
 
-from . import run_hpo, train_model
+from . import evaluate_model, run_hpo, train_model

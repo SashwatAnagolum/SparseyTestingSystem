@@ -54,7 +54,7 @@ hyperparameters:
           min: 2
           max: 10
           distribution: int_uniform
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           values: [0.75, 1.0, 1.5]
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -90,7 +90,7 @@ hyperparameters:
           values: [4, 9]
         num_cms_per_mac:
           values: [5, 10, 15, 20, 25]
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           value: 1.0
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -126,7 +126,7 @@ hyperparameters:
           values: [4, 9]
         num_cms_per_mac:
           value: 2
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           values: [1.0, 1.5]
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -162,7 +162,7 @@ hyperparameters:
           value: 2
         num_macs:
           values: [4, 9]
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           value: 1.0
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]
@@ -198,7 +198,7 @@ hyperparameters:
           value: 2
         num_macs:
           value: 4
-        mac_receptive_field_radius:
+        mac_receptive_field_size:
           value: 0.75
         sigmoid_lambda:
           values: [1.0, 5.0, 10.0, 25.0]

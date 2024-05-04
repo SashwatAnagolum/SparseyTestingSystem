@@ -11,12 +11,29 @@
             "justMyCode": true
         },
         {
+            "name": "Evaluate Model",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\evaluate_model.py",
+            "args": [
+                "--dataset_config", ".\\demo\\eval_dataset.yaml",
+                "--preprocessing_config", ".\\demo\\preprocessing.yaml",
+                "--model_name", "${input:getModelNameString}",
+                "--training_recipe_config", ".\\demo\\trainer.yaml",
+                "--system_config", ".\\demo\\system.yaml"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
             "name": "Run HPO",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\run_hpo.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\run_hpo.py",
             "args": [
-                "--dataset_config", ".\\demo\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
                 "--hpo_config", ".\\demo\\hpo.yaml",
                 "--system_config", ".\\demo\\system.yaml"
@@ -26,12 +43,29 @@
             "justMyCode": true
         },
         {
+            "name": "Run HPO (custom configs)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\run_hpo.py",
+            "args": [
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
+                "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
+                "--hpo_config", "${input:getSparseyConfigDirectoryString}\\hpo.yaml",
+                "--system_config", "${input:getSparseyConfigDirectoryString}\\system.yaml",
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
             "name": "Run HPO (custom configs, piped output)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\run_hpo.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\run_hpo.py",
             "args": [
-                "--dataset_config", "${input:getSparseyConfigDirectoryString}\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
                 "--hpo_config", "${input:getSparseyConfigDirectoryString}\\hpo.yaml",
                 "--system_config", "${input:getSparseyConfigDirectoryString}\\system.yaml",
@@ -45,9 +79,10 @@
             "name": "Train Model",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\train_model.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
             "args": [
-                "--dataset_config", ".\\demo\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
                 "--model_config", ".\\demo\\network.yaml",
                 "--training_recipe_config", ".\\demo\\trainer.yaml",
@@ -61,9 +96,10 @@
             "name": "Train Model by Name",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\train_model.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
             "args": [
-                "--dataset_config", ".\\demo\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", ".\\demo\\preprocessing.yaml",
                 "--model_name", "${input:getModelNameString}",
                 "--training_recipe_config", ".\\demo\\trainer.yaml",
@@ -74,12 +110,30 @@
             "justMyCode": true
         },
         {
+            "name": "Train Model (custom configs)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
+            "args": [
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
+                "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
+                "--model_config", "${input:getSparseyConfigDirectoryString}\\network.yaml",
+                "--training_recipe_config", "${input:getSparseyConfigDirectoryString}\\trainer.yaml",
+                "--system_config", "${input:getSparseyConfigDirectoryString}\\system.yaml",
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
             "name": "Train Model (custom configs, piped output)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\scripts\\train_model.py",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\train_model.py",
             "args": [
-                "--dataset_config", "${input:getSparseyConfigDirectoryString}\\dataset.yaml",
+                "--training_dataset_config", ".\\demo\\train_dataset.yaml",
+                "--evaluation_dataset_config", ".\\demo\\eval_dataset.yaml",
                 "--preprocessing_config", "${input:getSparseyConfigDirectoryString}\\preprocessing.yaml",
                 "--model_config", "${input:getSparseyConfigDirectoryString}\\network.yaml",
                 "--training_recipe_config", "${input:getSparseyConfigDirectoryString}\\trainer.yaml",
@@ -90,18 +144,27 @@
             "cwd": "${workspaceFolder}",
             "justMyCode": true
         },
+        {
+            "name": "Update Documentation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\src\\sparseypy\\scripts\\update_docs.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
     ],
     "inputs": [
         {
             "id": "getModelNameString",
             "type": "promptString",
             "description": "enter the name of the online model to use",
-            "default": "example_model"
+            "default": "example_model_v2"
         },
         {
             "id": "getSparseyConfigDirectoryString",
             "type": "promptString",
-            "description": "enter the path to the directory containing your HPO config files",
+            "description": "enter the path to the directory containing your config files (without the trailing slash)",
             "default": ".\\demo"
         },
         {

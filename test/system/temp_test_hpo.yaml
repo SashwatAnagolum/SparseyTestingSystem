@@ -1,0 +1,312 @@
+hpo_run_name: sample_hpo_run
+hpo_strategy: random
+hyperparameters:
+  input_dimensions:
+    height:
+      value: 8
+    width:
+      value: 8
+  layers:
+  - name:
+      value: sparsey
+    params:
+      activation_threshold_max:
+        value: 0.8
+      activation_threshold_min:
+        value: 0.1
+      autosize_grid:
+        value: true
+      grid_layout:
+        value: rect
+      mac_receptive_field_size:
+        values:
+        - 0.75
+        - 1.0
+        - 1.5
+      min_familiarity:
+        distribution: uniform
+        max: 0.5
+        min: 0.3
+      num_cms_per_mac:
+        value: 2
+      num_macs:
+        values:
+        - 4
+        - 9
+      num_neurons_per_cm:
+        distribution: int_uniform
+        max: 10
+        min: 2
+      permanence:
+        distribution: uniform
+        max: 0.9
+        min: 0.2
+      saturation_threshold:
+        value: 0.8
+      sigmoid_chi:
+        values:
+        - 0.5
+        - 1.0
+        - 2.5
+        - 5.0
+      sigmoid_lambda:
+        values:
+        - 1.0
+        - 5.0
+        - 10.0
+        - 25.0
+      sigmoid_phi:
+        values:
+        - 1.0
+        - 1.5
+        - 2.0
+        - 2.5
+        - 3.0
+  - name:
+      value: sparsey
+    params:
+      activation_threshold_max:
+        value: 0.8
+      activation_threshold_min:
+        value: 0.1
+      autosize_grid:
+        value: true
+      grid_layout:
+        value: rect
+      mac_receptive_field_size:
+        value: 1.0
+      min_familiarity:
+        distribution: uniform
+        max: 0.5
+        min: 0.3
+      num_cms_per_mac:
+        values:
+        - 5
+        - 10
+        - 15
+        - 20
+        - 25
+      num_macs:
+        values:
+        - 4
+        - 9
+      num_neurons_per_cm:
+        value: 5
+      permanence:
+        distribution: uniform
+        max: 0.9
+        min: 0.2
+      saturation_threshold:
+        value: 0.8
+      sigmoid_chi:
+        values:
+        - 0.5
+        - 1.0
+        - 2.5
+        - 5.0
+      sigmoid_lambda:
+        values:
+        - 1.0
+        - 5.0
+        - 10.0
+        - 25.0
+      sigmoid_phi:
+        values:
+        - 1.0
+        - 1.5
+        - 2.0
+        - 2.5
+        - 3.0
+  - name:
+      value: sparsey
+    params:
+      activation_threshold_max:
+        value: 0.8
+      activation_threshold_min:
+        value: 0.1
+      autosize_grid:
+        value: true
+      grid_layout:
+        value: rect
+      mac_receptive_field_size:
+        values:
+        - 1.0
+        - 1.5
+      min_familiarity:
+        distribution: uniform
+        max: 0.5
+        min: 0.3
+      num_cms_per_mac:
+        value: 2
+      num_macs:
+        values:
+        - 4
+        - 9
+      num_neurons_per_cm:
+        value: 5
+      permanence:
+        distribution: uniform
+        max: 0.9
+        min: 0.2
+      saturation_threshold:
+        value: 0.8
+      sigmoid_chi:
+        values:
+        - 0.5
+        - 1.0
+        - 2.5
+        - 5.0
+      sigmoid_lambda:
+        values:
+        - 1.0
+        - 5.0
+        - 10.0
+        - 25.0
+      sigmoid_phi:
+        values:
+        - 1.0
+        - 1.5
+        - 2.0
+        - 2.5
+        - 3.0
+  - name:
+      value: sparsey
+    params:
+      activation_threshold_max:
+        value: 0.8
+      activation_threshold_min:
+        value: 0.1
+      autosize_grid:
+        value: true
+      grid_layout:
+        value: rect
+      mac_receptive_field_size:
+        value: 1.0
+      min_familiarity:
+        distribution: uniform
+        max: 0.5
+        min: 0.3
+      num_cms_per_mac:
+        value: 2
+      num_macs:
+        values:
+        - 4
+        - 9
+      num_neurons_per_cm:
+        value: 5
+      permanence:
+        distribution: uniform
+        max: 0.9
+        min: 0.2
+      saturation_threshold:
+        value: 0.8
+      sigmoid_chi:
+        values:
+        - 0.5
+        - 1.0
+        - 2.5
+        - 5.0
+      sigmoid_lambda:
+        values:
+        - 1.0
+        - 5.0
+        - 10.0
+        - 25.0
+      sigmoid_phi:
+        values:
+        - 1.0
+        - 1.5
+        - 2.0
+        - 2.5
+        - 3.0
+  - name:
+      value: sparsey
+    params:
+      activation_threshold_max:
+        value: 0.8
+      activation_threshold_min:
+        value: 0.1
+      autosize_grid:
+        value: true
+      grid_layout:
+        value: rect
+      mac_receptive_field_size:
+        value: 0.75
+      min_familiarity:
+        distribution: uniform
+        max: 0.5
+        min: 0.3
+      num_cms_per_mac:
+        value: 2
+      num_macs:
+        value: 4
+      num_neurons_per_cm:
+        value: 5
+      permanence:
+        distribution: uniform
+        max: 0.9
+        min: 0.2
+      saturation_threshold:
+        value: 0.8
+      sigmoid_chi:
+        values:
+        - 0.5
+        - 1.0
+        - 2.5
+        - 5.0
+      sigmoid_lambda:
+        values:
+        - 1.0
+        - 5.0
+        - 10.0
+        - 25.0
+      sigmoid_phi:
+        values:
+        - 1.0
+        - 1.5
+        - 2.0
+        - 2.5
+        - 3.0
+  num_layers:
+    value: 4
+  trainer:
+    dataloader:
+      batch_size:
+        value: 1
+      shuffle:
+        value: true
+    optimizer:
+      name:
+        value: hebbian
+    training:
+      num_epochs:
+        value: 1
+learning_rate: invalid_value
+metrics:
+- name: feature_coverage
+  reduction: none
+  save: true
+- name: match_accuracy
+  save: true
+- name: basis_set_size
+  save: true
+- name: basis_set_size_increase
+  save: true
+- name: num_activations
+  reduction: none
+  save: true
+missing_key: null
+model_family: sparsey
+num_candidates: 2
+num_epochs: -1
+optimization_objective:
+  combination_method: sum
+  objective_terms:
+  - metric:
+      name: match_accuracy
+    weight: 1.0
+  - metric:
+      name: feature_coverage
+    weight: 0.5
+project_name: sparsey_hpo_presentation_3
+verbosity: 0

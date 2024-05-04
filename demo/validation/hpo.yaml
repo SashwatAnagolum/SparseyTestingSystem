@@ -1,0 +1,381 @@
+---
+# hpo.yaml - hyperparameter optimization configuration file
+
+# model_family: string
+#     the type of model to optimize for; currently "sparsey"
+model_family: sparsey
+# hpo_run_name: string
+#     the name to use for this HPO run and its corresponding Sweep in Weights & Biases
+hpo_run_name: sample_hpo_run
+
+# description: string (optional, default None) - a written description of the purpose of this HPO run
+#     logged to the sweep summary in Weights & Biases
+description: "A testing sweep using the demo configuration files."
+
+# project_name: string
+#     the project in Weights & Biases to which to log this run's results (its Sweep, the constituent Runs, and all metrics)
+project_name: sparsey_hpo_presentation_3
+# verbosity: int >= 0
+#     controls how much information about the HPO process is output to the console
+#     0 = minimal; suppresses Weights & Biases HPO console spam
+verbosity: 0
+
+hyperparameters:
+  # list of hyperparameters to either hold constant or optimize
+  #   GENERAL HYPERPARAMETER OPTIONS
+  #   in general, hyperparameters have three specific types: a single value, a set of values, or a sampling distribution
+  #   SINGLE VALUE
+  #   hyperparameter:
+  #     value: 7.5
+  #   RANGE OF VALUES
+  #   hyperparameter:
+  #     values: [X, Y, Z]
+  #   DISTRIBUTION
+  #   hyperparameter:
+  #     min: 0
+  #     max: 10 (note that maximum must be STRICTLY GREATER THAN minimum to use this; if you only want a single value, use "value" instead)
+  #     distribution: uniform (currently supports "int_uniform" for integer values only (e.g. 3) and "uniform" for float values (can give 3.05))
+
+  # input_dimensions: the dimensions to which to resize the input during HPO
+  #     width and height can be any positive integer values not larger than the input, and do not need to be the same
+  #     NOTE: future system versions will enforce matching preprocessing output and model input dimensions
+  input_dimensions: 
+    width: 
+      value: 8
+    height:
+      value: 8
+
+  # num_layers: int > 0
+  #     the number of layers to be used in the model
+  #     the actual properties of the layers are defined below; this just controls the *number* of layers
+  #     if you define more layers than num_layers below, num_layers controls 
+  #     (even if you specify 3 layers if "num_layers" is 1 you will get 1 layer)
+  num_layers:
+    value: 4
+
+  # the trainer section defines the training-related hyperparameters of the Sparsey model
+  trainer:
+  # optimizer settings
+    optimizer:
+      # name: string - the optimizer class to load and use
+      #    for Sparsey models you should always use "hebbian"
+      name: 
+        value: hebbian
+
+    # dataloader: controls the dataloader parameters to use
+    dataloader:
+      # batch_size: int > 0
+      #    number of input items per batch
+      batch_size: 
+        value: 1
+      # shuffle: bool
+      #    whether to randomize the inputs as they are drawn from the dataloader
+      shuffle: 
+        value: True
+
+    # training: directly training-related hyperparameters
+    training:
+      # num_epochs: int > 0
+      #     number of epochs to train for
+      #     for Sparsey single-shot learning this will always be 1
+      #     but the setting exists for potential future compatibility
+      num_epochs: 
+        value: 1
+
+  # the layers section defines the properties of individual layers in the Sparey model
+  #     each entry in its list is a new layer, in order from the bottom of the model to the top
+  #     each layer has a name and a list of parameters
+  layers:
+      # name: the type of layer to create, currently "sparsey" for a SparseyLayer
+    - name: 
+        value: sparsey
+      params:
+        # grid_layout: string "rect" or "hex", default "rect"
+        #     whether to arrange the MACs in this layer on a rectangular or hexagonal grid
+        grid_layout:
+          value: rect
+        # autosize_grid: bool, default False
+        #     if this setting is enabled the system will automatically arrange the MACs on the selected grid
+        #     rather than needing to explicitly specify the layer dimensions
+        autosize_grid:
+          value: True
+        # num_cms_per_mac: int > 0
+        #     the number of coding modules that comprise each MAC in this layer
+        num_cms_per_mac:
+          value: 2
+        # num_macs: int > 0
+        #     the number of MACs in the layer
+        #     if this is smaller than the layer size, not all rows will be filled
+        num_macs:
+          values: [4, 9]
+        # num_neurons_per_cm: int > 0
+        #     the number of neurons in each competitive module in each MAC in the layer
+        num_neurons_per_cm:
+          min: 2
+          max: 10
+          distribution: int_uniform
+        # mac_receptive_field_size: float > 0
+        #     the receptive field radius of each MAC, defined in terms of the side length of the current layer
+        #     a value of 1 represents a full side length
+        #     note that this uses Euclidean distance; for all corner MACs in this layer to see all MACs 
+        #     in the previous layer, a value of 1.5 is required
+        mac_receptive_field_size:
+          values: [0.75, 1.0, 1.5]
+        # sigmoid_lambda: float > 0
+        #     parameter for the familiarity computation
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        # sigmoid_phi: float > 0
+        #     parameter for the familiarity computation
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+        # permanence_convexity: 0 < float <= 1
+        #     controls the shape of the permanence decay curve
+        permanence_convexity:
+          value: 0.5
+        # permanence_steps: int > 0
+        #     the number of steps without a pre-post correlation that a weight takes to
+        #     decay completely to zero
+        permanence_steps:
+          min: 10
+          max: 30
+          distribution: int_uniform
+        # saturation_threshold: float > 0
+        #     the fraction of 
+        saturation_threshold:
+          value: 0.8
+        # activation thresholds: float, 0 < min <= max <= 1
+        #     the upper and lower bounds for the number of MACs that need to be 
+        #     active in the receptive field of the MAC for it to become active
+        #     both values are required
+        # activation_threshold_min: the lower bound 
+        activation_threshold_min:
+          value: 0.1
+        # activation_threshold_max: the upper bound
+        activation_threshold_max:
+          value: 0.8
+        # min_familiarity: 0 < float < 1
+        #     the minimum average global familiarty required for the CSA to not construct 
+        #     a uniform distribution over neurons in a CM
+        min_familiarity:
+          min: 0.3
+          max: 0.5
+          distribution: uniform
+        # sigmoid_chi: float > 0
+        #     expansion factor for the sigmoid used to compute the 
+        #     distribution over CMs for the CSA
+        sigmoid_chi:
+          values: [0.5, 1.0, 2.5, 5.0]
+
+    - name: 
+        value: sparsey
+      params:
+        grid_layout:
+          value: rect
+        autosize_grid:
+          value: True
+        num_neurons_per_cm:
+          value: 5
+        num_macs:
+          values: [4, 9]
+        num_cms_per_mac:
+          values: [5, 10, 15, 20, 25]
+        mac_receptive_field_size:
+          value: 1.0
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+        permanence_convexity:
+          value: 0.5
+        permanence_steps:
+          min: 10
+          max: 30
+          distribution: int_uniform
+        saturation_threshold:
+          value: 0.8
+        activation_threshold_min:
+          value: 0.1
+        activation_threshold_max:
+          value: 0.8
+        min_familiarity:
+          min: 0.3
+          max: 0.5
+          distribution: uniform
+        sigmoid_chi:
+          values: [0.5, 1.0, 2.5, 5.0]
+
+    - name: 
+        value: sparsey
+      params:
+        grid_layout:
+          value: rect
+        autosize_grid:
+          value: True
+        num_neurons_per_cm:
+          value: 5
+        num_macs:
+          values: [4, 9]
+        num_cms_per_mac:
+          value: 2
+        mac_receptive_field_size:
+          values: [1.0, 1.5]
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+        permanence_convexity:
+          value: 0.5
+        permanence_steps:
+          min: 10
+          max: 30
+          distribution: int_uniform
+        saturation_threshold:
+          value: 0.8
+        activation_threshold_min:
+          value: 0.1
+        activation_threshold_max:
+          value: 0.8
+        min_familiarity:
+          min: 0.3
+          max: 0.5
+          distribution: uniform
+        sigmoid_chi:
+          values: [0.5, 1.0, 2.5, 5.0]
+
+    - name: 
+        value: sparsey
+      params:
+        grid_layout:
+          value: rect
+        autosize_grid:
+          value: True
+        num_cms_per_mac:
+          value: 2
+        num_neurons_per_cm:
+          value: 5
+        num_macs:
+          values: [4, 9]
+        mac_receptive_field_size:
+          value: 1.0
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+        permanence_convexity:
+          value: 0.5
+        permanence_steps:
+          min: 10
+          max: 30
+          distribution: int_uniform
+        saturation_threshold:
+          value: 0.8
+        activation_threshold_min:
+          value: 0.1
+        activation_threshold_max:
+          value: 0.8
+        min_familiarity:
+          min: 0.3
+          max: 0.5
+          distribution: uniform
+        sigmoid_chi:
+          values: [0.5, 1.0, 2.5, 5.0]
+
+    - name: 
+        value: sparsey
+      params:
+        grid_layout:
+          value: rect
+        autosize_grid:
+          value: True
+        num_cms_per_mac:
+          value: 2
+        num_neurons_per_cm:
+          value: 5
+        num_macs:
+          value: 4
+        mac_receptive_field_size:
+          value: 0.75
+        sigmoid_lambda:
+          values: [1.0, 5.0, 10.0, 25.0]
+        sigmoid_phi:
+          values: [1.0, 1.5, 2.0, 2.5, 3.0]
+        permanence_convexity:
+          value: 0.5
+        permanence_steps:
+          min: 10
+          max: 30
+          distribution: int_uniform
+        saturation_threshold:
+          value: 0.8
+        activation_threshold_min:
+          value: 0.1
+        activation_threshold_max:
+          value: 0.8
+        min_familiarity:
+          min: 0.3
+          max: 0.5
+          distribution: uniform
+        sigmoid_chi:
+          values: [0.5, 1.0, 2.5, 5.0]
+
+# hpo_strategy: string
+# the name of the HPO strategy to use; can be any strategy supported by the system
+# currently options are "random", "grid", and "bayesian"
+hpo_strategy: random
+
+# optimization_objective: the section describes the desired objective function
+# consists of a list of one or more objective terms and a combination method to describe how they should be combined to produce the objective value
+optimization_objective:
+  # objective_terms: list of the individual terms in the objective
+  # one list entry for each metric
+  # * name: the name of the metric; can be any metric supported by the system
+  # * weight: the weight of this metric in the overall objective function; can be any float value, positive or negative
+  objective_terms:
+    - metric:
+        name: match_accuracy
+      weight: 1.0  
+
+    - metric:
+        name: feature_coverage
+      weight: 0.5
+  # combination_method: string
+  # how the objective terms will be combined to produce the objective value
+  # * "sum" for a weighted sum
+  # * "mean" for a weighted average
+  # * "product" to multiply all the terms and their weights together
+  combination_method: sum
+
+# num_candidates: int > 0
+# the number of candidate models to try/steps of HPO to perform 
+num_candidates: 10
+
+# metrics: the list of metrics to compute for HPO
+#     this is equivalent to the "metrics" key in the training_recipe
+#     one list entry for each metric:
+#     * name: the name of the metric (can be any metric supported by the system)
+#     * save: whether to save the values of the metric to Weights & Biases for later review
+#     * reduction (optional, must be supported by the metric): the method to use to reduce the granularity of the metric
+#     * params (if supported by metric): additional parameters related to the metric, as defined in its schema
+metrics:
+  - name: feature_coverage
+    reduction: none
+    save: True
+
+  - name: match_accuracy
+    save: True
+
+  - name: basis_set_size
+    save: True
+
+  - name: basis_set_size_increase
+    save: True
+
+  #- name: basis_average
+  #  save: True
+
+  - name: num_activations
+    reduction: none
+    save: True
+
+...

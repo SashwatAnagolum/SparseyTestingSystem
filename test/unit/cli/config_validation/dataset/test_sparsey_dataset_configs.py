@@ -94,12 +94,12 @@ class TestSparseyDatasetConfigs:
                 dataset config.
         """
         del sparsey_dataset_config['preprocessed_stack']
-
-        with pytest.raises(SchemaError):
-            validate_config(
+        # made optional
+        # with pytest.raises(SchemaError):
+        assert validate_config(
                 sparsey_dataset_config, 'dataset', 'image',
                 survive_with_exception=True
-            )
+                ) is not None
 
 
     def test_invalid_preprocessed_stack(

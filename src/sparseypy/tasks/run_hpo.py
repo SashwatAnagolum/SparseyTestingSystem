@@ -6,16 +6,25 @@ Run HPO Task: script to run HPO.
 
 
 import os
-from pprint import pprint
+import shutil
 from tqdm import tqdm
+import warnings
 
 from sparseypy.access_objects.hpo_runs.hpo_run  import HPORun
 from sparseypy.core.data_storage_retrieval.data_storer import DataStorer
+from sparseypy.core.printing import Printer
 
+# filter out PyTorch warnings for using NestedTensors
+warnings.filterwarnings(
+    "ignore",
+    message=r"The PyTorch API of nested tensors is in prototype stage and will change in the.+"
+)
 
 def run_hpo(hpo_config: dict,
-            dataset_config: dict, preprocessing_config: dict,
-            system_config: dict):
+            training_dataset_config: dict,
+            evaluation_dataset_config: dict,
+            preprocessing_config: dict,
+            system_config: dict) -> None:
     """
     Runs hyperparameter optimization
     over the specified network hyperparameters
@@ -24,60 +33,43 @@ def run_hpo(hpo_config: dict,
     Args:
         hpo_config (dict): config info used to build the
             HPORun object.
-        dataset_config (dict): config info used to build the
-            dataset object.
+        training_dataset_config (dict): config info used to
+            build the training dataset object.
+        evaluation_dataset_config (dict): config info used to
+            build the evaluation dataset object.
         preprocessing_config (dict): config info used to build the
             preprocessing stack.
         system_config (dict): config info for the overall system
     """
 
+    # silence WandB if requested by the user
+    if system_config["wandb"]["silent"]:
+        os.environ["WANDB_SILENT"] = "true"
+
     # initialize the DataStorer (logs into W&B and Firestore)
+    tqdm.write("Connecting to Weights & Biases...")
     DataStorer.configure(system_config)
 
     hpo_run = HPORun(
-        hpo_config,
-        dataset_config, preprocessing_config, system_config
+        hpo_config, training_dataset_config,
+        evaluation_dataset_config, preprocessing_config, 
+        system_config
     )
 
     # if we are in production mode (verbosity 0), suppress the W&B output
     if hpo_config["verbosity"] == 0:
         os.environ["WANDB_SILENT"] = "true"
 
-    met_separator = "\n* "
-    combination_item = "{mn:<25} (weight: {mw:.5f})"
-
-    obj_vals = [
-        combination_item.format(mn=x['metric']['name'], mw=x['weight'])
-        for x in hpo_config['optimization_objective']['objective_terms']
-        ]
-
-    tqdm.write(f"""
-HYPERPARAMETER OPTIMIZATION SUMMARY
-          
-W&B project name: {hpo_config['project_name']}
-W&B sweep name: {hpo_config['hpo_run_name']}
-
-Model family: {hpo_config['model_family']}
-Optimization strategy: {hpo_config['hpo_strategy']}
-Number of runs: {hpo_config['num_candidates']}
-
-Selected metrics: 
-* {met_separator.join([x["name"] for x in hpo_config["metrics"]])}
-
-Objective calculation: {hpo_config['optimization_objective']['combination_method']} of
-* {met_separator.join(obj_vals)}
-""")
+    # print the HPO summary
+    Printer.print_pre_hpo_summary(hpo_config)
 
     hpo_results = hpo_run.run_sweep()
-    print("OPTIMIZATION RUN COMPLETED")
-    print(f"Best run: {hpo_results.best_run.id}")
-    hpo_run._print_breakdown(hpo_results.best_run)
-    print("Best run configuration:\n---------------------------------------------------------")
-    layer_number = 1
-    print('INPUT DIMENSIONS ')
-    pprint(hpo_results.best_run.configs["model_config"]["input_dimensions"])
-    print("\n---------------------------------------------------------")
-    for layer in hpo_results.best_run.configs["model_config"]["layers"]:
-        print("LAYER ", layer_number, "\n---------------------------------------------------------")
-        pprint(layer)
-        layer_number+=1
+
+    Printer.print_post_hpo_summary(hpo_results, hpo_config,
+                                   hpo_run.sweep_url, hpo_run.best_run_url)
+
+    # remove results at completion if requested
+    if system_config['wandb'].get('remove_local_files', False):
+        for wandb_dir in hpo_run.wandb_dirs:
+            shutil.rmtree(wandb_dir)
+        tqdm.write("\nRemoved local temporary files.")

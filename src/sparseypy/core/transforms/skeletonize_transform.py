@@ -23,6 +23,7 @@ class SkeletonizeTransform(AbstractTransform):
         :return: Skeletonized edge data.
         """
         # Ensure the input is a CPU numpy array
+        # may not work correctly on MPS since Torch doesn't have an equivalent sensing method
         if sample.is_cuda:
             sample = sample.cpu()
         sample_np = sample.squeeze().numpy()  # Assuming the input is grayscale [1, Height, Width]

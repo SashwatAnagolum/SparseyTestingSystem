@@ -1,0 +1,19 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/python",
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.profiles.windows": {
+        "SparseyPowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell",
+            "args": [
+                "-ExecutionPolicy", "Bypass"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "SparseyPowerShell"
+}

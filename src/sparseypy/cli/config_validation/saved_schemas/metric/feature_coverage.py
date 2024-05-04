@@ -23,15 +23,16 @@ class FeatureCoverageMetricSchema(AbstractSchema):
                 'name': Schema('feature_coverage', error="name must be 'feature_coverage'"),
                 Optional('save', default=False): Schema(bool, error="save must be a boolean value"),
                 Optional('reduction', default='none'): Or(
-                    'none', 'sum', 'mean', 'highest_layer',
+                    'layerwise_mean', 'layerwise_sum', 'mean', 'sum', 'highest_layer',
+                    'highest_layer_mean', 'none', None,
                     error="reduction must be 'none', 'sum', 'highest_layer', or 'mean'"
                 ),
                 Optional('best_value', default='max_by_layerwise_mean'): Schema(
                         And(
                             Const(Use(MetricFactory.is_valid_comparision), True)
-                            ), error="best_value must be the name of a valid comparison function from comparisons.py")
+                            ), error="best_value must be the name of a valid comparison function from comparisons.py"),
+                Optional('params', default={}): {}
             }, 
-            ignore_extra_keys=True,
             error="Invalid configuration for feature_coverage metric"
         )
 

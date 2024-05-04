@@ -4,16 +4,14 @@
 Default HPO Schema: the schema for HPO runs.
 """
 
-
-from schema import Schema, And, Or, Use
+import torch
+from schema import Schema, And, Or, Use, Optional
 
 from sparseypy.cli.config_validation.saved_schemas.abs_schema import AbstractSchema
 from sparseypy.cli.config_validation import schema_factory
 from sparseypy.cli.config_validation.saved_schemas import (
     model, schema_utils, metric
 )
-
-from sparseypy.cli.config_validation.saved_schemas import training_recipe
 
 
 class DefaultHpoSchema(AbstractSchema):
@@ -125,6 +123,19 @@ class DefaultHpoSchema(AbstractSchema):
         return schema_params
 
 
+    def check_if_gpu_exists(self):
+        """
+        Checks if a supported GPU exists on the current system.
+        Returns:
+            (bool): whether or not a GPU is present
+        """
+        return (
+            torch.cuda.is_available()
+            or
+            torch.backends.mps.is_available()
+        )
+
+
     def check_if_model_family_exists(self, model_family) -> bool:
         """
         Checks if a model family with the name model_family exists.
@@ -179,7 +190,13 @@ class DefaultHpoSchema(AbstractSchema):
                     )
                 },
                 {
-                    'value': Or(str, bool, Use(float), int, error="value must be of type str, int, float, or bool")
+                    'value': Or(
+                        str,
+                        bool,
+                        Use(float),
+                        int,
+                        error="value must be of type str, int, float, or bool"
+                    )
                 }
             ),
             error="Invalid hyperparameter configuration"
@@ -258,9 +275,20 @@ class DefaultHpoSchema(AbstractSchema):
 
         config_schema = Schema(
             {
-                'model_family': And(str, self.check_if_model_family_exists, error="Model family does not exist"),
+                'model_family': 
+                    And(
+                        str,
+                        self.check_if_model_family_exists,
+                        error="Model family does not exist"
+                    ),
                 'hpo_run_name': And(str, error="HPO run name must be a string"),
                 'project_name': And(str, error="Project name must be a string"),
+                Optional('description', default=None):
+                    And(str, error="description must be a string"),
+                Optional('use_gpu', default=self.check_if_gpu_exists()): Or(
+                    False, lambda x: self.check_if_gpu_exists(),
+                    error='Cannot set use_gpu to True when no GPU is available.'
+                ),
                 'hyperparameters': And(
                     dict, self.check_optimized_hyperparams_validity,
                     lambda x: self.has_enough_layer_configs(
@@ -283,7 +311,12 @@ class DefaultHpoSchema(AbstractSchema):
                 },
                 'metrics': Use(lambda x: self.validate_metrics_in_order(x, schema_params['metric_schemas'],),
                                     error="Specified metric is not valid."),
-                'num_candidates': And(int, schema_utils.is_positive, error="Number of candidates must be a positive integer"),
+                'num_candidates':
+                    And(
+                        int,
+                        schema_utils.is_positive,
+                        error="Number of candidates must be a positive integer"
+                    ),
                 'verbosity': And(int, error="Verbosity must be an integer"),
             },
             error="Invalid HPO configuration"

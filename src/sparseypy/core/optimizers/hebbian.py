@@ -6,66 +6,107 @@ Hebbian: file holding the Hebbian optimizer class.
 
 
 import sys
-
-from typing import Iterator, Callable, Optional
-
 import torch
 
 from sparseypy.core.hooks import LayerIOHook
+from sparseypy.core.model_layers.sparsey_layer import MAC
 
 
 class HebbianOptimizer(torch.optim.Optimizer):
-    def __init__(self, model: torch.nn.Module):
+    """
+    HebbianOptimizer: class representing the optimizer
+        for the Sparsey model.
+        Attributes:
+            model (torch.nn.Module): the model to optimize.
+            device (torch.device): the device to run the model on.
+            epsilon (float): the epsilon value to use for
+                numerical stability.
+            saturation_thresholds (list[float]): the saturation
+                thresholds for each layer.
+            timesteps (dict): the number of timesteps that each
+                weight has not been updated for.
+            verbosity (int): the verbosity level.
+            hook (LayerIOHook): the hook to use for
+                retrieving layer inputs and outputs.
+    """
+    def __init__(self, model: torch.nn.Module, device: torch.device, 
+                 epsilon: float = 1e-7):
+        """
+        Initialize the HebbianOptimizer.
+        Args:
+            model (torch.nn.Module): the model to optimize.
+            device (torch.device): the device to run the model on.
+            epsilon (float): the epsilon value to use for
+                numerical stability.
+        """
         super().__init__(model.parameters(), dict())
+
         self.model = model
         self.saturation_thresholds = []
+        self.timesteps = dict()
+        self.epsilon = epsilon
+        self.device = device
+        self.verbosity = 0
+        self.hook = LayerIOHook(self.model)
 
-        # BUG this will not operate correctly in certain kinds of model
         for layer in model.children():
             if hasattr(layer, 'saturation_threshold'):
                 self.saturation_thresholds.append(layer.saturation_threshold)
+            else:
+                self.saturation_thresholds.append(1.0)
 
-        self.model_layer_inputs = []
-        self.model_layer_outputs = []
-        self.model_layers = []
-
-        self.verbosity = 0
-
-        self.hook = LayerIOHook(self.model)
 
     def calculate_freezing_mask(self, weights, layer_index):
-        #Retrieve the threshold for freezing weights for the current layer from a list of thresholds.
-        layer_threshold = self.saturation_thresholds[layer_index]
-        
-        # Calculate the mean of the input weights across dimension 1, which should be inputs.
-        # This represents the average activation for each neuron/feature.
-        #FRACTION OF WEIGHTS SET TO 1 FOR EACH NEURON
-        mean_inputs = torch.mean(weights, dim=1)
-        
-        #If verbosity is set to a level above 0, print the mean values of the inputs.
-        # Converting the tensor to a numpy array for easier reading.
-        #if (self.verbosity > 0):
-        # print("Mean Inputs: " + str(mean_inputs.numpy()))
-        
-        #Create a mask where 1 represents weights that are not frozen (updateable)
-        # and 0 represents weights that are frozen based on the layer's threshold.
-        freezing_mask = (mean_inputs > layer_threshold).float()
-        
-        #Expand the freezing mask to match the dimensions of the weights tensor.
-        # This is done by adding a new dimension and then expanding it to match the size of weights.
-        freezing_mask_expanded = freezing_mask.unsqueeze(1).expand_as(weights)
-        
-        #Invert the mask: now 1s represent weights that should be frozen (not updateable),
-        # and 0s represent weights that can still be updated.
-        updateable_mask = 1 - freezing_mask_expanded
-        
-        #If verbosity is set to a level above 0, print the updateable mask.
-        # Converting the tensor to a numpy array for easier reading.
-        if (self.verbosity > 0):
-            print("Updateable Mask: " + str(updateable_mask.numpy()))
-        
-        #Return the mask indicating which weights are updateable (not frozen).
-        return updateable_mask
+        """
+        Calculates the freezing mask for the weights of a SparseyLayer.
+        """
+        active_weights_frac = torch.mean(weights, dim=1, keepdim=True)
+        weight_update_mask = torch.gt(
+            active_weights_frac, self.saturation_thresholds[layer_index]
+        ).expand_as(weights)
+
+        return weight_update_mask
+
+
+    def apply_permanence_update(self, permanence_steps: int,
+                                permanence_convexity: float,
+                                params: torch.Tensor,
+                                timestep_values: torch.Tensor) -> None:
+        """
+        Applies the permanence weight updates.
+
+        Args:
+            permanence_steps (int): the number of steps before
+                unupdated weights are reduced to zero.
+            permanence_convexity (float): controls the slope
+                of the function used to reduce the values of weights
+                that are not updated.
+            params (torch.Tensor): the weight tensor to update.
+            timestep_values (torch.Tensor): the timesteps that
+                each weight in params has not been updated for.
+        """
+        torch.div(
+            1.0 + (permanence_convexity / permanence_steps),
+            torch.add(
+                torch.div(
+                    permanence_convexity,
+                    torch.sub(
+                        permanence_steps,
+                        timestep_values
+                    )
+                ), 1.0
+            ),
+            out=params
+        )
+
+        torch.where(
+            torch.ge(
+                timestep_values,
+                permanence_steps
+            ), torch.zeros(1, device=self.device),
+            params, out=params
+        )
+
 
     def step(self, closure=None) -> None:
         """
@@ -76,60 +117,81 @@ class HebbianOptimizer(torch.optim.Optimizer):
         """
         # Retrieve layers, their inputs, and outputs using the custom hook.
         # 'layers' contains instances of MAC,
-        # 'inputs' and 'outputs' are tensors representing inputs and outputs for those MACs.
+        # 'inputs' and 'outputs' are tensors repres
+        # enting inputs and outputs for those MACs.
         layers, inputs, outputs = self.hook.get_layer_io()
 
-        # Iterate over each layer 
-        for layer_index, layer in enumerate(layers):
-            # iterate over each MAC along with its input and output tensors.
-            for (mac_index, (mac, mac_input, mac_output)) in enumerate(zip(layer, inputs[layer_index], outputs[layer_index])):
-                # iterate over the parameters of the current MAC
-                for params in mac.parameters():
-                    # Calculate weight updates by performing matrix multiplication between
-                    # the transpose of the flattened layer input and the flattened layer output.
+        with torch.no_grad():
+            # Iterate over each layer
+            for layer_index, (layer, layer_input, layer_output) in enumerate(
+                zip(layers, inputs, outputs)
+            ):
+                if layer_index not in self.timesteps:
+                    self.timesteps[layer_index] = []
+
+                for param_index, params in enumerate(layer.parameters()):
+                    if len(self.timesteps[layer_index]) == param_index:
+                        self.timesteps[layer_index] = torch.ones(
+                            params.shape, dtype=torch.float32,
+                            device=self.device
+                        )
+
+                        torch.mul(
+                            self.timesteps[layer_index],
+                            layer.permanence_steps,
+                            out=self.timesteps[layer_index]
+                        )
+
+                    layer_input = torch.cat(
+                        (
+                            layer_input,
+                            torch.zeros(
+                                (
+                                    layer_input.shape[0],
+                                    1, *layer_input.shape[2:]
+                                ),
+                                dtype=torch.float32, device=self.device
+                            )
+                        ), dim=1
+                    )
+
+                    mac_inputs = layer_input[:, layer.input_connections]
+
                     weight_updates = torch.matmul(
-                        torch.transpose(
-                            mac_input.view(mac_input.shape[0], -1), 0, 1
+                        torch.permute(
+                            mac_inputs.view(*mac_inputs.shape[:2], -1),
+                            (1, 2, 0)
                         ),
-                        mac_output.view(mac_output.shape[0], -1)
+                        torch.permute(layer_output, (1, 0, 2))
                     )
 
-                    # Reshape the weight updates to match the dimensions of the parameters
-                    # and then permute the dimensions for correct alignment.
-                    weight_updates = torch.permute(
-                        weight_updates.view(
-                            weight_updates.shape[0],
-                            params.shape[0],
-                            params.shape[2]
-                        ),
-                        (1, 0, 2)
+                    weight_freeze_mask = self.calculate_freezing_mask(
+                        params, layer_index
                     )
 
-                    params += weight_updates
+                    torch.div(
+                        weight_updates,
+                        layer_input.shape[0],
+                        out=weight_updates
+                    )
 
-                    # Print the current parameter values for investigation.
-                    # Note: Converting to NumPy for easier visualization.
-                    if self.verbosity > 0:
-                        print("Params.data " + str(params.data.numpy()))
+                    weight_updates[weight_freeze_mask] = 0.0
 
-                    # Calculate the updateable mask based on the current parameters and layer's threshold.
-                    # print("Layer: " + str(layer_index))
-                    # print("MAC: " + str(mac_index))
-                    updateable_mask = self.calculate_freezing_mask(params.data, layer_index)
-                    # print("\n")
+                    torch.add(
+                        self.timesteps[layer_index], 1,
+                        out=self.timesteps[layer_index]
+                    )
 
-                    # Apply the updateable mask to the weight updates, effectively zeroing
-                    # updates for weights that are not updateable (frozen).
-                    # BUG: probably does not update weights that are both active on this step *and* frozen
-                    weight_updates *= updateable_mask
+                    self.apply_permanence_update(
+                        layer.permanence_steps,
+                        layer.permanence_convexity,
+                        params, self.timesteps[layer_index]
+                    )
 
-                    # apply permanence/weight decay to all weights 
-                    # (newly changed weights will be reset to 1 in the next step)
-                    # CHECK whether we need to ignore the frozen weights for decay; if so more will be needed...
-                    torch.mul(params, mac.permanence, out=params)
-
-                    # add the new weights to the old ones then clamp to [0,1]
-                    params += torch.ge(weight_updates, 1)
-                    torch.clamp(params, 0, 1, out=params)
+                    torch.add(params, weight_updates, out=params)
+                    torch.clamp(params, 0.0, 1.0, out=params)
+                    self.timesteps[layer_index][
+                        torch.gt(weight_updates, 0)
+                    ] = 0
 
         return

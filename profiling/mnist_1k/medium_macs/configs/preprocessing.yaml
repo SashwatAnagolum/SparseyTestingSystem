@@ -1,0 +1,8 @@
+# preprocessing.yaml - system preprocessing configuration
+
+transform_list:
+# convert images to float from uint8, and scale them to [0, 1]
+  - name: to_dtype
+    params:
+      dtype: float32
+      scale: True

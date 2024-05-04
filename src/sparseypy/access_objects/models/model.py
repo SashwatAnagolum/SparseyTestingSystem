@@ -15,13 +15,14 @@ class Model(torch.nn.Module):
     Attributes:
         layers: the layers in the model.
     """
-    def __init__(self) -> None:
+    def __init__(self, device: torch.device) -> None:
         """
         Initializes the model. 
         """
         super().__init__()
 
         self.num_layers = 0
+        self.device = device
 
 
     def add_layer(self, layer: torch.nn.Module) -> None:
@@ -34,6 +35,11 @@ class Model(torch.nn.Module):
 
 
     def train(self, mode: bool = True) -> None:
+        """
+        Sets the model to training mode.
+        Args:
+            mode (bool): whether to set the model to training mode.
+        """
         for module in self.children():
             module.train(mode)               
 

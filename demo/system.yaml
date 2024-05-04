@@ -1,6 +1,23 @@
 # system.yaml - core system and database configuration
 ---
 
+# console: output settings for the console
+console:
+  # hpo_progress_bars: bool, default True - whether to show progress bars for training and evaluation
+  #     during HPO runs. Defaults to True for better feedback. Has a very small performance impact.
+  #     disable for batch jobs (e.g. on HPC)
+  hpo_progress_bars: False
+  # print_best_hpo_config: bool, default True - whether to print the model configuration for the best-
+  #     performing experiment in an HPO run to the console when the HPO run completes.
+  print_best_hpo_config: True
+  # whether to print error stack traces when they occur for schema validation errors
+  # print_error_stacktrace: True
+  print_error_stacktrace: False
+  # print_metric_values: bool, default False - whether to print the values of the selected metrics
+  #     to the console at each step of training. More informative about model progress, but printing
+  #     this much data to the console has a significant performance impact so it is disabled by default.
+  print_metric_values: False
+
 # wandb: configuration settings for Weights & Biases
 wandb:
   # api_key: str (optional) - the API key to use to connect to Weights & Biases
@@ -10,7 +27,13 @@ wandb:
   api_key: WANDB_API_KEY
   # project_name: string - the name of the project in Weights & Biases to log data into
   #     this is also the default project for individual training runs using Train Model
-  project_name: sparsey_testing_project
+  project_name: post_presentation_4
+  # entity: string, default None - the "entity" (organization) to log runs and sweeps to in Weights & Biases
+  #     if this is NOT specified, runs and sweeps will log to the default entity for the user whose API key
+  #     is used to run the system. This key would be used e.g. for users who are normally part of other
+  #     organizations but want to log their Sparsey runs to a shared Sparsey organization, or to enforce
+  #     a single default organization among all users of the configuration files
+  entity: sparsey-testing-system
   # save_models: bool, default True - whether to save model weights into Weights & Biases
   # NOTE: CURRENTLY A DUMMY OPTION because model saving is not implemented yet
   # save_models: True
@@ -30,6 +53,18 @@ wandb:
   #     NOTE that using "mac" level can substantially increase W&B data usage
   #     expansion factor is (# of layers * # of macs) in the amount of metric data stored
   data_resolution: 2
+  # silent: bool, default True - whether to suppress all Weights & Biases system messages
+  #     Unset this if you need to diagnose problems with Weights & Biases or you are willing to
+  #     put up with the console spam for the mini-metric graphs it creates during training.
+  silent: True
+  # local_log_directory: str, default None = "." - the location to which W&B logs local data during a run
+  #     Weights & Biases will create a "wandb" folder in this location to store its local cache of
+  #     run data.
+  # local_log_directory: .
+  # remove_local_files: bool, default False - whether to delete the local W&B files on run and sweep
+  #     completion. Defaults to False to avoid deleting files on the local system that users might
+  #     wand. Set to True to reduce unnecessary use of storage space.
+  remove_local_files: False
 
 # database: configuration settings for one or more backend databases
 database:
@@ -47,12 +82,19 @@ database:
   write_databases:
     # firestore adapter
     - name: firestore
-      # hpo_table_name: string - the name of the table in Firestore in which to store HPO run data
-      #     (this is things like which runs are best--data for each experiment in an HPO run is still
-      #     stored in the experiment table)
-      hpo_table_name: hpo_runs
-      # experiment_table_name: string - the name of the table in Firestore in which to store experiments
-      experiment_table_name: experiments
+      # table_names: the names to use for the system database tables in Firestore
+      #     (optional; see config schema for the defaults)
+      table_names:
+        # hpo_runs: name of the table containing HPO run data
+        hpo_runs: "hpo_runs"
+        # experiments: name of the data containing experiment metadata
+        experiments: "experiments"
+        # batches: name of the table containing the (batched) experiment step data
+        batches: "batches"
+        # models: name of the table containing data on individual model instances
+        models: "models"
+        # model_registry: name of the table containing overall metadata for named models
+        model_registry: "model_registry"
       # firebase_service_key_path: the name of the environment variable from which the system
       #     should read the path to the service account key required to access the Firestore database
       #     (this key also contains the path to the DB and all other required information)
@@ -68,12 +110,14 @@ database:
       #     (note that models are still saved to W&B and model *summary* data is still
       #     saved regardless of this setting)
       save_models: False
+      # batch_size: int, default 64
+      #     the size of each batch to save to the database
+      #     Firestore has a 1 MiB limit for each document in the database; each batch is one document
+      #     if you encounter issues with saving data, reducing the batch size can help
+      batch_size: 64
     # - name: dynamodb
     #   sso_profile: $AWS_SSO_PROFILE
     # - name: mongo
     #   connection_string: $MONGO_CONNECTION_STRING
 
-# whether to print error stack traces when they occur for schema validation errors
-# print_error_stacktrace: True
-print_error_stacktrace: False
 ...

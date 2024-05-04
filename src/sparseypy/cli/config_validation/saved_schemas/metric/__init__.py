@@ -1,5 +1,6 @@
 from . import (
-    basis_set_size, basis_set_size_increase,
+    basis_set_size,
     feature_coverage,
-    match_accuracy, basis_average, num_activations
+    match_accuracy, basis_average, num_activations,
+    sisc_adherence
 )

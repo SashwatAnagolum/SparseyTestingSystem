@@ -11,6 +11,11 @@ from sparseypy.core import model_layers
 
 
 class LayerFactory:
+    """
+    Layer Factory: class to create layers based on the layer name.
+    attributes:
+        allowed_modules (set): set of allowed modules to create layers from.
+    """
     allowed_modules = set([i for i in dir(model_layers) if i[:2] != '__'])
 
     @staticmethod

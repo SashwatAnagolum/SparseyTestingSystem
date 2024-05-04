@@ -1,0 +1,80 @@
+---
+# network.yaml - Sparsey model config file for an individual experiment
+
+# model_name: string, optional (no default)
+#     the name of the model in the model registry to which this config refers.
+#     will create the registry entry if it does not exist.
+#     WARNING: IF THERE IS AN EXISTING REGISTRY ENTRY WITH THIS NAME IT WILL 
+#     BE UPDATED WITH THE RESULTS OF TRAINING RUNS USING THIS NETWORK.YAML
+#     AS NEW VERSIONS.
+model_name: profiling_model
+# model_description: string, optional (no default)
+#     friendly description for this model to be displayed in the database and model registry
+model_description: "the model used for profiing"
+
+# input_dimensions: the dimensions to which to resize the input during HPO
+#     width and height can be any positive integer values and do not need to be the same;
+#     however, the model's input dimensions 
+#     must match the dimensions of the output from the preprocessing stack
+input_dimensions:
+  height: 28
+  width: 28
+
+# layerwise configurations for each layer in the network
+#     each entry in the list is a new layer, in order from the bottom of the model to the top
+#     each layer has a name and a list of parameters
+layers:
+  - name: sparsey
+    params:
+      num_macs: 36
+      mac_grid_num_rows: 6
+      mac_grid_num_cols: 6
+      num_cms_per_mac: 16
+      num_neurons_per_cm: 16
+      mac_receptive_field_size: 0.75
+      sigmoid_lambda: 28.0
+      sigmoid_phi: 5.0
+      saturation_threshold: 0.5
+      permanence_steps: 10
+      permanence_convexity: 0.3
+      activation_threshold_min: 0.2
+      activation_threshold_max: 1
+      min_familiarity: 0.2
+      sigmoid_chi: 2.5
+
+  - name: sparsey
+    params:
+      num_macs: 16
+      mac_grid_num_rows: 4
+      mac_grid_num_cols: 4
+      num_cms_per_mac: 16
+      num_neurons_per_cm: 16
+      mac_receptive_field_size: 0.75
+      sigmoid_lambda: 28.0
+      sigmoid_phi: 5.0
+      saturation_threshold: 0.5
+      permanence_steps: 10
+      permanence_convexity: 0.3
+      activation_threshold_min: 0.2
+      activation_threshold_max: 1
+      min_familiarity: 0.2
+      sigmoid_chi: 2.5
+    
+  - name: sparsey
+    params:
+      num_macs: 4
+      mac_grid_num_rows: 2
+      mac_grid_num_cols: 2
+      num_cms_per_mac: 16
+      num_neurons_per_cm: 16
+      mac_receptive_field_size: 0.75
+      sigmoid_lambda: 28.0
+      sigmoid_phi: 5.0
+      saturation_threshold: 0.5
+      permanence_steps: 10
+      permanence_convexity: 0.3
+      activation_threshold_min: 0.2
+      activation_threshold_max: 1
+      min_familiarity: 0.2
+      sigmoid_chi: 2.5
+...

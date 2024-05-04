@@ -5,7 +5,6 @@ Default System Schema: the schema for system.yaml.
 """
 
 import os
-import typing
 
 from schema import Schema, And, Or, Optional, Use
 
@@ -87,7 +86,7 @@ class DefaultSystemSchema(AbstractSchema):
             )
 
         return schema_params
-    
+
     def make_env_schema(self, env_name: str):
         """
         Builds a schema that can be used to validate a string that is either
@@ -118,20 +117,72 @@ class DefaultSystemSchema(AbstractSchema):
         """
         config_schema = Schema(
                 {
+                    'console': Schema(
+                        {
+                            Optional('hpo_progress_bars', default=True):
+                                Schema(
+                                    bool,
+                                    error="hpo_progress_bars must be a Boolean value"
+                                ),
+                            Optional('print_best_hpo_config', default=False):
+                                Schema(
+                                    bool,
+                                    error="print_best_hpo_config must be a Boolean value"
+                                ),
+                            Optional('print_error_stacktrace', default=False):
+                                Schema(
+                                    bool,
+                                    error="print_error_stacktrace must be a Boolean value"
+                                ),
+                            Optional('print_metric_values', default=False):
+                                Schema(
+                                    bool,
+                                    error="print_metric_values must be a Boolean value"
+                                )
+                        }
+                    ),
                     'wandb': Schema({
-                        Optional('api_key', default="WANDB_API_KEY"): And(Use(os.getenv), str, error="Invalid Weights and Biases API key"),
-                        'project_name': Schema(str, error="Project name must be a string"),
-                        Optional('save_locally', default=True): Schema(bool, error="save_locally must be a boolean value"),
-                        Optional('save_models', default=True): Schema(bool, error="save_models must be a Boolean value"),
-                        Optional('data_resolution', default=2): And(int, lambda x : 0 <= x <= 2, error="data_resolution must be 0, 1, or 2")
+                        Optional('api_key', default="WANDB_API_KEY"):
+                            And(
+                                Use(os.getenv),
+                                str,
+                                error="Invalid Weights and Biases API key"
+                            ),
+                        'project_name': 
+                            Schema(str, error="Project name must be a string"),
+                        Optional('data_resolution', default=2):
+                            And(
+                                int,
+                                lambda x : 0 <= x <= 2,
+                                error="data_resolution must be 0, 1, or 2"
+                            ),
+                        Optional('entity', default=None):
+                            Schema(str, error="Entity name must be a string"),
+                        Optional('local_log_directory', default=None):
+                            Schema(str, error="local_log_directory must be a string"),
+                        Optional('remove_local_files', default=False):
+                            Schema(bool, error="remove_local_files must be a Boolean value"),
+                        Optional('save_locally', default=True):
+                            Schema(bool, error="save_locally must be a Boolean value"),
+                        Optional('save_models', default=True):
+                            Schema(bool, error="save_models must be a Boolean value"),
+                        Optional('silent', default=True):
+                            Schema(bool, error="silent must be a Boolean value")
                     },
                     error="Error in wandb configuration"),
                     'database': Schema({
-                        'read_database': Schema(lambda x : x in schema_params['selected_dbs'], error="The read_database must also be configured as a write_database"),
-                        'write_databases': [Or(*schema_params['database_schemas'], error="Invalid database configuration schema")]
+                        'read_database': 
+                            Schema(
+                                lambda x : x in schema_params['selected_dbs'],
+                                error="The read_database must also be chosen as a write_database"
+                            ),
+                        'write_databases': 
+                            [
+                                Or(*schema_params['database_schemas'],
+                                error="Invalid database configuration schema")
+                            ]
                     },
                     error="Error in database configuration"),
-                    Optional('print_error_stacktrace', default=False): Schema(bool, error="print_error_stacktrace must be a boolean value")
                 },
                 error="Error in system.yaml"
         )
