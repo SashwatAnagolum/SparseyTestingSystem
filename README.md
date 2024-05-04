@@ -1,3 +1,4 @@
+![The project logo: a hierarchical machine learning model next to the word "sparesypy." Subtitle: "The Sparsey Testing System."](/readme_images/repository_logo_no_sponsor.png)
 # sparseypy: The Sparsey Testing System
 A full-featured framework for experimenting with the Sparsey model, including:
 * A Python reimplementation of the original model
