@@ -22,7 +22,7 @@ sparseypy makes getting started with the capabilities of Sparsey easy and access
 
 For our example, we will perform HPO to investigate the effects of different model parameters on the rate of basis set size growth, a key aspect of Sparsey's lifelong learning capabilities.
 
-First, define your model and experiment parameters using automatically validated YAML configuration files.
+First, define your model and experiment parameters using the system's automatically validated YAML configuration files.
 
 ```yaml
 hyperparameters:
@@ -53,11 +53,7 @@ hyperparameters:
       ...
 ```
 
-Perform individual experiments in the CLI with feedback on core performance indicators.
-
-![The sparseypy CLI during an individual training run.](/readme_images/cli1.png)
-
-Or broad hyperparameter optimization runs across many different Sparsey models.
+Next, perform your experiments in the system CLI, with feedback on core performance indicators.
 
 ![The sparseypy CLI during a hyperparameter optimization run.](/readme_images/cli2.png)
 
@@ -65,7 +61,7 @@ Finally, review the full detail of your results on Weights & Biases.
 
 ![The results of a basis set size experiment in Weights & Biases.](/readme_images/wandb.png)
 
-In this case, the experiment shows a promising trend--for most models, the basis set size does decrease over time. Some models are more promising than others, 
+The experiment results show a promising trend--for most models, the basis set size does decrease over time. This particular experiment suggests that the size of the basis set (the number of unique codes learned by the model over time) is negatively correlated with the receptive field radius (the portion of the previous layer an individual MAC sees as part of its input).
 
 # Installation
 
