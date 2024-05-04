@@ -11,7 +11,7 @@ A full-featured framework for experimenting with the Sparsey model, including:
 
 # Sparsey
 
-Sparsey is a biologically plausible machine learning model developed by Dr. Rod Rinkus and based on the structure of the neocortex. 
+[Sparsey](https://sparsey.com) is a biologically plausible machine learning model developed by Dr. Rod Rinkus and based on the structure of the neocortex. 
 
 It represents information in a fundamentally different way than mainstream models using an extremely efficient, non-optimization-based learning method which can be viewed as a form of adaptive, locality-preserving hashing. 
 
@@ -86,9 +86,7 @@ The results of our basis set/receptive field experiment are shown below, using a
 
 These show a promising trend--for most models, the basis set size (graphs at top left and below) does decrease over time, allowing the Sparsey models to continue learning new information over a long period of time. In addition, this experiment suggests that the size of the basis set is negatively correlated with the receptive field radius ("rf-size" as seen in the experiment list on the left), although further exploration will be necessary.
 
-The screenshot above also contains graphs of a few other metrics, such as SISC adherence (a measure of how much similar inputs to the model cause it to learn similar codes) and the number of MAC activations on eah step of the input--but even these graphs barely scratch the surface of the system's capability. 
-
-The system can create a huge number of graphs for almost any experiment imaginable.  Data can be drawn from any metric recorded at any step of execution, filtered by any hyperparameter for any model created during the experiment, and aggregated across all of the individual training and hyperparameter optimization runs logged to a project, providing unparalleled visibility into the course of your experiments.
+The screenshot above also contains graphs of a few other metrics--but even these graphs barely scratch the surface of the system's capability. The system can create a huge number of graphs for almost any experiment imaginable.  Data can be drawn from any metric recorded at any step of execution, filtered by any hyperparameter for any model created during the experiment, and aggregated across all of the individual training and hyperparameter optimization runs logged to a project, providing unparalleled visibility into the course of your experiments.
 
 # Installation
 
@@ -200,10 +198,10 @@ Neurithmic Systems welcomes contributions from any interested developers--please
 
 # Acknowledgements
 
-Sparsey, its existing Java implementation, and all associated research is the brainchild of **Dr. Rod Rinkus**.
+Sparsey, its existing Java implementation, and all associated research is the brainchild of **[Dr. Rod Rinkus](http://sparsey.com/Neurithmic_People.html)**.
 
-The Sparsey Testing System was developed by **Sashwat Anagolum**, **JD Padrnos**, **Andy Klawa**, and **CJ Pereira** from The Pennsylvania State University as part of their capstone project.
+The Sparsey Testing System was developed by **[Sashwat Anagolum](https://github.com/SashwatAnagolum)**, **[JD Padrnos](https://github.com/jdpadrnos)**, **[Andy Klawa](https://github.com/ajk7012)**, and **[CJ Pereira](https://github.com/cjpereira98)** from The Pennsylvania State University as part of their capstone project.
 
-The authors also wish to thank **Codie Petersen** for his extensive contributions to the project.
+The authors also wish to thank **[Dr. Pulin Agrawal](https://github.com/pulinagrawal)** for his tireless support and guidance and **[Codie Petersen](https://github.com/Codie-Petersen)** for his extensive contributions to the project.
 
 Sparsey (c) 2023 Neurithmic Systems 
