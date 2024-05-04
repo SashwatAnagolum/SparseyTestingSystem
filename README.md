@@ -19,11 +19,21 @@ In conjunction with the multi-level, hierarchical architecture of the memory, th
 
 # The Testing System
 
-sparseypy makes getting started with the capabilities of Sparsey easy and accessible.
+sparseypy makes getting started with the capabilities of Sparsey easy and accessible. 
 
-For our example, we will perform HPO to investigate the effects of different model parameters on the rate of basis set size growth, a key aspect of Sparsey's lifelong learning capabilities.
+To illustrate this, we will walk through a simple experiment: performing hyperparameter optimization to determine the effect of changing one of the system's hyperparameters, receptive field size (which controls how large of a window onto the previous layer each MAC in the system receives as part of its input) on one of its core metrics, basis set size (a measure of the number of unique codes learned by the model over time).
 
-First, define your model and experiment parameters using the system's automatically validated YAML configuration files.
+The exponential slowdown in basis set size growth over time is a key aspect of Sparsey's lifelong learning capabilities, so we hope to find values for receptive field size that will cause it to level off quickly over time.
+
+Performing this experiment with the system takes place over three phases.
+
+## 1. Design
+
+First, **define your experiment parameters** using the system's automatically validated YAML configuration files. 
+
+As part of this example experiment, we will select a variety of potential values for several model hyperparameters, including the critical receptive field size. 
+
+Hyperparameters can be set to **single values**, selected from **lists of values**, or drawn from a wide variety of **statistical distributions**. The excerpt below (from the `hpo.yaml` configuration file) demonstrates this process. 
 
 ```yaml
 hyperparameters:
@@ -50,19 +60,35 @@ hyperparameters:
         # mac_receptive_field_size: float > 0
         #     the receptive field radius of each MAC, defined in terms of the side length of the current layer
         mac_receptive_field_size:
-          values: [0.75, 1.0, 1.5]
+          values: [0.25, 0.5, 0.75, 1.0, 1.5]
       ...
 ```
 
-Next, perform your experiments in the system CLI, with feedback on core performance indicators.
+Before experiment execution, the system will **automatically detect errors** in the model hyperparameters and alert you with informative error messages.
+
+## 2. Execution
+
+Next, **perform your experiments** in the system CLI, with feedback on core performance indicators. 
+
+The system automatically displays a summary of experiment configuration, the current run's objective function score (or performance on key metrics), progress through the phases of training, and the elapsed and estimated time remaining.
 
 ![The sparseypy CLI during a hyperparameter optimization run.](/readme_images/cli2.png)
 
-Finally, review the full detail of your results on Weights & Biases.
+It also provides a link to view **live results during execution** on the Weights & Biases platform.
+
+## 3. Result Review
+
+Finally, review the results of your experiment on the Weights & Biases platform.
+
+The results of our basis set/receptive field experiment are shown below, using a few of the built-in graph types supported by Weights & Biases.
 
 ![The results of a basis set size experiment in Weights & Biases.](/readme_images/wandb.png)
 
-The experiment results show a promising trend--for most models, the basis set size does decrease over time. This particular experiment suggests that the size of the basis set (the number of unique codes learned by the model over time) is negatively correlated with the receptive field radius (the portion of the previous layer an individual MAC sees as part of its input).
+These show a promising trend--for most models, the basis set size (graphs at top left and below) does decrease over time, allowing the Sparsey models to continue learning new information over a long period of time. In addition, this experiment suggests that the size of the basis set is negatively correlated with the receptive field radius ("rf-size" as seen in the experiment list on the left), although further exploration will be necessary.
+
+The screenshot above also contains graphs of a few other metrics, such as SISC adherence (a measure of how much similar inputs to the model cause it to learn similar codes) and the number of MAC activations on eah step of the input--but even these graphs barely scratch the surface of the system's capability. 
+
+The system can create a huge number of graphs for almost any experiment imaginable.  Data can be drawn from any metric recorded at any step of execution, filtered by any hyperparameter for any model created during the experiment, and aggregated across all of the individual training and hyperparameter optimization runs logged to a project, providing unparalleled visibility into the course of your experiments.
 
 # Installation
 
