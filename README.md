@@ -20,52 +20,63 @@ In conjunction with the multi-level, hierarchical architecture of the memory, th
 
 sparseypy makes getting started with the capabilities of Sparsey easy and accessible.
 
-Define your model and experiment parameters using automatically validated YAML configuration files.
+For our example, we will perform HPO to investigate the effects of different model parameters on the rate of basis set size growth, a key aspect of Sparsey's lifelong learning capabilities.
+
+First, define your model and experiment parameters using automatically validated YAML configuration files.
 
 ```yaml
-layers:
-  - name: sparsey
-    params:
-      # grid_layout: string "rect" or "hex", default "rect", optional
-      #     whether to arrange the MACs in this layer on a rectangular or hexagonal grid
-      grid_layout: rect
-      autosize_grid: false
-      # num_macs: int > 0
-      #     the number of MACs in the layer
-      #     if this is smaller than the layer size, not all rows will be filled
-      num_macs: 9
-      # num_cms_per_mac: int > 0
-      #     the number of coding modules that comprise each MAC in this layer
-      num_cms_per_mac: 2
-      # num_neurons_per_cm: int > 0
-      #     the number of neurons in each competitive module in each MAC in the layer
-      num_neurons_per_cm: 2
-      # mac_receptive_field_size: float > 0
-      #     the receptive field radius of each MAC, defined in terms of the side length of the current layer
-      mac_receptive_field_size: 0.6
+hyperparameters:
+  # the layers section defines the properties of individual layers in the Sparey model
+  layers:
+    - name: 
+        value: sparsey
+      params:
+        # num_cms_per_mac: int > 0
+        #     the number of coding modules that comprise each MAC in this layer
+        num_cms_per_mac:
+          value: 2
+        # num_macs: int > 0
+        #     the number of MACs in the layer
+        #     if this is smaller than the layer size, not all rows will be filled
+        num_macs:
+          values: [4, 9]
+        # num_neurons_per_cm: int > 0
+        #     the number of neurons in each competitive module in each MAC in the layer
+        num_neurons_per_cm:
+          min: 2
+          max: 10
+          distribution: int_uniform
+        # mac_receptive_field_size: float > 0
+        #     the receptive field radius of each MAC, defined in terms of the side length of the current layer
+        mac_receptive_field_size:
+          values: [0.75, 1.0, 1.5]
       ...
 ```
 
-Execute experiments in the CLI with feedback on core performance indicators.
+Perform individual experiments in the CLI with feedback on core performance indicators.
 
-INSERT CLI SCREENSHOT HERE
+![The sparseypy CLI during an individual training run.](/readme_images/cli1.png)
 
-Then review the full detail of your results on Weights & Biases.
+Or broad hyperparameter optimization runs across many different Sparsey models.
 
-INSERT W&B SCREENSHOT
+![The sparseypy CLI during a hyperparameter optimization run.](/readme_images/cli2.png)
 
+Finally, review the full detail of your results on Weights & Biases.
 
+![The results of a basis set size experiment in Weights & Biases.](/readme_images/wandb.png)
+
+In this case, the experiment shows a promising trend--for most models, the basis set size does decrease over time. Some models are more promising than others, 
 
 # Installation
 
 Requires **Python 3.11** and a **Weights & Biases** account.
 
-User:
+User:  
 `pip install sparseypy`
 
-Developer:
-`git clone https://github.com/Neurithmic-Systems/SparseyTestingSystem.git`
-`./environment_setup`
+Developer:  
+`git clone https://github.com/Neurithmic-Systems/SparseyTestingSystem.git`  
+`./environment_setup`  
 (installs sparseypy in a virtual environment in the project directory)
 
 # Configuration
@@ -92,7 +103,7 @@ Each script has its own command-line arguments (detailed below) and also makes u
   * Required for `run_hpo`
 * `network.yaml`: Defines the structure of a single Sparsey model, including all the model-related hyperparameters, the layer structure, the input size, and the model name and description.
   * Required for `train_model` (**unless** using an existing named model)
-* `preprocessing.yaml`: Defines the sequence of transformations to be applied to input data loaded from the dataset.
+* `preprocessing.yaml`: Defines the sequence of transformations to be applied to input data loaded from the datasets.
   * Required for **all commands**
 * `system.yaml`: Defines system-level settings for Weights & Biases and Firestore, such as the resolution of the data to be saved to the database.
   * Required for **all commands**
@@ -132,7 +143,7 @@ Reload the previously-trained model with name “example_model” from Weights &
 `--dataset_config <path to dataset.yaml>`  
 The dataset on which to evaluate the model.  
 `--preprocessing_config <path to preprocessing.yaml>`  
-The preprocessing transforms to apply to data loaded from the dataset.  
+The preprocessing transforms to apply to data loaded from the datasets.  
 `--system_config <path to system.yaml>`  
 The system configuration (database and Weights & Biases settings) to use for the evaluation run.  
 `--training_recipe_config <path to trainer.yaml>`  
@@ -150,7 +161,7 @@ The dataset to use for training the models in this HPO run.
 `--evaluation_dataset_config <path to eval_dataset.yaml>`  
 The dataset to use for evaluating the models in this HPO run.  
 `--preprocessing_config <path to preprocessing.yaml>`  
-The preprocessing transforms to apply to data loaded from the dataset.  
+The preprocessing transforms to apply to data loaded from the datasets.  
 `--hpo_config <path to hpo.yaml>`  
 The hyperparameter options, strategy, and metrics to evaluate in this HPO run.  
 `--system_config <path to system.yaml>`  
