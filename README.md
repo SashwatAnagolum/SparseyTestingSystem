@@ -9,7 +9,7 @@ A full-featured framework for experimenting with the Sparsey model, including:
 
 # Sparsey
 
-Sparsey is a biologically plausible machine learning model developed by Dr. Rod Rinkus based on the structure of the neocortex. 
+Sparsey is a biologically plausible machine learning model developed by Dr. Rod Rinkus and based on the structure of the neocortex. 
 
 It represents information in a fundamentally different way than mainstream models using an extremely efficient, non-optimization-based learning method which can be viewed as a form of adaptive, locality-preserving hashing. 
 
@@ -50,15 +50,15 @@ The Sparsey Testing System is accessed via a command-line interface. This comman
 
 Each script has its own command-line arguments (detailed below) and also makes use of a selection of the **six main configuration files**:
 * `dataset.yaml`: Defines a dataset for use with the system. Includes the type and location of the dataset, optional preprocessing transforms, and performance options like lazy loading and in-memory caching.
-  * Required for all commands
+  * Required for **all commands**
 * `hpo.yaml`: Defines a set of candidate hyperparameters and metrics for use in HPO. Controls all the hyperparameters for the run, all metrics and training parameters, and the calculation of the objective function used to rank the success of experiments within an HPO run.
   * Required for `run_hpo`
 * `network.yaml`: Defines the structure of a single Sparsey model, including all the model-related hyperparameters, the layer structure, the input size, and the model name and description.
   * Required for `train_model` (**unless** using an existing named model)
 * `preprocessing.yaml`: Defines the sequence of transformations to be applied to input data loaded from the dataset.
-  * Required for all commands
+  * Required for **all commands**
 * `system.yaml`: Defines system-level settings for Weights & Biases and Firestore, such as the resolution of the data to be saved to the database.
-  * Required for all commands
+  * Required for **all commands**
 * `trainer.yaml`: Defines the training parameters and metrics to use for an individual training experiment.
   * Required for `train_model` and `evaluate_model`
 
@@ -67,52 +67,60 @@ The system also ships with **fully-commented reference configuration files**, in
 
 # Command-Line Reference
 
-`train_model` 
+`train_model`  
 Train and evaluate a new (or existing) model in a single experiment.
-Required arguments:
-`--training_dataset_config <path to training dataset.yaml>`
-The dataset to use for training.
-`--evaluation_dataset_config <path to evaluation dataset.yaml>`
-The dataset to use for evaluation.
-`--preprocessing_config “<path to preprocessing.yaml>`
-The preprocessing stack (series of transformations) to use for this training run.
-`--system_config <path to system.yaml>`
-The system configuration (database and Weights & Biases settings) to use for the training run.
-`--training_recipe_config <path to trainer.yaml>`
-You must also select **exactly one** of the following two options to specify the model to use:
-`--model_config <path to network.yaml>`
-Train a new model with the configuration provided in the indicated file.
-OR
-`--model_name "example_model"`
-Reload the previously-trained model with name “example_model” from Weights & Biases for additional training.
 
-`evaluate_model`
-Reload a chosen model from Weights & Biases and evaluate its performance on the provided dataset.
-Required arguments:
-`--dataset_config <path to dataset.yaml>`
-The dataset on which to evaluate the model.
-`--preprocessing_config <path to preprocessing.yaml>`
-The preprocessing transforms to apply to data loaded from the dataset.
-`--system_config <path to system.yaml>`
-The system configuration (database and Weights & Biases settings) to use for the evaluation run.
-`--training_recipe_config <path to trainer.yaml>`
-The training-related parameters (such as batch size) to use for the evaluation run.
-`--model_name "example_model"`
-The name of the model from the Weights & Biases model registry to use for this evaluation.
+**Required arguments:**  
+`--training_dataset_config <path to training dataset.yaml>`  
+The dataset to use for training.  
+`--evaluation_dataset_config <path to evaluation dataset.yaml>`  
+The dataset to use for evaluation.  
+`--preprocessing_config <path to preprocessing.yaml>`  
+The preprocessing stack (series of transformations) to use for this training run.  
+`--system_config <path to system.yaml>`  
+The system configuration (database and Weights & Biases settings) to use for the training run.  
+`--training_recipe_config <path to trainer.yaml>`  
 
-`run_hpo`
+You must also select **exactly one** of the following two options to specify the model to use:  
+`--model_config <path to network.yaml>`  
+Train a new model with the configuration provided in the indicated file.  
+**OR**  
+`--model_name "example_model"`  
+Reload the previously-trained model with name “example_model” from Weights & Biases for additional training.  
+
+***
+
+`evaluate_model`  
+Reload a chosen model from Weights & Biases and evaluate its performance on the provided dataset.  
+
+**Required arguments:**  
+`--dataset_config <path to dataset.yaml>`  
+The dataset on which to evaluate the model.  
+`--preprocessing_config <path to preprocessing.yaml>`  
+The preprocessing transforms to apply to data loaded from the dataset.  
+`--system_config <path to system.yaml>`  
+The system configuration (database and Weights & Biases settings) to use for the evaluation run.  
+`--training_recipe_config <path to trainer.yaml>`  
+The training-related parameters (such as batch size) to use for the evaluation run.  
+`--model_name "example_model"`  
+The name of the model from the Weights & Biases model registry to use for this evaluation.  
+
+***
+
+`run_hpo`  
 Perform a hyperparameter optimization run.
-Required arguments:
-`--training_dataset_config <path to dataset.yaml>`
-The dataset to use for training the models in this HPO run.
-`--evaluation_dataset_config <path to eval_dataset.yaml>`
-The dataset to use for evaluating the models in this HPO run.
-`--preprocessing_config <path to preprocessing.yaml>`
-The preprocessing transforms to apply to data loaded from the dataset.
-`--hpo_config <path to hpo.yaml>`
-The hyperparameter options, strategy, and metrics to evaluate in this HPO run.
-`--system_config <path to system.yaml>`
-The system configuration (database and Weights & Biases settings) to use for the HPO run.
+
+**Required arguments:**  
+`--training_dataset_config <path to dataset.yaml>`  
+The dataset to use for training the models in this HPO run.  
+`--evaluation_dataset_config <path to eval_dataset.yaml>`  
+The dataset to use for evaluating the models in this HPO run.  
+`--preprocessing_config <path to preprocessing.yaml>`  
+The preprocessing transforms to apply to data loaded from the dataset.  
+`--hpo_config <path to hpo.yaml>`  
+The hyperparameter options, strategy, and metrics to evaluate in this HPO run.  
+`--system_config <path to system.yaml>`  
+The system configuration (database and Weights & Biases settings) to use for the HPO run.  
 
 # Further Documentation
 
